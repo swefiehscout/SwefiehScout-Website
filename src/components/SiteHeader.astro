@@ -18,7 +18,21 @@ function isActive(href: string) {
         <small>Swefieh, Jordan · كشافة الروم الأرثوذكس - الصويفية</small>
       </span>
     </a>
-    <nav class="site-nav" aria-label="Primary">
+
+    <button
+      class="nav-toggle"
+      type="button"
+      aria-label="Open menu"
+      aria-controls="primary-nav"
+      aria-expanded="false"
+      data-nav-toggle
+    >
+      <span class="nav-toggle-bar"></span>
+      <span class="nav-toggle-bar"></span>
+      <span class="nav-toggle-bar"></span>
+    </button>
+
+    <nav class="site-nav" id="primary-nav" aria-label="Primary" data-nav>
       <ul>
         {nav.map((item) => (
           <li class={item.children.length ? 'has-children' : ''}>
@@ -43,4 +57,47 @@ function isActive(href: string) {
       </ul>
     </nav>
   </div>
+  <div class="nav-backdrop" data-nav-backdrop hidden></div>
 </header>
+
+<script is:inline>
+  (function () {
+    var btn = document.querySelector('[data-nav-toggle]');
+    var nav = document.querySelector('[data-nav]');
+    var backdrop = document.querySelector('[data-nav-backdrop]');
+    if (!btn || !nav || !backdrop) return;
+
+    function setOpen(open) {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      nav.classList.toggle('is-open', open);
+      btn.classList.toggle('is-open', open);
+      document.body.classList.toggle('nav-locked', open);
+      if (open) {
+        backdrop.removeAttribute('hidden');
+        // next frame so transition runs
+        requestAnimationFrame(function () { backdrop.classList.add('is-visible'); });
+      } else {
+        backdrop.classList.remove('is-visible');
+        setTimeout(function () { backdrop.setAttribute('hidden', ''); }, 220);
+      }
+    }
+
+    btn.addEventListener('click', function () {
+      setOpen(btn.getAttribute('aria-expanded') !== 'true');
+    });
+    backdrop.addEventListener('click', function () { setOpen(false); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') setOpen(false);
+    });
+    // Tap a link → close drawer.
+    nav.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { setOpen(false); });
+    });
+    // Close on resize back to desktop so state doesn't get stuck.
+    var mq = window.matchMedia('(min-width: 880px)');
+    (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(function (e) {
+      if (e.matches) setOpen(false);
+    });
+  })();
+</script>

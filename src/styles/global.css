@@ -111,6 +111,11 @@ img, video { max-width: 100%; height: auto; display: block; }
   top: 0;
   z-index: 50;
 }
+/* On phones the user explicitly didn't want a sticky bar — let the header
+   scroll away with the rest of the page. */
+@media (max-width: 879px) {
+  .site-header { position: static; }
+}
 .header-inner {
   max-width: 1100px;
   margin: 0 auto;
@@ -218,6 +223,126 @@ img, video { max-width: 100%; height: auto; display: block; }
   display: flex;
 }
 .site-nav .submenu a { font-weight: 400; font-size: 0.92rem; }
+
+/* ---------- Hamburger toggle (mobile only) ---------- */
+.nav-toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition:
+    background 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out);
+}
+.nav-toggle:hover { background: rgba(87, 22, 7, 0.06); }
+.nav-toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.nav-toggle-bar {
+  position: absolute;
+  inset-inline: 11px;
+  height: 2px;
+  background: var(--color-brand);
+  border-radius: 2px;
+  transition:
+    transform 0.25s var(--ease-out),
+    opacity 0.2s var(--ease-out),
+    top 0.25s var(--ease-out);
+}
+.nav-toggle-bar:nth-child(1) { top: 14px; }
+.nav-toggle-bar:nth-child(2) { top: 21px; }
+.nav-toggle-bar:nth-child(3) { top: 28px; }
+.nav-toggle.is-open .nav-toggle-bar:nth-child(1) {
+  top: 21px;
+  transform: rotate(45deg);
+}
+.nav-toggle.is-open .nav-toggle-bar:nth-child(2) { opacity: 0; }
+.nav-toggle.is-open .nav-toggle-bar:nth-child(3) {
+  top: 21px;
+  transform: rotate(-45deg);
+}
+
+.nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 12, 8, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.2s var(--ease-out);
+  z-index: 49;
+}
+.nav-backdrop.is-visible { opacity: 1; }
+
+body.nav-locked { overflow: hidden; }
+
+/* ---------- Mobile nav (≤879px): drawer + hamburger ---------- */
+@media (max-width: 879px) {
+  .header-inner {
+    padding: 0.75rem 1rem;
+    flex-wrap: nowrap;
+  }
+  .brand img { width: 44px; height: 44px; }
+  .brand-text { font-size: 0.95rem; }
+  .brand-text small { font-size: 0.7rem; }
+
+  .nav-toggle { display: block; }
+
+  .site-nav {
+    position: fixed;
+    top: 0;
+    inset-inline-end: 0;
+    height: 100dvh;
+    width: min(86vw, 340px);
+    background: var(--color-surface);
+    box-shadow: -8px 0 28px -10px rgba(0, 0, 0, 0.25);
+    padding: 5rem 1.25rem 2rem;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.28s var(--ease-out);
+    z-index: 60;
+  }
+  .site-nav.is-open { transform: translateX(0); }
+
+  .site-nav ul {
+    flex-direction: column;
+    gap: 0.15rem;
+    align-items: stretch;
+  }
+  .site-nav a {
+    padding: 0.85rem 1rem;
+    font-size: 1rem;
+    border-radius: var(--radius);
+  }
+  .site-nav a::after { display: none; }
+
+  /* Submenus on mobile: expand inline beneath their parent. */
+  .site-nav .submenu {
+    display: flex;
+    position: static;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    padding: 0 0 0.25rem 0.75rem;
+    margin: 0.1rem 0 0.4rem;
+    border-inline-start: 2px solid var(--color-border);
+  }
+  .site-nav .submenu a {
+    padding: 0.6rem 0.85rem;
+    font-size: 0.95rem;
+    color: var(--color-muted);
+  }
+  .site-nav .has-children > a::after {
+    content: '';
+  }
+}
 
 /* ---------- Page main ---------- */
 main {
@@ -698,4 +823,73 @@ main.wide {
   font-size: 0.8rem;
   opacity: 0.8;
   text-align: center;
+}
+
+/* ---------- Phone polish (≤640px) ----------
+   Tighter spacing, smaller hero, single-column cards, larger tap targets.
+   Aimed at the user's stated priority: mobile-first, beautiful on phones. */
+@media (max-width: 640px) {
+  main { margin: 1.5rem auto 2.5rem; padding: 0 1rem; }
+
+  .page-title { font-size: 1.75rem; margin-bottom: 1rem; }
+
+  .hero {
+    padding: 2.25rem 1.25rem 2.5rem;
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+  }
+  .hero-logo { width: 130px; height: 130px; }
+  .hero h1 { font-size: clamp(1.7rem, 7vw, 2.2rem); }
+  .hero .tagline { font-size: 0.98rem; }
+  .hero .tagline-ar { font-size: 1.05rem; text-align: center; }
+  .hero-cta { width: 100%; }
+  .hero-cta .btn-primary,
+  .hero-cta .btn-secondary {
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 0.75rem 1rem;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 2.5rem;
+  }
+  .stat-card { padding: 1rem 0.5rem; border-radius: var(--radius); }
+  .stat-num { font-size: 1.7rem; }
+  .stat-label { font-size: 0.78rem; letter-spacing: 0.03em; }
+
+  .section { margin: 2.5rem 0; }
+  .section-heading { font-size: 1.4rem; }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .card { padding: 1.2rem; border-radius: var(--radius); }
+  .card-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .card-title { font-size: 1.05rem; }
+  .card-blurb { font-size: 0.9rem; }
+
+  .prose h2 { font-size: 1.3rem; }
+  .prose h3 { font-size: 1.1rem; }
+
+  .site-footer { padding: 1.75rem 1rem; margin-top: 2.5rem; }
+  .footer-inner { gap: 1.25rem; grid-template-columns: 1fr; }
+
+  .form-row input,
+  .form-row select,
+  .form-row textarea {
+    font-size: 16px; /* prevent iOS zoom on focus */
+  }
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
 }
