@@ -1,0 +1,46 @@
+---
+import { getNav } from '../lib/nav.ts';
+
+const { currentPath } = Astro.props as { currentPath: string };
+const nav = await getNav();
+
+function isActive(href: string) {
+  if (href === '/' || href === '/index') return currentPath === '/' || currentPath === '/index';
+  return currentPath === href || currentPath.startsWith(href + '/');
+}
+---
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="brand">
+      <img src="/images/logo.png" alt="Greek Orthodox Scouts & Guides — Swefieh emblem" />
+      <span class="brand-text">
+        Greek Orthodox Scouts &amp; Guides
+        <small>Swefieh, Jordan · كشافة الروم الأرثوذكس - الصويفية</small>
+      </span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        {nav.map((item) => (
+          <li class={item.children.length ? 'has-children' : ''}>
+            <a
+              href={item.href}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+            >{item.title}</a>
+            {item.children.length > 0 && (
+              <ul class="submenu">
+                {item.children.map((child) => (
+                  <li>
+                    <a
+                      href={child.href}
+                      aria-current={isActive(child.href) ? 'page' : undefined}
+                    >{child.title}</a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>

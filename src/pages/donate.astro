@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Donate" pageTitle="Donations · التبرعات">
+  <p><strong>Support Our Mission — Keep the Spirit of Scouting Alive!</strong></p>
+  <p>
+    Your generous donations play a vital role in sustaining the work of The
+    Greek Orthodox Scouts &amp; Guides – Swefieh. Every contribution, no matter
+    the size, strengthens our ability to impact the lives of young people and
+    the community we serve.
+  </p>
+
+  <form action="https://submit-form.com/aUFtzEEns" method="POST" class="form-grid">
+    <div class="form-row">
+      <label for="name">Name · الاسم</label>
+      <input type="text" id="name" name="name" required />
+    </div>
+    <div class="form-row">
+      <label for="email">Email · البريد الإلكتروني</label>
+      <input type="email" id="email" name="email" required />
+    </div>
+    <div class="form-row">
+      <label for="phone">Phone Number · رقم الهاتف</label>
+      <input type="tel" id="phone" name="phone" required />
+    </div>
+    <div class="form-row">
+      <label for="amount">Amount · المبلغ</label>
+      <input type="text" id="amount" name="amount" required />
+    </div>
+    <div class="form-row">
+      <label for="process">Donation Method · طريقة التبرع</label>
+      <select id="process" name="process" required>
+        <option value="">Select…</option>
+        <option value="Bank Account">Bank Account · حساب بنكي</option>
+        <option value="Cliq">Cliq · كليك</option>
+        <option value="Contact us">Contact us · تواصل معنا</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label for="notes">Notes · ملاحظات</label>
+      <textarea id="notes" name="notes"></textarea>
+    </div>
+    <div>
+      <button type="submit" class="btn-primary">Submit</button>
+    </div>
+  </form>
+</BaseLayout>

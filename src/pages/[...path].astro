@@ -1,0 +1,22 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  // `custom` pages are owned by dedicated .astro files in src/pages/ — skip
+  // them here to avoid Astro's static-path collision error.
+  return pages.filter((p) => !p.data.custom).map((page) => ({
+    // The "index" page lives at "/" (path = undefined); everything else uses
+    // its declared slug ("about-us/our-priests" etc.).
+    params: { path: page.data.slug === 'index' ? undefined : page.data.slug },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+---
+<BaseLayout title={page.data.title} pageTitle={page.data.title}>
+  <Content />
+</BaseLayout>

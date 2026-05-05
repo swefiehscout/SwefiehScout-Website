@@ -1,0 +1,114 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Stat tiles. The "since 2008" group has been active for 18 years (as of
+// 2026) and currently has 160+ members per the original site copy.
+const yearsActive = new Date().getFullYear() - 2008;
+
+const stats = [
+  { num: '160+',           label: 'Active Members' },
+  { num: yearsActive + '+', label: 'Years of Service' },
+  { num: '2008',           label: 'Established' },
+  { num: '1',              label: 'Cathedral Home' },
+];
+
+const quickLinks = [
+  {
+    href: '/about-us/mission-and-vision',
+    icon: '✦',
+    title: 'Mission & Vision',
+    blurb: 'Faith, service, and adventure — what drives us forward.',
+  },
+  {
+    href: '/about-us/our-church',
+    icon: '✟',
+    title: 'Our Church',
+    blurb: 'The Presentation of the Lord Cathedral in Swefieh.',
+  },
+  {
+    href: '/about-us/our-priests',
+    icon: '☧',
+    title: 'Our Priests',
+    blurb: 'Spiritual leaders guiding our scouting journey.',
+  },
+  {
+    href: '/about-us/our-team',
+    icon: '★',
+    title: 'Our Team',
+    blurb: 'The leaders who make every camp, hike, and project happen.',
+  },
+  {
+    href: '/about-us/our-band',
+    icon: '♪',
+    title: 'Our Band',
+    blurb: 'Drums, brass, and tradition — the sound of the scouts.',
+  },
+  {
+    href: '/join-us',
+    icon: '➜',
+    title: 'Join Us',
+    blurb: 'New scouts, families, and supporters always welcome.',
+  },
+];
+---
+<BaseLayout title="Home" bare wide>
+  <section class="hero" data-animate>
+    <div class="hero-inner">
+      <img class="hero-logo" src="/images/logo.png" alt="Greek Orthodox Scouts & Guides — Swefieh emblem" />
+      <div>
+        <h1>
+          The Greek Orthodox <span class="accent">Scouts &amp; Guides</span>
+          <br />Swefieh
+        </h1>
+        <p class="tagline">
+          A community of faith, service, and adventure — rooted in the
+          Orthodox tradition since 2008.
+        </p>
+        <p class="tagline-ar">قيادة بالإيمان، خدمة بالقلب، وبناء مجتمع أقوى</p>
+        <div class="hero-cta">
+          <a href="/join-us" class="btn-primary">Join Us</a>
+          <a href="/about-us" class="btn-secondary">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    {stats.map((s, i) => (
+      <div class="stat-card" data-animate data-animate-delay={String((i % 5) + 1)}>
+        <span class="stat-num">{s.num}</span>
+        <span class="stat-label">{s.label}</span>
+      </div>
+    ))}
+  </section>
+
+  <section class="section">
+    <h2 class="section-heading" data-animate>Welcome</h2>
+    <article class="prose" style="text-align: center; max-width: 720px; margin: 0 auto;">
+      <p data-animate>
+        We are proud to share the digital home of <strong>The Greek Orthodox Scouts &amp;
+        Guides – Swefieh</strong>. Based at the Presentation of the Lord
+        Cathedral, our group is more than an organization — it's a family of
+        over 160 active members united by shared values, spiritual growth,
+        and a commitment to making a positive impact.
+      </p>
+      <p data-animate data-animate-delay="1">
+        فخورون بإعلاننا عن إطلاق الموقع الإلكتروني الرسمي لمجموعة كشافة ومرشدات الروم الأرثوذكس – الصويفية، المجتمع النابض بالحياة الذي يركّز على الإيمان، الخدمة، والمغامرة.
+      </p>
+    </article>
+  </section>
+
+  <section class="section">
+    <h2 class="section-heading" data-animate>Explore Our Community</h2>
+    <div class="cards-grid">
+      {quickLinks.map((link, i) => (
+        <a class="card" href={link.href} data-animate data-animate-delay={String((i % 5) + 1)}>
+          <span class="card-icon" aria-hidden="true">{link.icon}</span>
+          <h3 class="card-title">{link.title}</h3>
+          <p class="card-blurb">{link.blurb}</p>
+          <span class="card-arrow">Read more →</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
