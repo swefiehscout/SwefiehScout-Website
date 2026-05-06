@@ -2,24 +2,93 @@
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
+  <div class="footer-accent" aria-hidden="true"></div>
+
   <div class="footer-inner">
-    <div class="footer-contact">
-      <h3>Contact</h3>
-      <p><a href="mailto:info@swefieh-orthodox-scout.com">info@swefieh-orthodox-scout.com</a></p>
-      <p>Leader Wasan: <a href="tel:+962796441145">+962 7 9644 1145</a></p>
-      <p>Leader Mina: <a href="tel:+962798312286">+962 7 9831 2286</a></p>
-    </div>
-    <div class="footer-social">
-      <h3>Follow Us</h3>
-      <p>
-        <a href="https://www.instagram.com/theorthodoxscout" target="_blank" rel="noopener">Instagram</a>
-        <a href="https://www.facebook.com/share/1Eh8bqpyn2/" target="_blank" rel="noopener">Facebook</a>
+    <div class="footer-brand">
+      <h3 class="footer-brand-name">Greek Orthodox Scouts &amp; Guides - Swefieh</h3>
+      <p class="footer-brand-name-ar">مجموعة كشافة ومرشدات الروم الأرثوذكس - الصويفية</p>
+      <p class="footer-brand-tagline">
+        Faith, service, and adventure since 2008.<br />
+        <span class="footer-brand-tagline-ar">إيمان، خدمة، ومغامرة منذ ٢٠٠٨.</span>
+      </p>
+      <p class="footer-brand-address">
+        Presentation of the Lord Cathedral, Swefieh, Amman
       </p>
     </div>
-    <div class="footer-about">
-      <h3>About</h3>
-      <p>The Presentation of the Lord Cathedral, Swefieh — كاتدرائية دخول السيد إلى الهيكل، الصويفية</p>
+
+    <div class="footer-col">
+      <h4 class="footer-h4">Explore</h4>
+      <ul class="footer-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/about-us">About Us</a></li>
+        <li><a href="/about-us/our-church">Our Church</a></li>
+        <li><a href="/about-us/our-team">Our Team</a></li>
+        <li><a href="/about-us/our-band">Our Band</a></li>
+        <li><a href="/gallery">Gallery</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-h4">Engage</h4>
+      <ul class="footer-links">
+        <li><a href="/join-us">Join Us</a></li>
+        <li><a href="/event-booking">Book the Band</a></li>
+        <li><a href="/donate">Donate</a></li>
+        <li><a href="/contact-us">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-h4">Connect</h4>
+      <ul class="footer-contact-list">
+        <li>
+          <a class="footer-contact-item" href="mailto:info@swefieh-orthodox-scout.com">
+            <span class="footer-contact-icon" aria-hidden="true">✉</span>
+            <span class="footer-contact-text">info@swefieh-orthodox-scout.com</span>
+          </a>
+        </li>
+        <li>
+          <a class="footer-contact-item" href="tel:+962796441145">
+            <span class="footer-contact-icon" aria-hidden="true">☏</span>
+            <span class="footer-contact-text">
+              <span class="footer-contact-label">Leader Wasan</span>
+              +962 7 9644 1145
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="footer-contact-item" href="tel:+962798312286">
+            <span class="footer-contact-icon" aria-hidden="true">☏</span>
+            <span class="footer-contact-text">
+              <span class="footer-contact-label">Leader Mina</span>
+              +962 7 9831 2286
+            </span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="footer-social" aria-label="Social links">
+        <a class="footer-social-btn" href="https://www.instagram.com/theorthodoxscout" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+          </svg>
+        </a>
+        <a class="footer-social-btn" href="https://www.facebook.com/share/1Eh8bqpyn2/" target="_blank" rel="noopener" aria-label="Facebook">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+          </svg>
+        </a>
+      </div>
     </div>
   </div>
-  <p class="footer-copy">© {year} The Orthodox Scouts and Guides — Swefieh</p>
+
+  <div class="footer-bottom">
+    <p class="footer-copy">
+      © {year} The Greek Orthodox Scouts &amp; Guides - Swefieh ·
+      <span class="footer-copy-ar">مجموعة كشافة ومرشدات الروم الأرثوذكس - الصويفية</span>
+    </p>
+  </div>
 </footer>

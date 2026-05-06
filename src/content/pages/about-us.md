@@ -1,23 +1,40 @@
 ---
 title: "About Us"
+titleAr: "من نحن"
+tagline: "Faith, service, and adventure, rooted in the Orthodox tradition since 2008."
+taglineAr: "إيمان، خدمة، ومغامرة، متجذّرون في التقاليد الأرثوذكسية منذ ٢٠٠٨."
 slug: "about-us"
 navOrder: 2
 ---
 
 ## Our Patron
 
-Saint George, the patron saint of scouts, is a figure of courage, faith, and resilience. Born in 280 AD in Lydda, Palestine, he is remembered for his unwavering commitment to Christianity, even in the face of persecution. According to tradition, Saint George was a steadfast defender of the faith, opposing the oppressive actions of Emperor Diocletian. His martyrdom on April 23, 303 AD in Lydda marked him as a symbol of devotion and sacrifice.
+Saint George (soldier, martyr, and dragon-slayer) is the patron saint of scouts. Born in Lydda, Palestine, in 280 AD, he stood firm in his Christian faith under the persecutions of Emperor Diocletian, and was martyred on April 23, 303 AD. We follow his example: courage, faith, and service.
 
-He is often depicted heroically slaying a dragon, symbolizing the triumph of good over evil. As scouts, we take pride in having such a noble protector and are inspired to follow his example of bravery and dedication to the values of faith and service.
+## شفيع الكشافة
 
-هو شفيع الكشاف، ولد القديس جورج في اللد، في فلسطين عام ٢٨٠م. و يقال أنه أسس جماعة مسيحية في أورمي في فلسطين. مسيحي ملتزم و صادق. عارض القديس جورج الاضطهادات التي قادها الإمبراطور ديوكليتيان، استشهد في ٢٣ نيسان عام ٣٠٣ في اللد في فلسطين. يصوّر القديس جورج ممتطياً حصانه و يحارب التنين. وعلى الكشافة أن يفتخروا بشفيعهم وأن يتبعوا يتبعوا هذا المدافع عن المسيحية.
+هو شفيع الكشاف. وُلد القديس جورج في اللد بفلسطين عام ٢٨٠م. عارض الاضطهادات التي قادها الإمبراطور ديوكليتيان، واستُشهد في ٢٣ نيسان عام ٣٠٣م. يُصوَّر ممتطيًا حصانه يحارب التنين، وعلى الكشّافة أن يفتخروا بشفيعهم وأن يتبعوا هذا المدافع عن المسيحية.
 
 ## Who Are We?
 
-Rooted in the Orthodox Christian faith, our scout group is more than just a community; it’s a family united by shared values and spiritual growth. Guided by the teachings of the Orthodox Church, we nurture faith, compassion, and resilience, fostering a deep connection with God and one another. Our home, the Presentation of the Lord Cathedral in Swefieh, serves as a beacon of faith where we gather to strengthen our bond with our Creator and our community.
+A scouting family of over 160 active members, rooted in the Orthodox Christian faith. Since 2008, we've grown together at the Presentation of the Lord Cathedral in Swefieh, building lifelong skills, lifelong friendships, and a deeper connection to God.
 
-With over 160 active members and a legacy spanning more than 15 years (since 2008), we are a vibrant scouting community driven by adventure, service, and camaraderie. Our mission is “empowering scouts to lead with faith, serve with heart, and build a stronger community rooted in the Orthodox spirit.” Together, we build lifelong skills and unforgettable memories, all while staying true to the values of the scouting movement and the Orthodox faith that guides us.
+## من نحن؟
 
-متجذرون في الإيمان المسيحي الأرثوذكسي، تمثل مجموعتنا الكشفية أكثر من مجرد تجمع أو نشاط؛ إنها عائلة حقيقية تجمعها قيم روحية مشتركة ومسيرة نمو متواصلة في الإيمان والمحبة. نستلهم تعاليم الكنيسة الأرثوذكسية لزرع بذور الإيمان العميق والرحمة الصادقة والقدرة على مواجهة التحديات بقوة وثبات، مما يعزز علاقتنا الروحية مع الله وروابطنا الإنسانية مع بعضنا البعض. مقرنا في كاتدرائية دخول السيد إلى الهيكل في الصويفية ليس مجرد مكان، بل هو منارة روحية تُضيء لنا طريق الإيمان وتعزز وحدتنا كجسد واحد في المسيح.
+عائلة كشفية من أكثر من ١٦٠ عضوًا نشطًا، متجذّرة في الإيمان المسيحي الأرثوذكسي. منذ تأسيسها عام ٢٠٠٨ في كاتدرائية دخول السيد إلى الهيكل بالصويفية، نكبر معًا في الإيمان والمحبة والخدمة.
 
-مع إرث يتجاوز الخمسة عشر عامًا منذ تأسيسنا عام 2008، وأكثر من 160 عضوًا نشطًا، نحن مجتمع كشفي ينبض بالحياة، تُحركه روح المغامرة، رسالة الخدمة، وروح الفريق. رسالتنا تتجسد في "تمكين الكشافة من القيادة المستنيرة بالإيمان، الخدمة النابعة من القلب، وبناء مجتمع أقوى متجذر في الروح الأرثوذكسية". نحن لا نصنع مجرد ذكريات أو مهارات، بل نؤسس رحلة حياة مليئة بالمعنى، حيث يلتقي الإيمان العميق بالقيم الكشفية، لنترك أثرًا خالدًا في حياة أفرادنا ومجتمعنا.
+## Our Mission
+
+> "Empowering scouts to lead with faith, serve with heart, and build a stronger community rooted in the Orthodox spirit."
+
+## رسالتنا
+
+> "تمكين الكشافة من القيادة بالإيمان، والخدمة بقلبٍ مخلص، وبناء مجتمع أقوى متجذر في الروح الأرثوذكسية."
+
+## Our Vision
+
+> "To inspire a generation of faith-driven leaders united by service, fellowship, and the Orthodox spirit."
+
+## رؤيتنا
+
+> "إلهام جيل من القادة المؤمنين المتحدين بروح الخدمة والأخوة الأرثوذكسية."

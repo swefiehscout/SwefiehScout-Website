@@ -1,43 +1,97 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
----
-<BaseLayout title="Event Booking" pageTitle="Scout Band Booking Request">
-  <p>
-    Fill out the form to request the Orthodox Scout band for your event. We'll
-    get back to you shortly to confirm details.
-  </p>
+import Icon from '../components/Icon.astro';
 
-  <form action="https://submit-form.com/NfRHHxGHu" method="POST" class="form-grid">
-    <div class="form-row">
-      <label for="name">Your Full Name</label>
-      <input type="text" id="name" name="name" required />
-    </div>
-    <div class="form-row">
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" required />
-    </div>
-    <div class="form-row">
-      <label for="phone">Phone Number</label>
-      <input type="tel" id="phone" name="phone" required />
-    </div>
-    <div class="form-row">
-      <label for="date">Event Date</label>
-      <input type="date" id="date" name="date" required />
-    </div>
-    <div class="form-row">
-      <label for="time">Event Time</label>
-      <input type="time" id="time" name="time" required />
-    </div>
-    <div class="form-row">
-      <label for="location">Event Location</label>
-      <input type="text" id="location" name="location" required />
-    </div>
-    <div class="form-row">
-      <label for="details">Additional Information</label>
-      <textarea id="details" name="details"></textarea>
-    </div>
-    <div>
-      <button type="submit" class="btn-primary">Request Booking</button>
-    </div>
-  </form>
+const features = [
+  {
+    icon: 'music',
+    title: 'Drums & Bagpipes',
+    titleAr: 'إيقاعات ومزامير',
+    blurb: 'Traditional bagpipes and classical scout percussion.',
+  },
+  {
+    icon: 'pin',
+    title: 'All Around Amman',
+    titleAr: 'في كل أرجاء عمّان',
+    blurb: 'Weddings, churches, and community events. Wherever you need us.',
+  },
+  {
+    icon: 'star',
+    title: 'Trained Performers',
+    titleAr: 'موسيقيون مدرَّبون',
+    blurb: 'From our youngest scouts to our seniors, disciplined and rehearsed.',
+  },
+  {
+    icon: 'fleur',
+    title: 'Heritage & Tradition',
+    titleAr: 'إرث وتقاليد',
+    blurb: 'A band rooted in Orthodox heritage and Arab scouting tradition.',
+  },
+] as const;
+---
+<BaseLayout title="Event Booking" bare wide>
+  <section class="page-hero" data-animate>
+    <h1 class="page-h1">
+      Book the Scout Band
+      <span class="page-h1-ar">حجز الفرقة الموسيقية</span>
+    </h1>
+    <p class="page-tag">
+      Invite our band to perform at your wedding, church celebration, or community event.
+    </p>
+    <p class="page-tag-ar">
+      ادعُ فرقتنا الكشفية لإحياء حفل زفافك، مناسبتك الكنسية، أو فعاليتك المجتمعية.
+    </p>
+  </section>
+
+  <section class="feature-grid">
+    {features.map((f, i) => (
+      <div class="feature-card" data-animate data-animate-delay={String(i + 1)}>
+        <span class="feature-icon" aria-hidden="true"><Icon name={f.icon} size={22} /></span>
+        <h3 class="feature-h3">{f.title}</h3>
+        <p class="feature-h3-ar">{f.titleAr}</p>
+        <p>{f.blurb}</p>
+      </div>
+    ))}
+  </section>
+
+  <div class="form-card form-card--solo" data-animate>
+    <h2 class="form-h2">Booking Request</h2>
+    <p class="form-h2-ar">طلب حجز</p>
+    <p class="form-help">
+      Fill out the form and we'll get back to you shortly to confirm the details.
+    </p>
+    <form action="https://submit-form.com/NfRHHxGHu" method="POST" class="form-grid">
+      <div class="form-row">
+        <label for="name">Your Full Name · الاسم الكامل</label>
+        <input type="text" id="name" name="name" required />
+      </div>
+      <div class="form-row">
+        <label for="email">Email · البريد الإلكتروني</label>
+        <input type="email" id="email" name="email" required />
+      </div>
+      <div class="form-row">
+        <label for="phone">Phone Number · رقم الهاتف</label>
+        <input type="tel" id="phone" name="phone" required />
+      </div>
+      <div class="form-row">
+        <label for="date">Event Date · تاريخ الفعالية</label>
+        <input type="date" id="date" name="date" required />
+      </div>
+      <div class="form-row">
+        <label for="time">Event Time · وقت الفعالية</label>
+        <input type="time" id="time" name="time" required />
+      </div>
+      <div class="form-row">
+        <label for="location">Event Location · موقع الفعالية</label>
+        <input type="text" id="location" name="location" required />
+      </div>
+      <div class="form-row">
+        <label for="details">Additional Information · معلومات إضافية</label>
+        <textarea id="details" name="details"></textarea>
+      </div>
+      <div>
+        <button type="submit" class="btn-primary">Request Booking</button>
+      </div>
+    </form>
+  </div>
 </BaseLayout>

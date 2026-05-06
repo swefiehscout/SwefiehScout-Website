@@ -1,0 +1,138 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+
+const leaders = [
+  {
+    initials: 'NE',
+    name: 'Dr. Naeem Eibef',
+    nameAr: 'د. نعيم ايبف',
+    role: 'General Leader',
+    roleAr: 'القائد العام للمجموعة',
+  },
+  {
+    initials: 'FE',
+    name: 'Fadi Eibef',
+    nameAr: 'فادي ايبف',
+    role: 'Deputy General Leader & Band Leader',
+    roleAr: 'نائب القائد العام وقائد الفرقة الموسيقية',
+  },
+];
+
+const achievements = [
+  {
+    icon: 'compass',
+    title: 'Registration & Leadership',
+    titleAr: 'التسجيل والقيادة',
+    items: [
+      { en: 'Officially registered in 2016 by Leader Naeem Eibef and Leader George Zayer.', ar: 'تأسست المجموعة رسميًّا عام ٢٠١٦ بقيادة نعيم ايبف وجورج زاير.' },
+      { en: 'First general assembly in 2018; administrative board elected in 2019.', ar: 'أوّل جمعية عمومية عام ٢٠١٨، وانتخاب المجلس الإداري عام ٢٠١٩.' },
+      { en: 'Hosted the first Orthodox scout and guide gathering in 2024, led by Bishop Christoforos.', ar: 'استضافة أول لقاء كشفي أرثوذكسي عام ٢٠٢٤ برعاية المطران خريستوفوروس.' },
+    ],
+  },
+  {
+    icon: 'star',
+    title: 'Leader Development',
+    titleAr: 'تطوير القادة',
+    items: [
+      { en: '12 leaders completed Unit Leader training.', ar: '١٢ قائدًا أنهوا دورة قائد وحدة.' },
+      { en: '30 leaders completed Assistant Unit Leader training.', ar: '٣٠ قائدًا أنهوا دورة مساعد قائد وحدة.' },
+      { en: '10 leaders earned the Wood Badge.', ar: '١٠ قادة حصلوا على الشارة الخشبية.' },
+      { en: '5 leaders completed trauma protection courses.', ar: '٥ قادة أنهوا دورات الحماية من الصدمات.' },
+      { en: 'Five consecutive years of Orthodox leadership preparation programs.', ar: 'خمس سنوات متتالية من برامج إعداد القادة الأرثوذكسيين.' },
+    ],
+  },
+  {
+    icon: 'plus',
+    title: 'Medical Expertise',
+    titleAr: 'الخبرات الطبية',
+    items: [
+      { en: 'Members certified in Basic and Advanced Life Support contribute to events and camps.', ar: 'أعضاء معتمدون في الإسعافات الأولية والإنعاش المتقدّم يساهمون في الفعاليات والمخيمات.' },
+    ],
+  },
+] as const;
+---
+<BaseLayout title="Our Team" bare wide>
+  <section class="page-hero" data-animate>
+    <h1 class="page-h1">
+      Our Team
+      <span class="page-h1-ar">فريقنا</span>
+    </h1>
+    <p class="page-tag">
+      Trained leaders, supportive mentors, and a board that keeps us grounded.
+    </p>
+    <p class="page-tag-ar">
+      قادة مدرَّبون، مرشدون داعمون، ومجلس يحفظ توازننا.
+    </p>
+  </section>
+
+  <section class="leader-grid">
+    {leaders.map((l, i) => (
+      <article class="leader-card" data-animate data-animate-delay={String(i + 1)}>
+        <div class="leader-avatar" aria-hidden="true">{l.initials}</div>
+        <h2 class="leader-name">{l.name}</h2>
+        <p class="leader-name-ar">{l.nameAr}</p>
+        <p class="leader-role">{l.role}</p>
+        <p class="leader-role-ar">{l.roleAr}</p>
+      </article>
+    ))}
+  </section>
+
+  <article class="prose">
+    <h2 dir="auto">Leadership</h2>
+
+    <p dir="auto">
+      Our scouts are guided by a dedicated team trained through the Jordanian
+      Association for Boy Scouts and Girl Guides (Amman). Many of our leaders
+      proudly wear the Wood Badge, a mark of advanced leadership training.
+    </p>
+
+    <p dir="auto">
+      Our board brings together ministers, priests, business professionals, and
+      parents, chaired by <strong>Father Dr. Ibrahim Dabour</strong>, whose
+      wisdom and leadership inspire our community.
+    </p>
+
+    <h2 dir="auto">القيادة</h2>
+
+    <p dir="auto">
+      تعمل مجموعتنا الكشفية تحت إشراف فريق متميز من القادة المدرّبين في الجمعية
+      الأردنية للكشافة والمرشدات (عمّان). يعتزّ كثيرٌ من قادتنا بارتداء منديل
+      الشارة الخشبية، تعبيرًا عن التزامهم وإنجازهم.
+    </p>
+
+    <p dir="auto">
+      يدعمهم مجلسٌ متنوّع يضم وزراء، كهنة، محترفين، وأولياء أمور، يترأسه
+      الإيكونوموس الدكتور إبراهيم دبور، الذي تُلهمنا حكمته وقيادته.
+    </p>
+  </article>
+
+  <section class="section-stack" data-animate>
+    <h2 class="section-h2">Our Achievements</h2>
+    <p class="section-h2-ar">إنجازاتنا</p>
+  </section>
+
+  <section class="achievement-list">
+    {achievements.map((a, i) => (
+      <article class="achievement-card" data-animate data-animate-delay={String((i % 5) + 1)}>
+        <header class="achievement-head">
+          <div class="achievement-head-en">
+            <span class="achievement-icon" aria-hidden="true"><Icon name={a.icon} size={20} /></span>
+            <h3 class="achievement-title">{a.title}</h3>
+          </div>
+          <div class="achievement-head-ar" dir="rtl">
+            <h3 class="achievement-title-ar">{a.titleAr}</h3>
+          </div>
+        </header>
+        <ul class="achievement-items">
+          {a.items.map((it) => (
+            <li>
+              <span class="achievement-en">{it.en}</span>
+              <span class="achievement-ar" dir="rtl">{it.ar}</span>
+            </li>
+          ))}
+        </ul>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

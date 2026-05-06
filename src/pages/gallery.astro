@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const albums = [
+  {
+    title: 'Sabt Al Noor',
+    titleAr: 'سبت النور',
+    caption: 'Holy Saturday · Light of the Resurrection',
+    captionAr: 'سبت النور · نور القيامة',
+    href: 'https://drive.google.com/drive/folders/12BUiMA0NlRi0q6BKtZ7aIgEXBS2nXeNE?usp=sharing',
+    variant: 'fire',
+    icon: 'sun',
+  },
+  {
+    title: 'Holy Friday - Jonaz',
+    titleAr: 'الجمعة العظيمة - الجناز',
+    caption: 'Holy Week · The Lamentations',
+    captionAr: 'أسبوع الآلام · المراثي',
+    href: 'https://drive.google.com/drive/folders/11Sa5rqgswa84MKnUCRjBMQpj90uPzWUN?usp=sharing',
+    variant: 'solemn',
+    icon: 'cross',
+  },
+  {
+    title: 'Palm Sunday',
+    titleAr: 'أحد الشعانين',
+    caption: '2026 · Procession & Service',
+    captionAr: '٢٠٢٦ · الزياح والقداس',
+    href: 'https://drive.google.com/drive/folders/1djOTyMuZoCQ7xXCDJZ26RQG37DOmHMcw?usp=drive_link',
+    variant: 'palm',
+    icon: 'flower',
+  },
+  {
+    title: 'Palm Sunday - Portraits',
+    titleAr: 'أحد الشعانين - صور فردية',
+    caption: '2026 · Individual scout & guide photos',
+    captionAr: '٢٠٢٦ · صور فردية للكشاف والمرشدات',
+    href: 'https://drive.google.com/drive/folders/1zO_ujN-5YjVQ_eCWzfF6Av_yq7nZlYV9?usp=drive_link',
+    variant: 'palm-soft',
+    icon: 'sparkle',
+  },
+] as const;
+---
+<BaseLayout title="Gallery" bare wide>
+  <section class="page-hero" data-animate>
+    <h1 class="page-h1">
+      Gallery
+      <span class="page-h1-ar">معرض الصور</span>
+    </h1>
+    <p class="page-tag">
+      Moments from camps, parades, services, and life in the troop.
+    </p>
+    <p class="page-tag-ar">لمحات من المخيمات، المسيرات، القداديس، والحياة الكشفية.</p>
+  </section>
+
+  <section class={`gallery-grid gallery-grid--${albums.length}`}>
+    {albums.map((album, i) => (
+      <a
+        class={`album-card album-card--${album.variant}`}
+        href={album.href}
+        target="_blank"
+        rel="noopener"
+        data-animate
+        data-animate-delay={String((i % 5) + 1)}
+      >
+        <div class="album-art">
+          <span class="album-icon" aria-hidden="true">
+            <Icon name={album.icon} size={64} strokeWidth={1.5} />
+          </span>
+          <span class="album-pattern" aria-hidden="true"></span>
+        </div>
+        <div class="album-meta">
+          <p class="album-caption">{album.caption}</p>
+          <h2 class="album-title">{album.title}</h2>
+          <p class="album-title-ar">{album.titleAr}</p>
+          <p class="album-caption-ar">{album.captionAr}</p>
+          <span class="album-cta">
+            Open Album
+            <span class="album-cta-arrow" aria-hidden="true">→</span>
+          </span>
+        </div>
+      </a>
+    ))}
+  </section>
+
+  <p class="gallery-footnote" data-animate>
+    Albums open in Google Drive in a new tab.<br />
+    <span dir="rtl">تُفتح الألبومات في Google Drive في نافذة جديدة.</span>
+  </p>
+</BaseLayout>

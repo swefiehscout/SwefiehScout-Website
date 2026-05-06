@@ -1,47 +1,119 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
----
-<BaseLayout title="Donate" pageTitle="Donations · التبرعات">
-  <p><strong>Support Our Mission — Keep the Spirit of Scouting Alive!</strong></p>
-  <p>
-    Your generous donations play a vital role in sustaining the work of The
-    Greek Orthodox Scouts &amp; Guides – Swefieh. Every contribution, no matter
-    the size, strengthens our ability to impact the lives of young people and
-    the community we serve.
-  </p>
+import Icon from '../components/Icon.astro';
 
-  <form action="https://submit-form.com/aUFtzEEns" method="POST" class="form-grid">
-    <div class="form-row">
-      <label for="name">Name · الاسم</label>
-      <input type="text" id="name" name="name" required />
-    </div>
-    <div class="form-row">
-      <label for="email">Email · البريد الإلكتروني</label>
-      <input type="email" id="email" name="email" required />
-    </div>
-    <div class="form-row">
-      <label for="phone">Phone Number · رقم الهاتف</label>
-      <input type="tel" id="phone" name="phone" required />
-    </div>
-    <div class="form-row">
-      <label for="amount">Amount · المبلغ</label>
-      <input type="text" id="amount" name="amount" required />
-    </div>
-    <div class="form-row">
-      <label for="process">Donation Method · طريقة التبرع</label>
-      <select id="process" name="process" required>
-        <option value="">Select…</option>
-        <option value="Bank Account">Bank Account · حساب بنكي</option>
-        <option value="Cliq">Cliq · كليك</option>
-        <option value="Contact us">Contact us · تواصل معنا</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label for="notes">Notes · ملاحظات</label>
-      <textarea id="notes" name="notes"></textarea>
-    </div>
-    <div>
-      <button type="submit" class="btn-primary">Submit</button>
-    </div>
-  </form>
+const methods = [
+  {
+    icon: 'bank',
+    title: 'Bank Transfer',
+    titleAr: 'تحويل بنكي',
+    blurb: 'Direct deposit into our scout group account.',
+  },
+  {
+    icon: 'cliq',
+    title: 'CliQ',
+    titleAr: 'كليك',
+    blurb: 'Instant mobile transfer for donors in Jordan.',
+  },
+  {
+    icon: 'cash',
+    title: 'Cash',
+    titleAr: 'نقدًا',
+    blurb: 'Hand-deliver at the cathedral or to a leader.',
+  },
+  {
+    icon: 'phone',
+    title: 'Contact Us',
+    titleAr: 'تواصل معنا',
+    blurb: 'Reach our leaders to arrange another option.',
+  },
+] as const;
+
+const impact = [
+  { num: '160+', label: 'Active scouts supported' },
+  { num: '100%', label: 'Goes to programs' },
+  { num: '15+', label: 'Years of service' },
+];
+---
+<BaseLayout title="Donate" bare wide>
+  <section class="page-hero" data-animate>
+    <h1 class="page-h1">
+      Donate
+      <span class="page-h1-ar">التبرعات</span>
+    </h1>
+    <p class="page-tag">
+      Support our mission. Every contribution keeps the spirit of scouting alive.
+    </p>
+    <p class="page-tag-ar">
+      ادعم رسالتنا. كل تبرّع يُبقي روح الكشفية نابضة بالحياة.
+    </p>
+  </section>
+
+  <section class="impact-grid">
+    {impact.map((s, i) => (
+      <div class="stat-card" data-animate data-animate-delay={String(i + 1)}>
+        <span class="stat-num">{s.num}</span>
+        <span class="stat-label">{s.label}</span>
+      </div>
+    ))}
+  </section>
+
+  <section class="section-stack" data-animate>
+    <h2 class="section-h2">How to Donate</h2>
+    <p class="section-h2-ar">طرق التبرع</p>
+  </section>
+
+  <section class="method-grid">
+    {methods.map((m, i) => (
+      <div class="method-card" data-animate data-animate-delay={String(i + 1)}>
+        <span class="method-icon" aria-hidden="true"><Icon name={m.icon} size={22} /></span>
+        <h3 class="method-h3">{m.title}</h3>
+        <p class="method-h3-ar">{m.titleAr}</p>
+        <p>{m.blurb}</p>
+      </div>
+    ))}
+  </section>
+
+  <div class="form-card form-card--solo" data-animate>
+    <h2 class="form-h2">Donation Request</h2>
+    <p class="form-h2-ar">طلب تبرّع</p>
+    <p class="form-help">
+      Fill out the form and we'll follow up with the details for your chosen method.
+    </p>
+    <form action="https://submit-form.com/aUFtzEEns" method="POST" class="form-grid">
+      <div class="form-row">
+        <label for="name">Name · الاسم</label>
+        <input type="text" id="name" name="name" required />
+      </div>
+      <div class="form-row">
+        <label for="email">Email · البريد الإلكتروني</label>
+        <input type="email" id="email" name="email" required />
+      </div>
+      <div class="form-row">
+        <label for="phone">Phone Number · رقم الهاتف</label>
+        <input type="tel" id="phone" name="phone" required />
+      </div>
+      <div class="form-row">
+        <label for="amount">Amount · المبلغ</label>
+        <input type="text" id="amount" name="amount" required />
+      </div>
+      <div class="form-row">
+        <label for="process">Donation Method · طريقة التبرع</label>
+        <select id="process" name="process" required>
+          <option value="">Select…</option>
+          <option value="Bank Account">Bank Transfer · تحويل بنكي</option>
+          <option value="Cliq">CliQ · كليك</option>
+          <option value="Cash">Cash · نقدًا</option>
+          <option value="Contact us">Contact Us · تواصل معنا</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="notes">Notes · ملاحظات</label>
+        <textarea id="notes" name="notes"></textarea>
+      </div>
+      <div>
+        <button type="submit" class="btn-primary">Submit Donation Request</button>
+      </div>
+    </form>
+  </div>
 </BaseLayout>

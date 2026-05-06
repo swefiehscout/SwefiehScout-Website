@@ -1,10 +1,11 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
 
 export async function getStaticPaths() {
   const pages = await getCollection('pages');
-  // `custom` pages are owned by dedicated .astro files in src/pages/ — skip
+  // `custom` pages are owned by dedicated .astro files in src/pages/, skip
   // them here to avoid Astro's static-path collision error.
   return pages.filter((p) => !p.data.custom).map((page) => ({
     // The "index" page lives at "/" (path = undefined); everything else uses
@@ -16,7 +17,56 @@ export async function getStaticPaths() {
 
 const { page } = Astro.props;
 const { Content } = await render(page);
+const hasHero = !!page.data.titleAr;
+
+// If this page has children (other pages declaring it as `parent`), render
+// them as a sub-nav card grid above the prose body.
+const allPages = await getCollection('pages');
+const children = allPages
+  .filter((p) => p.data.parent === page.data.slug)
+  .sort((a, b) => (a.data.title).localeCompare(b.data.title));
 ---
-<BaseLayout title={page.data.title} pageTitle={page.data.title}>
-  <Content />
-</BaseLayout>
+{hasHero ? (
+  <BaseLayout title={page.data.title} bare>
+    <section class="page-hero" data-animate>
+      <h1 class="page-h1">
+        {page.data.title}
+        <span class="page-h1-ar">{page.data.titleAr}</span>
+      </h1>
+      {page.data.tagline && <p class="page-tag">{page.data.tagline}</p>}
+      {page.data.taglineAr && <p class="page-tag-ar">{page.data.taglineAr}</p>}
+    </section>
+
+    {children.length > 0 && (
+      <section class={`sub-pages-grid sub-pages-grid--${children.length}`}>
+        {children.map((c, i) => (
+          <a
+            class="sub-page-card"
+            href={'/' + c.data.slug}
+            data-animate
+            data-animate-delay={String((i % 5) + 1)}
+          >
+            {c.data.navIcon && (
+              <span class="sub-page-icon" aria-hidden="true">
+                <Icon name={c.data.navIcon as any} size={26} strokeWidth={1.75} />
+              </span>
+            )}
+            <h3 class="sub-page-title">{c.data.title}</h3>
+            {c.data.titleAr && (
+              <p class="sub-page-title-ar">{c.data.titleAr}</p>
+            )}
+            <span class="sub-page-arrow" aria-hidden="true">→</span>
+          </a>
+        ))}
+      </section>
+    )}
+
+    <article class="prose">
+      <Content />
+    </article>
+  </BaseLayout>
+) : (
+  <BaseLayout title={page.data.title} pageTitle={page.data.title}>
+    <Content />
+  </BaseLayout>
+)}

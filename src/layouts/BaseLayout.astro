@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import '../styles/global.css';
@@ -22,16 +23,18 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} · Orthodox Scouts Swefieh</title>
-    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/images/logo-emblem.png" />
+    <link rel="icon" type="image/png" href="/images/logo.png" />
+    <link rel="apple-touch-icon" href="/images/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Amiri:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Markazi+Text:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
     />
+    <ClientRouter />
   </head>
   <body>
+    <div class="scroll-progress" data-scroll-progress aria-hidden="true"></div>
     <SiteHeader currentPath={currentPath} />
     <main class={`page-enter${wide ? ' wide' : ''}`}>
       {pageTitle && <h1 class="page-title" data-animate>{pageTitle}</h1>}
@@ -46,26 +49,173 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
     <SiteFooter />
 
     <script is:inline>
-      // Scroll-reveal: any element with [data-animate] fades + slides into
-      // place when it enters the viewport. Lightweight, no framework, and
-      // honors prefers-reduced-motion via the CSS media query.
+      // Scroll progress bar at the very top of the viewport. Re-queries
+      // the bar on every update so that view-transition swaps don't
+      // leave a stale element reference.
       (function () {
+        function update() {
+          var bar = document.querySelector('[data-scroll-progress]');
+          if (!bar) return;
+          var doc = document.documentElement;
+          var max = (doc.scrollHeight - doc.clientHeight) || 1;
+          var pct = (window.scrollY / max) * 100;
+          bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+        }
+        window.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        document.addEventListener('astro:page-load', update);
+      })();
+
+      // Stat counter — animates from 0 to the displayed number when the
+      // .stat-num element first enters the viewport, then pulses briefly
+      // when finished. Skips animation if prefers-reduced-motion is set.
+      (function () {
+        if (
+          window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ) return;
+        function bind() {
+          document.querySelectorAll('.stat-num').forEach(function (el) {
+            if (el.dataset.counted) return;
+            var raw = el.textContent.trim();
+            var match = raw.match(/^(\d+)/);
+            if (!match) return;
+            var target = parseInt(match[1], 10);
+            var suffix = raw.slice(match[1].length);
+            el.dataset.counted = '1';
+            var io = new IntersectionObserver(function (entries) {
+              entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                io.unobserve(entry.target);
+                var start = performance.now();
+                var duration = 1100;
+                function tick(now) {
+                  var t = Math.min(1, (now - start) / duration);
+                  var eased = 1 - Math.pow(1 - t, 3);
+                  var value = Math.round(target * eased);
+                  entry.target.textContent = value + suffix;
+                  if (t < 1) {
+                    requestAnimationFrame(tick);
+                  } else {
+                    entry.target.classList.add('is-counted');
+                  }
+                }
+                requestAnimationFrame(tick);
+              });
+            }, { threshold: 0.4 });
+            io.observe(el);
+          });
+        }
+        bind();
+        document.addEventListener('astro:page-load', bind);
+      })();
+
+      // Mouse-tracking card spotlight — sets --x and --y custom props
+      // on each .card so its ::after radial highlight follows the cursor.
+      (function () {
+        function bind() {
+          document.querySelectorAll('.card').forEach(function (card) {
+            if (card.dataset.spotlight) return;
+            card.dataset.spotlight = '1';
+            card.addEventListener('mousemove', function (e) {
+              var rect = card.getBoundingClientRect();
+              var x = ((e.clientX - rect.left) / rect.width) * 100;
+              var y = ((e.clientY - rect.top) / rect.height) * 100;
+              card.style.setProperty('--x', x + '%');
+              card.style.setProperty('--y', y + '%');
+            });
+          });
+        }
+        bind();
+        document.addEventListener('astro:page-load', bind);
+      })();
+    </script>
+    <script is:inline>
+      function setupProseAndReveal() {
+        // Bilingual paired-row layout: in each <article class="prose">,
+        // split content into sections at every <h2> boundary, label each
+        // section by language (from its first element), then pair the i-th
+        // English section with the i-th Arabic section. Each pair becomes
+        // its own .bp-row — a 2-column grid — so corresponding section
+        // headings always sit across from each other regardless of how
+        // much content each section carries. Pre-<h2> content forms an
+        // implicit first section.
+        document.querySelectorAll('.prose').forEach(function (prose) {
+          var items = Array.prototype.slice.call(prose.children);
+          if (items.length < 2) return;
+
+          var keep = [];
+          var content = [];
+          items.forEach(function (c) {
+            if (c.classList && c.classList.contains('page-cta')) keep.push(c);
+            else content.push(c);
+          });
+          if (content.length < 2) return;
+
+          // Build sections at H2 boundaries.
+          var sections = [];
+          var current = null;
+          content.forEach(function (c) {
+            var langOf = c.matches(':dir(rtl)') ? 'ar' : 'en';
+            if (c.tagName === 'H2') {
+              if (current) sections.push(current);
+              current = { lang: langOf, els: [c] };
+            } else if (!current) {
+              current = { lang: langOf, els: [c] };
+            } else {
+              current.els.push(c);
+            }
+          });
+          if (current) sections.push(current);
+
+          var enSections = sections.filter(function (s) { return s.lang === 'en'; });
+          var arSections = sections.filter(function (s) { return s.lang === 'ar'; });
+          if (!enSections.length || !arSections.length) return;
+
+          // Pair by index. If counts differ, surplus sections sit alone
+          // on their side with the other column empty.
+          var max = Math.max(enSections.length, arSections.length);
+          for (var i = 0; i < max; i++) {
+            var en = enSections[i] || null;
+            var ar = arSections[i] || null;
+            var row = document.createElement('div');
+            row.className = 'bp-row';
+            var enWrap = document.createElement('div');
+            enWrap.className = 'lang-en';
+            var arWrap = document.createElement('div');
+            arWrap.className = 'lang-ar';
+            if (en) en.els.forEach(function (e) { enWrap.appendChild(e); });
+            if (ar) ar.els.forEach(function (e) { arWrap.appendChild(e); });
+            row.appendChild(enWrap);
+            row.appendChild(arWrap);
+            prose.appendChild(row);
+          }
+          keep.forEach(function (c) { prose.appendChild(c); });
+          prose.classList.add('bilingual');
+        });
+
+        // Scroll-reveal: any element with [data-animate] fades + slides into
+        // place when it enters the viewport. Lightweight, no framework, and
+        // honors prefers-reduced-motion via the CSS media query.
         if (typeof IntersectionObserver === 'undefined') {
-          // Old browsers: just show everything with no animation.
           document.querySelectorAll('[data-animate]').forEach(function (el) {
             el.classList.add('is-visible');
           });
           return;
         }
 
-        // Auto-tag every direct child of .prose as animated, so existing
-        // markdown pages get scroll-reveal without authoring per-block tags.
-        document.querySelectorAll('.prose > *').forEach(function (el, i) {
-          if (!el.hasAttribute('data-animate')) {
-            el.setAttribute('data-animate', '');
-            // Stagger first few elements; cap delay tier at 5.
-            if (i < 5) el.setAttribute('data-animate-delay', String(i + 1));
-          }
+        // Auto-tag prose content blocks. For a bilingual paired-row prose,
+        // walk inside each row's column wrappers; otherwise direct children.
+        document.querySelectorAll('.prose').forEach(function (prose) {
+          var blocks = prose.classList.contains('bilingual')
+            ? prose.querySelectorAll(':scope > .bp-row > .lang-en > *, :scope > .bp-row > .lang-ar > *')
+            : prose.children;
+          Array.prototype.slice.call(blocks).forEach(function (el, i) {
+            if (!el.hasAttribute('data-animate')) {
+              el.setAttribute('data-animate', '');
+              if (i < 5) el.setAttribute('data-animate-delay', String(i + 1));
+            }
+          });
         });
 
         var io = new IntersectionObserver(
@@ -83,7 +233,11 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
         document
           .querySelectorAll('[data-animate]')
           .forEach(function (el) { io.observe(el); });
-      })();
+      }
+      // astro:page-load fires on initial load and after every view
+      // transition. Calling setup directly *and* on the event would
+      // double-tag elements with data-animate.
+      document.addEventListener('astro:page-load', setupProseAndReveal);
     </script>
   </body>
 </html>

@@ -12,10 +12,10 @@ function isActive(href: string) {
 <header class="site-header">
   <div class="header-inner">
     <a href="/" class="brand">
-      <img src="/images/logo.png" alt="Greek Orthodox Scouts & Guides — Swefieh emblem" />
+      <img src="/images/logo.png" alt="Greek Orthodox Scouts & Guides - Swefieh emblem" />
       <span class="brand-text">
-        Greek Orthodox Scouts &amp; Guides
-        <small>Swefieh, Jordan · كشافة الروم الأرثوذكس - الصويفية</small>
+        Greek Orthodox Scouts &amp; Guides - Swefieh
+        <small>مجموعة كشافة ومرشدات الروم الأرثوذكس - الصويفية</small>
       </span>
     </a>
 
@@ -34,14 +34,37 @@ function isActive(href: string) {
 
     <nav class="site-nav" id="primary-nav" aria-label="Primary" data-nav>
       <ul>
-        {nav.map((item) => (
+        {nav.map((item, idx) => (
           <li class={item.children.length ? 'has-children' : ''}>
-            <a
-              href={item.href}
-              aria-current={isActive(item.href) ? 'page' : undefined}
-            >{item.title}</a>
+            {item.children.length > 0 ? (
+              <div class="nav-parent">
+                <a
+                  href={item.href}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                >{item.title}</a>
+                <button
+                  type="button"
+                  class="submenu-toggle"
+                  aria-controls={`submenu-${idx}`}
+                  aria-expanded="false"
+                  aria-label={`Toggle ${item.title} menu`}
+                  data-submenu-toggle
+                >
+                  <span aria-hidden="true">▾</span>
+                </button>
+              </div>
+            ) : (
+              <a
+                href={item.href}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+              >{item.title}</a>
+            )}
             {item.children.length > 0 && (
-              <ul class="submenu">
+              <ul
+                class="submenu"
+                id={`submenu-${idx}`}
+                data-submenu
+              >
                 {item.children.map((child) => (
                   <li>
                     <a
@@ -61,7 +84,58 @@ function isActive(href: string) {
 </header>
 
 <script is:inline>
-  (function () {
+  function setupSiteHeader() {
+    // Glass-on-scroll: the header switches to a translucent backdrop-blur
+    // surface when the page has been scrolled past the very top.
+    var header = document.querySelector('.site-header');
+    if (header) {
+      var sync = function () {
+        header.classList.toggle('is-scrolled', window.scrollY > 8);
+      };
+      sync();
+      window.addEventListener('scroll', sync, { passive: true });
+    }
+
+    // Click-based submenu: a chevron button next to each parent link
+    // toggles the submenu open/closed. The parent link itself still
+    // navigates normally — separating the two interactions makes touch
+    // and mouse both reliable. Click outside or press Escape closes.
+    var subToggles = document.querySelectorAll('[data-submenu-toggle]');
+    function closeAllSubmenus(except) {
+      subToggles.forEach(function (b) {
+        if (b === except) return;
+        b.setAttribute('aria-expanded', 'false');
+        var id = b.getAttribute('aria-controls');
+        var menu = id && document.getElementById(id);
+        if (menu) menu.classList.remove('is-open');
+      });
+    }
+    subToggles.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var id = btn.getAttribute('aria-controls');
+        var menu = id && document.getElementById(id);
+        var isOpen = btn.getAttribute('aria-expanded') === 'true';
+        closeAllSubmenus(btn);
+        if (!isOpen) {
+          btn.setAttribute('aria-expanded', 'true');
+          if (menu) menu.classList.add('is-open');
+        } else {
+          btn.setAttribute('aria-expanded', 'false');
+          if (menu) menu.classList.remove('is-open');
+        }
+      });
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('.has-children')) {
+        closeAllSubmenus(null);
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeAllSubmenus(null);
+    });
+
     var btn = document.querySelector('[data-nav-toggle]');
     var nav = document.querySelector('[data-nav]');
     var backdrop = document.querySelector('[data-nav-backdrop]');
@@ -99,5 +173,10 @@ function isActive(href: string) {
     (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(function (e) {
       if (e.matches) setOpen(false);
     });
-  })();
+  }
+  // astro:page-load fires on initial page load AND after every view
+  // transition, so a single listener covers both. Adding setup() as a
+  // direct call too would double-bind the click handlers and make the
+  // hamburger toggle open-then-close on a single tap.
+  document.addEventListener('astro:page-load', setupSiteHeader);
 </script>

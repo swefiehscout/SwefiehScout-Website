@@ -1,47 +1,66 @@
 ---
 title: "Our Team"
+titleAr: "فريقنا"
+navIcon: "star"
 slug: "about-us/our-team"
 parent: "about-us"
+custom: true
 ---
 
-## د. نعيم ايبف
+## Leadership
 
-القائد العام للمجموعة
+- **Dr. Naeem Eibef** - General Leader
+- **Fadi Eibef** - Deputy General Leader & Band Leader
 
-## فادي ايبف
+Our scouts are guided by a dedicated team trained through the Jordanian Association for Boy Scouts and Girl Guides (Amman). Many of our leaders proudly wear the Wood Badge, a mark of advanced leadership training.
 
-نائب القائد العام للمجموعة و قائد الفرقة الموسيقية
+Our board brings together ministers, priests, business professionals, and parents, chaired by **Father Dr. Ibrahim Dabour**, whose wisdom and leadership inspire our community.
 
-Our scout group is guided by a dedicated and highly qualified team of leaders who have undergone rigorous training through the Jordanian Association for Boy Scouts and Girl Guides, in Amman - Jordan. Many of our leaders proudly wear the The Wood Badge Neckerchief, a symbol of their commitment and achievement, and have completed advanced leadership courses to ensure the highest standard of mentorship for our members.
+## القيادة
 
-Supporting our leaders is a diverse and experienced board that includes ministers, priests, business professionals, and parents, all of whom bring valuable perspectives and guidance to our mission. At the peak of our board is our esteemed Father Dr. Ibrahim Dabour, whose wisdom and leadership inspire our community to grow in faith, service, and unity. Together, we are committed to empowering our scouts and fostering a vibrant, faith driven community.
+- **د. نعيم ايبف** - القائد العام للمجموعة
+- **فادي ايبف** - نائب القائد العام وقائد الفرقة الموسيقية
 
-تعمل مجموعتنا الكشفية تحت إشراف فريق متميز ومؤهل من القادة الذين خضعوا لتدريبات مكثفة ضمن الجمعية الأردنية للكشافة والمرشدات في عمّان – الأردن. العديد من قادتنا يعتزون بارتداء منديل الشارة الخشبية، الذي يعبر عن التزامهم وإنجازاتهم، وقد أكملوا دورات متقدمة في القيادة لضمان تقديم أعلى مستويات الإرشاد لأعضائنا.
+تعمل مجموعتنا الكشفية تحت إشراف فريق متميز من القادة المدرّبين في الجمعية الأردنية للكشافة والمرشدات (عمّان). يعتزّ كثيرٌ من قادتنا بارتداء منديل الشارة الخشبية، تعبيرًا عن التزامهم وإنجازهم.
 
-يدعم قادتنا مجلس متنوع وذو خبرة يضم وزراء، كهنة، محترفين من قطاع الأعمال، وأولياء أمور، يساهم كل منهم برؤى قيّمة وإرشادات تعزز رسالتنا. على رأس هذا المجلس يقف الإيكونوموس الدكتور إبراهيم دبور، الذي تُلهمنا حكمته وقيادته للنمو في الإيمان، الخدمة، والوحدة. معًا، نعمل بروح واحدة على تمكين كشافتنا وبناء مجتمع نابض بالحياة ومتجذر في الإيمان. 
+يدعمهم مجلسٌ متنوّع يضم وزراء، كهنة، محترفين، وأولياء أمور، يترأسه الإيكونوموس الدكتور إبراهيم دبور، الذي تُلهمنا حكمته وقيادته.
 
-## Our Achievement's
+## Our Achievements
 
-Registration and Leadership:
+**Registration & Leadership**
 
-  * Officially registered and licensed in 2016 by Leader Naeem Eibef and Leader George Zayer
+- Officially registered in 2016 by Leader Naeem Eibef and Leader George Zayer.
+- First general assembly formed in 2018; administrative board elected in 2019.
+- Hosted the first Orthodox scout and guide gathering in 2024, led by Bishop Christoforos.
 
-  * First general assembly formed in 2018; administrative board elected in 2019
+**Leader Development**
 
-  * Hosted the first Orthodox scout and guide gathering in 2024, led by Bishop Christoforos
+- 12 leaders completed Unit Leader training.
+- 30 leaders completed Assistant Unit Leader training.
+- 10 leaders earned the Wood Badge.
+- 5 leaders completed trauma protection courses.
+- Five consecutive years of Orthodox leadership preparation programs.
 
-Leader Development:
+**Medical Expertise**
 
-  * 12 leaders completed Unit Leader training
+- Members certified in Basic and Advanced Life Support contribute to events and camps.
 
-  * 30 leaders completed Assistant Unit Leader training
+## إنجازاتنا
 
-  * 10 leaders earned the Wood Badge
+**التسجيل والقيادة**
 
-  * 5 leaders completed trauma protection courses
+- تأسست المجموعة رسميًّا عام ٢٠١٦ بقيادة نعيم ايبف وجورج زاير.
+- أوّل جمعية عمومية عام ٢٠١٨، وانتخاب المجلس الإداري عام ٢٠١٩.
+- استضافة أول لقاء كشفي أرثوذكسي عام ٢٠٢٤ برعاية المطران خريستوفوروس.
 
-  * Conducted Orthodox leadership preparation programs for five consecutive years
+**تطوير القادة**
 
-Medical Expertise:
+- ١٢ قائدًا أنهوا دورة قائد وحدة.
+- ٣٠ قائدًا أنهوا دورة مساعد قائد وحدة.
+- ١٠ قادة حصلوا على الشارة الخشبية.
+- ٥ قادة أنهوا دورات الحماية من الصدمات.
+- خمس سنوات متتالية من برامج إعداد القادة الأرثوذكسيين.
 
-  * Members certified in Basic and Advanced Life Support contribute to events and camps
+**الخبرات الطبية**
+
+- أعضاء معتمدون في الإسعافات الأولية والإنعاش المتقدّم يساهمون في الفعاليات والمخيمات.

@@ -1,17 +1,23 @@
 ---
 title: "Our Band"
+titleAr: "فرقتنا الموسيقية"
+navIcon: "music"
+tagline: "Bagpipes and drums in proud Arab scouting tradition. A band like no other."
+taglineAr: "مزامير وطبول في تقاليد كشفية عربية عريقة. فرقة لا مثيل لها."
 slug: "about-us/our-band"
 parent: "about-us"
 ---
 
-## Our Band
+A vibrant part of our scouting community, our band combines percussion with the timeless tradition of bagpipes, a proud fixture of Palestinian and Jordanian scout heritage.
 
-A vibrant and prestigious part of our scout group is our talented band, which combines the power of percussion with the timeless tradition of bagpipes. Our instruments, including the finest bagpipes sourced directly from Scotland, reflect our commitment to quality and excellence. We are proud to have established the first band for our youngest members, ages 6-10, which is the first of its kind in the entire Middle East. These young musicians have already mastered many marches and showcased their talent in a remarkable performance during Easter 2024.
+We're proud to have founded the first band for ages 6–10, the first of its kind in the Middle East. Our young musicians have already mastered many marches and performed memorably at Easter 2026.
 
-Our band practices every Friday and Sunday, honing their skills and perfecting their performances. Beyond enriching our scout group, the band brings joy and a sense of tradition to weddings, church celebrations, and numerous community events. Through their dedication and artistry, they embody the spirit and prestige of our scouting community.
+The band rehearses every Friday and Sunday, and performs at weddings, church celebrations, and community events across Amman.
 
-‎‏‎تعد فرقتنا الموسيقية النابضة بالحياة واحدة من أبرز مكونات مجموعتنا الكشفية، حيث تجمع بين قوة الإيقاعات وسحر تقليد مزامير القِرب. أدواتنا الموسيقية، بما في ذلك أفضل مزامير القرب المستوردة مباشرةً من اسكتلندا، تعكس التزامنا بالجودة والتميز.‎‏‎
+## فرقتنا الموسيقية
 
-‎‏‎نفخر بتأسيس أول فرقة مخصصة لأصغر أعضائنا، الذين تتراوح أعمارهم بين 6 و10 سنوات، وهي الأولى من نوعها في منطقة الشرق الأوسط. وقد تمكن هؤلاء الموسيقيون الصغار بالفعل من إتقان العديد من المسيرات الموسيقية وقدموا أداءً مميزًا خلال احتفالات عيد الفصح لعام 2026.‎‏‎
+تجمع فرقتنا الموسيقية بين قوة الإيقاعات وسحر تقليد مزامير القِرب، جزء أصيل من التراث الكشفي الفلسطيني والأردني.
 
-‎‏‎تتدرب الفرقة كل يوم جمعة وأحد، لتطوير مهاراتهم وتحسين عروضهم. إلى جانب إثراء مجموعتنا الكشفية، تُضيف الفرقة أجواءً من البهجة والتقاليد إلى حفلات الزفاف، والاحتفالات الكنسية، والعديد من الفعاليات المجتمعية. ومن خلال تفانيهم وفنهم، يجسد أعضاء الفرقة روح مجموعتنا الكشفية ورقيها.‎‏‎
+نفخر بتأسيس أول فرقة مخصصة لأصغر أعضائنا (٦–١٠ سنوات)، وهي الأولى من نوعها في الشرق الأوسط. أتقن موسيقيونا الصغار العديد من المسيرات، وقدموا أداءً مميزًا في احتفالات عيد الفصح ٢٠٢٦.
+
+تتدرب الفرقة كل جمعة وأحد، وتُحيي حفلات الزفاف والاحتفالات الكنسية والفعاليات المجتمعية.

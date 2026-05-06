@@ -1,12 +1,40 @@
 ---
 title: "Our Church"
+titleAr: "كنيستنا"
+navIcon: "cross"
+tagline: "The Presentation of the Lord Cathedral, our spiritual home in Swefieh."
+taglineAr: "كاتدرائية دخول السيد إلى الهيكل، عريننا الروحي في الصويفية."
 slug: "about-us/our-church"
 parent: "about-us"
 ---
 
-[Instagram](https://www.instagram.com/presentationofthelordcathedral?igsh=Ym44dmR1bTd4YWts&utm_source=qr)
+## Our Priests
 
-[Facebook](https://www.facebook.com/profile.php?id=61567862633827&mibextid=wwXIfr&mibextid=wwXIfr)
+Our spiritual guides at the Presentation of the Lord Cathedral:
+
+- Archimandrite Khristoforos Haddad
+- Father Dr. Ibrahim Dabour
+- Father Alexandrous Makhamreh
+- Father Nikoforous Hanhan
+
+They lead our prayers, mentor our scouts, and remind us that scouting is more than adventure; it's a path to growing closer to God through humble service.
+
+We are grateful for their continuous prayers and care, which help us embody the true spirit of scouting: faith, duty, and service.
+
+## كهنتنا
+
+كهنتنا في كاتدرائية دخول السيد إلى الهيكل:
+
+- الأرشمندريت خريستوفوروس حداد
+- الأب الدكتور إبراهيم دبور
+- الأب ألكسندروس مخامرة
+- الأب نيكوفوروس حنحن
+
+تتنعّم مجموعتنا الكشفية برعاية روحية من كهنة مخلصين يخدمون في كاتدرائية دخول السيد إلى الهيكل. يقدمون لنا الإرشاد الروحي، ويُقيمون الصلوات، ويذكّروننا بأن الكشفية ليست مجرد مغامرة، بل طريق للتقرّب إلى الله وخدمة الآخرين بالمحبة والتواضع.
+
+نحن ممتنّون لدعمهم وصلواتهم الدائمة التي تُساعدنا في تجسيد روح الكشفية الحقيقية: الإيمان، الواجب، والخدمة.
+
+## The Cathedral
 
 The Presentation of the Lord Cathedral – Swefieh, Amman
 
@@ -48,6 +76,8 @@ The church’s interior is adorned with stunning Byzantine-style icons, painted 
 
 The Presentation of the Lord Cathedral stands not only as a spiritual sanctuary but as a symbol of unity, tradition, and service, welcoming all who seek solace, guidance, and a connection to God.
 
+## الكاتدرائية
+
 كاتدرائية دخول السيد إلى الهيكل – الصويفية، عمّان
 
 تحتفل الكنائس حول العالم بعيد دخول السيد المسيح إلى الهيكل، وهو العيد الذي يرمز إلى تقديم الطفل يسوع إلى الهيكل وفقًا للشريعة اليهودية. وتحمل العديد من الكنائس اسم "دخول السيد إلى الهيكل"، ومن بينها كاتدرائية دخول السيد إلى الهيكل في منطقة الصويفية، التابعة لمطرانية الروم الأرثوذكس في فيلادلفيا. تقع الكاتدرائية في حي الصويفية، وهو أحد أحياء منطقة وادي السير غرب العاصمة الأردنية عمّان، وتشكل منارة روحية ومجتمعية بارزة.
@@ -87,3 +117,8 @@ The Presentation of the Lord Cathedral stands not only as a spiritual sanctuary 
 تزين الكاتدرائية من الداخل مجموعة من الأيقونات البيزنطية المرسومة بدقة متناهية، مما يضفي أجواءً من الخشوع والإلهام. تُساهم هذه الأعمال الفنية المقدسة في تعزيز التجربة الروحية للمصلين والزوار، وتُظهر جمال التراث الأرثوذكسي العريق.
 
 تشكل كاتدرائية دخول السيد إلى الهيكل رمزًا للوحدة والتقاليد والخدمة، وتفتح أبوابها لكل من يبحث عن السكينة الروحية والتوجيه والارتباط العميق بالله.
+
+<div class="page-cta">
+  <a class="btn-social" href="https://www.instagram.com/presentationofthelordcathedral?igsh=Ym44dmR1bTd4YWts&utm_source=qr" target="_blank" rel="noopener">Instagram</a>
+  <a class="btn-social" href="https://www.facebook.com/profile.php?id=61567862633827&mibextid=wwXIfr&mibextid=wwXIfr" target="_blank" rel="noopener">Facebook</a>
+</div>

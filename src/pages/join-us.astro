@@ -1,0 +1,157 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const reasons = [
+  {
+    icon: 'sparkle',
+    title: 'Lead',
+    titleAr: 'القيادة',
+    blurb: 'Develop teamwork, problem-solving, and communication.',
+    blurbAr: 'تعلّم العمل الجماعي وحلّ المشكلات والتواصل.',
+  },
+  {
+    icon: 'cross',
+    title: 'Believe',
+    titleAr: 'الإيمان',
+    blurb: 'Explore the teachings of the Orthodox Church.',
+    blurbAr: 'استكشاف تعاليم الكنيسة الأرثوذكسية.',
+  },
+  {
+    icon: 'heart',
+    title: 'Serve',
+    titleAr: 'الخدمة',
+    blurb: 'Join community projects with lasting impact.',
+    blurbAr: 'مشاريع ذات أثر دائم في المجتمع.',
+  },
+  {
+    icon: 'flag',
+    title: 'Adventure',
+    titleAr: 'المغامرة',
+    blurb: 'Outdoor camps, hikes, and events year-round.',
+    blurbAr: 'مخيمات وفعاليات في الهواء الطلق.',
+  },
+  {
+    icon: 'star',
+    title: 'Belong',
+    titleAr: 'الانتماء',
+    blurb: 'Join a 15+ year scouting tradition.',
+    blurbAr: 'إرث كشفي يمتد لأكثر من ١٥ عامًا.',
+  },
+  {
+    icon: 'flower',
+    title: 'Grow',
+    titleAr: 'النمو',
+    blurb: 'Build skills, confidence, and character.',
+    blurbAr: 'بناء المهارات والثقة والشخصية.',
+  },
+] as const;
+
+const steps = [
+  {
+    n: 1,
+    title: 'Reach Out',
+    titleAr: 'تواصل معنا',
+    blurb: 'Send us a message through our contact page.',
+    blurbAr: 'أرسل رسالة عبر صفحة التواصل.',
+  },
+  {
+    n: 2,
+    title: 'Visit',
+    titleAr: 'زورنا',
+    blurb: 'Come to the cathedral and meet a leader.',
+    blurbAr: 'تعال إلى الكاتدرائية وقابل أحد القادة.',
+  },
+  {
+    n: 3,
+    title: 'Register',
+    titleAr: 'سجّل',
+    blurb: 'Fill out the forms and join the troop.',
+    blurbAr: 'عبّئ الاستمارة وانضم إلى المجموعة.',
+  },
+  {
+    n: 4,
+    title: 'Begin',
+    titleAr: 'ابدأ',
+    blurb: 'Start your adventure with us.',
+    blurbAr: 'انطلق في مغامرتك معنا.',
+  },
+];
+---
+<BaseLayout title="Join Us" bare wide>
+  <section class="page-hero" data-animate>
+    <h1 class="page-h1">
+      Join Us
+      <span class="page-h1-ar">انضم إلينا</span>
+    </h1>
+    <p class="page-tag">
+      A family united by faith, values, and service. Whether you want to lead,
+      believe, serve, or adventure, there's a place for you here.
+    </p>
+    <p class="page-tag-ar">
+      عائلة متحدة بالإيمان والقيم والخدمة. سواء أردت القيادة، الإيمان، الخدمة،
+      أو المغامرة، فلدينا مكانٌ لك.
+    </p>
+  </section>
+
+  <section class="section-stack" data-animate>
+    <h2 class="section-h2">Why Join Us</h2>
+    <p class="section-h2-ar">لماذا تنضم إلينا</p>
+  </section>
+
+  <section class="reasons-grid">
+    {reasons.map((r, i) => (
+      <div class="reason-card" data-animate data-animate-delay={String((i % 5) + 1)}>
+        <span class="reason-icon" aria-hidden="true"><Icon name={r.icon} size={24} /></span>
+        <h3 class="reason-title">{r.title}</h3>
+        <p class="reason-title-ar">{r.titleAr}</p>
+        <p class="reason-blurb">{r.blurb}</p>
+        <p class="reason-blurb-ar">{r.blurbAr}</p>
+      </div>
+    ))}
+  </section>
+
+  <section class="who-card" data-animate>
+    <div class="who-eyebrow">Who Can Join · من يمكنه الانضمام</div>
+    <p class="who-text">
+      <strong>Ages 6 to 25.</strong> Parents and community members are welcome
+      to volunteer and support our young leaders.
+    </p>
+    <p class="who-text-ar">
+      <strong>من سنّ ٦ إلى ٢٥ عامًا.</strong> ندعو أيضًا أولياء الأمور وأعضاء
+      المجتمع للمشاركة كمتطوّعين أو داعمين.
+    </p>
+  </section>
+
+  <section class="section-stack" data-animate>
+    <h2 class="section-h2">How to Join</h2>
+    <p class="section-h2-ar">كيف تنضم إلينا</p>
+  </section>
+
+  <section class="steps-grid">
+    {steps.map((s, i) => (
+      <div class="step-card" data-animate data-animate-delay={String(i + 1)}>
+        <div class="step-num" aria-hidden="true">{s.n}</div>
+        <h3 class="step-title">{s.title}</h3>
+        <p class="step-title-ar">{s.titleAr}</p>
+        <p class="step-blurb">{s.blurb}</p>
+        <p class="step-blurb-ar">{s.blurbAr}</p>
+      </div>
+    ))}
+  </section>
+
+  <section class="join-cta" data-animate>
+    <h2 class="join-cta-title">Ready to start?</h2>
+    <p class="join-cta-title-ar">جاهز للبدء؟</p>
+    <p class="join-cta-tag">
+      Whether you're a scout, parent, or supporter, your involvement makes a difference.
+    </p>
+    <p class="join-cta-tag-ar">
+      سواء كنت كشفيًا، وليّ أمر، أو داعمًا، مشاركتك تصنع فرقًا.
+    </p>
+    <div class="join-cta-buttons">
+      <a class="btn-primary" href="/contact-us">Contact Us</a>
+      <a class="btn-secondary" href="/about-us">Learn More</a>
+    </div>
+  </section>
+</BaseLayout>
