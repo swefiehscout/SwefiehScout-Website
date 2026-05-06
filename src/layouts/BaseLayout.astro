@@ -110,6 +110,20 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
         document.addEventListener('astro:page-load', bind);
       })();
 
+      // FormSubmit _next URL — set to the current origin's /thank-you
+      // so the post-submit redirect works on Vercel preview deploys,
+      // localhost, and the production domain alike. Without this the
+      // hardcoded production URL would break previews.
+      (function () {
+        function bind() {
+          document.querySelectorAll('input[name="_next"]').forEach(function (el) {
+            el.value = window.location.origin + '/thank-you';
+          });
+        }
+        bind();
+        document.addEventListener('astro:page-load', bind);
+      })();
+
       // Marquee shuffle — on every page-load, reshuffle each
       // .band-marquee-track's slides and pick a random starting offset
       // for the looping animation so refresh / re-navigation never
