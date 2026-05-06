@@ -894,14 +894,70 @@ main.wide {
   object-fit: cover;
   display: block;
   transition: transform 0.7s var(--ease-out);
+  /* Slow Ken-Burns zoom for the cinematic feel — only triggers when
+     view-transitions or scroll-reveals haven't paused motion. */
+  animation: heroPhotoDrift 18s ease-in-out infinite alternate;
+}
+@keyframes heroPhotoDrift {
+  from { transform: scale(1) translate(0, 0); }
+  to   { transform: scale(1.07) translate(-1%, -1%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-split-photo img { animation: none; }
 }
 .hero-split:hover .hero-split-photo img {
+  /* Hover overrides the loop with a snappier zoom. */
+  animation: none;
   transform: scale(1.04);
 }
 @media (min-width: 880px) {
   .hero-split-photo {
     aspect-ratio: auto;
     height: 100%;
+  }
+}
+/* Phone: photo dominates the viewport (60vh, capped) and a cream
+   gradient fades its bottom edge so it blends into the text card. */
+@media (max-width: 879px) {
+  .hero-split-photo {
+    aspect-ratio: auto;
+    height: 62vh;
+    min-height: 360px;
+    max-height: 560px;
+  }
+  .hero-split-photo::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    inset-inline: 0;
+    height: 30%;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(250, 243, 232, 0.6) 60%,
+      rgba(250, 243, 232, 0.95) 100%
+    );
+    pointer-events: none;
+  }
+  /* Floating bilingual "Est. 2008 · 2008" badge on the photo. */
+  .hero-split-photo::before {
+    content: 'Est. 2008 · ٢٠٠٨';
+    position: absolute;
+    top: 1rem;
+    inset-inline-end: 1rem;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--color-brand);
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 14px -4px rgba(87, 22, 7, 0.25);
+    z-index: 2;
   }
 }
 .hero-split-content {
@@ -911,6 +967,19 @@ main.wide {
   justify-content: center;
   gap: 0;
   position: relative;
+}
+@media (max-width: 879px) {
+  .hero-split-content {
+    padding: 1.5rem 1.5rem 2.5rem;
+    text-align: center;
+    align-items: center;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 8vw, 2.8rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .hero .hero-cta { justify-content: center; }
 }
 .hero-meta {
   display: flex;
