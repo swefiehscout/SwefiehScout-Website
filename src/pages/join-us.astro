@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
+import { joinUsMarqueePhotos } from '../lib/scenic-photos';
+
+const marqueePhotos = [...joinUsMarqueePhotos, ...joinUsMarqueePhotos];
 
 const reasons = [
   {
@@ -109,6 +112,18 @@ const steps = [
         <p class="reason-blurb-ar">{r.blurbAr}</p>
       </div>
     ))}
+  </section>
+
+  <section class="band-marquee" aria-label="Photos from the troop" data-animate>
+    <div class="band-marquee-track" style={`--n: ${joinUsMarqueePhotos.length}`}>
+      {marqueePhotos.map((src, i) => (
+        <div class="band-marquee-slide">
+          <img src={src} alt="" loading="lazy" aria-hidden={i >= joinUsMarqueePhotos.length} />
+        </div>
+      ))}
+    </div>
+    <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
+    <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
   </section>
 
   <section class="who-card" data-animate>

@@ -6,6 +6,7 @@ tagline: "Bagpipes and drums in proud Arab scouting tradition. A band like no ot
 taglineAr: "مزامير وطبول في تقاليد كشفية عربية عريقة. فرقة لا مثيل لها."
 slug: "about-us/our-band"
 parent: "about-us"
+custom: true
 ---
 
 A vibrant part of our scouting community, our band combines percussion with the timeless tradition of bagpipes, a proud fixture of Palestinian and Jordanian scout heritage.

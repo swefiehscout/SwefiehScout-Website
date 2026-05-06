@@ -152,15 +152,20 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
           });
           if (content.length < 2) return;
 
-          // Build sections at H2 boundaries.
+          // Build sections. A new section starts on every <h2>, on the
+          // very first content block, AND whenever the language flips
+          // mid-flow (so an English-then-Arabic block sequence without
+          // an explicit h2 between them still pairs correctly).
           var sections = [];
           var current = null;
           content.forEach(function (c) {
             var langOf = c.matches(':dir(rtl)') ? 'ar' : 'en';
-            if (c.tagName === 'H2') {
+            var startNew =
+              c.tagName === 'H2' ||
+              !current ||
+              current.lang !== langOf;
+            if (startNew) {
               if (current) sections.push(current);
-              current = { lang: langOf, els: [c] };
-            } else if (!current) {
               current = { lang: langOf, els: [c] };
             } else {
               current.els.push(c);

@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
+import { bandPhotos } from '../data/band-photos';
+
+const marqueePhotos = [...bandPhotos, ...bandPhotos];
 
 const features = [
   {
@@ -41,6 +44,18 @@ const features = [
     <p class="page-tag-ar">
       ادعُ فرقتنا الكشفية لإحياء حفل زفافك، مناسبتك الكنسية، أو فعاليتك المجتمعية.
     </p>
+  </section>
+
+  <section class="band-marquee" aria-label="Photos of the band" data-animate>
+    <div class="band-marquee-track" style={`--n: ${bandPhotos.length}`}>
+      {marqueePhotos.map((src, i) => (
+        <div class="band-marquee-slide">
+          <img src={src} alt="" loading="lazy" aria-hidden={i >= bandPhotos.length} />
+        </div>
+      ))}
+    </div>
+    <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
+    <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
   </section>
 
   <section class="feature-grid">

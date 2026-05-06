@@ -5,6 +5,7 @@ tagline: "Faith, service, and adventure, rooted in the Orthodox tradition since 
 taglineAr: "إيمان، خدمة، ومغامرة، متجذّرون في التقاليد الأرثوذكسية منذ ٢٠٠٨."
 slug: "about-us"
 navOrder: 2
+custom: true
 ---
 
 ## Our Patron

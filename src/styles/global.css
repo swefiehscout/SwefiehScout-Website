@@ -856,52 +856,98 @@ main.wide {
 }
 
 /* ---------- Hero (home page) ----------
-   A cinematic landing card: a soft cream-and-maroon radial backdrop, a
-   large emblem watermark in the corner, a dot-grid texture, and the
-   logo gently breathing on a continuous loop. */
+   Split layout: a real photo panel on one side and a text card with
+   title, tagline, and CTAs on the other. No image-as-background, no
+   overlays — the photo and the words live in their own clearly
+   separate compartments. */
 .hero {
   position: relative;
   margin: 0 0 3rem;
-  padding: 5.5rem 2rem 5.5rem;
   border-radius: var(--radius-lg);
-  background:
-    radial-gradient(circle at 80% 0%, rgba(122, 25, 20, 0.22), transparent 55%),
-    radial-gradient(circle at 0% 100%, rgba(20, 56, 34, 0.22), transparent 55%),
-    linear-gradient(135deg, #ffffff 0%, #faf3e8 100%);
-  overflow: hidden;
   border: 1px solid var(--color-border);
-  min-height: clamp(420px, 60vh, 620px);
+  background: linear-gradient(135deg, #ffffff 0%, #faf3e8 100%);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.hero-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding: 0;
+}
+@media (min-width: 880px) {
+  .hero-split {
+    grid-template-columns: 5fr 6fr;
+    min-height: 480px;
+  }
+}
+.hero-split-photo {
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-bg);
+  aspect-ratio: 4 / 3;
+}
+.hero-split-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s var(--ease-out);
+}
+.hero-split:hover .hero-split-photo img {
+  transform: scale(1.04);
+}
+@media (min-width: 880px) {
+  .hero-split-photo {
+    aspect-ratio: auto;
+    height: 100%;
+  }
+}
+.hero-split-content {
+  padding: 2.75rem 2rem;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  position: relative;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   align-items: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-brand-light);
+  margin: 0.4rem 0 1rem;
 }
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle, rgba(87, 22, 7, 0.08) 1px, transparent 1px);
-  background-size: 22px 22px;
-  opacity: 0.5;
-  mask-image: radial-gradient(circle at center, black 0%, transparent 75%);
-  -webkit-mask-image: radial-gradient(circle at center, black 0%, transparent 75%);
-  pointer-events: none;
+.hero-meta-sep { opacity: 0.45; }
+.hero-intro {
+  font-size: 0.98rem;
+  color: var(--color-text);
+  line-height: 1.65;
+  margin: 0.85rem 0 0.4rem;
 }
-/* Large faded emblem watermark in the corner — adds depth without
-   competing with the foreground content. */
-.hero::after {
-  content: '';
-  position: absolute;
-  inset-inline-end: -8%;
-  bottom: -20%;
-  width: 60%;
-  aspect-ratio: 1 / 1;
-  background-image: url('/images/logo.png');
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  opacity: 0.05;
-  pointer-events: none;
-  filter: grayscale(0.5);
+.hero-intro strong { color: var(--color-brand-dark); }
+.hero-intro-ar {
+  font-family: var(--font-arabic);
+  font-size: 0.98rem;
+  color: var(--color-text);
+  line-height: 1.85;
+  margin: 0.2rem 0 1.5rem;
+  unicode-bidi: plaintext;
+}
+@media (min-width: 720px) {
+  .hero-intro-ar { text-align: start; }
+}
+@media (min-width: 880px) {
+  .hero-split-content { padding: 3rem 3.25rem; }
+}
+@media (min-width: 1100px) {
+  .hero-split-content { padding: 3.5rem 4rem; }
 }
 .hero-inner {
   position: relative;
@@ -1381,6 +1427,7 @@ main.wide {
   unicode-bidi: plaintext;
 }
 
+
 /* Gallery uses the same count-aware no-orphan strategy as the sub-pages
    grid: column count is fixed per album count and per breakpoint, so the
    last row is always full. justify-content: center centers tracks when
@@ -1456,65 +1503,31 @@ main.wide {
   position: relative;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: var(--color-bg);
 }
-/* Bottom gradient fade so any future cover image will read against text. */
+.album-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+.album-card:hover .album-cover {
+  transform: scale(1.06);
+}
+/* Bottom gradient fade for visual depth and to keep brand warmth. */
 .album-art::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
-    transparent 35%,
-    rgba(0, 0, 0, 0.35) 100%
+    transparent 50%,
+    rgba(0, 0, 0, 0.3) 100%
   );
-  z-index: 1;
-}
-.album-icon {
-  position: relative;
-  z-index: 2;
-  font-size: clamp(3.5rem, 9vw, 5rem);
-  color: rgba(255, 255, 255, 0.92);
-  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.35));
-  transition: transform 0.5s var(--ease-out);
-  line-height: 1;
-}
-.album-card:hover .album-icon {
-  transform: scale(1.08) rotate(-3deg);
-}
-.album-pattern {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.10) 1px, transparent 1.5px);
-  background-size: 22px 22px;
-  opacity: 0.55;
-  mix-blend-mode: screen;
-}
-
-/* Per-album palettes — chosen to feel thematically appropriate. */
-.album-card--fire .album-art {
-  background:
-    radial-gradient(circle at 70% 20%, rgba(255, 220, 130, 0.55), transparent 55%),
-    linear-gradient(135deg, #f59e0b 0%, #c2410c 45%, #571607 100%);
-}
-.album-card--solemn .album-art {
-  background:
-    radial-gradient(circle at 30% 20%, rgba(122, 25, 20, 0.5), transparent 60%),
-    linear-gradient(135deg, #1a0b08 0%, #3a0f04 50%, #571607 100%);
-}
-.album-card--palm .album-art {
-  background:
-    radial-gradient(circle at 80% 25%, rgba(184, 134, 11, 0.45), transparent 55%),
-    linear-gradient(135deg, #143822 0%, #2d6a3e 55%, #b8860b 100%);
-}
-.album-card--palm-soft .album-art {
-  background:
-    radial-gradient(circle at 25% 25%, rgba(255, 245, 220, 0.55), transparent 55%),
-    linear-gradient(135deg, #4a7c5e 0%, #8eb09a 55%, #d4a574 100%);
+  pointer-events: none;
 }
 
 .album-meta {
@@ -1582,7 +1595,6 @@ main.wide {
 @media (max-width: 640px) {
   .gallery-grid { gap: 1rem; }
   .album-art { aspect-ratio: 3 / 2; }
-  .album-icon { font-size: 4rem; }
 }
 
 /* ---------- Form pages: shared building blocks ------------------------
@@ -1897,6 +1909,65 @@ main.wide {
 
 /* Three impact stats — divisors of 3 are 1 and 3, so 1 col phone / 3 cols
    above keeps it symmetric at every breakpoint. */
+/* Board photo on the Our Team page — wide landscape banner with a
+   bilingual caption underneath. */
+.board-photo {
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+}
+.board-photo img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 21 / 9;
+  object-fit: cover;
+  /* Crop the ceiling and the floor — bias the visible band toward the
+     centre of the photo where the faces sit. */
+  object-position: center 45%;
+  display: block;
+}
+.board-photo figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  text-align: center;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+}
+.board-photo figcaption span:last-child {
+  font-family: var(--font-arabic);
+  unicode-bidi: plaintext;
+}
+@media (max-width: 640px) {
+  .board-photo img { aspect-ratio: 16 / 9; }
+}
+
+/* Donation info banner — preserved at native aspect (no cropping) since
+   the image typically contains text/details that should stay readable. */
+.donation-banner {
+  max-width: 760px;
+  margin: 0 auto 3rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  background: var(--color-surface);
+}
+.donation-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 .impact-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -2267,27 +2338,33 @@ main.wide {
   border-color: var(--color-brand-light);
 }
 .leader-avatar {
-  width: 5.5rem;
-  height: 5.5rem;
+  width: 7rem;
+  height: 7rem;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin: 0 auto 1rem;
+  padding: 4px;
   background: linear-gradient(
     135deg,
     var(--color-brand) 0%,
     var(--color-brand-light) 50%,
     var(--color-accent) 100%
   );
-  color: #fff;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.7rem;
-  letter-spacing: 0.05em;
-  box-shadow: 0 6px 16px rgba(87, 22, 7, 0.3);
+  box-shadow: 0 8px 20px rgba(87, 22, 7, 0.28);
   position: relative;
   z-index: 1;
+  overflow: hidden;
+}
+.leader-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  /* Faces are usually in the upper portion of headshots — bias the
+     square crop towards the top so heads aren't cut off. */
+  object-position: center 20%;
+  display: block;
+  border: 2px solid var(--color-surface);
+  background: var(--color-surface);
 }
 .leader-name {
   font-family: var(--font-display);
@@ -2514,6 +2591,236 @@ main.wide {
 /* The home page reuses .join-cta for its closing block. Just add a touch
    more bottom margin to separate from the footer. */
 .home-cta { margin-top: 2rem; }
+
+/* ---------- Our Church: priest cards + cathedral photos ---------------- */
+.priest-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 1100px;
+  margin: 0 auto 2.5rem;
+}
+@media (min-width: 880px) {
+  .priest-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+  }
+}
+.priest-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1rem 1.25rem;
+  text-align: center;
+  transition:
+    transform 0.3s var(--ease-out),
+    box-shadow 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out);
+}
+.priest-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-brand-light);
+}
+.priest-photo {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  margin: 0 auto 0.85rem;
+  padding: 3px;
+  background: linear-gradient(
+    135deg,
+    var(--color-brand) 0%,
+    var(--color-brand-light) 50%,
+    var(--color-accent) 100%
+  );
+  box-shadow: 0 6px 16px rgba(87, 22, 7, 0.25);
+  overflow: hidden;
+}
+.priest-photo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 18%;
+  display: block;
+  border: 2px solid var(--color-surface);
+  background: var(--color-surface);
+}
+.priest-name {
+  font-family: var(--font-display);
+  color: var(--color-brand);
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+.priest-name-ar {
+  font-family: var(--font-display-arabic);
+  color: var(--color-text);
+  margin: 0;
+  font-size: 0.9rem;
+  unicode-bidi: plaintext;
+}
+@media (max-width: 480px) {
+  .priest-photo { width: 5rem; height: 5rem; }
+  .priest-name { font-size: 0.88rem; }
+  .priest-name-ar { font-size: 0.82rem; }
+}
+
+/* Wide cathedral panorama banner — full-width card with subtle frame.
+   Aspect ratios capped so very tall source images don't dominate the
+   page. object-fit cover crops to fill. */
+.church-banner,
+.church-interior {
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  background: var(--color-surface);
+}
+.church-banner {
+  aspect-ratio: 21 / 9;
+}
+.church-interior {
+  aspect-ratio: 4 / 3;
+}
+.church-banner img,
+.church-interior img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.church-interior {
+  /* figcaption sits below the image — flex column lets the image fill
+     the figure's aspect-ratio area and caption to flow underneath. */
+  aspect-ratio: auto;
+  display: flex;
+  flex-direction: column;
+}
+.church-interior img {
+  aspect-ratio: 4 / 3;
+  height: auto;
+}
+@media (max-width: 760px) {
+  .church-banner { aspect-ratio: 16 / 9; }
+}
+.church-interior figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  text-align: center;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+}
+.church-interior figcaption span:last-child {
+  font-family: var(--font-arabic);
+  unicode-bidi: plaintext;
+}
+
+/* Wide banner image used at the top of Our Band page. */
+.band-banner {
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  background: var(--color-surface);
+  aspect-ratio: 16 / 9;
+  position: relative;
+}
+.band-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+@media (max-width: 640px) {
+  .band-banner { aspect-ratio: 4 / 3; }
+}
+
+/* Band photo marquee — continuous horizontal scroll of every band
+   photo, looping seamlessly because the track contains two copies of
+   the photo set. Pauses on hover and respects reduced-motion. */
+.band-marquee {
+  position: relative;
+  max-width: 1180px;
+  margin: 0 auto 3rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+}
+.band-marquee-track {
+  display: flex;
+  gap: 0.85rem;
+  width: max-content;
+  padding: 1rem;
+  /* Duration is calculated from --n (the single-set photo count set
+     inline by each page) at ~4s per photo, so a band strip with 11
+     photos loops in ~44s while a scenic strip with 62 photos loops in
+     ~248s — every photo passes a fixed point at the same readable pace
+     regardless of total count. */
+  animation: bandMarquee calc(var(--n, 11) * 4s) linear infinite;
+  will-change: transform;
+}
+.band-marquee-slide {
+  flex-shrink: 0;
+  width: clamp(220px, 26vw, 320px);
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background: var(--color-surface);
+}
+.band-marquee-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s var(--ease-out);
+}
+.band-marquee-slide:hover img {
+  transform: scale(1.05);
+}
+@keyframes bandMarquee {
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .band-marquee-track { animation: none; }
+}
+@media (max-width: 640px) {
+  .band-marquee-slide {
+    width: clamp(180px, 60vw, 240px);
+  }
+  .band-marquee-track {
+    /* Mobile keeps the same per-photo cadence; just tighten gaps. */
+    gap: 0.6rem;
+    padding: 0.75rem;
+  }
+}
 
 /* ---------- Sub-page cards ---------------------------------------------
    When a parent page (e.g. /about-us) lists its children, the catch-all

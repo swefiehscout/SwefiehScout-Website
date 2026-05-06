@@ -6,6 +6,7 @@ tagline: "The Presentation of the Lord Cathedral, our spiritual home in Swefieh.
 taglineAr: "كاتدرائية دخول السيد إلى الهيكل، عريننا الروحي في الصويفية."
 slug: "about-us/our-church"
 parent: "about-us"
+custom: true
 ---
 
 ## Our Priests

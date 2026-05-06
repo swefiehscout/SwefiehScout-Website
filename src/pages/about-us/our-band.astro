@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { bandPhotos } from '../../data/band-photos';
+
+// Render the photo array twice in the track to make the loop seamless.
+const marqueePhotos = [...bandPhotos, ...bandPhotos];
+---
+<BaseLayout title="Our Band" bare wide>
+  <section class="page-hero" data-animate>
+    <h1 class="page-h1">
+      Our Band
+      <span class="page-h1-ar">فرقتنا الموسيقية</span>
+    </h1>
+    <p class="page-tag">
+      Bagpipes and drums in proud Arab scouting tradition. A band like no other.
+    </p>
+    <p class="page-tag-ar">
+      مزامير وطبول في تقاليد كشفية عربية عريقة. فرقة لا مثيل لها.
+    </p>
+  </section>
+
+  <section class="band-marquee" aria-label="Photos of the band" data-animate>
+    <div class="band-marquee-track" style={`--n: ${bandPhotos.length}`}>
+      {marqueePhotos.map((src, i) => (
+        <div class="band-marquee-slide">
+          <img src={src} alt="" loading="lazy" aria-hidden={i >= bandPhotos.length} />
+        </div>
+      ))}
+    </div>
+    <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
+    <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
+  </section>
+
+  <article class="prose">
+    <p dir="auto">
+      A vibrant part of our scouting community, our band combines percussion with the timeless tradition of bagpipes, a proud fixture of Palestinian and Jordanian scout heritage.
+    </p>
+    <p dir="auto">
+      We're proud to have founded the first band for ages 6–10, the first of its kind in the Middle East. Our young musicians have already mastered many marches and performed memorably at Easter 2026.
+    </p>
+    <p dir="auto">
+      The band rehearses every Friday and Sunday, and performs at weddings, church celebrations, and community events across Amman.
+    </p>
+
+    <h2 dir="auto">فرقتنا الموسيقية</h2>
+    <p dir="auto">
+      تجمع فرقتنا الموسيقية بين قوة الإيقاعات وسحر تقليد مزامير القِرب، جزء أصيل من التراث الكشفي الفلسطيني والأردني.
+    </p>
+    <p dir="auto">
+      نفخر بتأسيس أول فرقة مخصصة لأصغر أعضائنا (٦–١٠ سنوات)، وهي الأولى من نوعها في الشرق الأوسط. أتقن موسيقيونا الصغار العديد من المسيرات، وقدموا أداءً مميزًا في احتفالات عيد الفصح ٢٠٢٦.
+    </p>
+    <p dir="auto">
+      تتدرب الفرقة كل جمعة وأحد، وتُحيي حفلات الزفاف والاحتفالات الكنسية والفعاليات المجتمعية.
+    </p>
+  </article>
+
+  <section class="section-stack" data-animate style="margin-top: 2rem;">
+    <a href="/event-booking" class="btn-primary">Book the Band · احجز الفرقة</a>
+  </section>
+</BaseLayout>

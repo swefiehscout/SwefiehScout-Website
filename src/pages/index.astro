@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
+import { homeMarqueePhotos } from '../lib/scenic-photos';
+
+const marqueePhotos = [...homeMarqueePhotos, ...homeMarqueePhotos];
 
 // Stat tiles. The "since 2008" group has been active for 18 years (as of
 // 2026) and currently has 160+ members per the original site copy.
@@ -65,24 +68,24 @@ const quickLinks = [
 ] as const;
 ---
 <BaseLayout title="Home" bare wide>
-  <section class="hero" data-animate>
-    <div class="hero-inner">
-      <img class="hero-logo" src="/images/logo.png" alt="Greek Orthodox Scouts & Guides - Swefieh emblem" />
-      <div>
-        <h1>
-          The Greek Orthodox <span class="accent">Scouts &amp; Guides</span>
-          <br />Swefieh
-        </h1>
-        <p class="hero-h1-ar">مجموعة كشافة ومرشدات الروم الأرثوذكس - الصويفية</p>
-        <p class="tagline">
-          A community of faith, service, and adventure, rooted in the
-          Orthodox tradition since 2008.
-        </p>
-        <p class="tagline-ar">قيادة بالإيمان، خدمة بالقلب، وبناء مجتمع أقوى</p>
-        <div class="hero-cta">
-          <a href="/join-us" class="btn-primary">Join Us</a>
-          <a href="/about-us" class="btn-secondary">Learn More</a>
-        </div>
+  <section class="hero hero-split" data-animate>
+    <figure class="hero-split-photo">
+      <img src="/images/photos/hero.jpg" alt="The Greek Orthodox Scouts & Guides — Swefieh" />
+    </figure>
+    <div class="hero-split-content">
+      <h1>
+        The Greek Orthodox <span class="accent">Scouts &amp; Guides</span>
+        <br />Swefieh
+      </h1>
+      <p class="hero-h1-ar">مجموعة كشافة ومرشدات الروم الأرثوذكس - الصويفية</p>
+      <p class="tagline">
+        A community of faith, service, and adventure, rooted in the
+        Orthodox tradition since 2008.
+      </p>
+      <p class="tagline-ar">قيادة بالإيمان، خدمة بالقلب، وبناء مجتمع أقوى</p>
+      <div class="hero-cta">
+        <a href="/join-us" class="btn-primary">Join Us</a>
+        <a href="/about-us" class="btn-secondary">Learn More</a>
       </div>
     </div>
   </section>
@@ -94,6 +97,18 @@ const quickLinks = [
         <span class="stat-label">{s.label}</span>
       </div>
     ))}
+  </section>
+
+  <section class="band-marquee" aria-label="Photos of the band" data-animate>
+    <div class="band-marquee-track" style={`--n: ${homeMarqueePhotos.length}`}>
+      {marqueePhotos.map((src, i) => (
+        <div class="band-marquee-slide">
+          <img src={src} alt="" loading="lazy" aria-hidden={i >= homeMarqueePhotos.length} />
+        </div>
+      ))}
+    </div>
+    <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
+    <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
   </section>
 
   <section class="section">

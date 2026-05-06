@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { aboutUsMarqueePhotos } from '../lib/scenic-photos';
+
+// Render the sub-page card grid for About Us's children — same logic
+// the catch-all uses for parent pages with children, but inlined here
+// since this page is now custom.
+const allPages = await getCollection('pages');
+const children = allPages
+  .filter((p) => p.data.parent === 'about-us')
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+const marqueePhotos = [...aboutUsMarqueePhotos, ...aboutUsMarqueePhotos];
+---
+<BaseLayout title="About Us" bare wide>
+  <section class="hero hero-split" data-animate>
+    <figure class="hero-split-photo">
+      <img src="/images/photos/hero.jpg" alt="The Greek Orthodox Scouts & Guides — Swefieh" />
+    </figure>
+    <div class="hero-split-content">
+      <h1 class="page-h1">
+        About Us
+        <span class="page-h1-ar">من نحن</span>
+      </h1>
+
+      <p class="hero-meta">
+        <span>Est. 2008</span>
+        <span class="hero-meta-sep" aria-hidden="true">·</span>
+        <span>Swefieh, Amman</span>
+        <span class="hero-meta-sep" aria-hidden="true">·</span>
+        <span>160+ members</span>
+      </p>
+
+      <p class="page-tag">
+        Faith, service, and adventure, rooted in the Orthodox tradition.
+      </p>
+      <p class="page-tag-ar">
+        إيمان، خدمة، ومغامرة، متجذّرون في التقاليد الأرثوذكسية.
+      </p>
+
+      <p class="hero-intro">
+        A scouting family of <strong>160+ active members</strong> at the Presentation of the Lord Cathedral in Swefieh — growing together in faith, fellowship, and service.
+      </p>
+      <p class="hero-intro-ar">
+        عائلة كشفية تضم أكثر من ١٦٠ عضوًا نشطًا في كاتدرائية دخول السيد إلى الهيكل، نكبر معًا في الإيمان والمحبة والخدمة.
+      </p>
+
+      <div class="hero-cta">
+        <a class="btn-primary" href="/join-us">Join Us</a>
+        <a class="btn-secondary" href="/contact-us">Contact</a>
+      </div>
+    </div>
+  </section>
+
+  {children.length > 0 && (
+    <section class={`sub-pages-grid sub-pages-grid--${children.length}`}>
+      {children.map((c, i) => (
+        <a
+          class="sub-page-card"
+          href={'/' + c.data.slug}
+          data-animate
+          data-animate-delay={String((i % 5) + 1)}
+        >
+          <span class="sub-page-icon" aria-hidden="true">
+            {c.data.navIcon === 'cross' && (
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20" /><path d="M5 8h14" /></svg>
+            )}
+            {c.data.navIcon === 'star' && (
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.7 6.2.6-4.7 4.2 1.4 6.1L12 16.8l-5.5 2.8 1.4-6.1L3.2 9.3l6.2-.6L12 3z" /></svg>
+            )}
+            {c.data.navIcon === 'music' && (
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
+            )}
+          </span>
+          <h3 class="sub-page-title">{c.data.title}</h3>
+          {c.data.titleAr && <p class="sub-page-title-ar">{c.data.titleAr}</p>}
+          <span class="sub-page-arrow" aria-hidden="true">→</span>
+        </a>
+      ))}
+    </section>
+  )}
+
+  <section class="band-marquee" aria-label="Photos from the troop" data-animate>
+    <div class="band-marquee-track" style={`--n: ${aboutUsMarqueePhotos.length}`}>
+      {marqueePhotos.map((src, i) => (
+        <div class="band-marquee-slide">
+          <img src={src} alt="" loading="lazy" aria-hidden={i >= aboutUsMarqueePhotos.length} />
+        </div>
+      ))}
+    </div>
+    <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
+    <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
+  </section>
+
+  <article class="prose">
+    <h2 dir="auto">Our Patron</h2>
+    <p dir="auto">
+      Saint George (soldier, martyr, and dragon-slayer) is the patron saint of scouts. Born in Lydda, Palestine, in 280 AD, he stood firm in his Christian faith under the persecutions of Emperor Diocletian, and was martyred on April 23, 303 AD. We follow his example: courage, faith, and service.
+    </p>
+
+    <h2 dir="auto">شفيع الكشافة</h2>
+    <p dir="auto">
+      هو شفيع الكشاف. وُلد القديس جورج في اللد بفلسطين عام ٢٨٠م. عارض الاضطهادات التي قادها الإمبراطور ديوكليتيان، واستُشهد في ٢٣ نيسان عام ٣٠٣م. يُصوَّر ممتطيًا حصانه يحارب التنين، وعلى الكشّافة أن يفتخروا بشفيعهم وأن يتبعوا هذا المدافع عن المسيحية.
+    </p>
+
+    <h2 dir="auto">Who Are We?</h2>
+    <p dir="auto">
+      A scouting family of over 160 active members, rooted in the Orthodox Christian faith. Since 2008, we've grown together at the Presentation of the Lord Cathedral in Swefieh, building lifelong skills, lifelong friendships, and a deeper connection to God.
+    </p>
+
+    <h2 dir="auto">من نحن؟</h2>
+    <p dir="auto">
+      عائلة كشفية من أكثر من ١٦٠ عضوًا نشطًا، متجذّرة في الإيمان المسيحي الأرثوذكسي. منذ تأسيسها عام ٢٠٠٨ في كاتدرائية دخول السيد إلى الهيكل بالصويفية، نكبر معًا في الإيمان والمحبة والخدمة.
+    </p>
+
+    <h2 dir="auto">Our Mission</h2>
+    <blockquote dir="auto"><p>"Empowering scouts to lead with faith, serve with heart, and build a stronger community rooted in the Orthodox spirit."</p></blockquote>
+
+    <h2 dir="auto">رسالتنا</h2>
+    <blockquote dir="auto"><p>"تمكين الكشافة من القيادة بالإيمان، والخدمة بقلبٍ مخلص، وبناء مجتمع أقوى متجذر في الروح الأرثوذكسية."</p></blockquote>
+
+    <h2 dir="auto">Our Vision</h2>
+    <blockquote dir="auto"><p>"To inspire a generation of faith-driven leaders united by service, fellowship, and the Orthodox spirit."</p></blockquote>
+
+    <h2 dir="auto">رؤيتنا</h2>
+    <blockquote dir="auto"><p>"إلهام جيل من القادة المؤمنين المتحدين بروح الخدمة والأخوة الأرثوذكسية."</p></blockquote>
+  </article>
+</BaseLayout>

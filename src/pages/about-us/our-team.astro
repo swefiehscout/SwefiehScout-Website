@@ -4,14 +4,14 @@ import Icon from '../../components/Icon.astro';
 
 const leaders = [
   {
-    initials: 'NE',
+    photo: '/images/photos/leader-naeem.jpg',
     name: 'Dr. Naeem Eibef',
     nameAr: 'د. نعيم ايبف',
     role: 'General Leader',
     roleAr: 'القائد العام للمجموعة',
   },
   {
-    initials: 'FE',
+    photo: '/images/photos/leader-fadi.jpg',
     name: 'Fadi Eibef',
     nameAr: 'فادي ايبف',
     role: 'Deputy General Leader & Band Leader',
@@ -69,7 +69,9 @@ const achievements = [
   <section class="leader-grid">
     {leaders.map((l, i) => (
       <article class="leader-card" data-animate data-animate-delay={String(i + 1)}>
-        <div class="leader-avatar" aria-hidden="true">{l.initials}</div>
+        <div class="leader-avatar">
+          <img src={l.photo} alt={l.name} loading="lazy" />
+        </div>
         <h2 class="leader-name">{l.name}</h2>
         <p class="leader-name-ar">{l.nameAr}</p>
         <p class="leader-role">{l.role}</p>
@@ -106,6 +108,14 @@ const achievements = [
       الإيكونوموس الدكتور إبراهيم دبور، الذي تُلهمنا حكمته وقيادته.
     </p>
   </article>
+
+  <figure class="board-photo" data-animate>
+    <img src="/images/photos/board.jpg" alt="The board of The Greek Orthodox Scouts & Guides — Swefieh" loading="lazy" />
+    <figcaption>
+      <span>Our administrative board.</span>
+      <span dir="rtl">المجلس الإداري للمجموعة.</span>
+    </figcaption>
+  </figure>
 
   <section class="section-stack" data-animate>
     <h2 class="section-h2">Our Achievements</h2>
