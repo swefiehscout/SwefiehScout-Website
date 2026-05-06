@@ -110,6 +110,52 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
         document.addEventListener('astro:page-load', bind);
       })();
 
+      // Marquee shuffle — on every page-load, reshuffle each
+      // .band-marquee-track's slides and pick a random starting offset
+      // for the looping animation so refresh / re-navigation never
+      // shows the same opening sequence twice. The track keeps its
+      // doubled structure (uniques + uniques) so the seamless loop
+      // still works.
+      (function () {
+        function shuffle(track) {
+          var slides = Array.prototype.slice.call(track.children);
+          if (slides.length < 2) return;
+          var half = Math.floor(slides.length / 2);
+          var uniques = slides.slice(0, half);
+          // Fisher-Yates
+          for (var i = uniques.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var t = uniques[i];
+            uniques[i] = uniques[j];
+            uniques[j] = t;
+          }
+          // Replace track contents with shuffled + cloned-shuffled.
+          while (track.firstChild) track.removeChild(track.firstChild);
+          uniques.forEach(function (s) { track.appendChild(s); });
+          uniques.forEach(function (s) {
+            var clone = s.cloneNode(true);
+            // Originals are visible to AT, clones are hidden.
+            var img = clone.querySelector && clone.querySelector('img');
+            if (img) img.setAttribute('aria-hidden', 'true');
+            track.appendChild(clone);
+          });
+          // Random starting offset within one loop duration.
+          var cs = getComputedStyle(track);
+          var dur = parseFloat(cs.animationDuration);
+          if (!isNaN(dur) && dur > 0) {
+            track.style.animationDelay = '-' + (Math.random() * dur).toFixed(2) + 's';
+          }
+        }
+        function bind() {
+          document.querySelectorAll('.band-marquee-track').forEach(function (t) {
+            if (t.dataset.shuffled) return;
+            t.dataset.shuffled = '1';
+            shuffle(t);
+          });
+        }
+        document.addEventListener('astro:page-load', bind);
+      })();
+
       // Mouse-tracking card spotlight — sets --x and --y custom props
       // on each .card so its ::after radial highlight follows the cursor.
       (function () {
