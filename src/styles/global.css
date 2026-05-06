@@ -924,8 +924,11 @@ main.wide {
    ease so the landing reveal feels orchestrated. The breathe loop kicks
    in after the entry settles. */
 .hero-logo {
-  width: 200px;
-  height: 200px;
+  /* Fluid sizing: 150px on small phones, scales with viewport, capped at
+     280px on big desktops. Removes the need for separate mobile/tablet
+     overrides. */
+  width: clamp(150px, 22vw, 280px);
+  height: clamp(150px, 22vw, 280px);
   object-fit: contain;
   margin: 0 auto;
   filter: drop-shadow(0 10px 22px rgba(87, 22, 7, 0.28));
@@ -2937,7 +2940,6 @@ main.wide {
     border-radius: var(--radius);
     margin-bottom: 2rem;
   }
-  .hero-logo { width: 130px; height: 130px; }
   .hero h1 { font-size: clamp(1.7rem, 7vw, 2.2rem); }
   .hero .tagline { font-size: 0.98rem; }
   .hero .tagline-ar { font-size: 1.05rem; text-align: center; }
