@@ -35,6 +35,14 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
   </head>
   <body>
     <div class="scroll-progress" data-scroll-progress aria-hidden="true"></div>
+    <iframe
+      name="formsubmit-target"
+      title="Form submission"
+      data-formsubmit-frame
+      tabindex="-1"
+      aria-hidden="true"
+      style="position:absolute;width:0;height:0;border:0;visibility:hidden"
+    ></iframe>
     <SiteHeader currentPath={currentPath} />
     <main class={`page-enter${wide ? ' wide' : ''}`}>
       {pageTitle && <h1 class="page-title" data-animate>{pageTitle}</h1>}
@@ -110,18 +118,56 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
         document.addEventListener('astro:page-load', bind);
       })();
 
-      // FormSubmit _next URL — set to the current origin's /thank-you
-      // so the post-submit redirect works on Vercel preview deploys,
-      // localhost, and the production domain alike. Without this the
-      // hardcoded production URL would break previews.
+      // FormSubmit handler via hidden iframe — the form posts to
+      // FormSubmit through a hidden iframe target so the main page
+      // never navigates (which means Astro's view-transition router
+      // can't intercept and route us to home). Once the iframe
+      // receives the response, we navigate the main page to our
+      // /thank-you. Tracks submission time so the iframe's initial
+      // blank load doesn't trigger the redirect.
       (function () {
-        function bind() {
-          document.querySelectorAll('input[name="_next"]').forEach(function (el) {
-            el.value = window.location.origin + '/thank-you';
+        var submittedAt = 0;
+        var iframe = document.querySelector('[data-formsubmit-frame]');
+        if (iframe) {
+          iframe.addEventListener('load', function () {
+            // Initial blank load is at submittedAt = 0; only navigate
+            // if a submission happened in the last 30 seconds.
+            if (submittedAt && Date.now() - submittedAt < 30000) {
+              submittedAt = 0;
+              window.location.assign('/thank-you');
+            }
           });
         }
-        bind();
-        document.addEventListener('astro:page-load', bind);
+
+        function setup() {
+          document.querySelectorAll('form[action^="https://formsubmit.co/"]').forEach(function (form) {
+            // Force the form's target to the iframe so the response
+            // doesn't replace the main page.
+            form.setAttribute('target', 'formsubmit-target');
+            if (form.dataset.fsBound) return;
+            form.dataset.fsBound = '1';
+            form.addEventListener('submit', function () {
+              submittedAt = Date.now();
+              var btn = form.querySelector('button[type="submit"]');
+              if (btn) {
+                btn.disabled = true;
+                if (!btn.dataset.origLabel) btn.dataset.origLabel = btn.textContent;
+                btn.textContent = 'Sending…';
+              }
+              // Failsafe redirect in case the iframe's load event
+              // doesn't fire (e.g. some browsers block cross-origin
+              // iframe load events). 6s gives the POST time to complete.
+              setTimeout(function () {
+                if (submittedAt && Date.now() - submittedAt >= 5800) {
+                  submittedAt = 0;
+                  window.location.assign('/thank-you');
+                }
+              }, 6000);
+            });
+          });
+        }
+        setup();
+        document.addEventListener('astro:page-load', setup);
       })();
 
       // Marquee shuffle — on every page-load, reshuffle each
