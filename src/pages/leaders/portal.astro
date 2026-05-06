@@ -1,0 +1,295 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { loadPortalData, TOOL_LABELS, GROUP_LABELS } from '../../lib/leader-portal';
+import { PORTAL_TTL_HOURS } from '../../lib/leader-portal-config';
+
+const data = loadPortalData();
+const ttlMs = PORTAL_TTL_HOURS * 60 * 60 * 1000;
+
+const lessons = data['Lessons'] ?? {};
+const management = data['Management'] ?? {};
+
+function tool(key: string) {
+  return TOOL_LABELS[key] ?? { en: key, ar: '' };
+}
+function group(key: string) {
+  return GROUP_LABELS[key] ?? { en: key, ar: '' };
+}
+
+const lessonsList = Object.entries(lessons)
+  .map(([k, v]) => ({ key: k, url: v.url }))
+  .filter((l) => !!l.url);
+
+const managementList = Object.entries(management).map(([k, v]) => ({
+  key: k,
+  url: v.url,
+  children: v.children
+    ? Object.entries(v.children).map(([gk, gv]) => ({ key: gk, url: gv.url }))
+    : null,
+}));
+
+const TOOL_ICONS: Record<string, any> = {
+  'Attendance':          'calendar',
+  'Monthly Fee Tracker': 'cash',
+  'Members Directory':   'compass',
+  'Meeting Notes':       'envelope',
+  'Incident Reports':    'plus',
+  'Orthodox Lessons':    'cross',
+  'Scout Lessons':       'flag',
+};
+
+// CSS-variable accent per tool. Each tool reads --c1 and --c2 from its
+// modifier class to colour its icon disc and the optional left rail.
+const TOOL_VARIANTS: Record<string, string> = {
+  'Attendance':          'fire',
+  'Monthly Fee Tracker': 'gold',
+  'Members Directory':   'palm',
+  'Meeting Notes':       'plum',
+  'Incident Reports':    'rose',
+};
+
+const LESSON_VARIANTS: Record<string, string> = {
+  'Orthodox Lessons': 'solemn',
+  'Scout Lessons':    'palm',
+};
+---
+<BaseLayout title="Leaders Portal" bare wide>
+  <div class="portal-shell" data-portal-shell hidden>
+
+    <section class="portal-hero" data-animate>
+      <div class="portal-hero-glow" aria-hidden="true"></div>
+      <div class="portal-hero-watermark" aria-hidden="true"></div>
+
+      <div class="portal-hero-content">
+        <span class="portal-badge">
+          <span class="portal-badge-dot" aria-hidden="true"></span>
+          Leaders Access · دخول القادة
+        </span>
+        <h1 class="portal-h1">
+          Leaders Portal
+          <span class="portal-h1-ar">بوابة القادة</span>
+        </h1>
+        <p class="portal-welcome">
+          <span data-portal-day-en>Welcome back, leader.</span>
+          <span class="portal-welcome-sep" aria-hidden="true">·</span>
+          <span class="portal-welcome-ar" data-portal-day-ar>أهلًا بعودتك أيها القائد.</span>
+        </p>
+        <div class="portal-hero-actions">
+          <button type="button" class="portal-lock" data-portal-lock>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4" y="11" width="16" height="10" rx="2" />
+              <path d="M8 11V7a4 4 0 1 1 8 0v4" />
+            </svg>
+            Lock session · قفل الجلسة
+          </button>
+          <span class="portal-session-pill" data-portal-session>
+            Session active · الجلسة مفتوحة
+          </span>
+        </div>
+      </div>
+    </section>
+
+    {lessonsList.length > 0 && (
+      <>
+        <div class="section-divider" aria-hidden="true" data-animate>
+          <span>✦</span>
+        </div>
+
+        <section class="section-stack" data-animate>
+          <h2 class="section-h2">Lessons</h2>
+          <p class="section-h2-ar">الدروس</p>
+        </section>
+
+        <section class={`portal-lesson-grid portal-lesson-grid--${lessonsList.length}`}>
+          {lessonsList.map((l, i) => {
+            const t = tool(l.key);
+            const icon = TOOL_ICONS[l.key] ?? 'sparkle';
+            const variant = LESSON_VARIANTS[l.key] ?? 'solemn';
+            return (
+              <a
+                class={`portal-lesson-card portal-lesson-card--${variant}`}
+                href={l.url}
+                target="_blank"
+                rel="noopener"
+                data-animate
+                data-animate-delay={String(i + 1)}
+              >
+                <div class="portal-lesson-art" aria-hidden="true">
+                  <span class="portal-lesson-pattern"></span>
+                  <span class="portal-lesson-glyph">
+                    <Icon name={icon} size={72} strokeWidth={1.4} />
+                  </span>
+                </div>
+                <div class="portal-lesson-body">
+                  <span class="portal-lesson-eyebrow">Lessons · الدروس</span>
+                  <h3 class="portal-lesson-title">{t.en}</h3>
+                  <p class="portal-lesson-title-ar">{t.ar}</p>
+                  <span class="portal-lesson-cta">
+                    Open Drive folder
+                    <span class="portal-lesson-arrow" aria-hidden="true">→</span>
+                  </span>
+                </div>
+              </a>
+            );
+          })}
+        </section>
+      </>
+    )}
+
+    <div class="section-divider" aria-hidden="true" data-animate>
+      <span>✦</span>
+    </div>
+
+    <section class="section-stack" data-animate>
+      <h2 class="section-h2">Management</h2>
+      <p class="section-h2-ar">الإدارة</p>
+    </section>
+
+    <section class="portal-tools">
+      {managementList.map((t, i) => {
+        const labels = tool(t.key);
+        const icon = TOOL_ICONS[t.key] ?? 'star';
+        const variant = TOOL_VARIANTS[t.key] ?? 'fire';
+        const hasChildren = t.children !== null;
+        return (
+          <article
+            class={`portal-tool portal-tool--${variant}`}
+            data-animate
+            data-animate-delay={String((i % 5) + 1)}
+          >
+            <header class="portal-tool-head">
+              <span class="portal-tool-icon" aria-hidden="true">
+                <Icon name={icon} size={22} strokeWidth={1.7} />
+              </span>
+              <div class="portal-tool-text">
+                <h3>{labels.en}</h3>
+                <p>{labels.ar}</p>
+              </div>
+              {hasChildren && (
+                <span class="portal-tool-count">
+                  {t.children!.length} groups
+                </span>
+              )}
+            </header>
+
+            {hasChildren ? (
+              <div class={`portal-tool-grid portal-tool-grid--${t.children!.length}`}>
+                {t.children!.map((c) => {
+                  const g = group(c.key);
+                  return c.url ? (
+                    <a
+                      class="portal-btn"
+                      href={c.url}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <span class="portal-btn-ar">{g.ar}</span>
+                      <span class="portal-btn-en">{g.en}</span>
+                    </a>
+                  ) : (
+                    <span class="portal-btn portal-btn--empty" aria-disabled="true">
+                      <span class="portal-btn-ar">{g.ar}</span>
+                      <span class="portal-btn-en">soon</span>
+                    </span>
+                  );
+                })}
+              </div>
+            ) : (
+              t.url ? (
+                <a
+                  class="portal-btn portal-btn--single"
+                  href={t.url}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Open · فتح
+                </a>
+              ) : (
+                <span class="portal-btn portal-btn--single portal-btn--empty" aria-disabled="true">
+                  Coming soon · قريبًا
+                </span>
+              )
+            )}
+          </article>
+        );
+      })}
+    </section>
+  </div>
+
+  <script is:inline define:vars={{ ttlMs }}>
+    (function () {
+      var STORAGE_KEY = 'leaders_portal_unlocked_at';
+      function unlocked() {
+        try {
+          var ts = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+          return ts > 0 && Date.now() - ts < ttlMs;
+        } catch (e) { return false; }
+      }
+      function gate() {
+        var shell = document.querySelector('[data-portal-shell]');
+        if (!unlocked()) {
+          window.location.replace('/leaders');
+          return;
+        }
+        if (shell) shell.removeAttribute('hidden');
+      }
+      function fillDate() {
+        var en = document.querySelector('[data-portal-day-en]');
+        var ar = document.querySelector('[data-portal-day-ar]');
+        try {
+          var now = new Date();
+          if (en) {
+            en.textContent = now.toLocaleDateString('en-US', {
+              weekday: 'long', month: 'long', day: 'numeric'
+            });
+          }
+          if (ar) {
+            ar.textContent = now.toLocaleDateString('ar-EG', {
+              weekday: 'long', month: 'long', day: 'numeric'
+            });
+          }
+        } catch (e) {}
+      }
+      function fillSession() {
+        var pill = document.querySelector('[data-portal-session]');
+        if (!pill) return;
+        try {
+          var ts = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+          if (!ts) return;
+          var remaining = ts + ttlMs - Date.now();
+          var hours = Math.floor(remaining / 3600000);
+          var minutes = Math.floor((remaining % 3600000) / 60000);
+          var label =
+            hours > 0
+              ? hours + 'h ' + minutes + 'm left'
+              : minutes + 'm left';
+          var labelAr =
+            hours > 0
+              ? 'متبقي ' + hours + ' س ' + minutes + ' د'
+              : 'متبقي ' + minutes + ' د';
+          pill.innerHTML =
+            '<span class="portal-session-dot" aria-hidden="true"></span>' +
+            label + ' · ' + labelAr;
+        } catch (e) {}
+      }
+      function bindLock() {
+        var btn = document.querySelector('[data-portal-lock]');
+        if (!btn || btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', function () {
+          try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+          window.location.replace('/leaders');
+        });
+      }
+      function setup() {
+        gate();
+        bindLock();
+        fillDate();
+        fillSession();
+      }
+      document.addEventListener('astro:page-load', setup);
+      gate();
+    })();
+  </script>
+</BaseLayout>

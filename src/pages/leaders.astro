@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { PORTAL_PASSWORD, PORTAL_TTL_HOURS } from '../lib/leader-portal-config';
+const ttlMs = PORTAL_TTL_HOURS * 60 * 60 * 1000;
+---
+<BaseLayout title="Leaders Portal" bare>
+  <section class="page-hero" data-animate>
+    <h1 class="page-h1">
+      Leaders Portal
+      <span class="page-h1-ar">بوابة القادة</span>
+    </h1>
+    <p class="page-tag">
+      Enter the password to access the leaders' resources.
+    </p>
+    <p class="page-tag-ar">
+      أدخل كلمة المرور للوصول إلى موارد القادة.
+    </p>
+  </section>
+
+  <form class="gate-form" data-gate-form>
+    <label class="form-row">
+      <span class="gate-label">Password · كلمة المرور</span>
+      <input
+        type="password"
+        name="password"
+        autocomplete="current-password"
+        required
+        autofocus
+        data-gate-input
+      />
+    </label>
+    <p class="gate-error" data-gate-error hidden>
+      Wrong password · كلمة المرور خاطئة
+    </p>
+    <button type="submit" class="btn-primary">Unlock · فتح</button>
+    <p class="gate-note">
+      Sessions stay unlocked for {PORTAL_TTL_HOURS} hours.<br />
+      <span dir="rtl">تبقى الجلسة مفتوحة لمدة {PORTAL_TTL_HOURS} ساعات.</span>
+    </p>
+  </form>
+
+  <script is:inline define:vars={{ password: PORTAL_PASSWORD, ttlMs }}>
+    (function () {
+      var STORAGE_KEY = 'leaders_portal_unlocked_at';
+
+      function unlocked() {
+        try {
+          var ts = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+          return ts > 0 && Date.now() - ts < ttlMs;
+        } catch (e) { return false; }
+      }
+
+      // If already unlocked, jump straight to the portal.
+      if (unlocked()) {
+        window.location.replace('/leaders/portal');
+        return;
+      }
+
+      function bind() {
+        var form = document.querySelector('[data-gate-form]');
+        var input = document.querySelector('[data-gate-input]');
+        var err = document.querySelector('[data-gate-error]');
+        if (!form || !input || form.dataset.bound) return;
+        form.dataset.bound = '1';
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          if (input.value === password) {
+            try { localStorage.setItem(STORAGE_KEY, String(Date.now())); } catch (e) {}
+            window.location.assign('/leaders/portal');
+          } else {
+            if (err) err.removeAttribute('hidden');
+            input.value = '';
+            input.focus();
+          }
+        });
+        input.addEventListener('input', function () {
+          if (err) err.setAttribute('hidden', '');
+        });
+      }
+      document.addEventListener('astro:page-load', bind);
+    })();
+  </script>
+</BaseLayout>
