@@ -1,5 +1,6 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import Analytics from '@vercel/analytics/astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import '../styles/global.css';
@@ -55,6 +56,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
       )}
     </main>
     <SiteFooter />
+    <Analytics />
 
     <script is:inline>
       // Scroll progress bar at the very top of the viewport. Re-queries
