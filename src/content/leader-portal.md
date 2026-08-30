@@ -44,18 +44,3 @@ https://drive.google.com/drive/folders/15sy1tgZP7LO-OE6ruSb8bblS9yPLS5xl
 
 ### Ashbal-Zahrat
 https://docs.google.com/spreadsheets/d/18CAEbV4YXa1DGfNZWu3mt6fazAuLA8wSt1flvw6cXy4/edit?gid=1627271153#gid=1627271153
-
-************************************
-## Members Directory
-
-### Jawalah
-https://docs.google.com/spreadsheets/d/14nWgJVpLb2saaDLK4WGqLNCf0y9ihdcEYsgO3a9KauY/edit?gid=181353038#gid=181353038
-
-### Mutaqaddim
-https://docs.google.com/spreadsheets/d/1AHaWXut41dDFCCdM6K_fKxTYdOWcD_s_kXLsKmL5dtE/edit?gid=181353038#gid=181353038
-
-### Mubtadi
-https://docs.google.com/spreadsheets/d/1h0j7mOTQRjrHXNy4qSG6nteRrjLwfT55Hjy-anxLAdY/edit?gid=181353038#gid=181353038
-
-### Ashbal-Zahrat
-https://docs.google.com/spreadsheets/d/16FS9-MuF9GaBPn-eIj-1wMFzdcVeSNy2dQRzuvVQ_bo/edit?gid=181353038#gid=181353038

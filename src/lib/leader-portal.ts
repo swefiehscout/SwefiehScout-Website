@@ -64,7 +64,6 @@ export const TOOL_LABELS: Record<string, { en: string; ar: string }> = {
   'Scout Lessons':       { en: 'Scout Lessons',       ar: 'الدروس الكشفية' },
   'Attendance':          { en: 'Attendance',          ar: 'الحضور' },
   'Monthly Fee Tracker': { en: 'Monthly Fees',        ar: 'الاشتراكات الشهرية' },
-  'Members Directory':   { en: 'Members Directory',   ar: 'دليل الأعضاء' },
 };
 
 export const GROUP_LABELS: Record<string, { en: string; ar: string }> = {
