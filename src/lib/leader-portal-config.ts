@@ -10,5 +10,5 @@
 // resources behind the buttons (those are public Google Drive / Sheet
 // URLs, accessible to anyone with the link).
 
-export const PORTAL_PASSWORD = 'Leaders@2026';
+export const PORTAL_PASSWORD = 'SwefiehScout';
 export const PORTAL_TTL_HOURS = 4;
