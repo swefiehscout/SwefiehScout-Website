@@ -71,4 +71,5 @@ export const GROUP_LABELS: Record<string, { en: string; ar: string }> = {
   'Mutaqaddim':    { en: 'Mutaqaddim',    ar: 'متقدم' },
   'Mubtadi':       { en: 'Mubtadi',       ar: 'مبتدى' },
   'Ashbal-Zahrat': { en: 'Ashbal & Zahrat', ar: 'أشبال و زهرات' },
+  'Baraem':        { en: 'Baraem',         ar: 'براعم' },
 };
