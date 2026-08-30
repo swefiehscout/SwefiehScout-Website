@@ -28,7 +28,7 @@ https://drive.google.com/drive/folders/1vZ-c80lCRpg2AXARmVrtBJ06L_N4xwPE?usp=dri
 https://drive.google.com/drive/folders/1QK_5z0_ulvaXUZIUvlHJn5x0yZ-I7jDG?usp=drive_link
 
 ### Ashbal-Zahrat
-https://drive.google.com/drive/folders/12JBTkhQJQ__VEBt5PFe0y_mFxVv4Yt3P?usp=drive_link
+https://docs.google.com/spreadsheets/d/1iBSB3xkWvObbgSkvxitp4-uD9KAL9iV5R8j2LngNYxY/edit?gid=1627271153#gid=1627271153
 
 ************************************
 ## Monthly Fee Tracker
