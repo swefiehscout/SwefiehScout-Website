@@ -59,9 +59,3 @@ https://docs.google.com/spreadsheets/d/1h0j7mOTQRjrHXNy4qSG6nteRrjLwfT55Hjy-anxL
 
 ### Ashbal-Zahrat
 https://docs.google.com/spreadsheets/d/16FS9-MuF9GaBPn-eIj-1wMFzdcVeSNy2dQRzuvVQ_bo/edit?gid=181353038#gid=181353038
-************************************
-## Meeting Notes
-https://drive.google.com/drive/folders/1JqcnglvxBaM3_6FnGrdBaR8CmJX939GA
-************************************
-## Incident Reports
-https://drive.google.com/drive/folders/1106yQvq9FdWv2OfcBX0NuQZiLweffXsR
