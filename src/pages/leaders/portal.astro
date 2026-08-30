@@ -3,6 +3,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
 import { loadPortalData, TOOL_LABELS, GROUP_LABELS } from '../../lib/leader-portal';
 import { PORTAL_TTL_HOURS } from '../../lib/leader-portal-config';
+import { joinUsMarqueePhotos } from '../../lib/scenic-photos';
+
+// Same scenic strip as the Join Us page; doubled so the track loops seamlessly.
+const marqueePhotos = [...joinUsMarqueePhotos, ...joinUsMarqueePhotos];
 
 const data = loadPortalData();
 const ttlMs = PORTAL_TTL_HOURS * 60 * 60 * 1000;
@@ -29,6 +33,12 @@ const managementList = Object.entries(management).map(([k, v]) => ({
     : null,
 }));
 
+// Every group that appears under any management tool, in markdown order.
+// Drives the "filter by group" switcher.
+const groupKeys = [
+  ...new Set(managementList.flatMap((t) => (t.children ?? []).map((c) => c.key))),
+];
+
 const TOOL_ICONS: Record<string, any> = {
   'Attendance':          'calendar',
   'Monthly Fee Tracker': 'cash',
@@ -37,18 +47,6 @@ const TOOL_ICONS: Record<string, any> = {
   'Scout Lessons':       'flag',
 };
 
-// CSS-variable accent per tool. Each tool reads --c1 and --c2 from its
-// modifier class to colour its icon disc and the optional left rail.
-const TOOL_VARIANTS: Record<string, string> = {
-  'Attendance':          'fire',
-  'Monthly Fee Tracker': 'gold',
-  'Members Directory':   'palm',
-};
-
-const LESSON_VARIANTS: Record<string, string> = {
-  'Orthodox Lessons': 'solemn',
-  'Scout Lessons':    'palm',
-};
 ---
 <BaseLayout title="Leaders Portal" bare wide>
   <div class="portal-shell" data-portal-shell hidden>
@@ -88,44 +86,32 @@ const LESSON_VARIANTS: Record<string, string> = {
 
     {lessonsList.length > 0 && (
       <>
-        <div class="section-divider" aria-hidden="true" data-animate>
-          <span>✦</span>
-        </div>
-
         <section class="section-stack" data-animate>
           <h2 class="section-h2">Lessons</h2>
           <p class="section-h2-ar">الدروس</p>
         </section>
 
-        <section class={`portal-lesson-grid portal-lesson-grid--${lessonsList.length}`}>
-          {lessonsList.map((l, i) => {
-            const t = tool(l.key);
-            const icon = TOOL_ICONS[l.key] ?? 'sparkle';
-            const variant = LESSON_VARIANTS[l.key] ?? 'solemn';
+        <section class="portal-index" data-animate>
+          {lessonsList.map((l) => {
+            const labels = tool(l.key);
             return (
               <a
-                class={`portal-lesson-card portal-lesson-card--${variant}`}
+                class="portal-row portal-row--link"
                 href={l.url}
                 target="_blank"
                 rel="noopener"
-                data-animate
-                data-animate-delay={String(i + 1)}
               >
-                <div class="portal-lesson-art" aria-hidden="true">
-                  <span class="portal-lesson-pattern"></span>
-                  <span class="portal-lesson-glyph">
-                    <Icon name={icon} size={72} strokeWidth={1.4} />
-                  </span>
-                </div>
-                <div class="portal-lesson-body">
-                  <span class="portal-lesson-eyebrow">Lessons · الدروس</span>
-                  <h3 class="portal-lesson-title">{t.en}</h3>
-                  <p class="portal-lesson-title-ar">{t.ar}</p>
-                  <span class="portal-lesson-cta">
-                    Open Drive folder
-                    <span class="portal-lesson-arrow" aria-hidden="true">→</span>
-                  </span>
-                </div>
+                <span class="portal-row-icon" aria-hidden="true">
+                  <Icon name={TOOL_ICONS[l.key] ?? 'sparkle'} size={20} strokeWidth={1.6} />
+                </span>
+                <span class="portal-row-text">
+                  <span class="portal-row-title">{labels.en}</span>
+                  <span class="portal-row-title-ar">{labels.ar}</span>
+                </span>
+                <span class="portal-row-open">
+                  Drive folder
+                  <span class="portal-row-arrow" aria-hidden="true">→</span>
+                </span>
               </a>
             );
           })}
@@ -133,83 +119,115 @@ const LESSON_VARIANTS: Record<string, string> = {
       </>
     )}
 
-    <div class="section-divider" aria-hidden="true" data-animate>
-      <span>✦</span>
-    </div>
-
     <section class="section-stack" data-animate>
       <h2 class="section-h2">Management</h2>
       <p class="section-h2-ar">الإدارة</p>
     </section>
 
-    <section class="portal-tools">
-      {managementList.map((t, i) => {
-        const labels = tool(t.key);
-        const icon = TOOL_ICONS[t.key] ?? 'star';
-        const variant = TOOL_VARIANTS[t.key] ?? 'fire';
-        const hasChildren = t.children !== null;
-        return (
-          <article
-            class={`portal-tool portal-tool--${variant}`}
-            data-animate
-            data-animate-delay={String((i % 5) + 1)}
-          >
-            <header class="portal-tool-head">
-              <span class="portal-tool-icon" aria-hidden="true">
-                <Icon name={icon} size={22} strokeWidth={1.7} />
-              </span>
-              <div class="portal-tool-text">
-                <h3>{labels.en}</h3>
-                <p>{labels.ar}</p>
-              </div>
-              {hasChildren && (
-                <span class="portal-tool-count">
-                  {t.children!.length} groups
-                </span>
-              )}
-            </header>
+    {groupKeys.length > 1 && (
+      <section class="portal-picker" data-group-picker data-animate>
+        <p class="portal-picker-label">
+          Choose your group
+          <span class="portal-picker-label-ar">اختر مجموعتك</span>
+        </p>
+        <div class="portal-picker-grid">
+          {groupKeys.map((k) => {
+            const g = group(k);
+            return (
+              <button type="button" class="portal-picker-btn" data-group={k}>
+                <span class="portal-picker-ar">{g.ar}</span>
+                <span class="portal-picker-en">{g.en}</span>
+              </button>
+            );
+          })}
+        </div>
+        <button type="button" class="portal-picker-all" data-group="all">
+          View all groups · عرض كل المجموعات
+        </button>
+      </section>
+    )}
 
-            {hasChildren ? (
-              <div class={`portal-tool-grid portal-tool-grid--${t.children!.length}`}>
-                {t.children!.map((c) => {
-                  const g = group(c.key);
-                  return c.url ? (
+    <div class="portal-groupbar" data-group-bar hidden>
+      <button type="button" class="portal-back" data-group-back>
+        <span class="portal-back-arrow" aria-hidden="true">←</span>
+        Change group · تغيير المجموعة
+      </button>
+    </div>
+
+    <section class="portal-index" data-portal-index hidden>
+      {managementList.map((t) => {
+        const labels = tool(t.key);
+        const kids = t.children;
+        return (
+          <div class="portal-row" data-portal-tool-row>
+            <span class="portal-row-icon" aria-hidden="true">
+              <Icon name={TOOL_ICONS[t.key] ?? 'star'} size={20} strokeWidth={1.6} />
+            </span>
+            <span class="portal-row-text">
+              <span class="portal-row-title">{labels.en}</span>
+              <span class="portal-row-title-ar">{labels.ar}</span>
+            </span>
+            <div class="portal-row-links">
+              {kids
+                ? kids.map((c) => {
+                    const g = group(c.key);
+                    return c.url ? (
+                      <a
+                        class="portal-chip"
+                        href={c.url}
+                        target="_blank"
+                        rel="noopener"
+                        data-group={c.key}
+                      >
+                        <span class="portal-chip-ar">{g.ar}</span>
+                        <span class="portal-chip-en">{g.en}</span>
+                      </a>
+                    ) : (
+                      <span
+                        class="portal-chip portal-chip--empty"
+                        aria-disabled="true"
+                        data-group={c.key}
+                      >
+                        <span class="portal-chip-ar">{g.ar}</span>
+                        <span class="portal-chip-en">soon</span>
+                      </span>
+                    );
+                  })
+                : t.url ? (
                     <a
-                      class="portal-btn"
-                      href={c.url}
+                      class="portal-chip"
+                      href={t.url}
                       target="_blank"
                       rel="noopener"
                     >
-                      <span class="portal-btn-ar">{g.ar}</span>
-                      <span class="portal-btn-en">{g.en}</span>
+                      <span class="portal-chip-ar">فتح</span>
+                      <span class="portal-chip-en">Open</span>
                     </a>
                   ) : (
-                    <span class="portal-btn portal-btn--empty" aria-disabled="true">
-                      <span class="portal-btn-ar">{g.ar}</span>
-                      <span class="portal-btn-en">soon</span>
+                    <span class="portal-chip portal-chip--empty" aria-disabled="true">
+                      <span class="portal-chip-ar">قريبًا</span>
+                      <span class="portal-chip-en">soon</span>
                     </span>
-                  );
-                })}
-              </div>
-            ) : (
-              t.url ? (
-                <a
-                  class="portal-btn portal-btn--single"
-                  href={t.url}
-                  target="_blank"
-                  rel="noopener"
-                >
-                  Open · فتح
-                </a>
-              ) : (
-                <span class="portal-btn portal-btn--single portal-btn--empty" aria-disabled="true">
-                  Coming soon · قريبًا
-                </span>
-              )
-            )}
-          </article>
+                  )}
+            </div>
+          </div>
         );
       })}
+    </section>
+
+    <section class="band-marquee" aria-label="Photos from the troop" data-animate>
+      <div class="band-marquee-track" style={`--n: ${joinUsMarqueePhotos.length}`}>
+        {marqueePhotos.map((src, i) => (
+          <div class="band-marquee-slide">
+            <img
+              src={src}
+              alt=""
+              loading="lazy"
+              aria-hidden={i >= joinUsMarqueePhotos.length}
+            />
+          </div>
+        ))}
+      </div>
     </section>
   </div>
 
@@ -278,11 +296,94 @@ const LESSON_VARIANTS: Record<string, string> = {
           window.location.replace('/leaders');
         });
       }
+      /* ---- Group step ---------------------------------------------
+         Management is a two-step flow: pick a group, then see only that
+         group's links with a back button to switch. The pick is stored,
+         so a return visit lands straight on the tools. */
+      var GROUP_KEY = 'leaders_portal_group';
+
+      function filterTo(g) {
+        var index = document.querySelector('[data-portal-index]');
+        if (!index) return;
+        var chips = index.querySelectorAll('.portal-chip[data-group]');
+        for (var i = 0; i < chips.length; i++) {
+          var match = g === 'all' || chips[i].getAttribute('data-group') === g;
+          chips[i].classList.toggle('is-filtered', !match);
+        }
+        var rows = index.querySelectorAll('[data-portal-tool-row]');
+        for (var r = 0; r < rows.length; r++) {
+          var shown = rows[r].querySelectorAll('.portal-chip:not(.is-filtered)');
+          // A row with nothing left to show drops out; a row down to a
+          // single link gets a wider, easier target.
+          rows[r].classList.toggle('is-filtered', shown.length === 0);
+          for (var c = 0; c < shown.length; c++) {
+            shown[c].classList.toggle('is-solo', shown.length === 1);
+          }
+        }
+      }
+
+      function showTools(g) {
+        var picker = document.querySelector('[data-group-picker]');
+        var bar = document.querySelector('[data-group-bar]');
+        var index = document.querySelector('[data-portal-index]');
+        filterTo(g);
+        if (picker) picker.setAttribute('hidden', '');
+        if (index) index.removeAttribute('hidden');
+        if (bar && picker) bar.removeAttribute('hidden');
+        try { localStorage.setItem(GROUP_KEY, g); } catch (err) {}
+      }
+
+      function showPicker() {
+        var picker = document.querySelector('[data-group-picker]');
+        var bar = document.querySelector('[data-group-bar]');
+        var index = document.querySelector('[data-portal-index]');
+        if (!picker) return;
+        picker.removeAttribute('hidden');
+        if (bar) bar.setAttribute('hidden', '');
+        if (index) index.setAttribute('hidden', '');
+        try { localStorage.removeItem(GROUP_KEY); } catch (err) {}
+      }
+
+      function bindGroups() {
+        var picker = document.querySelector('[data-group-picker]');
+        var back = document.querySelector('[data-group-back]');
+        var index = document.querySelector('[data-portal-index]');
+
+        // No groups in the markdown at all — nothing to pick, just show
+        // the tools.
+        if (!picker) {
+          if (index) index.removeAttribute('hidden');
+          return;
+        }
+
+        if (!picker.dataset.bound) {
+          picker.dataset.bound = '1';
+          picker.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-group]');
+            if (btn) showTools(btn.getAttribute('data-group'));
+          });
+        }
+        if (back && !back.dataset.bound) {
+          back.dataset.bound = '1';
+          back.addEventListener('click', showPicker);
+        }
+
+        var saved = null;
+        try { saved = localStorage.getItem(GROUP_KEY); } catch (err) {}
+        // Ignore a remembered group that is no longer in the markdown.
+        if (saved && saved !== 'all' && !picker.querySelector('[data-group="' + saved + '"]')) {
+          saved = null;
+        }
+        if (saved) showTools(saved);
+        else showPicker();
+      }
+
       function setup() {
         gate();
         bindLock();
         fillDate();
         fillSession();
+        bindGroups();
       }
       document.addEventListener('astro:page-load', setup);
       gate();

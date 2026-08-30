@@ -3262,326 +3262,289 @@ main.wide {
   flex-shrink: 0;
 }
 
-/* ----- Lessons hero cards ----- */
-.portal-lesson-grid {
-  display: grid;
-  gap: 1.5rem;
-  max-width: 1100px;
+/* ----- Lessons + Management directory -------------------------------
+   Both sections share one component: a plain surface panel of hairline-
+   divided rows. Left is the icon + bilingual label, right is the link
+   (a single "Drive folder" for lessons, a set of group chips for the
+   management tools). Deliberately flat — one brand accent, no per-item
+   gradients — so it reads as a working index, not a landing page. */
+.portal-index {
+  max-width: 1000px;
   margin: 0 auto 3rem;
-}
-.portal-lesson-grid--1 { grid-template-columns: minmax(0, 540px); justify-content: center; }
-.portal-lesson-grid--2 { grid-template-columns: 1fr; }
-@media (min-width: 760px) {
-  .portal-lesson-grid--2 { grid-template-columns: 1fr 1fr; }
-}
-.portal-lesson-card {
-  display: flex;
-  flex-direction: column;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
   box-shadow: var(--shadow-sm);
-  text-decoration: none;
-  color: var(--color-text);
-  position: relative;
-  transition:
-    transform 0.4s var(--ease-out),
-    box-shadow 0.4s var(--ease-out),
-    border-color 0.3s var(--ease-out);
-  isolation: isolate;
 }
-.portal-lesson-card:hover,
-.portal-lesson-card:focus-visible {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--color-brand-light);
-  text-decoration: none;
+.portal-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem 1.1rem;
+  padding: 1.1rem 1.35rem;
+  border-top: 1px solid var(--color-border);
+  transition: background 0.25s var(--ease-out);
 }
-.portal-lesson-art {
-  position: relative;
-  aspect-ratio: 5 / 2;
-  display: flex;
+.portal-row:first-child { border-top: 0; }
+.portal-row:hover { background: var(--color-bg); }
+
+.portal-row-icon {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: var(--radius);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  color: var(--color-brand);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
-.portal-lesson-card--solemn .portal-lesson-art {
-  background:
-    radial-gradient(circle at 30% 20%, rgba(122, 25, 20, 0.55), transparent 60%),
-    linear-gradient(135deg, #1a0b08 0%, #3a0f04 50%, #571607 100%);
+.portal-row-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
-.portal-lesson-card--palm .portal-lesson-art {
-  background:
-    radial-gradient(circle at 80% 25%, rgba(184, 134, 11, 0.45), transparent 55%),
-    linear-gradient(135deg, #143822 0%, #2d6a3e 55%, #b8860b 100%);
+.portal-row-title {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  line-height: 1.25;
+  color: var(--color-brand);
 }
-.portal-lesson-card--fire .portal-lesson-art {
-  background:
-    radial-gradient(circle at 70% 20%, rgba(255, 220, 130, 0.55), transparent 55%),
-    linear-gradient(135deg, #f59e0b 0%, #c2410c 45%, #571607 100%);
+.portal-row-title-ar {
+  font-family: var(--font-display-arabic);
+  font-size: 1rem;
+  line-height: 1.3;
+  color: var(--color-muted);
+  unicode-bidi: plaintext;
 }
-.portal-lesson-pattern {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(
-    circle, rgba(255, 255, 255, 0.10) 1px, transparent 1.5px
-  );
-  background-size: 22px 22px;
-  opacity: 0.5;
-  mix-blend-mode: screen;
+
+/* Lesson rows are a single link, so the whole row is the anchor. */
+.portal-row--link {
+  text-decoration: none;
+  color: inherit;
 }
-.portal-lesson-glyph {
-  position: relative;
-  z-index: 1;
-  color: rgba(255, 255, 255, 0.94);
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
-  transition: transform 0.5s var(--ease-out);
-  line-height: 1;
+.portal-row--link:hover { text-decoration: none; }
+.portal-row-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-brand-light);
+  white-space: nowrap;
 }
-.portal-lesson-card:hover .portal-lesson-glyph {
-  transform: scale(1.08) rotate(-3deg);
+.portal-row-arrow {
+  transition: transform 0.25s var(--ease-out);
 }
-.portal-lesson-body {
-  padding: 1.4rem 1.5rem 1.5rem;
+.portal-row--link:hover .portal-row-arrow { transform: translateX(4px); }
+
+/* Group links on a management row. */
+.portal-row-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
-.portal-lesson-eyebrow {
-  display: inline-block;
-  font-size: 0.72rem;
+.portal-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+  min-width: 6.25rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-brand);
+  text-decoration: none;
+  text-align: center;
+  transition:
+    background 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out);
+}
+.portal-chip:hover {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: #fff;
+  text-decoration: none;
+}
+.portal-chip-ar {
+  font-family: var(--font-display-arabic);
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.15;
+  unicode-bidi: plaintext;
+}
+.portal-chip-en {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.portal-chip--empty {
+  color: var(--color-muted);
+  border-style: dashed;
+  cursor: not-allowed;
+}
+.portal-chip--empty:hover {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+  color: var(--color-muted);
+}
+
+/* Group step: a picker panel that swaps for the management panel plus a
+   back bar once a group is chosen. Keeps the working view to one group's
+   links instead of a wall of every group. */
+.portal-picker {
+  max-width: 1000px;
+  margin: 0 auto 3rem;
+  padding: 1.6rem 1.5rem 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+.portal-picker-label {
+  margin: 0 0 1.1rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--color-brand-light);
-  margin-bottom: 0.65rem;
-}
-.portal-lesson-title {
-  font-family: var(--font-display);
-  color: var(--color-brand);
-  font-size: 1.4rem;
-  margin: 0 0 0.2rem;
-  line-height: 1.2;
-}
-.portal-lesson-title-ar {
-  font-family: var(--font-display-arabic);
-  color: var(--color-text);
-  margin: 0 0 1rem;
-  font-size: 1.15rem;
-  unicode-bidi: plaintext;
-}
-.portal-lesson-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 700;
-  font-size: 0.92rem;
-  color: var(--color-brand);
-  letter-spacing: 0.02em;
-}
-.portal-lesson-arrow {
-  display: inline-block;
-  transition: transform 0.25s var(--ease-out);
-}
-.portal-lesson-card:hover .portal-lesson-arrow {
-  transform: translateX(5px);
-}
-
-/* ----- Management tools ----- */
-.portal-tools {
-  display: grid;
-  gap: 1.25rem;
-  max-width: 1100px;
-  margin: 0 auto 3rem;
-}
-.portal-tool {
-  --c1: var(--color-brand);
-  --c2: var(--color-brand-light);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem 1.75rem 1.75rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition:
-    box-shadow 0.3s var(--ease-out),
-    transform 0.3s var(--ease-out),
-    border-color 0.3s var(--ease-out);
-}
-.portal-tool::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  inset-inline-start: 0;
-  bottom: 0;
-  width: 4px;
-  background: linear-gradient(180deg, var(--c1), var(--c2));
-}
-.portal-tool::after {
-  content: '';
-  position: absolute;
-  inset-inline-end: -25%;
-  top: -40%;
-  width: 50%;
-  aspect-ratio: 1 / 1;
-  background: radial-gradient(circle, var(--c1), transparent 60%);
-  opacity: 0.08;
-  filter: blur(20px);
-  pointer-events: none;
-}
-.portal-tool:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--c2);
-}
-.portal-tool--fire { --c1: #c2410c; --c2: #571607; }
-.portal-tool--gold { --c1: #b8860b; --c2: #c2410c; }
-.portal-tool--palm { --c1: #2d6a3e; --c2: #143822; }
-.portal-tool--plum { --c1: #7a1914; --c2: #3a0f04; }
-.portal-tool--rose { --c1: #b8331f; --c2: #571607; }
-
-.portal-tool-head {
-  display: flex;
-  align-items: center;
-  gap: 0.95rem;
-  margin-bottom: 1.1rem;
-}
-.portal-tool-icon {
-  width: 2.8rem;
-  height: 2.8rem;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--c1), var(--c2));
-  color: #fff;
-  flex-shrink: 0;
-  box-shadow: 0 4px 10px -4px var(--c1);
-}
-.portal-tool-text { flex: 1; min-width: 0; }
-.portal-tool-text h3 {
-  font-family: var(--font-display);
-  color: var(--c1);
-  margin: 0;
-  font-size: 1.2rem;
-  line-height: 1.2;
-}
-.portal-tool-text p {
-  font-family: var(--font-display-arabic);
-  color: var(--color-text);
-  margin: 0.1rem 0 0;
-  font-size: 1rem;
-  unicode-bidi: plaintext;
-}
-.portal-tool-count {
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--color-muted);
-  background: var(--color-bg);
-  padding: 0.3rem 0.65rem;
-  border-radius: 999px;
-  font-weight: 700;
-  flex-shrink: 0;
 }
-
-.portal-tool-grid { display: grid; gap: 0.6rem; }
-.portal-tool-grid--1 { grid-template-columns: 1fr; }
-.portal-tool-grid--2 { grid-template-columns: 1fr 1fr; }
-.portal-tool-grid--3 { grid-template-columns: repeat(2, 1fr); }
-@media (min-width: 720px) {
-  .portal-tool-grid--3 { grid-template-columns: repeat(3, 1fr); }
+.portal-picker-label-ar {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--font-display-arabic);
+  font-size: 1.05rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-brand);
+  unicode-bidi: plaintext;
 }
-.portal-tool-grid--4 { grid-template-columns: repeat(2, 1fr); }
-@media (min-width: 720px) {
-  .portal-tool-grid--4 { grid-template-columns: repeat(4, 1fr); }
+.portal-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.7rem;
 }
-
-.portal-btn {
+.portal-picker-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.95rem 0.85rem;
-  background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 100%);
-  color: #fff;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 1.15rem 0.9rem;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  text-decoration: none;
-  font-weight: 600;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  transition:
-    transform 0.25s var(--ease-out),
-    box-shadow 0.25s var(--ease-out),
-    filter 0.25s var(--ease-out);
-  box-shadow: 0 4px 12px -4px var(--c1);
-}
-.portal-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  inset-inline-start: -120%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(
-    100deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    transparent 100%
-  );
-  transform: skewX(-20deg);
-  transition: inset-inline-start 0.7s var(--ease-out);
-  pointer-events: none;
-}
-.portal-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 18px -4px var(--c1);
-  text-decoration: none;
-  color: #fff;
-  filter: brightness(1.05);
-}
-.portal-btn:hover::before { inset-inline-start: 120%; }
-.portal-btn--empty {
   background: var(--color-bg);
-  color: var(--color-muted);
-  cursor: not-allowed;
-  box-shadow: none;
-  border: 1px dashed var(--color-border);
+  color: var(--color-brand);
+  cursor: pointer;
+  font: inherit;
+  transition:
+    background 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out);
 }
-.portal-btn--empty:hover {
-  transform: none;
-  box-shadow: none;
-  filter: none;
+.portal-picker-btn:hover {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: #fff;
+  transform: translateY(-2px);
 }
-.portal-btn--empty::before { display: none; }
-.portal-btn--single { width: 100%; }
-.portal-btn-ar {
+.portal-picker-ar {
   font-family: var(--font-display-arabic);
-  font-size: 1.1rem;
-  unicode-bidi: plaintext;
+  font-size: 1.35rem;
   font-weight: 700;
+  line-height: 1.1;
+  unicode-bidi: plaintext;
 }
-.portal-btn-en {
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
+.portal-picker-en {
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  opacity: 0.85;
+  opacity: 0.75;
+}
+.portal-picker-all {
+  margin-top: 1.1rem;
+  background: none;
+  border: 0;
+  padding: 0.2rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.portal-picker-all:hover { color: var(--color-brand); }
+
+.portal-groupbar {
+  max-width: 1000px;
+  margin: 0 auto 0.8rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+}
+.portal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-brand);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  transition:
+    background 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out);
+}
+.portal-back:hover {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: #fff;
+}
+.portal-back-arrow { transition: transform 0.2s var(--ease-out); }
+.portal-back:hover .portal-back-arrow { transform: translateX(-3px); }
+
+/* One group selected: the row's single remaining link gets more room. */
+.portal-chip.is-solo {
+  min-width: 11rem;
+  padding-block: 0.62rem;
 }
 
-@media (max-width: 640px) {
+/* Set by the group switcher — hides chips (and then empty rows). */
+.is-filtered { display: none !important; }
+
+@media (max-width: 720px) {
   .portal-hero { padding: 2.5rem 1.5rem 2.25rem; }
-  .portal-tool { padding: 1.25rem 1.25rem 1.4rem; }
-  .portal-tool-icon { width: 2.4rem; height: 2.4rem; }
-  .portal-tool-text h3 { font-size: 1.05rem; }
-  .portal-tool-text p { font-size: 0.9rem; }
-  .portal-tool-count { display: none; }
-  .portal-lesson-art { aspect-ratio: 3 / 1; }
-  .portal-lesson-body { padding: 1.1rem 1.25rem 1.25rem; }
-  .portal-lesson-title { font-size: 1.2rem; }
-  .portal-lesson-title-ar { font-size: 1rem; }
-  .portal-btn { padding: 0.75rem 0.5rem; }
-  .portal-btn-ar { font-size: 0.95rem; }
-  .portal-btn-en { font-size: 0.6rem; }
+  .portal-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 1rem 1.1rem 1.15rem;
+  }
+  .portal-row-links,
+  .portal-row-open {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+  .portal-row-links { display: grid; grid-template-columns: 1fr 1fr; }
+  .portal-chip { min-width: 0; }
+  .portal-row-title { font-size: 1.02rem; }
+  .portal-row-title-ar { font-size: 0.95rem; }
+  .portal-picker { padding: 1.3rem 1.1rem 1.2rem; }
+  .portal-picker-grid { grid-template-columns: 1fr 1fr; }
+  .portal-chip.is-solo { min-width: 0; grid-column: 1 / -1; }
 }
 
 /* ---------- Footer ----------------------------------------------------
