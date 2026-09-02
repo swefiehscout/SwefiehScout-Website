@@ -25,7 +25,7 @@ https://drive.google.com/drive/folders/1PGAixf1BUiIKgf0ujdfflWwdTFZ95PZg?usp=dri
 https://drive.google.com/drive/folders/1vZ-c80lCRpg2AXARmVrtBJ06L_N4xwPE?usp=drive_link
 
 ### Mubtadi
-https://drive.google.com/drive/folders/1QK_5z0_ulvaXUZIUvlHJn5x0yZ-I7jDG?usp=drive_link
+https://docs.google.com/spreadsheets/d/140mZ5E6jNUrx7qz92G44dB8LkOaUORS_r0Wrr4iHBR4/edit?usp=sharing
 
 ### Ashbal-Zahrat
 https://docs.google.com/spreadsheets/d/1iBSB3xkWvObbgSkvxitp4-uD9KAL9iV5R8j2LngNYxY/edit?gid=1627271153#gid=1627271153
@@ -43,7 +43,7 @@ https://drive.google.com/drive/folders/1I95ZyOpCR_zgLm_2XsfLacm5k-DMmGQX?usp=dri
 https://drive.google.com/drive/folders/1OdVXo5eBdYGXInp-VwXJ1BYh4fdOXhb6
 
 ### Mubtadi
-https://drive.google.com/drive/folders/15sy1tgZP7LO-OE6ruSb8bblS9yPLS5xl
+https://docs.google.com/spreadsheets/d/1oVdNx_gZP3femc8uKPvWD_4gfSMzUdkRGcb_CQoAC4s/edit?gid=1627271153#gid=1627271153
 
 ### Ashbal-Zahrat
 https://docs.google.com/spreadsheets/d/18CAEbV4YXa1DGfNZWu3mt6fazAuLA8wSt1flvw6cXy4/edit?gid=1627271153#gid=1627271153
