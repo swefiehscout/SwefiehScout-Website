@@ -1,6 +1,7 @@
-// Reads src/content/leader-portal.md at build time and shapes it into
-// a structure the portal page can iterate. The markdown is the user's
-// paste-here surface for URLs; this file translates it into typed data.
+// Reads src/content/leader-portal.md at build time and shapes it into a
+// structure the Workspace's Library > Lessons sub-tab can iterate. The
+// markdown is the user's paste-here surface for the shared Drive links;
+// this file translates it into typed data.
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -58,18 +59,11 @@ export function loadPortalData(): PortalData {
 }
 
 // Bilingual labels for the keys used in the markdown. If a key is missing
-// from this map, the portal falls back to the raw key.
+// from this map, the portal falls back to the raw key. Only "Lessons" is
+// read anywhere now (the Workspace's Library > Lessons sub-tab) — the old
+// per-group Attendance/Monthly Fee Tracker spreadsheet links this used to
+// carry were retired once the real Attendance/Fees tabs shipped.
 export const TOOL_LABELS: Record<string, { en: string; ar: string }> = {
-  'Orthodox Lessons':    { en: 'Orthodox Lessons',    ar: 'الدروس الأرثوذكسية' },
-  'Scout Lessons':       { en: 'Scout Lessons',       ar: 'الدروس الكشفية' },
-  'Attendance':          { en: 'Attendance',          ar: 'الحضور' },
-  'Monthly Fee Tracker': { en: 'Monthly Fees',        ar: 'الاشتراكات الشهرية' },
-};
-
-export const GROUP_LABELS: Record<string, { en: string; ar: string }> = {
-  'Jawalah':       { en: 'Jawalah',       ar: 'جوالة' },
-  'Mutaqaddim':    { en: 'Mutaqaddim',    ar: 'متقدم' },
-  'Mubtadi':       { en: 'Mubtadi',       ar: 'مبتدى' },
-  'Ashbal-Zahrat': { en: 'Ashbal & Zahrat', ar: 'أشبال و زهرات' },
-  'Baraem':        { en: 'Baraem',         ar: 'براعم' },
+  'Orthodox Lessons': { en: 'Orthodox Lessons', ar: 'الدروس الأرثوذكسية' },
+  'Scout Lessons':    { en: 'Scout Lessons',    ar: 'الدروس الكشفية' },
 };

@@ -3162,307 +3162,10 @@ main.wide {
   margin-bottom: 0.75rem;
 }
 
-.portal-shell { padding-bottom: 2rem; }
-
-/* ----- Hero ----- */
-.portal-hero {
-  position: relative;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  padding: 3.5rem 2.5rem 3rem;
-  margin: 0 0 3rem;
-  background:
-    radial-gradient(circle at 80% 0%, rgba(184, 51, 31, 0.22), transparent 55%),
-    radial-gradient(circle at 0% 100%, rgba(20, 56, 34, 0.22), transparent 55%),
-    linear-gradient(135deg, #ffffff 0%, #faf3e8 100%);
-  border: 1px solid var(--color-border);
-  isolation: isolate;
-}
-.portal-hero-glow {
-  position: absolute;
-  inset: -40% -30% auto auto;
-  width: 70%;
-  aspect-ratio: 1 / 1;
-  background:
-    radial-gradient(circle, rgba(184, 51, 31, 0.18), transparent 70%);
-  filter: blur(40px);
-  z-index: 0;
-  animation: portalGlowDrift 12s ease-in-out infinite;
-}
-@keyframes portalGlowDrift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-20px, 30px) scale(1.05); }
-}
-.portal-hero-watermark {
-  position: absolute;
-  inset-inline-end: -8%;
-  bottom: -25%;
-  width: 60%;
-  aspect-ratio: 1 / 1;
-  background-image: url('/images/logo.png');
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  opacity: 0.06;
-  filter: grayscale(0.4);
-  z-index: 0;
-  pointer-events: none;
-}
-.portal-hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 720px;
-}
-.portal-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(87, 22, 7, 0.08);
-  color: var(--color-brand);
-  padding: 0.4rem 0.85rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-bottom: 1.25rem;
-  border: 1px solid rgba(87, 22, 7, 0.12);
-}
-.portal-badge-dot {
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 50%;
-  background: var(--color-accent);
-  animation: portalDotPulse 2s ease-in-out infinite;
-}
-@keyframes portalDotPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.55; transform: scale(0.85); }
-}
-.portal-h1 {
-  font-family: var(--font-display);
-  font-size: clamp(2.2rem, 5vw, 3rem);
-  margin: 0 0 0.5rem;
-  color: var(--color-brand);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-}
-.portal-h1-ar {
-  display: block;
-  font-family: var(--font-display-arabic);
-  color: var(--color-accent);
-  font-size: 0.55em;
-  font-weight: 700;
-  margin-top: 0.4rem;
-  unicode-bidi: plaintext;
-}
-.portal-welcome {
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 1rem;
-  line-height: 1.55;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-.portal-welcome-sep { opacity: 0.5; }
-.portal-welcome-ar {
-  font-family: var(--font-display-arabic);
-  color: var(--color-text);
-  unicode-bidi: plaintext;
-}
-.portal-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1.75rem;
-}
-.portal-lock {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 1.15rem;
-  border: 1.5px solid var(--color-brand);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--color-brand);
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition:
-    background 0.2s var(--ease-out),
-    color 0.2s var(--ease-out),
-    transform 0.25s var(--ease-out),
-    box-shadow 0.25s var(--ease-out);
-}
-.portal-lock:hover {
-  background: var(--color-brand);
-  color: #fff;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-.portal-session-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.55rem 1.05rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  color: var(--color-muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-.portal-session-dot {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 50%;
-  background: var(--color-accent);
-  flex-shrink: 0;
-}
-
-/* ----- Lessons + Management directory -------------------------------
-   Both sections share one component: a plain surface panel of hairline-
-   divided rows. Left is the icon + bilingual label, right is the link
-   (a single "Drive folder" for lessons, a set of group chips for the
-   management tools). Deliberately flat — one brand accent, no per-item
-   gradients — so it reads as a working index, not a landing page. */
-.portal-index {
-  max-width: 1000px;
-  margin: 0 auto 3rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-.portal-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.9rem 1.1rem;
-  padding: 1.1rem 1.35rem;
-  border-top: 1px solid var(--color-border);
-  transition: background 0.25s var(--ease-out);
-}
-.portal-row:first-child { border-top: 0; }
-.portal-row:hover { background: var(--color-bg); }
-
-.portal-row-icon {
-  width: 2.35rem;
-  height: 2.35rem;
-  border-radius: var(--radius);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-brand);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  flex-shrink: 0;
-}
-.portal-row-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.portal-row-title {
-  font-family: var(--font-display);
-  font-size: 1.12rem;
-  line-height: 1.25;
-  color: var(--color-brand);
-}
-.portal-row-title-ar {
-  font-family: var(--font-display-arabic);
-  font-size: 1rem;
-  line-height: 1.3;
-  color: var(--color-muted);
-  unicode-bidi: plaintext;
-}
-
-/* Lesson rows are a single link, so the whole row is the anchor. */
-.portal-row--link {
-  text-decoration: none;
-  color: inherit;
-}
-.portal-row--link:hover { text-decoration: none; }
-.portal-row-open {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-brand-light);
-  white-space: nowrap;
-}
-.portal-row-arrow {
-  transition: transform 0.25s var(--ease-out);
-}
-.portal-row--link:hover .portal-row-arrow { transform: translateX(4px); }
-
-/* Group links on a management row. */
-.portal-row-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
-.portal-chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.05rem;
-  min-width: 6.25rem;
-  padding: 0.5rem 0.8rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-bg);
-  color: var(--color-brand);
-  text-decoration: none;
-  text-align: center;
-  transition:
-    background 0.2s var(--ease-out),
-    border-color 0.2s var(--ease-out),
-    color 0.2s var(--ease-out);
-}
-.portal-chip:hover {
-  background: var(--color-brand);
-  border-color: var(--color-brand);
-  color: #fff;
-  text-decoration: none;
-}
-.portal-chip-ar {
-  font-family: var(--font-display-arabic);
-  font-size: 1.02rem;
-  font-weight: 700;
-  line-height: 1.15;
-  unicode-bidi: plaintext;
-}
-.portal-chip-en {
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0.7;
-}
-.portal-chip--empty {
-  color: var(--color-muted);
-  border-style: dashed;
-  cursor: not-allowed;
-}
-.portal-chip--empty:hover {
-  background: var(--color-bg);
-  border-color: var(--color-border);
-  color: var(--color-muted);
-}
-
-/* Group step: a picker panel that swaps for the management panel plus a
-   back bar once a group is chosen. Keeps the working view to one group's
-   links instead of a wall of every group. */
+/* The full leaders-portal page (hero, session pill, Lessons/Management
+   directory rows, curriculum CTA) was retired once the real Workspace
+   shipped — this group picker is the one piece still reused, by the
+   public /join form's group-selection step. */
 .portal-picker {
   max-width: 1000px;
   margin: 0 auto 3rem;
@@ -3534,216 +3237,23 @@ main.wide {
   text-transform: uppercase;
   opacity: 0.75;
 }
-.portal-picker-all {
-  margin-top: 1.1rem;
-  background: none;
-  border: 0;
-  padding: 0.2rem;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.82rem;
-  color: var(--color-muted);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-.portal-picker-all:hover { color: var(--color-brand); }
-
-.portal-groupbar {
-  max-width: 1000px;
-  margin: 0 auto 0.8rem;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.6rem 1rem;
-}
-/* Safari's [hidden] isn't !important internally, so the unconditional
-   display:flex above can otherwise win and leave this bar visible. */
-.portal-groupbar[hidden] { display: none !important; }
-.portal-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.42rem 0.9rem;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  background: var(--color-surface);
-  color: var(--color-brand);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.86rem;
-  transition:
-    background 0.2s var(--ease-out),
-    border-color 0.2s var(--ease-out),
-    color 0.2s var(--ease-out);
-}
-.portal-back:hover {
-  background: var(--color-brand);
-  border-color: var(--color-brand);
-  color: #fff;
-}
-.portal-back-arrow { transition: transform 0.2s var(--ease-out); }
-.portal-back:hover .portal-back-arrow { transform: translateX(-3px); }
-
-/* One group selected: the row's single remaining link gets more room. */
-.portal-chip.is-solo {
-  min-width: 11rem;
-  padding-block: 0.62rem;
-}
-
-/* Set by the group switcher — hides chips (and then empty rows). */
-.is-filtered { display: none !important; }
-
 @media (max-width: 720px) {
-  .portal-hero { padding: 2.5rem 1.5rem 2.25rem; }
-  .portal-row {
-    grid-template-columns: auto minmax(0, 1fr);
-    padding: 1rem 1.1rem 1.15rem;
-  }
-  .portal-row-links,
-  .portal-row-open {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
-  }
-  .portal-row-links { display: grid; grid-template-columns: 1fr 1fr; }
-  .portal-chip { min-width: 0; }
-  .portal-row-title { font-size: 1.02rem; }
-  .portal-row-title-ar { font-size: 0.95rem; }
   .portal-picker { padding: 1.3rem 1.1rem 1.2rem; }
   .portal-picker-grid { grid-template-columns: 1fr 1fr; }
-  .portal-chip.is-solo { min-width: 0; grid-column: 1 / -1; }
 }
 
-/* ---------- Leaders portal: Curriculum Maker CTA -----------------------
-   A big hero-style button (not a plain row) linking from the portal into
-   the standalone curriculum tool — it's the flagship entry point, so it
-   gets the same visual weight as the page's own hero. */
-.portal-curr-cta {
-  display: block;
-  position: relative;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  padding: 2.75rem 2.5rem;
-  margin: 0 0 3rem;
-  max-width: 1000px;
-  margin-inline: auto;
-  margin-bottom: 3rem;
-  text-decoration: none;
-  color: inherit;
-  background:
-    radial-gradient(circle at 85% 15%, rgba(20, 56, 34, 0.28), transparent 55%),
-    radial-gradient(circle at 10% 100%, rgba(184, 51, 31, 0.22), transparent 55%),
-    linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-dark) 100%);
-  border: 1px solid var(--color-brand-dark);
-  isolation: isolate;
-  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
-}
-.portal-curr-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  text-decoration: none;
-}
-.portal-curr-cta-watermark {
-  position: absolute;
-  inset-inline-end: -6%;
-  bottom: -30%;
-  width: 46%;
-  aspect-ratio: 1 / 1;
-  background-image: url('/images/logo.png');
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  opacity: 0.12;
-  filter: grayscale(1) brightness(3);
-  z-index: 0;
-  pointer-events: none;
-}
-.portal-curr-cta-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-.portal-curr-cta-text { max-width: 620px; }
-.portal-curr-cta-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  padding: 0.4rem 0.85rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-}
-.portal-curr-cta-h2 {
-  font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3.6vw, 2.15rem);
-  color: #fff;
-  margin: 0 0 0.5rem;
-  line-height: 1.1;
-}
-.portal-curr-cta-h2-ar {
-  display: block;
-  font-family: var(--font-display-arabic);
-  font-size: 0.62em;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
-  margin-top: 0.3rem;
-  unicode-bidi: plaintext;
-}
-.portal-curr-cta-desc {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 0.98rem;
-  line-height: 1.55;
-}
-.portal-curr-cta-desc-ar {
-  display: block;
-  font-family: var(--font-arabic);
-  color: rgba(255, 255, 255, 0.7);
-  margin-top: 0.3rem;
-  unicode-bidi: plaintext;
-}
-.portal-curr-cta-arrow {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 50%;
-  background: #fff;
-  color: var(--color-brand);
-  font-size: 1.4rem;
-  transition: transform 0.25s var(--ease-out);
-}
-.portal-curr-cta:hover .portal-curr-cta-arrow { transform: translateX(5px); }
-
-@media (max-width: 640px) {
-  .portal-curr-cta { padding: 2.1rem 1.5rem; }
-  .portal-curr-cta-content { gap: 1.25rem; }
-  .portal-curr-cta-arrow { width: 2.75rem; height: 2.75rem; }
-}
-
-/* ---------- Curriculum Maker --------------------------------------------
-   Weekly/monthly/yearly meeting planner. Reuses the portal's hero/badge/
-   picker classes for the header and onboarding step, and adds its own
-   `curr-` namespace for the toolbar, drag-and-drop bank, calendar views,
-   and day-detail drawer. */
+/* ---------- Curriculum (Workspace tab) ----------------------------------
+   Embedded month planner — click a date to open a centered popup, pick
+   from the per-group Activity Bank or add a custom activity. The `curr-`
+   namespace also covers the day popup, activity chips, and calendar
+   month grid. */
 
 /* Several of these are toggled via the `hidden` attribute but also carry
    an unconditional `display` (flex/grid) for when they're shown. Browsers
    disagree on whether `[hidden]` itself is `!important` (Safari's isn't),
    so a same-specificity `display` rule can silently win and leave the
    element visible — force it explicitly instead of relying on that. */
-.curr-onboard[hidden], .curr-tool[hidden], .curr-warn[hidden],
-.curr-view[hidden], .curr-day-overlay[hidden], .curr-custom-overlay[hidden] {
+.curr-view[hidden], .curr-day-overlay[hidden] {
   display: none !important;
 }
 
@@ -3785,10 +3295,6 @@ main.wide {
 .curr-subtab:hover:not(.curr-subtab--active), .ws-subtab:hover:not(.ws-subtab--active) { color: var(--color-brand-dark); }
 [data-curr-subpanel][hidden], [data-subpanel][hidden] { display: none !important; }
 
-/* ----- Curriculum day drawer: prev/next-day nav around the header ----- */
-.curr-day-nav-row { display: flex; align-items: flex-start; gap: 0.75rem; margin: 0 2.5rem 1.25rem 0; }
-.curr-day-nav-row .curr-day-header { margin: 0; flex: 1; }
-
 /* ----- Activity Bank management list ----- */
 .curr-bank-list { display: flex; flex-wrap: wrap; gap: 0.6rem; }
 .curr-bank-item {
@@ -3805,77 +3311,6 @@ main.wide {
   font-size: 1rem; line-height: 1; padding: 0.15rem;
 }
 .curr-bank-item button:hover { color: var(--color-brand-light); }
-
-.curr-warn {
-  max-width: 1000px;
-  margin: -1.5rem auto 2rem;
-  padding: 0.75rem 1.1rem;
-  background: #fff3e0;
-  border: 1px solid #f0c987;
-  border-radius: var(--radius);
-  color: #7a4a00;
-  font-size: 0.85rem;
-  text-align: center;
-}
-
-/* ----- Onboarding ----- */
-.curr-onboard { max-width: 620px; margin: 0 auto 3rem; }
-.curr-onboard-card {
-  position: relative;
-  overflow: hidden;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  padding: 2rem;
-  text-align: center;
-}
-.curr-onboard-bar {
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--color-brand) 0%, var(--color-brand-light) 50%, var(--color-accent) 100%);
-}
-.curr-onboard-name-field {
-  display: block;
-  max-width: 320px;
-  margin: 1.25rem auto 1.5rem;
-  text-align: start;
-}
-.curr-onboard-name-field input {
-  width: 100%;
-  padding: 0.7rem 0.9rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  font: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-.curr-onboard-label {
-  margin: 0 0 1rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-}
-.curr-onboard-label-ar {
-  display: block;
-  margin-top: 0.25rem;
-  font-family: var(--font-display-arabic);
-  font-size: 1rem;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--color-brand);
-  unicode-bidi: plaintext;
-}
-.curr-onboard-groups { margin-bottom: 1.5rem; }
-.curr-group-toggle--active {
-  background: var(--color-brand);
-  border-color: var(--color-brand);
-  color: #fff;
-}
-.curr-onboard-start { width: 100%; padding: 0.85rem 1.4rem; }
 
 /* ----- Toolbar ----- */
 .curr-toolbar {
@@ -4140,7 +3575,9 @@ main.wide {
 .curr-day-overlay {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  /* Well above the sticky site header (z-index 50) and everything else in
+     the page — a modal has to win every stacking comparison, always. */
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4148,20 +3585,24 @@ main.wide {
   background: rgba(26, 26, 26, 0.4);
 }
 .curr-day-panel {
-  width: min(480px, 100%);
-  max-height: min(88vh, 700px);
+  /* Wide enough that the activity bank's chips wrap onto just a couple of
+     rows instead of a long single column, so the panel is rarely taller
+     than the viewport and rarely needs its own scrollbar at a normal
+     100%-zoom desktop window. */
+  width: min(720px, 94vw);
+  max-height: min(90vh, 820px);
   overflow-y: auto;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  padding: 1.5rem;
+  padding: 1.75rem 2rem;
 }
 .curr-day-banner {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  margin: -1.5rem -1.5rem 1.25rem;
+  padding: 0.85rem 1.25rem;
+  margin: -1.75rem -2rem 1.25rem;
   background: var(--color-brand);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   color: #fff;
@@ -4181,6 +3622,10 @@ main.wide {
 }
 .curr-day-nav-btn:hover { background: rgba(255, 255, 255, 0.25); }
 .curr-day-header { font-weight: 700; }
+.curr-day-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 560px) {
+  .curr-day-field-row { grid-template-columns: 1fr; }
+}
 .curr-day-field { display: block; margin-bottom: 1rem; font-size: 0.82rem; color: var(--color-muted); }
 .curr-day-field span { display: block; margin-bottom: 0.3rem; font-weight: 600; }
 .curr-day-field input, .curr-day-field textarea {
@@ -4215,32 +3660,6 @@ main.wide {
 .curr-day-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 2.5rem; }
 .curr-day-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border); }
 
-/* ----- Custom activity mini-form ----- */
-.curr-custom-overlay {
-  position: fixed; inset: 0; z-index: 70;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(26, 26, 26, 0.35);
-  padding: 1rem;
-}
-.curr-custom-card {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 1.5rem;
-  max-width: 360px;
-  width: 100%;
-}
-.curr-custom-card h3 { margin: 0 0 1rem; font-family: var(--font-display); color: var(--color-brand); font-size: 1.1rem; }
-.curr-custom-card label { display: block; margin-bottom: 0.85rem; font-size: 0.8rem; color: var(--color-muted); }
-.curr-custom-card label span { display: block; margin-bottom: 0.3rem; font-weight: 600; }
-.curr-custom-card input {
-  width: 100%; padding: 0.55rem 0.7rem; border: 1px solid var(--color-border);
-  border-radius: var(--radius); font: inherit; background: var(--color-bg); color: var(--color-text);
-}
-.curr-custom-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.5rem; }
-.curr-custom-actions button { padding: 0.55rem 1rem; border-radius: var(--radius); font: inherit; font-size: 0.85rem; cursor: pointer; }
-.curr-custom-actions button:not(.btn-primary) { background: none; border: 1px solid var(--color-border); color: var(--color-muted); }
-
 /* ----- Toast ----- */
 .curr-toast {
   position: fixed;
@@ -4253,7 +3672,7 @@ main.wide {
   border-radius: 999px;
   font-size: 0.85rem;
   box-shadow: var(--shadow-lg);
-  z-index: 90;
+  z-index: 1100;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s var(--ease-out), transform 0.25s var(--ease-out);

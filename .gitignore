@@ -3,9 +3,6 @@ dist/
 # generated types
 .astro/
 
-# raw source materials kept for reference/re-cleanup; not shipped
-archive/
-
 # Claude Code per-machine settings + any stray macOS metadata Spotlight
 # stashes inside this folder.
 .claude/

@@ -1,8 +1,9 @@
 ---
 // Leaders Workspace — the shell. Gated by a real Supabase Auth session
 // (not the old shared-password localStorage flag). Tabs: Dashboard,
-// Roster, Archive, Approvals, Attendance, Fees, Curriculum (links out to
-// the dedicated tool), Finance, Library, Lessons, and (admin only) Admin.
+// Roster, Archive, Approvals, Attendance, Fees, Curriculum (embedded,
+// shared per group), Finance (Ledger/Categories), Library
+// (Documents/Lessons), Reports, and (admin only) Admin.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
 import { loadPortalData, TOOL_LABELS } from '../../lib/leader-portal';
@@ -535,14 +536,16 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         <button type="button" class="curr-day-nav-btn" data-curr-day-next aria-label="Next day">›</button>
       </div>
 
-      <label class="curr-day-field">
-        <span>Theme</span>
-        <input type="text" data-day-theme placeholder="e.g. First Aid Badge" />
-      </label>
-      <label class="curr-day-field">
-        <span>Notes</span>
-        <textarea data-day-notes rows="2" placeholder="Anything to remember for this meeting…"></textarea>
-      </label>
+      <div class="curr-day-field-row">
+        <label class="curr-day-field">
+          <span>Theme</span>
+          <input type="text" data-day-theme placeholder="e.g. First Aid Badge" />
+        </label>
+        <label class="curr-day-field">
+          <span>Notes</span>
+          <textarea data-day-notes rows="2" placeholder="Anything to remember for this meeting…"></textarea>
+        </label>
+      </div>
 
       <p class="curr-day-section-label">Select from the activity bank</p>
       <div class="curr-bank-chips" data-curr-bank-chips></div>
@@ -1809,10 +1812,15 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.currDayNotes.value = (m && m.notes) || '';
       currRenderActivityList(els.currDayList, dateStr);
       els.currDayOverlay.removeAttribute('hidden');
+      // Lock background scroll while the modal is open — otherwise the
+      // page can scroll behind it and the sticky header/footer end up
+      // looking like they're overlapping the popup.
+      document.documentElement.style.overflow = 'hidden';
     }
     function currCloseDayPanel() {
       els.currDayOverlay.setAttribute('hidden', '');
       state.curr.currentDay = null;
+      document.documentElement.style.overflow = '';
     }
     // Theme/Notes only commit when Save is pressed — activities (bank
     // picks, custom adds, removes) still save instantly, same as
