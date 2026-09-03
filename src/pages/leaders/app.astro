@@ -3241,6 +3241,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           // it on every switch so Dashboard/Reports re-fetch for the new
           // group instead of reusing the previous group's roster.
           state.members = [];
+          // An open "Editing <member>" form is bound to a member id from
+          // the group we're leaving; submitting it after a switch would
+          // save group_key: <new group> against that id, silently moving
+          // the member. Close it out on every switch.
+          if (state.editingMemberId) resetMemberForm();
           renderGroupSwitch();
           refreshApprovalsBadge();
           loadActiveTabData();
