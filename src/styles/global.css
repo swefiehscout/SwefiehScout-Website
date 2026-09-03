@@ -4356,6 +4356,8 @@ main.wide {
 .ws-field span { display: block; margin-bottom: 0.4rem; }
 .ws-field input, .ws-field select, .ws-field textarea {
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 0.65rem 0.85rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -4365,6 +4367,12 @@ main.wide {
   color: var(--color-text);
   transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
+/* Safari renders a date input's native controls (segments + calendar
+   icon) at their own intrinsic width unless appearance is reset —
+   width:100% above doesn't reliably override that on its own, so the
+   box can end up visibly narrower than every other field in the same
+   grid despite sharing the identical rule. */
+.ws-field input[type="date"] { -webkit-appearance: none; appearance: none; }
 .ws-field input:focus, .ws-field select:focus, .ws-field textarea:focus {
   outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(20, 56, 34, 0.1);
 }
