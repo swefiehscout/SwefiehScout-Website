@@ -4400,7 +4400,7 @@ main.wide {
   color: var(--color-muted);
   font-size: 0.92rem;
   line-height: 1.6;
-  max-width: 640px;
+  width: 100%;
   padding: 1.5rem;
   background: var(--color-bg);
   border: 1px dashed var(--color-border);
