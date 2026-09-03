@@ -1418,7 +1418,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!state.attDatesWithRecords) state.attDatesWithRecords = new Set();
       state.attDatesWithRecords.add(date);
       renderAttCalendar();
-      await loadAttDay();
+      // Deliberately not a full loadAttDay() reload+rerender here — the
+      // checkbox the user just toggled already reflects what was saved;
+      // re-fetching would just rebuild the table from the server again,
+      // and if two toggles land close together (check, then quickly
+      // uncheck) the first save's reload can resolve *after* the
+      // second save and repaint the row back to the stale, wrong state.
+      // The summary count is the only thing that needs refreshing, and
+      // it's cheap to get straight from the DOM.
+      const total = els.attBody.querySelectorAll('[data-att-present]').length;
+      const presentNow = els.attBody.querySelectorAll('[data-att-present]:checked').length;
+      els.attSummary.textContent = `${presentNow} of ${total} present`;
     }
     function bindAttendance() {
       els.attPrev.addEventListener('click', () => {
@@ -1531,7 +1541,28 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }, { onConflict: 'group_key,member_id,period' }).select().single();
       if (error) { console.error(error); showToast('Could not save.'); return; }
       await syncFeeToFinance(feeRow);
-      await loadFees();
+      // Deliberately not a full loadFees() reload+rerender here — same
+      // reasoning as saveAttendance(): the row already reflects what was
+      // just saved, and a reload racing a rapid check/uncheck pair can
+      // repaint it back to a stale state. Patch just this row's "Paid
+      // on" cell and cache from what the upsert actually returned, then
+      // recompute the summary from the DOM.
+      const row = els.feeBody.querySelector(`tr[data-member-id="${memberId}"]`);
+      if (row) {
+        row.dataset.paidOn = feeRow.paid_on || '';
+        const paidOnCell = row.querySelector('[data-label="Paid on"]');
+        if (paidOnCell) paidOnCell.textContent = feeRow.paid_on ? feeRow.paid_on : '—';
+      }
+      const paidCheckboxes: any[] = Array.from(els.feeBody.querySelectorAll('[data-fee-paid]'));
+      const total = paidCheckboxes.length;
+      let paidCount = 0, collected = 0;
+      paidCheckboxes.forEach((cb: any) => {
+        if (!cb.checked) return;
+        paidCount++;
+        const amt = Number(cb.closest('tr').querySelector('[data-fee-amount]').value || 0);
+        collected += amt;
+      });
+      els.feeSummary.textContent = `${paidCount} of ${total} paid — ${collected.toFixed(2)} collected`;
     }
     // Keeps a fee payment mirrored into the Finance ledger as an income
     // line — created/updated while paid, removed the moment it's unmarked
