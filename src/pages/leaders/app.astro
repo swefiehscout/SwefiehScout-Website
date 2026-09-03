@@ -1,0 +1,726 @@
+---
+// Leaders Workspace — the shell. Gated by a real Supabase Auth session
+// (not the old shared-password localStorage flag). Tabs: Dashboard,
+// Roster, Attendance, Fees, Curriculum, Finance, Library, Lessons, and
+// (admin only) Admin. Only Dashboard/Roster/Admin are wired up so far —
+// the rest are placeholders filled in over the next few passes.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+---
+<BaseLayout title="Leaders Workspace" bare wide>
+  <div class="ws-shell" data-ws-shell hidden>
+
+    <section class="ws-pending" data-ws-pending hidden>
+      <div class="ws-pending-card">
+        <h2 class="section-h2">Waiting for approval</h2>
+        <p class="ws-pending-text">
+          Your account is created — an admin needs to approve you and assign your group before you can get in.
+        </p>
+        <div class="ws-pending-actions">
+          <button type="button" class="btn-primary" data-ws-check-again>Check again</button>
+          <button type="button" class="curr-nav-today" data-ws-signout-pending>Sign out</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="ws-main" data-ws-main hidden>
+      <header class="ws-header">
+        <div class="ws-header-left">
+          <img class="ws-logo-mark" src="/images/logo.png" alt="" />
+          <span class="ws-logo">Leaders Workspace</span>
+        </div>
+        <div class="ws-header-right">
+          <div class="ws-group-switch" data-ws-group-switch></div>
+          <div class="ws-account">
+            <button type="button" class="ws-account-btn" data-ws-account-btn></button>
+            <div class="ws-account-menu" data-ws-account-menu hidden>
+              <div class="ws-account-info" data-ws-who></div>
+              <button type="button" class="ws-account-signout" data-ws-signout>Sign out</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <nav class="ws-tabs" data-ws-tabs>
+        <button type="button" class="ws-tab" data-tab="dashboard"><Icon name="compass" size={16} strokeWidth={1.8} /> Dashboard</button>
+        <button type="button" class="ws-tab" data-tab="roster"><Icon name="star" size={16} strokeWidth={1.8} /> Roster</button>
+        <button type="button" class="ws-tab" data-tab="archive"><Icon name="fleur" size={16} strokeWidth={1.8} /> Archive</button>
+        <button type="button" class="ws-tab" data-tab="approvals"><Icon name="plus" size={16} strokeWidth={1.8} /> Approvals<span class="ws-tab-badge" data-approvals-badge hidden></span></button>
+        <button type="button" class="ws-tab" data-tab="attendance"><Icon name="calendar" size={16} strokeWidth={1.8} /> Attendance</button>
+        <button type="button" class="ws-tab" data-tab="fees"><Icon name="cash" size={16} strokeWidth={1.8} /> Fees</button>
+        <button type="button" class="ws-tab" data-tab="curriculum"><Icon name="flag" size={16} strokeWidth={1.8} /> Curriculum</button>
+        <button type="button" class="ws-tab" data-tab="finance"><Icon name="bank" size={16} strokeWidth={1.8} /> Finance</button>
+        <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
+        <button type="button" class="ws-tab" data-tab="lessons"><Icon name="sparkle" size={16} strokeWidth={1.8} /> Lessons</button>
+        <button type="button" class="ws-tab" data-tab="admin" data-admin-only hidden><Icon name="pin" size={16} strokeWidth={1.8} /> Admin</button>
+      </nav>
+
+      <div class="ws-panels">
+        <section class="ws-panel" data-panel="dashboard">
+          <div class="ws-stat-row" data-ws-stats></div>
+          <p class="ws-soon">Attendance rates, fee-collection %, and curriculum progress will show up here as those tabs go live.</p>
+        </section>
+
+        <section class="ws-panel" data-panel="roster" hidden>
+          <form class="ws-member-form" data-roster-form>
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title" data-member-form-title>Add a member</p>
+
+            <div class="ws-form-grid ws-form-grid--4">
+              <label class="ws-field">
+                <span>Full name *</span>
+                <input type="text" data-m-name required />
+              </label>
+              <label class="ws-field">
+                <span>Date of birth</span>
+                <input type="date" data-m-dob />
+              </label>
+              <label class="ws-field">
+                <span>Guardian 1 relation *</span>
+                <select data-m-g1-rel required>
+                  <option value="">Select…</option>
+                  <option>Mother</option>
+                  <option>Father</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label class="ws-field">
+                <span>Guardian 1 phone *</span>
+                <input type="tel" data-m-g1-phone required />
+              </label>
+            </div>
+
+            <div class="ws-form-grid">
+              <div class="ws-optional-block" data-g2-block>
+                <button type="button" class="ws-add-link" data-g2-add>+ Add second guardian</button>
+                <div class="ws-optional-fields" data-g2-fields hidden>
+                  <div class="ws-form-grid">
+                    <label class="ws-field">
+                      <span>Guardian 2 relation</span>
+                      <select data-m-g2-rel>
+                        <option value="">Select…</option>
+                        <option>Mother</option>
+                        <option>Father</option>
+                        <option>Other</option>
+                      </select>
+                    </label>
+                    <label class="ws-field">
+                      <span>Guardian 2 phone</span>
+                      <input type="tel" data-m-g2-phone />
+                    </label>
+                  </div>
+                  <button type="button" class="ws-remove-link" data-g2-remove>Remove</button>
+                </div>
+              </div>
+
+              <div class="ws-optional-block" data-allergy-block>
+                <button type="button" class="ws-add-link" data-allergy-add>+ Add allergy info</button>
+                <div class="ws-optional-fields" data-allergy-fields hidden>
+                  <label class="ws-field">
+                    <span>What allergy?</span>
+                    <input type="text" data-m-allergy-detail placeholder="e.g. peanuts" />
+                  </label>
+                  <button type="button" class="ws-remove-link" data-allergy-remove>Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <label class="ws-field ws-field--full">
+              <span>Notes</span>
+              <textarea data-m-notes rows="1"></textarea>
+            </label>
+
+            <div class="ws-form-actions">
+              <button type="submit" class="btn-primary" data-member-form-submit>Add member</button>
+              <button type="button" class="ws-form-cancel" data-member-form-cancel hidden>Cancel edit</button>
+            </div>
+          </form>
+
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-roster-table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Guardian 1</th>
+                  <th>Allergies</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody data-roster-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="archive" hidden>
+          <p class="ws-soon" data-archive-hint>
+            Archived members are hidden from Attendance and Fees going forward, but every past record tied to
+            them (attendance history, fee payments) stays exactly as it was — nothing is deleted or recalculated.
+            Restore someone here any time to bring them back into the active roster.
+          </p>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-archive-table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Guardian 1</th>
+                  <th>Allergies</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody data-archive-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="approvals" hidden>
+          <p class="ws-soon">
+            Anyone can submit a request at <strong>/join</strong> without an account. Approving one adds them
+            straight to this group's active roster; rejecting just declines it — nothing is created either way
+            until you act.
+          </p>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-approvals-table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Guardian 1</th>
+                  <th>Allergies</th>
+                  <th>Notes</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody data-approvals-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="attendance" hidden><p class="ws-soon">Attendance is coming in the next pass.</p></section>
+        <section class="ws-panel" data-panel="fees" hidden><p class="ws-soon">Monthly fees are coming in the next pass.</p></section>
+        <section class="ws-panel" data-panel="curriculum" hidden><p class="ws-soon">The curriculum maker is moving in here next.</p></section>
+        <section class="ws-panel" data-panel="finance" hidden><p class="ws-soon">The income/expense ledger is coming in the next pass.</p></section>
+        <section class="ws-panel" data-panel="library" hidden><p class="ws-soon">The document library is coming in the next pass.</p></section>
+        <section class="ws-panel" data-panel="lessons" hidden><p class="ws-soon">Shared lesson resources are coming in the next pass.</p></section>
+
+        <section class="ws-panel" data-panel="admin" hidden>
+          <h3 class="ws-admin-h3">Leaders</h3>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-admin-table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Groups</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody data-admin-body></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { supabase, supabaseConfigured, getSession, getProfile, signOut } from '../../lib/workspace/auth';
+    import { GROUPS } from '../../lib/curriculum/constants';
+
+    // Loose alias for actual query calls below — supabaseConfigured is
+    // checked once in init() before any of this runs, so by the time these
+    // are called it's never actually null; this just avoids sprinkling
+    // non-null assertions through every single query call.
+    const db: any = supabase;
+
+    const state: any = { session: null, profile: null, availableGroups: [], activeGroup: null, activeTab: 'dashboard', members: [], approvals: [], editingMemberId: null };
+    const els: any = {};
+
+    function el(sel: string): any { return document.querySelector(sel); }
+    function escapeHtml(s: any) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as any)[c]
+      ));
+    }
+    let toastTimer: any;
+    function showToast(msg: any) {
+      let t = document.querySelector('.curr-toast');
+      if (!t) { t = document.createElement('div'); t.className = 'curr-toast'; document.body.appendChild(t); }
+      t.textContent = msg;
+      t.classList.add('curr-toast--show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('curr-toast--show'), 3500);
+    }
+
+    function cacheEls() {
+      els.shell = el('[data-ws-shell]');
+      els.pending = el('[data-ws-pending]');
+      els.main = el('[data-ws-main]');
+      els.groupSwitch = el('[data-ws-group-switch]');
+      els.accountBtn = el('[data-ws-account-btn]');
+      els.accountMenu = el('[data-ws-account-menu]');
+      els.who = el('[data-ws-who]');
+      els.signout = el('[data-ws-signout]');
+      els.signoutPending = el('[data-ws-signout-pending]');
+      els.tabs = el('[data-ws-tabs]');
+      els.stats = el('[data-ws-stats]');
+      els.rosterForm = el('[data-roster-form]');
+      els.rosterBody = el('[data-roster-body]');
+      els.archiveBody = el('[data-archive-body]');
+      els.adminBody = el('[data-admin-body]');
+      els.approvalsBody = el('[data-approvals-body]');
+      els.approvalsBadge = el('[data-approvals-badge]');
+      els.mName = el('[data-m-name]');
+      els.mDob = el('[data-m-dob]');
+      els.mG1Rel = el('[data-m-g1-rel]');
+      els.mG1Phone = el('[data-m-g1-phone]');
+      els.mG2Rel = el('[data-m-g2-rel]');
+      els.mG2Phone = el('[data-m-g2-phone]');
+      els.mAllergyDetail = el('[data-m-allergy-detail]');
+      els.mNotes = el('[data-m-notes]');
+      els.g2Add = el('[data-g2-add]');
+      els.g2Fields = el('[data-g2-fields]');
+      els.g2Remove = el('[data-g2-remove]');
+      els.allergyAdd = el('[data-allergy-add]');
+      els.allergyFields = el('[data-allergy-fields]');
+      els.allergyRemove = el('[data-allergy-remove]');
+      els.formTitle = el('[data-member-form-title]');
+      els.formSubmit = el('[data-member-form-submit]');
+      els.formCancel = el('[data-member-form-cancel]');
+    }
+
+    // ---------- Roster ---------------------------------------------------
+    async function loadRoster() {
+      if (!state.activeGroup) return;
+      const { data, error } = await db
+        .from('members').select('*')
+        .eq('group_key', state.activeGroup)
+        .order('full_name', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load the roster.'); return; }
+      state.members = data || [];
+      renderRoster();
+      renderArchive();
+      renderStats();
+    }
+    function memberRowHTML(m: any, actionsHTML: string) {
+      return `
+        <tr data-member-id="${m.id}">
+          <td>${escapeHtml(m.full_name)}</td>
+          <td>${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
+          <td>${m.has_allergies
+              ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ' — ' + escapeHtml(m.allergy_detail) : ''}</span>`
+              : '—'}</td>
+          <td class="ws-row-actions">${actionsHTML}</td>
+        </tr>`;
+    }
+    async function archiveMember(id: string) {
+      if (!confirm('Archive this member? They\'ll disappear from Attendance and Fees going forward, but nothing already recorded for them changes. You can restore them any time from the Archive tab.')) return;
+      const { error } = await db.from('members').update({ active: false }).eq('id', id);
+      if (error) { showToast('Could not archive.'); return; }
+      if (state.editingMemberId === id) resetMemberForm();
+      await loadRoster();
+    }
+    async function restoreMember(id: string) {
+      const { error } = await db.from('members').update({ active: true }).eq('id', id);
+      if (error) { showToast('Could not restore.'); return; }
+      await loadRoster();
+    }
+    async function deleteMemberForever(id: string) {
+      if (!confirm('Permanently delete this member? This also deletes their attendance/fee history — this cannot be undone. Archiving is usually what you want instead.')) return;
+      const { error } = await db.from('members').delete().eq('id', id);
+      if (error) { showToast('Could not delete.'); return; }
+      if (state.editingMemberId === id) resetMemberForm();
+      await loadRoster();
+    }
+
+    function renderRoster() {
+      const active = state.members.filter((m: any) => m.active);
+      if (!active.length) {
+        els.rosterBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No members yet — add the first one below.</td></tr>';
+        return;
+      }
+      els.rosterBody.innerHTML = active.map((m: any) => memberRowHTML(m, `
+        <button type="button" class="ws-edit-btn" data-edit-member>Edit</button>
+        <button type="button" class="ws-edit-btn" data-archive-member>Archive</button>
+        <button type="button" class="ws-row-del" data-del-member title="Delete permanently">×</button>
+      `)).join('');
+
+      els.rosterBody.querySelectorAll('tr').forEach((row: any) => {
+        const id = row.dataset.memberId;
+        row.querySelector('[data-edit-member]').addEventListener('click', () => startEditMember(id));
+        row.querySelector('[data-archive-member]').addEventListener('click', () => archiveMember(id));
+        row.querySelector('[data-del-member]').addEventListener('click', () => deleteMemberForever(id));
+      });
+    }
+
+    function renderArchive() {
+      const archived = state.members.filter((m: any) => !m.active);
+      if (!archived.length) {
+        els.archiveBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No archived members.</td></tr>';
+        return;
+      }
+      els.archiveBody.innerHTML = archived.map((m: any) => memberRowHTML(m, `
+        <button type="button" class="ws-edit-btn" data-edit-member>Edit</button>
+        <button type="button" class="ws-edit-btn" data-restore-member>Restore</button>
+        <button type="button" class="ws-row-del" data-del-member title="Delete permanently">×</button>
+      `)).join('');
+
+      els.archiveBody.querySelectorAll('tr').forEach((row: any) => {
+        const id = row.dataset.memberId;
+        row.querySelector('[data-edit-member]').addEventListener('click', () => startEditMember(id));
+        row.querySelector('[data-restore-member]').addEventListener('click', () => restoreMember(id));
+        row.querySelector('[data-del-member]').addEventListener('click', () => deleteMemberForever(id));
+      });
+    }
+
+    // ---------- Approvals (from the public /join form) ------------------
+    async function refreshApprovalsBadge() {
+      if (!state.activeGroup) return;
+      const { count, error } = await db
+        .from('join_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('group_key', state.activeGroup)
+        .eq('status', 'pending');
+      if (error) { console.error(error); return; }
+      if (count && count > 0) {
+        els.approvalsBadge.textContent = String(count);
+        els.approvalsBadge.removeAttribute('hidden');
+      } else {
+        els.approvalsBadge.setAttribute('hidden', '');
+      }
+    }
+    async function loadApprovals() {
+      if (!state.activeGroup) return;
+      const { data, error } = await db
+        .from('join_requests')
+        .select('*')
+        .eq('group_key', state.activeGroup)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load requests.'); return; }
+      state.approvals = data || [];
+      renderApprovals();
+    }
+    function renderApprovals() {
+      if (!state.approvals.length) {
+        els.approvalsBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No pending requests.</td></tr>';
+        return;
+      }
+      els.approvalsBody.innerHTML = state.approvals.map((r: any) => `
+        <tr data-request-id="${r.id}">
+          <td>${escapeHtml(r.full_name)}</td>
+          <td>${r.guardian1_relation ? `${escapeHtml(r.guardian1_relation)}: ${escapeHtml(r.guardian1_phone || '—')}` : '—'}</td>
+          <td>${r.has_allergies
+              ? `<span class="ws-allergy-badge" title="${escapeHtml(r.allergy_detail || '')}">Yes${r.allergy_detail ? ' — ' + escapeHtml(r.allergy_detail) : ''}</span>`
+              : '—'}</td>
+          <td>${escapeHtml(r.notes || '—')}</td>
+          <td class="ws-row-actions">
+            <button type="button" class="ws-edit-btn" data-approve-request>Approve</button>
+            <button type="button" class="ws-row-del" data-reject-request title="Reject">×</button>
+          </td>
+        </tr>
+      `).join('');
+
+      els.approvalsBody.querySelectorAll('tr').forEach((row: any) => {
+        const id = row.dataset.requestId;
+        row.querySelector('[data-approve-request]').addEventListener('click', () => approveRequest(id));
+        row.querySelector('[data-reject-request]').addEventListener('click', () => rejectRequest(id));
+      });
+    }
+    async function approveRequest(id: string) {
+      const r = state.approvals.find((x: any) => x.id === id);
+      if (!r) return;
+      const { error: insertError } = await db.from('members').insert({
+        group_key: r.group_key,
+        full_name: r.full_name,
+        birth_date: r.birth_date,
+        guardian1_relation: r.guardian1_relation,
+        guardian1_phone: r.guardian1_phone,
+        guardian2_relation: r.guardian2_relation,
+        guardian2_phone: r.guardian2_phone,
+        has_allergies: r.has_allergies,
+        allergy_detail: r.allergy_detail,
+        notes: r.notes,
+        created_by: state.session.user.id,
+      });
+      if (insertError) { console.error(insertError); showToast('Could not approve — member was not added.'); return; }
+      const { error: updateError } = await db.from('join_requests')
+        .update({ status: 'approved', reviewed_by: state.session.user.id, reviewed_at: new Date().toISOString() })
+        .eq('id', id);
+      if (updateError) console.error(updateError);
+      showToast(`${r.full_name} added to the roster.`);
+      await loadApprovals();
+      await refreshApprovalsBadge();
+      if (state.activeTab === 'roster') await loadRoster();
+    }
+    async function rejectRequest(id: string) {
+      if (!confirm('Reject this request? No member will be added.')) return;
+      const { error } = await db.from('join_requests')
+        .update({ status: 'rejected', reviewed_by: state.session.user.id, reviewed_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) { showToast('Could not reject.'); return; }
+      await loadApprovals();
+      await refreshApprovalsBadge();
+    }
+
+    function showG2(focus = true) {
+      els.g2Fields.hidden = false;
+      els.g2Add.hidden = true;
+      if (focus) els.mG2Rel.focus();
+    }
+    function hideG2() {
+      els.g2Fields.hidden = true;
+      els.g2Add.hidden = false;
+      els.mG2Rel.value = '';
+      els.mG2Phone.value = '';
+    }
+    function showAllergy(focus = true) {
+      els.allergyFields.hidden = false;
+      els.allergyAdd.hidden = true;
+      if (focus) els.mAllergyDetail.focus();
+    }
+    function hideAllergy() {
+      els.allergyFields.hidden = true;
+      els.allergyAdd.hidden = false;
+      els.mAllergyDetail.value = '';
+    }
+    function readMemberForm() {
+      const name = els.mName.value.trim();
+      const g1Rel = els.mG1Rel.value;
+      const g1Phone = els.mG1Phone.value.trim();
+      if (!name || !g1Rel || !g1Phone) return null;
+      const hasAllergies = !els.allergyFields.hidden;
+      return {
+        group_key: state.activeGroup,
+        full_name: name,
+        birth_date: els.mDob.value || null,
+        guardian1_relation: g1Rel,
+        guardian1_phone: g1Phone,
+        guardian2_relation: !els.g2Fields.hidden ? (els.mG2Rel.value || null) : null,
+        guardian2_phone: !els.g2Fields.hidden ? (els.mG2Phone.value.trim() || null) : null,
+        has_allergies: hasAllergies,
+        allergy_detail: hasAllergies ? els.mAllergyDetail.value.trim() || null : null,
+        notes: els.mNotes.value.trim() || null,
+      };
+    }
+    function resetMemberForm() {
+      els.rosterForm.reset();
+      hideG2();
+      hideAllergy();
+      state.editingMemberId = null;
+      els.formTitle.textContent = 'Add a member';
+      els.formSubmit.textContent = 'Add member';
+      els.formCancel.hidden = true;
+    }
+    function startEditMember(id: string) {
+      const m = state.members.find((x: any) => x.id === id);
+      if (!m) return;
+      if (state.activeTab !== 'roster') setTab('roster');
+      state.editingMemberId = id;
+      els.mName.value = m.full_name || '';
+      els.mDob.value = m.birth_date || '';
+      els.mG1Rel.value = m.guardian1_relation || '';
+      els.mG1Phone.value = m.guardian1_phone || '';
+      if (m.guardian2_relation || m.guardian2_phone) {
+        showG2(false);
+        els.mG2Rel.value = m.guardian2_relation || '';
+        els.mG2Phone.value = m.guardian2_phone || '';
+      } else {
+        hideG2();
+      }
+      if (m.has_allergies) {
+        showAllergy(false);
+        els.mAllergyDetail.value = m.allergy_detail || '';
+      } else {
+        hideAllergy();
+      }
+      els.mNotes.value = m.notes || '';
+      els.formTitle.textContent = `Editing ${m.full_name}`;
+      els.formSubmit.textContent = 'Save changes';
+      els.formCancel.hidden = false;
+      els.rosterForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function bindRosterForm() {
+      els.g2Add.addEventListener('click', () => showG2());
+      els.g2Remove.addEventListener('click', () => hideG2());
+      els.allergyAdd.addEventListener('click', () => showAllergy());
+      els.allergyRemove.addEventListener('click', () => hideAllergy());
+      els.formCancel.addEventListener('click', resetMemberForm);
+      els.rosterForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const payload = readMemberForm();
+        if (!payload) { showToast('Full name, Guardian 1 relation, and Guardian 1 phone are required.'); return; }
+        if (state.editingMemberId) {
+          const { error } = await db.from('members').update(payload).eq('id', state.editingMemberId);
+          if (error) { console.error(error); showToast('Could not save member.'); return; }
+        } else {
+          const { error } = await db.from('members').insert({ ...payload, created_by: state.session.user.id });
+          if (error) { console.error(error); showToast('Could not add member.'); return; }
+        }
+        resetMemberForm();
+        await loadRoster();
+      });
+    }
+
+    // ---------- Dashboard --------------------------------------------------
+    function renderStats() {
+      const active = state.members.filter((m: any) => m.active).length;
+      const archived = state.members.length - active;
+      els.stats.innerHTML = `
+        <div class="ws-stat ws-stat--accent">
+          <span class="ws-stat-icon">★</span>
+          <span class="ws-stat-text"><span class="ws-stat-num">${active}</span><span class="ws-stat-label">Active members</span></span>
+        </div>
+        <div class="ws-stat">
+          <span class="ws-stat-icon">◆</span>
+          <span class="ws-stat-text"><span class="ws-stat-num">${archived}</span><span class="ws-stat-label">Archived members</span></span>
+        </div>
+      `;
+    }
+
+    // ---------- Admin: approve leaders, assign groups --------------------
+    async function loadAdmin() {
+      const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load leaders.'); return; }
+      renderAdmin(data || []);
+    }
+    function renderAdmin(profiles: any) {
+      els.adminBody.innerHTML = profiles.map((p: any) => `
+        <tr data-profile-id="${p.id}" class="${p.role === 'pending' ? 'ws-row--pending' : ''}">
+          <td>${escapeHtml(p.name)}</td>
+          <td>
+            <select data-admin-role>
+              <option value="pending" ${p.role === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="leader" ${p.role === 'leader' ? 'selected' : ''}>Leader</option>
+              <option value="admin" ${p.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+          </td>
+          <td class="ws-admin-groups">
+            ${GROUPS.map((g) => `
+              <label class="ws-group-check">
+                <input type="checkbox" value="${g.key}" ${p.groups.includes(g.key) ? 'checked' : ''} />
+                ${escapeHtml(g.en)}
+              </label>
+            `).join('')}
+          </td>
+          <td><button type="button" class="btn-primary ws-admin-save" data-admin-save>Save</button></td>
+        </tr>
+      `).join('');
+
+      els.adminBody.querySelectorAll('tr').forEach((row: any) => {
+        const id = row.dataset.profileId;
+        row.querySelector('[data-admin-save]').addEventListener('click', async () => {
+          const role = row.querySelector('[data-admin-role]').value;
+          const groups = Array.from(row.querySelectorAll('.ws-group-check input:checked')).map((i) => i.value);
+          const { error } = await db.from('profiles').update({ role, groups }).eq('id', id);
+          if (error) { console.error(error); showToast('Could not save — ' + (error.message || 'unknown error') + '.'); return; }
+          showToast('Saved.');
+          if (id === state.session.user.id) { state.profile.role = role; state.profile.groups = groups; setupGroups(); }
+        });
+      });
+    }
+
+    // ---------- Groups + tabs ---------------------------------------------
+    function setupGroups() {
+      state.availableGroups = state.profile.role === 'admin'
+        ? GROUPS.map((g) => g.key)
+        : state.profile.groups;
+      if (!state.availableGroups.includes(state.activeGroup)) {
+        state.activeGroup = state.availableGroups[0] || null;
+      }
+      renderGroupSwitch();
+    }
+    function renderGroupSwitch() {
+      if (state.availableGroups.length <= 1) {
+        const g = GROUPS.find((x) => x.key === state.availableGroups[0]);
+        els.groupSwitch.innerHTML = g ? `<span class="ws-single-group">${escapeHtml(g.en)}</span>` : '';
+        return;
+      }
+      els.groupSwitch.innerHTML = state.availableGroups.map((key: any) => {
+        const g = GROUPS.find((x) => x.key === key);
+        return `<button type="button" class="curr-tab${key === state.activeGroup ? ' curr-tab--active' : ''}" data-group="${key}">${g ? g.en : key}</button>`;
+      }).join('');
+      els.groupSwitch.querySelectorAll('[data-group]').forEach((btn: any) => {
+        btn.addEventListener('click', () => {
+          state.activeGroup = btn.dataset.group;
+          renderGroupSwitch();
+          refreshApprovalsBadge();
+          if (state.activeTab === 'roster' || state.activeTab === 'dashboard' || state.activeTab === 'archive') loadRoster();
+          if (state.activeTab === 'approvals') loadApprovals();
+        });
+      });
+    }
+
+    function setTab(tab: any) {
+      state.activeTab = tab;
+      els.tabs.querySelectorAll('.ws-tab').forEach((b: any) => b.classList.toggle('ws-tab--active', b.dataset.tab === tab));
+      document.querySelectorAll('.ws-panel').forEach((p: any) => p.toggleAttribute('hidden', p.dataset.panel !== tab));
+      if (tab === 'roster' || tab === 'dashboard' || tab === 'archive') loadRoster();
+      if (tab === 'admin') loadAdmin();
+      if (tab === 'approvals') loadApprovals();
+    }
+    function bindTabs() {
+      els.tabs.querySelectorAll('.ws-tab').forEach((btn: any) => {
+        btn.addEventListener('click', () => setTab(btn.dataset.tab));
+      });
+    }
+
+    // ---------- Boot ---------------------------------------------------
+    async function init() {
+      cacheEls();
+      if (!supabaseConfigured) { showToast('Not connected to the database.'); return; }
+
+      const session = await getSession();
+      if (!session) { window.location.replace('/leaders'); return; }
+      state.session = session;
+
+      const profile = await getProfile(session.user.id);
+      if (!profile) { await signOut(); window.location.replace('/leaders'); return; }
+      state.profile = profile;
+
+      els.shell.removeAttribute('hidden');
+
+      if (profile.role === 'pending') {
+        els.pending.removeAttribute('hidden');
+        els.signoutPending.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
+        const checkBtn = el('[data-ws-check-again]');
+        checkBtn.addEventListener('click', async () => {
+          checkBtn.disabled = true;
+          checkBtn.textContent = 'Checking…';
+          const fresh = await getProfile(session.user.id);
+          if (fresh && fresh.role !== 'pending') {
+            window.location.reload();
+            return;
+          }
+          checkBtn.disabled = false;
+          checkBtn.textContent = 'Check again';
+          showToast('Still pending — ask an admin to approve you.');
+        });
+        return;
+      }
+
+      els.main.removeAttribute('hidden');
+      const initials = profile.name.trim().split(/\s+/).map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
+      els.accountBtn.textContent = initials || '?';
+      els.who.innerHTML = `<span class="ws-account-name">${escapeHtml(profile.name)}</span><span class="ws-account-role">${profile.role}</span>`;
+      els.accountBtn.addEventListener('click', () => {
+        els.accountMenu.toggleAttribute('hidden');
+      });
+      document.addEventListener('click', (e: any) => {
+        if (els.accountMenu.hidden) return;
+        if (e.target.closest('.ws-account')) return;
+        els.accountMenu.setAttribute('hidden', '');
+      });
+      els.signout.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
+      if (profile.role === 'admin') {
+        document.querySelectorAll('[data-admin-only]').forEach((elm) => elm.removeAttribute('hidden'));
+      }
+
+      setupGroups();
+      bindTabs();
+      bindRosterForm();
+      refreshApprovalsBadge();
+      setTab('dashboard');
+    }
+
+    document.addEventListener('astro:page-load', init);
+  </script>
+</BaseLayout>

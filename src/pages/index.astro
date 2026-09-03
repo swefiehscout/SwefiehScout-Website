@@ -90,6 +90,28 @@ const quickLinks = [
     </div>
   </section>
 
+  <section class="section" data-animate>
+    <h2 class="section-heading">Get Started</h2>
+    <div class="cards-grid cards-grid--2">
+      <a class="card" href="/join" data-animate data-animate-delay="1">
+        <span class="card-icon" aria-hidden="true">
+          <Icon name="plus" size={26} />
+        </span>
+        <h3 class="card-title">New Member?</h3>
+        <p class="card-blurb">Register your child for a group in a couple of minutes — a leader will approve you in.</p>
+        <span class="card-arrow">Register now →</span>
+      </a>
+      <a class="card" href="/leaders" data-animate data-animate-delay="2">
+        <span class="card-icon" aria-hidden="true">
+          <Icon name="compass" size={26} />
+        </span>
+        <h3 class="card-title">Already a Leader?</h3>
+        <p class="card-blurb">Sign in to your group's workspace — roster, attendance, fees, and more.</p>
+        <span class="card-arrow">Sign in →</span>
+      </a>
+    </div>
+  </section>
+
   <section class="stats">
     {stats.map((s, i) => (
       <div class="stat-card" data-animate data-animate-delay={String((i % 5) + 1)}>

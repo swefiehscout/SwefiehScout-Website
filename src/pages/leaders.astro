@@ -1,83 +1,168 @@
 ---
+// Leaders Workspace — sign in / create account. Replaces the old shared-
+// password gate now that each leader has a real Supabase Auth account.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { PORTAL_PASSWORD, PORTAL_TTL_HOURS } from '../lib/leader-portal-config';
-const ttlMs = PORTAL_TTL_HOURS * 60 * 60 * 1000;
 ---
-<BaseLayout title="Leaders Portal" bare>
+<BaseLayout title="Leaders Workspace" bare>
   <section class="page-hero" data-animate>
-    <h1 class="page-h1">
-      Leaders Portal
-      <span class="page-h1-ar">بوابة القادة</span>
-    </h1>
-    <p class="page-tag">
-      Enter the password to access the leaders' resources.
-    </p>
-    <p class="page-tag-ar">
-      أدخل كلمة المرور للوصول إلى موارد القادة.
-    </p>
+    <h1 class="page-h1">Leaders Workspace</h1>
+    <p class="page-tag">Sign in to your group's workspace.</p>
   </section>
 
-  <form class="gate-form" data-gate-form>
-    <label class="form-row">
-      <span class="gate-label">Password · كلمة المرور</span>
-      <input
-        type="password"
-        name="password"
-        autocomplete="current-password"
-        required
-        autofocus
-        data-gate-input
-      />
-    </label>
-    <p class="gate-error" data-gate-error hidden>
-      Wrong password · كلمة المرور خاطئة
-    </p>
-    <button type="submit" class="btn-primary">Unlock · فتح</button>
+  <div class="gate-form auth-card">
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab auth-tab--active" data-auth-mode="signin">Sign in</button>
+      <button type="button" class="auth-tab" data-auth-mode="signup">Create account</button>
+    </div>
+
+    <form data-auth-form>
+      <label class="form-row" data-field-name hidden>
+        <span class="gate-label">Your name</span>
+        <input type="text" data-auth-name autocomplete="name" placeholder="e.g. Fadi" />
+      </label>
+      <label class="form-row">
+        <span class="gate-label">Email</span>
+        <input type="email" data-auth-email autocomplete="email" required />
+      </label>
+      <label class="form-row">
+        <span class="gate-label">Password</span>
+        <input type="password" data-auth-password autocomplete="current-password" required minlength="6" />
+      </label>
+      <p class="gate-error" data-auth-error hidden></p>
+      <p class="auth-notice" data-auth-notice hidden></p>
+      <button type="submit" class="btn-primary" data-auth-submit>Sign in</button>
+    </form>
+    <button type="button" class="auth-forgot" data-auth-forgot>Forgot password?</button>
+
+    <div class="auth-recovery" data-auth-recovery hidden>
+      <p class="gate-label">Set a new password</p>
+      <input type="password" data-recovery-password minlength="6" placeholder="New password" />
+      <button type="button" class="btn-primary" data-recovery-submit>Save password</button>
+    </div>
+
     <p class="gate-note">
-      Sessions stay unlocked for {PORTAL_TTL_HOURS} hours.<br />
-      <span dir="rtl">تبقى الجلسة مفتوحة لمدة {PORTAL_TTL_HOURS} ساعات.</span>
+      New leaders: create an account, then wait for an admin to approve you and assign your group.
     </p>
-  </form>
+  </div>
 
-  <script is:inline define:vars={{ password: PORTAL_PASSWORD, ttlMs }}>
-    (function () {
-      var STORAGE_KEY = 'leaders_portal_unlocked_at';
+  <script>
+    import { supabase, supabaseConfigured, signIn, signUp, resetPassword, updatePassword, getSession } from '../lib/workspace/auth';
 
-      function unlocked() {
-        try {
-          var ts = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
-          return ts > 0 && Date.now() - ts < ttlMs;
-        } catch (e) { return false; }
-      }
+    let mode = 'signin';
 
-      // If already unlocked, jump straight to the portal.
-      if (unlocked()) {
-        window.location.replace('/leaders/portal');
-        return;
-      }
+    function el(sel: string): any { return document.querySelector(sel); }
+    function showError(msg: string) {
+      const e = el('[data-auth-error]');
+      e.textContent = msg;
+      e.hidden = false;
+      el('[data-auth-notice]').hidden = true;
+    }
+    function showNotice(msg: string) {
+      const n = el('[data-auth-notice]');
+      n.textContent = msg;
+      n.hidden = false;
+      el('[data-auth-error]').hidden = true;
+    }
+    function clearMessages() {
+      el('[data-auth-error]').hidden = true;
+      el('[data-auth-notice]').hidden = true;
+    }
 
-      function bind() {
-        var form = document.querySelector('[data-gate-form]');
-        var input = document.querySelector('[data-gate-input]');
-        var err = document.querySelector('[data-gate-error]');
-        if (!form || !input || form.dataset.bound) return;
-        form.dataset.bound = '1';
-        form.addEventListener('submit', function (e) {
-          e.preventDefault();
-          if (input.value === password) {
-            try { localStorage.setItem(STORAGE_KEY, String(Date.now())); } catch (e) {}
-            window.location.assign('/leaders/portal');
+    function setMode(next: string) {
+      mode = next;
+      document.querySelectorAll('[data-auth-mode]').forEach((b) => {
+        b.classList.toggle('auth-tab--active', (b as HTMLElement).dataset.authMode === next);
+      });
+      el('[data-field-name]').hidden = next !== 'signup';
+      el('[data-auth-submit]').textContent = next === 'signup' ? 'Create account' : 'Sign in';
+      clearMessages();
+    }
+
+    async function handleSubmit(e: Event) {
+      e.preventDefault();
+      clearMessages();
+      if (!supabaseConfigured) { showError('Not connected to the database.'); return; }
+      const email = el('[data-auth-email]').value.trim();
+      const password = el('[data-auth-password]').value;
+      const submitBtn = el('[data-auth-submit]');
+      submitBtn.disabled = true;
+      try {
+        if (mode === 'signup') {
+          const name = el('[data-auth-name]').value.trim();
+          if (!name) { showError('Enter your name.'); return; }
+          const { data, error } = await signUp(name, email, password);
+          if (error) throw error;
+          if (data.session) {
+            window.location.assign('/leaders/app');
           } else {
-            if (err) err.removeAttribute('hidden');
-            input.value = '';
-            input.focus();
+            showNotice('Account created — check your email to confirm it, then sign in.');
+            setMode('signin');
+          }
+        } else {
+          const { error } = await signIn(email, password);
+          if (error) throw error;
+          window.location.assign('/leaders/app');
+        }
+      } catch (err: any) {
+        showError(err.message || 'Something went wrong.');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    async function handleForgot() {
+      clearMessages();
+      const email = el('[data-auth-email]').value.trim();
+      if (!email) { showError('Enter your email above first, then tap this again.'); return; }
+      try {
+        await resetPassword(email);
+        showNotice('Check your email for a password reset link.');
+      } catch (err: any) {
+        showError(err.message || 'Something went wrong.');
+      }
+    }
+
+    async function handleRecoverySubmit() {
+      const password = el('[data-recovery-password]').value;
+      if (!password || password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+      try {
+        const { error } = await updatePassword(password);
+        if (error) throw error;
+        showNotice('Password updated — you can sign in now.');
+        el('[data-auth-recovery]').hidden = true;
+      } catch (err: any) {
+        showError(err.message || 'Something went wrong.');
+      }
+    }
+
+    function bind() {
+      const form = el('[data-auth-form]');
+      if (form.dataset.bound) return;
+      form.dataset.bound = '1';
+
+      document.querySelectorAll('[data-auth-mode]').forEach((b) => {
+        b.addEventListener('click', () => setMode((b as HTMLElement).dataset.authMode || 'signin'));
+      });
+      form.addEventListener('submit', handleSubmit);
+      el('[data-auth-forgot]').addEventListener('click', handleForgot);
+      el('[data-recovery-submit]').addEventListener('click', handleRecoverySubmit);
+
+      if (supabaseConfigured && supabase) {
+        supabase.auth.onAuthStateChange((event) => {
+          if (event === 'PASSWORD_RECOVERY') {
+            el('[data-auth-recovery]').hidden = false;
           }
         });
-        input.addEventListener('input', function () {
-          if (err) err.setAttribute('hidden', '');
+        getSession().then((session) => {
+          // Already signed in and this isn't a password-recovery landing —
+          // skip straight to the workspace.
+          if (session && !window.location.hash.includes('type=recovery')) {
+            window.location.replace('/leaders/app');
+          }
         });
       }
-      document.addEventListener('astro:page-load', bind);
-    })();
+    }
+
+    document.addEventListener('astro:page-load', bind);
   </script>
 </BaseLayout>
