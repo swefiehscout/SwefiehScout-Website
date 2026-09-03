@@ -4338,14 +4338,16 @@ main.wide {
 .ws-form-grid--4 { grid-template-columns: repeat(4, 1fr); }
 /* Tablet gap: the 720px query below collapses this straight to 1
    column, but nothing covered the space between that and full desktop
-   width — an iPad (portrait especially) rendered 4 fields, Guardian 1
-   phone included, at an uncomfortably cramped width. A 2-column step
-   in between was tried first but produced overlapping rows on actual
-   iPad Safari (reproducible on open, not a rendering-timing glitch) —
-   root cause unconfirmed, so falling back to the same full 1-column
-   stack already proven safe on phones, just extended to cover tablet
-   widths too rather than risk a second broken layout. */
-@media (min-width: 721px) and (max-width: 1024px) {
+   width. The upper bound here was originally 1024px, which turned out
+   to be wrong — main.wide caps the whole app at 1180px regardless of
+   viewport, and iPad landscape alone runs anywhere from ~1024px
+   (10.9") up past 1180px to ~1366px (12.9" Pro), so 1024px missed
+   most real iPads entirely; a 2-column step tried in between also
+   produced overlapping rows on actual iPad Safari for reasons not
+   pinned down. Widened well past every iPad's landscape width and
+   kept as a full 1-column stack (the layout already proven safe on
+   phones) rather than guess at a second column count. */
+@media (min-width: 721px) and (max-width: 1440px) {
   .ws-form-grid--4 { grid-template-columns: 1fr; }
 }
 .ws-field { display: block; margin-bottom: 0.9rem; font-size: 0.78rem; color: var(--color-muted); font-weight: 600; }
