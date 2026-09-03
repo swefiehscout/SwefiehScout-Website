@@ -1441,7 +1441,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         : (state.groupSettings?.expense_categories || []);
       els.finCategory.innerHTML = list.length
         ? list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
-        : '<option value="">No categories yet — add some in Settings</option>';
+        : '<option value="">No categories yet — add some in the Categories tab</option>';
     }
     function bindFinanceForm() {
       els.finType.addEventListener('change', updateFinCategoryOptions);
@@ -2533,6 +2533,15 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     }
 
     // ---------- Boot ---------------------------------------------------
+    // astro:page-load fires on the very first load AND again after every
+    // client-side view-transition back to this page (e.g. a leader clicks
+    // a site-nav link like Home, then hits the browser Back button — the
+    // header/footer are outside the workspace, always in reach). init()
+    // has to re-run then (session may have expired, role/groups may have
+    // changed) but must NOT re-bind every listener on top of the ones
+    // already bound — these two flags gate just the one-time bindings.
+    let boundOnce = false;
+    let boundPendingOnce = false;
     async function init() {
       cacheEls();
       if (!supabaseConfigured) { showToast('Not connected to the database.'); return; }
@@ -2557,20 +2566,23 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
 
       if (profile.role === 'pending') {
         els.pending.removeAttribute('hidden');
-        els.signoutPending.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
-        const checkBtn = el('[data-ws-check-again]');
-        checkBtn.addEventListener('click', async () => {
-          checkBtn.disabled = true;
-          checkBtn.textContent = 'Checking…';
-          const fresh = await getProfile(session.user.id);
-          if (fresh && fresh.role !== 'pending') {
-            window.location.reload();
-            return;
-          }
-          checkBtn.disabled = false;
-          checkBtn.textContent = 'Check again';
-          showToast('Still pending — ask an admin to approve you.');
-        });
+        if (!boundPendingOnce) {
+          boundPendingOnce = true;
+          els.signoutPending.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
+          const checkBtn = el('[data-ws-check-again]');
+          checkBtn.addEventListener('click', async () => {
+            checkBtn.disabled = true;
+            checkBtn.textContent = 'Checking…';
+            const fresh = await getProfile(session.user.id);
+            if (fresh && fresh.role !== 'pending') {
+              window.location.reload();
+              return;
+            }
+            checkBtn.disabled = false;
+            checkBtn.textContent = 'Check again';
+            showToast('Still pending — ask an admin to approve you.');
+          });
+        }
         return;
       }
 
@@ -2578,40 +2590,50 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       const initials = profile.name.trim().split(/\s+/).map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
       els.accountBtn.textContent = initials || '?';
       els.who.innerHTML = `<span class="ws-account-name">${escapeHtml(profile.name)}</span><span class="ws-account-role">${profile.role}</span>`;
-      els.accountBtn.addEventListener('click', () => {
-        els.accountMenu.toggleAttribute('hidden');
-      });
-      document.addEventListener('click', (e: any) => {
-        if (els.accountMenu.hidden) return;
-        if (e.target.closest('.ws-account')) return;
-        els.accountMenu.setAttribute('hidden', '');
-      });
-      els.signout.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
       if (profile.role === 'admin') {
         document.querySelectorAll('[data-admin-only]').forEach((elm) => elm.removeAttribute('hidden'));
       }
 
+      // setupGroups()/renderGroupSwitch() rebuild their own innerHTML (and
+      // rebind onto those fresh nodes) every call, so they're always safe
+      // to re-run — unlike everything below, which binds directly onto
+      // static elements that persist across an astro:page-load re-init.
       setupGroups();
-      bindTabs();
-      bindSubtabs();
-      bindDashboard();
-      bindRosterForm();
-      bindFinanceForm();
-      bindLibraryUpload();
-      bindReports();
-      bindTableSearch(els.rosterSearch, els.rosterBody);
-      bindTableSearch(els.archiveSearch, els.archiveBody);
-      bindTableSearch(els.approvalsSearch, els.approvalsBody);
-      bindTableSearch(els.attSearch, els.attBody);
-      bindTableSearch(els.feeSearch, els.feeBody);
-      currBindStatics();
-      bindAttendance();
-      els.feeMonth.addEventListener('change', loadFees);
-      els.feeYear.addEventListener('change', loadFees);
-      els.feeDefault.addEventListener('blur', saveDefaultFee);
-      bindSettings();
-      els.finMonth.addEventListener('change', loadFinance);
-      els.finYear.addEventListener('change', loadFinance);
+
+      if (!boundOnce) {
+        boundOnce = true;
+        els.accountBtn.addEventListener('click', () => {
+          els.accountMenu.toggleAttribute('hidden');
+        });
+        document.addEventListener('click', (e: any) => {
+          if (els.accountMenu.hidden) return;
+          if (e.target.closest('.ws-account')) return;
+          els.accountMenu.setAttribute('hidden', '');
+        });
+        els.signout.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
+
+        bindTabs();
+        bindSubtabs();
+        bindDashboard();
+        bindRosterForm();
+        bindFinanceForm();
+        bindLibraryUpload();
+        bindReports();
+        bindTableSearch(els.rosterSearch, els.rosterBody);
+        bindTableSearch(els.archiveSearch, els.archiveBody);
+        bindTableSearch(els.approvalsSearch, els.approvalsBody);
+        bindTableSearch(els.attSearch, els.attBody);
+        bindTableSearch(els.feeSearch, els.feeBody);
+        currBindStatics();
+        bindAttendance();
+        els.feeMonth.addEventListener('change', loadFees);
+        els.feeYear.addEventListener('change', loadFees);
+        els.feeDefault.addEventListener('blur', saveDefaultFee);
+        bindSettings();
+        els.finMonth.addEventListener('change', loadFinance);
+        els.finYear.addEventListener('change', loadFinance);
+      }
+
       refreshApprovalsBadge();
       setTab('dashboard');
     }

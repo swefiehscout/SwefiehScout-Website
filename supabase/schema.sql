@@ -329,6 +329,14 @@ insert into storage.buckets (id, name, public)
 values ('documents', 'documents', false)
 on conflict (id) do nothing;
 
+-- Every upload path is "<group_key>/..." (see bindLibraryUpload() and the
+-- Finance receipt upload in app.astro) — (storage.foldername(name))[1]
+-- pulls that first path segment back out, so writes/updates/deletes are
+-- scoped to groups the user actually has access to, same as every other
+-- table. Read stays any-authenticated: a signed URL already requires
+-- knowing the exact unguessable, timestamped path, which in practice
+-- only ever reaches a leader via a `documents` row they were permitted
+-- to SELECT in the first place.
 drop policy if exists "workspace read documents" on storage.objects;
 create policy "workspace read documents" on storage.objects
   for select using (
@@ -338,19 +346,19 @@ create policy "workspace read documents" on storage.objects
 drop policy if exists "workspace write documents" on storage.objects;
 create policy "workspace write documents" on storage.objects
   for insert with check (
-    bucket_id = 'documents' and auth.role() = 'authenticated'
+    bucket_id = 'documents' and has_group_access((storage.foldername(name))[1])
   );
 
 drop policy if exists "workspace update documents" on storage.objects;
 create policy "workspace update documents" on storage.objects
   for update using (
-    bucket_id = 'documents' and auth.role() = 'authenticated'
+    bucket_id = 'documents' and has_group_access((storage.foldername(name))[1])
   );
 
 drop policy if exists "workspace delete documents" on storage.objects;
 create policy "workspace delete documents" on storage.objects
   for delete using (
-    bucket_id = 'documents' and auth.role() = 'authenticated'
+    bucket_id = 'documents' and has_group_access((storage.foldername(name))[1])
   );
 
 -- ============================================================
