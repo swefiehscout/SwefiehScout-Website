@@ -3759,8 +3759,9 @@ main.wide {
 }
 .curr-back-link:hover { color: var(--color-brand); text-decoration: underline; }
 
-/* ----- Curriculum sub-tabs (Plan / Activity Bank) ----- */
-.curr-subtabs {
+/* ----- Sub-tabs within a workspace panel (Curriculum's Plan / Activity
+   Bank, Finance's Ledger / Categories, Library's Documents / Lessons) ----- */
+.curr-subtabs, .ws-subtabs {
   display: inline-flex;
   gap: 0.25rem;
   padding: 0.3rem;
@@ -3769,7 +3770,7 @@ main.wide {
   border: 1px solid var(--color-border);
   border-radius: 999px;
 }
-.curr-subtab {
+.curr-subtab, .ws-subtab {
   padding: 0.5rem 1.1rem;
   border: 0;
   border-radius: 999px;
@@ -3780,9 +3781,9 @@ main.wide {
   font-weight: 600;
   cursor: pointer;
 }
-.curr-subtab--active { background: var(--color-brand); color: #fff; }
-.curr-subtab:hover:not(.curr-subtab--active) { color: var(--color-brand-dark); }
-[data-curr-subpanel][hidden] { display: none !important; }
+.curr-subtab--active, .ws-subtab--active { background: var(--color-brand); color: #fff; }
+.curr-subtab:hover:not(.curr-subtab--active), .ws-subtab:hover:not(.ws-subtab--active) { color: var(--color-brand-dark); }
+[data-curr-subpanel][hidden], [data-subpanel][hidden] { display: none !important; }
 
 /* ----- Curriculum day drawer: prev/next-day nav around the header ----- */
 .curr-day-nav-row { display: flex; align-items: flex-start; gap: 0.75rem; margin: 0 2.5rem 1.25rem 0; }
@@ -4433,13 +4434,18 @@ main.wide {
 /* ----- Tabs: filled pill segmented control, icon + label ----- */
 .ws-tabs {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  /* One row, evenly split across the full width — falls back to wrapping
+     at narrower widths (see media queries below) so labels stay readable. */
+  grid-template-columns: repeat(11, 1fr);
   gap: 0.4rem;
   padding: 0.4rem;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   width: 100%;
+}
+@media (max-width: 1180px) {
+  .ws-tabs { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
 }
 .ws-tab {
   display: flex;

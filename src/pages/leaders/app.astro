@@ -59,9 +59,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         <button type="button" class="ws-tab" data-tab="curriculum"><Icon name="flag" size={16} strokeWidth={1.8} /> Curriculum</button>
         <button type="button" class="ws-tab" data-tab="finance"><Icon name="bank" size={16} strokeWidth={1.8} /> Finance</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
-        <button type="button" class="ws-tab" data-tab="lessons"><Icon name="sparkle" size={16} strokeWidth={1.8} /> Lessons</button>
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
-        <button type="button" class="ws-tab" data-tab="settings"><Icon name="cliq" size={16} strokeWidth={1.8} /> Settings</button>
         <button type="button" class="ws-tab" data-tab="admin" data-admin-only hidden><Icon name="pin" size={16} strokeWidth={1.8} /> Admin</button>
       </nav>
 
@@ -317,115 +315,156 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         </section>
 
         <section class="ws-panel" data-panel="finance" hidden>
-          <form class="ws-member-form" data-fin-form>
-            <div class="ws-member-form-bar" aria-hidden="true"></div>
-            <p class="ws-member-form-title">Add an entry</p>
-            <div class="ws-form-grid ws-form-grid--4">
-              <label class="ws-field">
-                <span>Type *</span>
-                <select data-fin-type required>
-                  <option value="expense" selected>Expense</option>
-                  <option value="income">Income</option>
-                </select>
-              </label>
-              <label class="ws-field">
-                <span>Category</span>
-                <select data-fin-category></select>
-              </label>
-              <label class="ws-field">
-                <span>Amount *</span>
-                <input type="number" step="0.01" min="0" data-fin-amount required />
-              </label>
-              <label class="ws-field">
-                <span>Date *</span>
-                <input type="date" data-fin-date required />
-              </label>
-            </div>
-            <div class="ws-form-grid">
-              <label class="ws-field ws-field--full">
-                <span>Description</span>
-                <input type="text" data-fin-description />
-              </label>
-              <label class="ws-field">
-                <span>Receipt (optional)</span>
-                <input type="file" accept="image/*,.pdf" data-fin-receipt />
-              </label>
-            </div>
-            <div class="ws-form-actions">
-              <button type="submit" class="btn-primary" data-fin-submit>Add entry</button>
-            </div>
-          </form>
-
-          <div class="ws-toolbar-row">
-            <label class="ws-field ws-field--inline">
-              <span>Month</span>
-              <select data-fin-month></select>
-            </label>
-            <label class="ws-field ws-field--inline">
-              <span>Year</span>
-              <select data-fin-year></select>
-            </label>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="finance" data-subtab="ledger">Ledger</button>
+            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="categories">Categories</button>
           </div>
-          <div class="ws-stat-row ws-stat-row--3" data-fin-stats></div>
 
-          <div class="ws-statement" data-fin-statement></div>
+          <div data-subpanel="finance:ledger">
+            <form class="ws-member-form" data-fin-form>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Add an entry</p>
+              <div class="ws-form-grid ws-form-grid--4">
+                <label class="ws-field">
+                  <span>Type *</span>
+                  <select data-fin-type required>
+                    <option value="expense" selected>Expense</option>
+                    <option value="income">Income</option>
+                  </select>
+                </label>
+                <label class="ws-field">
+                  <span>Category</span>
+                  <select data-fin-category></select>
+                </label>
+                <label class="ws-field">
+                  <span>Amount *</span>
+                  <input type="number" step="0.01" min="0" data-fin-amount required />
+                </label>
+                <label class="ws-field">
+                  <span>Date *</span>
+                  <input type="date" data-fin-date required />
+                </label>
+              </div>
+              <div class="ws-form-grid">
+                <label class="ws-field ws-field--full">
+                  <span>Description</span>
+                  <input type="text" data-fin-description />
+                </label>
+                <label class="ws-field">
+                  <span>Receipt (optional)</span>
+                  <input type="file" accept="image/*,.pdf" data-fin-receipt />
+                </label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary" data-fin-submit>Add entry</button>
+              </div>
+            </form>
 
-          <h3 class="ws-admin-h3">Transactions</h3>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-fin-table>
-              <thead>
-                <tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Receipt</th><th></th></tr>
-              </thead>
-              <tbody data-fin-body></tbody>
-            </table>
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline">
+                <span>Month</span>
+                <select data-fin-month></select>
+              </label>
+              <label class="ws-field ws-field--inline">
+                <span>Year</span>
+                <select data-fin-year></select>
+              </label>
+            </div>
+            <div class="ws-stat-row ws-stat-row--3" data-fin-stats></div>
+
+            <div class="ws-statement" data-fin-statement></div>
+
+            <h3 class="ws-admin-h3">Transactions</h3>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-fin-table>
+                <thead>
+                  <tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Receipt</th><th></th></tr>
+                </thead>
+                <tbody data-fin-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="finance:categories" hidden>
+            <p class="ws-soon">
+              The default monthly fee lives on the Fees tab now (it can change month to month) — these lists are
+              for things that apply to every month, shared across all groups.
+            </p>
+            <div class="ws-form-grid">
+              <div class="ws-member-form">
+                <div class="ws-member-form-bar" aria-hidden="true"></div>
+                <p class="ws-member-form-title">Expense categories</p>
+                <div class="ws-category-add">
+                  <input type="text" data-settings-expense-input placeholder="e.g. Supplies" />
+                  <button type="button" class="btn-primary" data-settings-expense-add>Add</button>
+                </div>
+                <div class="ws-category-list" data-settings-expense-list></div>
+              </div>
+              <div class="ws-member-form">
+                <div class="ws-member-form-bar" aria-hidden="true"></div>
+                <p class="ws-member-form-title">Income categories</p>
+                <div class="ws-category-add">
+                  <input type="text" data-settings-income-input placeholder="e.g. Donations" />
+                  <button type="button" class="btn-primary" data-settings-income-add>Add</button>
+                </div>
+                <div class="ws-category-list" data-settings-income-list></div>
+              </div>
+            </div>
           </div>
         </section>
 
         <section class="ws-panel" data-panel="library" hidden>
-          <div class="ws-member-form ws-library-upload">
-            <div class="ws-member-form-bar" aria-hidden="true"></div>
-            <p class="ws-member-form-title">Upload a document</p>
-            <div class="ws-form-grid">
-              <label class="ws-field">
-                <span>File *</span>
-                <input type="file" data-lib-file />
-              </label>
-              <label class="ws-field">
-                <span>Title (optional)</span>
-                <input type="text" data-lib-title placeholder="Defaults to the file name" />
-              </label>
-            </div>
-            <div class="ws-form-actions">
-              <button type="button" class="btn-primary" data-lib-upload>Upload</button>
-            </div>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="library" data-subtab="documents">Documents</button>
+            <button type="button" class="ws-subtab" data-subtabs="library" data-subtab="lessons">Lessons</button>
           </div>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-lib-table>
-              <thead>
-                <tr><th>Title</th><th>Type</th><th>Uploaded</th><th></th></tr>
-              </thead>
-              <tbody data-lib-body></tbody>
-            </table>
-          </div>
-        </section>
 
-        <section class="ws-panel" data-panel="lessons" hidden>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-lessons-table>
-              <thead><tr><th>Resource</th><th></th></tr></thead>
-              <tbody>
-                {LESSON_LINKS.map((l) => (
-                  <tr>
-                    <td>{l.label}</td>
-                    <td class="ws-row-actions">
-                      {l.url
-                        ? <a class="ws-edit-btn" href={l.url} target="_blank" rel="noopener">Open →</a>
-                        : <span class="ws-empty" style="padding:0">Not linked yet</span>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div data-subpanel="library:documents">
+            <div class="ws-member-form ws-library-upload">
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Upload a document</p>
+              <div class="ws-form-grid">
+                <label class="ws-field">
+                  <span>File *</span>
+                  <input type="file" data-lib-file />
+                </label>
+                <label class="ws-field">
+                  <span>Title (optional)</span>
+                  <input type="text" data-lib-title placeholder="Defaults to the file name" />
+                </label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="button" class="btn-primary" data-lib-upload>Upload</button>
+              </div>
+            </div>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-lib-table>
+                <thead>
+                  <tr><th>Title</th><th>Type</th><th>Uploaded</th><th></th></tr>
+                </thead>
+                <tbody data-lib-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="library:lessons" hidden>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-lessons-table>
+                <thead><tr><th>Resource</th><th></th></tr></thead>
+                <tbody>
+                  {LESSON_LINKS.map((l) => (
+                    <tr>
+                      <td>{l.label}</td>
+                      <td class="ws-row-actions">
+                        {l.url
+                          ? <a class="ws-edit-btn" href={l.url} target="_blank" rel="noopener">Open →</a>
+                          : <span class="ws-empty" style="padding:0">Not linked yet</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -455,33 +494,6 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
               <h3 class="ws-admin-h3">Attendance</h3>
               <p class="ws-report-desc">Every active member's attendance count and rate for the period.</p>
               <button type="button" class="btn-primary" data-report-attendance>Download PDF</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="ws-panel" data-panel="settings" hidden>
-          <p class="ws-soon">
-            The default monthly fee lives on the Fees tab now (it can change month to month) — Settings is for
-            things that apply to every month, like your Finance category lists below.
-          </p>
-          <div class="ws-form-grid">
-            <div class="ws-member-form">
-              <div class="ws-member-form-bar" aria-hidden="true"></div>
-              <p class="ws-member-form-title">Expense categories</p>
-              <div class="ws-category-add">
-                <input type="text" data-settings-expense-input placeholder="e.g. Supplies" />
-                <button type="button" class="btn-primary" data-settings-expense-add>Add</button>
-              </div>
-              <div class="ws-category-list" data-settings-expense-list></div>
-            </div>
-            <div class="ws-member-form">
-              <div class="ws-member-form-bar" aria-hidden="true"></div>
-              <p class="ws-member-form-title">Income categories</p>
-              <div class="ws-category-add">
-                <input type="text" data-settings-income-input placeholder="e.g. Donations" />
-                <button type="button" class="btn-primary" data-settings-income-add>Add</button>
-              </div>
-              <div class="ws-category-list" data-settings-income-list></div>
             </div>
           </div>
         </section>
@@ -546,14 +558,10 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     </div>
   </div>
 
-  <!-- Print-only sheet for Reports/Curriculum PDF export (see the
-       .curr-print rules in global.css — hidden on screen, shown only
-       inside @media print). Shared by both since only one prints at a
-       time. -->
-  <div class="curr-print" data-report-print></div>
-
   <script>
     import { supabase, supabaseConfigured, getSession, getProfile, signOut } from '../../lib/workspace/auth';
+    import jsPDF from 'jspdf';
+    import autoTable from 'jspdf-autotable';
     import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK } from '../../lib/curriculum/constants';
 
     // Loose alias for actual query calls below — supabaseConfigured is
@@ -655,7 +663,6 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.settingsIncomeList = el('[data-settings-income-list]');
       els.reportMonth = el('[data-report-month]');
       els.reportYear = el('[data-report-year]');
-      els.reportPrint = el('[data-report-print]');
       els.currPrev = el('[data-curr-prev]');
       els.currNext = el('[data-curr-next]');
       els.currToday = el('[data-curr-today]');
@@ -1257,6 +1264,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       populatePeriodSelects(els.finMonth, els.finYear, true);
       await loadGroupSettings();
       updateFinCategoryOptions();
+      renderSettings();
       const { start, end, label } = periodRange(els.finMonth, els.finYear);
       state.finLabel = label;
       const { data, error } = await db.from('finance_entries').select('*')
@@ -1454,19 +1462,40 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       const { data } = await db.from('members').select('*').eq('group_key', state.activeGroup).order('full_name', { ascending: true });
       state.members = data || [];
     }
-    function printLetterhead(title: string, rangeLabel: string) {
+    // Real PDF generation (not the browser print dialog) — Reports and
+    // Curriculum are English-only now, so jsPDF's limited RTL support is
+    // no longer a concern, and this gives a genuine one-click download.
+    const PDF_BRAND: [number, number, number] = [87, 22, 7];
+    const PDF_ACCENT: [number, number, number] = [20, 56, 34];
+    const PDF_FOOT_BG: [number, number, number] = [250, 243, 232];
+    function pdfHeader(doc: any, title: string, rangeLabel: string): number {
       const g = GROUPS.find((x) => x.key === state.activeGroup);
-      const now = new Date();
-      return `
-        <div class="curr-print-letterhead">
-          <img src="/images/logo.png" alt="" class="curr-print-logo" />
-          <div>
-            <p class="curr-print-org">Greek Orthodox Scouts &amp; Guides — Swefieh</p>
-            <h1>${g ? escapeHtml(g.en) : ''} — ${escapeHtml(title)}</h1>
-            <p class="curr-print-range">${escapeHtml(rangeLabel)}</p>
-          </div>
-        </div>
-        <p class="curr-print-meta">Generated by ${escapeHtml(state.profile?.name || '')} on ${now.toLocaleDateString()}</p>`;
+      const groupName = g ? g.en : (state.activeGroup || '');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...PDF_BRAND);
+      doc.text('GREEK ORTHODOX SCOUTS & GUIDES — SWEFIEH', 14, 15);
+      doc.setFontSize(17);
+      doc.text(`${groupName} — ${title}`, 14, 25);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(90, 90, 90);
+      doc.text(rangeLabel, 14, 32);
+      doc.setDrawColor(...PDF_BRAND);
+      doc.setLineWidth(0.6);
+      doc.line(14, 36, 196, 36);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Generated by ${state.profile?.name || ''} on ${new Date().toLocaleDateString()}`, 14, 41);
+      return 48;
+    }
+    function pdfNextY(doc: any, fallback: number): number {
+      return (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 10 : fallback;
+    }
+    function pdfFilename(title: string, label: string): string {
+      const g = GROUPS.find((x) => x.key === state.activeGroup);
+      const groupName = g ? g.en : (state.activeGroup || '');
+      return `${groupName}-${title}-${label}`.replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/^-+|-+$/g, '') + '.pdf';
     }
     async function downloadFinanceReport() {
       try {
@@ -1486,21 +1515,27 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         const incomeRows = totals('income'), expenseRows = totals('expense');
         const income = incomeRows.reduce((s, [, v]) => s + v, 0);
         const expense = expenseRows.reduce((s, [, v]) => s + v, 0);
-        const rowsHtml = (rows: [string, number][]) => rows.length
-          ? rows.map(([c, v]) => `<tr><td>${escapeHtml(c)}</td><td>${v.toFixed(2)}</td></tr>`).join('')
-          : '<tr><td colspan="2">No data available</td></tr>';
-        els.reportPrint.innerHTML = `
-          ${printLetterhead('Income Statement', label)}
-          <table class="ws-statement-table"><tbody>
-            <tr class="ws-statement-section"><td colspan="2">Income</td></tr>
-            ${rowsHtml(incomeRows)}
-            <tr class="ws-statement-total"><td>Total Income</td><td>${income.toFixed(2)}</td></tr>
-            <tr class="ws-statement-section"><td colspan="2">Expenses</td></tr>
-            ${rowsHtml(expenseRows)}
-            <tr class="ws-statement-total"><td>Total Expenses</td><td>${expense.toFixed(2)}</td></tr>
-            <tr class="ws-statement-net"><td>Net Income</td><td>${(income - expense).toFixed(2)}</td></tr>
-          </tbody></table>`;
-        window.print();
+
+        const doc = new jsPDF();
+        let y = pdfHeader(doc, 'Income Statement', label);
+        const tableOpts = {
+          theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+          footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
+          columnStyles: { 1: { halign: 'right' } },
+        };
+        autoTable(doc, { ...tableOpts, startY: y, head: [['Income', '']],
+          body: incomeRows.length ? incomeRows.map(([c, v]) => [c, v.toFixed(2)]) : [['No data available', '']],
+          foot: [['Total Income', income.toFixed(2)]] });
+        y = pdfNextY(doc, y);
+        autoTable(doc, { ...tableOpts, startY: y, head: [['Expenses', '']],
+          body: expenseRows.length ? expenseRows.map(([c, v]) => [c, v.toFixed(2)]) : [['No data available', '']],
+          foot: [['Total Expenses', expense.toFixed(2)]] });
+        y = pdfNextY(doc, y);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...PDF_ACCENT);
+        doc.text(`Net Income: ${(income - expense).toFixed(2)}`, 14, y);
+        doc.save(pdfFilename('Income-Statement', label));
       } catch (err) {
         console.error('finance report failed', err);
         showToast('Could not generate the report — check your connection and try again.');
@@ -1511,6 +1546,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         await ensureMembersLoaded();
         const { period, label, isYear } = periodRange(els.reportMonth, els.reportYear);
         const active = state.members.filter((m: any) => m.active);
+        const doc = new jsPDF();
         if (!isYear) {
           const { data, error } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).eq('period', period);
           if (error) throw error;
@@ -1519,14 +1555,12 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
           const rows = active.map((m: any) => {
             const rec = map.get(m.id);
             if (rec && rec.paid) { collected += Number(rec.amount || 0); paidCount++; }
-            return `<tr><td>${escapeHtml(m.full_name)}</td><td>${rec && rec.paid ? 'Paid' : 'Unpaid'}</td><td>${rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'}</td></tr>`;
-          }).join('');
-          els.reportPrint.innerHTML = `
-            ${printLetterhead('Monthly Fees', `${label} — ${paidCount} of ${active.length} paid, ${collected.toFixed(2)} collected`)}
-            <table class="ws-statement-table"><tbody>
-              <tr class="ws-statement-section"><td>Member</td><td>Status</td><td>Amount</td></tr>
-              ${rows || '<tr><td colspan="3">No data available</td></tr>'}
-            </tbody></table>`;
+            return [m.full_name, rec && rec.paid ? 'Paid' : 'Unpaid', rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'];
+          });
+          const y = pdfHeader(doc, 'Monthly Fees', `${label} — ${paidCount} of ${active.length} paid, ${collected.toFixed(2)} collected`);
+          autoTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+            head: [['Member', 'Status', 'Amount']], body: rows.length ? rows : [['No data available', '', '']] });
+          doc.save(pdfFilename('Monthly-Fees', label));
         } else {
           const year = els.reportYear.value;
           const { data, error } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).like('period', `${year}-%`);
@@ -1540,17 +1574,14 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
           });
           const rows = active.map((m: any) => {
             const s = byMember.get(m.id) || { months: 0, total: 0 };
-            return `<tr><td>${escapeHtml(m.full_name)}</td><td>${s.months} / 12</td><td>${s.total.toFixed(2)}</td></tr>`;
-          }).join('');
+            return [m.full_name, `${s.months} / 12`, s.total.toFixed(2)];
+          });
           const grandTotal = active.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
-          els.reportPrint.innerHTML = `
-            ${printLetterhead('Yearly Fees Summary', `${label} — ${grandTotal.toFixed(2)} collected total`)}
-            <table class="ws-statement-table"><tbody>
-              <tr class="ws-statement-section"><td>Member</td><td>Months Paid</td><td>Total</td></tr>
-              ${rows || '<tr><td colspan="3">No data available</td></tr>'}
-            </tbody></table>`;
+          const y = pdfHeader(doc, 'Yearly Fees Summary', `${label} — ${grandTotal.toFixed(2)} collected total`);
+          autoTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+            head: [['Member', 'Months Paid', 'Total']], body: rows.length ? rows : [['No data available', '', '']] });
+          doc.save(pdfFilename('Yearly-Fees', label));
         }
-        window.print();
       } catch (err) {
         console.error('fees report failed', err);
         showToast('Could not generate the report — check your connection and try again.');
@@ -1570,15 +1601,13 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         const bodyRows = active.map((m: any) => {
           const present = presentByMember.get(m.id) || 0;
           const rate = totalSessions ? Math.round((present / totalSessions) * 100) : 0;
-          return `<tr><td>${escapeHtml(m.full_name)}</td><td>${present} / ${totalSessions}</td><td>${rate}%</td></tr>`;
-        }).join('');
-        els.reportPrint.innerHTML = `
-          ${printLetterhead('Attendance', `${label} — ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held`)}
-          <table class="ws-statement-table"><tbody>
-            <tr class="ws-statement-section"><td>Member</td><td>Present</td><td>Rate</td></tr>
-            ${bodyRows || '<tr><td colspan="3">No data available</td></tr>'}
-          </tbody></table>`;
-        window.print();
+          return [m.full_name, `${present} / ${totalSessions}`, `${rate}%`];
+        });
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Attendance', `${label} — ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held`);
+        autoTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+          head: [['Member', 'Present', 'Rate']], body: bodyRows.length ? bodyRows : [['No data available', '', '']] });
+        doc.save(pdfFilename('Attendance', label));
       } catch (err) {
         console.error('attendance report failed', err);
         showToast('Could not generate the report — check your connection and try again.');
@@ -1798,26 +1827,27 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     function currNavToday() { state.curr.anchor = new Date(); currReload(); }
     function currExportPDF() {
       const { start, end } = currComputeRange();
-      let html = printLetterhead('Curriculum', els.currNavLabel.textContent);
-      let any = false;
+      const rows: any[] = [];
       let d = new Date(start);
       while (d <= end) {
         const dateStr = toDateStr(d);
         const m = state.curr.meetings.get(dateStr);
         if (m && m.activities && m.activities.length) {
-          any = true;
-          html += `<div class="curr-print-day">
-            <h3>${WEEKDAYS[d.getDay()].en} · ${d.getDate()} ${MONTHS[d.getMonth()].en} ${d.getFullYear()}</h3>
-            ${m.theme ? `<p class="curr-print-theme">${escapeHtml(m.theme)}</p>` : ''}
-            <ol>${m.activities.map((a: any) => `<li>${escapeHtml(a.en)}${a.duration ? ` — ${a.duration} min` : ''}</li>`).join('')}</ol>
-            ${m.notes ? `<p class="curr-print-notes">${escapeHtml(m.notes)}</p>` : ''}
-          </div>`;
+          const dateLabel = `${WEEKDAYS[d.getDay()].en} ${d.getDate()} ${MONTHS[d.getMonth()].en}`;
+          const activitiesText = m.activities.map((a: any) => a.en + (a.duration ? ` (${a.duration} min)` : '')).join('\n');
+          rows.push([dateLabel, m.theme || '—', activitiesText, m.notes || '—']);
         }
         d = addDays(d, 1);
       }
-      if (!any) html += '<p>No meetings planned in this range yet.</p>';
-      els.reportPrint.innerHTML = html;
-      window.print();
+      const doc = new jsPDF();
+      const y = pdfHeader(doc, 'Curriculum', els.currNavLabel.textContent);
+      autoTable(doc, {
+        startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9, valign: 'top' },
+        columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 32 } },
+        head: [['Date', 'Theme', 'Activities', 'Notes']],
+        body: rows.length ? rows : [['No meetings planned in this range yet.', '', '', '']],
+      });
+      doc.save(pdfFilename('Curriculum', els.currNavLabel.textContent));
     }
 
     // ---------- Activity Bank (per-group, editable) -----------------------
@@ -2100,7 +2130,6 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       if (tab === 'fees') loadFees();
       if (tab === 'finance') loadFinance();
       if (tab === 'library') loadLibrary();
-      if (tab === 'settings') loadSettings();
       if (tab === 'curriculum') currStart();
     }
 
@@ -2113,6 +2142,19 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     function bindTabs() {
       els.tabs.querySelectorAll('.ws-tab').forEach((btn: any) => {
         btn.addEventListener('click', () => setTab(btn.dataset.tab));
+      });
+    }
+
+    // ---------- Generic sub-tabs (Finance's Ledger/Categories, Library's
+    // Documents/Lessons) — same pattern as Curriculum's Plan/Activity Bank,
+    // scoped by a "group" name so unrelated sub-tab sets don't collide.
+    function setSubtab(group: string, name: string) {
+      document.querySelectorAll(`.ws-subtab[data-subtabs="${group}"]`).forEach((b: any) => b.classList.toggle('ws-subtab--active', b.dataset.subtab === name));
+      document.querySelectorAll(`[data-subpanel^="${group}:"]`).forEach((p: any) => p.toggleAttribute('hidden', p.dataset.subpanel !== `${group}:${name}`));
+    }
+    function bindSubtabs() {
+      document.querySelectorAll('.ws-subtab').forEach((btn: any) => {
+        btn.addEventListener('click', () => setSubtab(btn.dataset.subtabs, btn.dataset.subtab));
       });
     }
 
@@ -2169,6 +2211,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
 
       setupGroups();
       bindTabs();
+      bindSubtabs();
       bindRosterForm();
       bindFinanceForm();
       bindLibraryUpload();
