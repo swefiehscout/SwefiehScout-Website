@@ -3273,7 +3273,7 @@ main.wide {
    disagree on whether `[hidden]` itself is `!important` (Safari's isn't),
    so a same-specificity `display` rule can silently win and leave the
    element visible — force it explicitly instead of relying on that. */
-.curr-view[hidden], .curr-day-overlay[hidden] {
+.curr-view[hidden], .curr-day-overlay[hidden], .curr-day-attachment[hidden] {
   display: none !important;
 }
 
@@ -3660,6 +3660,9 @@ main.wide {
 }
 .curr-day-custom-add select:disabled { color: var(--color-muted); background: var(--color-bg); }
 .curr-day-custom-add button { padding: 0.5rem 0.9rem; font-size: 0.82rem; }
+/* The "an attachment is already on file" row — a View link plus a small
+   remove (×) button, shown instead of the upload form (never both). */
+.curr-day-attachment { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
 .curr-day-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 2.5rem; margin-bottom: 0.5rem; }
 .curr-day-actions {
   position: sticky;

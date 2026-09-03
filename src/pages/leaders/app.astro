@@ -820,6 +820,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </label>
       </div>
 
+      <p class="curr-day-section-label">Attachment</p>
+      <div class="curr-day-attachment" data-curr-attachment-current hidden>
+        <a class="ws-edit-btn" data-curr-attachment-link target="_blank" rel="noopener">View attachment →</a>
+        <button type="button" class="ws-row-del" data-curr-attachment-remove title="Remove">×</button>
+      </div>
+      <div class="curr-day-custom-add curr-day-custom-add--tight" data-curr-attachment-upload>
+        <input type="file" accept="image/*,.pdf,.doc,.docx" data-curr-attachment-file />
+        <button type="button" class="btn-primary" data-curr-attachment-upload-btn>Upload</button>
+      </div>
+
       <p class="curr-day-section-label">Add an activity</p>
       <form class="curr-day-custom-add" data-curr-bank-select-form>
         <select data-curr-bank-select>
@@ -1001,6 +1011,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.currDayTheme = el('[data-day-theme]');
       els.currDayNotes = el('[data-day-notes]');
       els.currDayList = el('[data-curr-day-list]');
+      els.currAttachmentCurrent = el('[data-curr-attachment-current]');
+      els.currAttachmentLink = el('[data-curr-attachment-link]');
+      els.currAttachmentRemove = el('[data-curr-attachment-remove]');
+      els.currAttachmentUpload = el('[data-curr-attachment-upload]');
+      els.currAttachmentFile = el('[data-curr-attachment-file]');
+      els.currAttachmentUploadBtn = el('[data-curr-attachment-upload-btn]');
       els.currDayPrev = el('[data-curr-day-prev]');
       els.currDayNext = el('[data-curr-day-next]');
       els.currDaySave = el('[data-curr-day-save]');
@@ -2007,7 +2023,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function currPersistMeeting(dateStr: string) {
       const m = state.curr.meetings.get(dateStr);
       if (!m) return;
-      const isEmpty = (!m.activities || m.activities.length === 0) && !m.theme && !m.notes;
+      const isEmpty = (!m.activities || m.activities.length === 0) && !m.theme && !m.notes && !m.attachment_path;
       try {
         if (isEmpty) {
           if (m.id) await db.from('curriculum_meetings').delete().eq('id', m.id);
@@ -2017,7 +2033,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         }
         const payload: any = {
           group_key: m.group_key, date: m.date, theme: m.theme || null, notes: m.notes || null,
-          activities: m.activities, updated_by: state.profile?.name || null,
+          activities: m.activities, attachment_path: m.attachment_path || null, updated_by: state.profile?.name || null,
         };
         if (!m.id) payload.created_by = m.created_by || state.profile?.name || null;
         const { data, error } = await db.from('curriculum_meetings').upsert(payload, { onConflict: 'group_key,date' }).select().single();
@@ -2127,6 +2143,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         cell.addEventListener('click', () => currOpenDayPanel(cell.dataset.date));
       });
     }
+    // Shows the current attachment (with a signed View link + Remove) if
+    // the meeting has one, otherwise the upload form — never both at
+    // once, same as everywhere else a single-slot attachment shows up.
+    async function currRenderAttachment(m: any) {
+      const path = m && m.attachment_path;
+      els.currAttachmentUpload.toggleAttribute('hidden', !!path);
+      els.currAttachmentFile.value = '';
+      if (!path) { els.currAttachmentCurrent.setAttribute('hidden', ''); return; }
+      els.currAttachmentCurrent.removeAttribute('hidden');
+      const { data, error } = await db.storage.from('documents').createSignedUrl(path, 3600);
+      els.currAttachmentLink.href = !error && data ? data.signedUrl : '#';
+    }
     function currOpenDayPanel(dateStr: string) {
       state.curr.currentDay = dateStr;
       const d = parseDateStr(dateStr);
@@ -2135,6 +2163,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.currDayTheme.value = (m && m.theme) || '';
       els.currDayNotes.value = (m && m.notes) || '';
       currRenderActivityList(els.currDayList, dateStr);
+      currRenderAttachment(m);
       els.currDayOverlay.removeAttribute('hidden');
       // Lock background scroll while the modal is open — otherwise the
       // page can scroll behind it and the sticky header/footer end up
@@ -2313,6 +2342,31 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
       els.currDaySave.addEventListener('click', currSaveDay);
       els.currDayCancel.addEventListener('click', currCancelDay);
+      els.currAttachmentUploadBtn.addEventListener('click', async () => {
+        const dateStr = state.curr.currentDay;
+        if (!dateStr) return;
+        const file = els.currAttachmentFile.files[0];
+        if (!file) { showToast('Choose a file first.'); return; }
+        els.currAttachmentUploadBtn.disabled = true;
+        const path = `${state.activeGroup}/curriculum/${dateStr}-${Date.now()}-${file.name}`;
+        const { error: upErr } = await db.storage.from('documents').upload(path, file);
+        if (upErr) { console.error(upErr); showToast('Could not upload.'); els.currAttachmentUploadBtn.disabled = false; return; }
+        const m = currGetOrCreateMeeting(dateStr);
+        m.attachment_path = path;
+        await currPersistMeeting(dateStr);
+        await currRenderAttachment(state.curr.meetings.get(dateStr));
+        els.currAttachmentUploadBtn.disabled = false;
+      });
+      els.currAttachmentRemove.addEventListener('click', async () => {
+        const dateStr = state.curr.currentDay;
+        const m = dateStr && state.curr.meetings.get(dateStr);
+        if (!m || !m.attachment_path) return;
+        const oldPath = m.attachment_path;
+        m.attachment_path = null;
+        await currPersistMeeting(dateStr);
+        await db.storage.from('documents').remove([oldPath]);
+        await currRenderAttachment(state.curr.meetings.get(dateStr) || null);
+      });
       els.currDayPrev.addEventListener('click', () => currStepDay(-1));
       els.currDayNext.addEventListener('click', () => currStepDay(1));
       document.addEventListener('click', (e: any) => {

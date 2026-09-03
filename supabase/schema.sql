@@ -324,6 +324,11 @@ drop policy if exists "group access" on curriculum_meetings;
 create policy "group access" on curriculum_meetings
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
+-- One optional file attached to a meeting (path inside the existing
+-- `documents` storage bucket, same has_group_access() policies already
+-- cover it since the path is always <group_key>/curriculum/...).
+alter table curriculum_meetings add column if not exists attachment_path text;
+
 -- ============================================================
 -- Storage bucket for the document library. Run once — if it
 -- already exists this will error harmlessly; ignore that and
