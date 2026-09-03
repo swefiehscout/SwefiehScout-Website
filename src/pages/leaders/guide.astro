@@ -1,35 +1,127 @@
 ---
 // Step-by-step guide for leaders and admins using the Leaders Workspace.
 // Linked from a "Guide" button in app.astro's header, next to the account
-// avatar. Kept as its own page (not a tab inside the workspace) so it
-// opens in a new tab and a leader never loses their place mid-task, and
-// so it works even for someone who hasn't finished setting up their
-// account yet. English-only, matching the workspace itself.
+// avatar. Kept short and plain on purpose — leaders are not technical,
+// so this stays scannable (short bullets, no jargon, no raw URLs/paths)
+// instead of reading like documentation. Anyone who wants more detail
+// still has the workspace itself to poke around in.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
 
-const sections: { id: string; label: string; icon: string; adminOnly?: boolean }[] = [
-  { id: 'getting-started', label: 'Getting started', icon: 'sun' },
-  { id: 'groups', label: 'Your group(s)', icon: 'flower' },
-  { id: 'dashboard', label: 'Dashboard', icon: 'compass' },
-  { id: 'roster', label: 'Roster', icon: 'star' },
-  { id: 'archive', label: 'Archive', icon: 'fleur' },
-  { id: 'approvals', label: 'Approvals', icon: 'plus' },
-  { id: 'attendance', label: 'Attendance', icon: 'calendar' },
-  { id: 'fees', label: 'Fees', icon: 'cash' },
-  { id: 'curriculum', label: 'Curriculum', icon: 'flag' },
-  { id: 'finance', label: 'Finance', icon: 'bank' },
-  { id: 'library', label: 'Library', icon: 'diamond' },
-  { id: 'reports', label: 'Reports', icon: 'envelope' },
-  { id: 'admin', label: 'Admin', icon: 'pin', adminOnly: true },
+type IconName =
+  | 'sparkle' | 'cross' | 'star' | 'heart' | 'flag' | 'music' | 'flower' | 'fleur'
+  | 'arrow-right' | 'phone' | 'envelope' | 'pin' | 'bank' | 'cliq' | 'cash'
+  | 'calendar' | 'compass' | 'plus' | 'diamond' | 'sun';
+
+const sections: { id: string; label: string; icon: IconName; lines: string[]; adminOnly?: boolean }[] = [
+  {
+    id: 'getting-started', label: 'Getting started', icon: 'sun',
+    lines: [
+      'Tap Sign up and enter your name, email, and a password.',
+      'Check your email and tap the confirmation link.',
+      'Come back and sign in.',
+      'Wait for an admin to approve you and add you to a group.',
+      "Once you're approved, sign in again and you're in.",
+    ],
+  },
+  {
+    id: 'groups', label: 'Groups', icon: 'flower',
+    lines: [
+      "Lead one group? That's all you'll see — nothing to switch.",
+      'Lead more than one? Tap a group\'s name at the top to switch to it.',
+      'The bar under the tabs always shows which group you\'re looking at.',
+    ],
+  },
+  {
+    id: 'dashboard', label: 'Dashboard', icon: 'compass',
+    lines: [
+      "A quick snapshot of your group.",
+      'Member count, attendance, fees, and money in and out.',
+      'Your next planned meeting.',
+      "Anything that needs your attention — unpaid fees, new requests, allergies.",
+    ],
+  },
+  {
+    id: 'roster', label: 'Roster', icon: 'star',
+    lines: [
+      "Add a member — their name and a guardian's contact info.",
+      'Use search to find someone.',
+      'Tap Edit to change their details.',
+      'Tap Archive when they leave the group.',
+    ],
+  },
+  {
+    id: 'archive', label: 'Archive', icon: 'fleur',
+    lines: [
+      'Members who left — nothing about them is deleted.',
+      'Tap Restore to bring someone back at any time.',
+    ],
+  },
+  {
+    id: 'approvals', label: 'Approvals', icon: 'plus',
+    lines: [
+      'New people who asked to join your group show up here.',
+      'Approve adds them to your roster. Reject declines the request.',
+    ],
+  },
+  {
+    id: 'attendance', label: 'Attendance', icon: 'calendar',
+    lines: [
+      'Pick a date on the calendar.',
+      "Tick who's present — it saves right away, nothing else to do.",
+    ],
+  },
+  {
+    id: 'fees', label: 'Fees', icon: 'cash',
+    lines: [
+      'Pick the month.',
+      "Tick who's paid — the date is recorded for you automatically.",
+    ],
+  },
+  {
+    id: 'curriculum', label: 'Curriculum', icon: 'flag',
+    lines: [
+      'Tap a date to plan that meeting.',
+      'Add a theme and pick or type the activities.',
+      'Download a PDF of the whole month\'s plan whenever you like.',
+    ],
+  },
+  {
+    id: 'finance', label: 'Finance', icon: 'bank',
+    lines: [
+      'Add money coming in or going out, with an amount and date.',
+      'See totals for whichever month you pick.',
+    ],
+  },
+  {
+    id: 'library', label: 'Library', icon: 'diamond',
+    lines: [
+      'Upload documents to share with your group.',
+      'Find shared lesson resources here too.',
+    ],
+  },
+  {
+    id: 'reports', label: 'Reports', icon: 'envelope',
+    lines: [
+      'Pick a month, then download a PDF — fees, attendance, money, or the meeting plan.',
+    ],
+  },
+  {
+    id: 'admin', label: 'Admin', icon: 'pin', adminOnly: true,
+    lines: [
+      'Everything below is admin only, and covers every group at once.',
+      'Overview, Finance, Reports, Curriculum, Library, Roster — the same information as each group\'s own tabs, just all groups together.',
+      'Leader Management — approve new leaders, choose which groups each one can access, or remove someone\'s access.',
+    ],
+  },
 ];
 ---
 <BaseLayout title="Leaders Workspace Guide" bare>
   <div class="guide-wrap">
     <section class="page-hero" data-animate>
       <h1 class="page-h1">Leaders Workspace Guide</h1>
-      <p class="page-tag">Everything you need to know to use the new system, step by step.</p>
-      <a class="btn-primary guide-back" href="/leaders/app">← Back to the Workspace</a>
+      <p class="page-tag">A quick look at how everything works.</p>
+      <a class="btn-primary guide-back" href="/leaders/app">← Back to the workspace</a>
     </section>
 
     <nav class="guide-toc" aria-label="Jump to a section">
@@ -37,281 +129,30 @@ const sections: { id: string; label: string; icon: string; adminOnly?: boolean }
         <a class="guide-toc-link" href={`#${s.id}`}>
           <Icon name={s.icon} size={15} strokeWidth={1.8} />
           {s.label}
-          {s.adminOnly && <span class="guide-badge">Admin</span>}
         </a>
       ))}
     </nav>
 
-    <section id="getting-started" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="sun" size={20} strokeWidth={1.8} /></span>
-        <h2>Getting started</h2>
-      </div>
-      <p class="guide-intro">
-        Every leader and admin signs in with their own account — there's no shared password anymore.
-      </p>
-      <ol class="guide-steps">
-        <li>
-          Go to <strong>/leaders</strong> and pick the <strong>Sign up</strong> tab. Enter your name, email, and a
-          password, then submit.
-        </li>
-        <li>
-          You'll land on a <strong>Check your email</strong> screen. Open the confirmation email and click the
-          link in it — it can take a minute or two to arrive, so check your spam folder if you don't see it
-          right away. Didn't get it after a few minutes? The screen has a resend button (it's disabled for the
-          first 3 minutes after each send, so you can't fire off duplicates by accident).
-        </li>
-        <li>
-          Clicking the email link confirms your address and brings you back to /leaders with a
-          "Email confirmed — sign in below" notice. Sign in with the password you chose.
-        </li>
-        <li>
-          The first time you sign in you'll see <strong>Waiting for approval</strong> — your account exists, but
-          an admin still needs to approve you and assign you to a group before you can get in. There's nothing
-          to do here but wait; use <strong>Check again</strong> once you know you've been approved.
-        </li>
-        <li>
-          Once an admin approves you (see <a href="#admin">Admin → Leader Management</a>), reload or hit
-          <strong>Check again</strong> and you're in.
-        </li>
-      </ol>
-    </section>
-
-    <section id="groups" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="flower" size={20} strokeWidth={1.8} /></span>
-        <h2>Your group(s)</h2>
-      </div>
-      <p class="guide-intro">
-        Everything in the workspace — Roster, Attendance, Fees, all of it — belongs to one group at a time.
-      </p>
-      <ol class="guide-steps">
-        <li>If you only lead one group, its name just shows at the top — nothing to switch.</li>
-        <li>
-          If you're assigned to more than one group (or you're an admin, who can see all of them), pill buttons
-          for each one sit in the header. Tap a pill to switch — every tab reloads for that group.
-        </li>
-        <li>
-          The bar just under the tabs always shows <strong>Viewing: &lt;group name&gt;</strong>, so it's never
-          ambiguous which group's data is on screen — handy since that banner stays visible even after you've
-          scrolled past the header.
-        </li>
-        <li>
-          Switching groups mid-edit (say, you had a member's edit form open) automatically closes that form
-          rather than risk saving it against the wrong group.
-        </li>
-      </ol>
-    </section>
-
-    <section id="dashboard" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="compass" size={20} strokeWidth={1.8} /></span>
-        <h2>Dashboard</h2>
-      </div>
-      <p class="guide-intro">The landing tab — a quick-glance summary of your currently-selected group.</p>
-      <ul class="guide-list">
-        <li><strong>Four KPI cards:</strong> active members, attendance rate over the last 30 days, this period's fees collected, and net income month-to-date — each with a trend badge against the previous period.</li>
-        <li><strong>Photo strip</strong> of the troop, scrolling on its own.</li>
-        <li><strong>Attendance trend</strong> chart of your last several sessions, and an <strong>Income vs. Expenses</strong> chart across the last 6 months.</li>
-        <li><strong>Next planned meeting</strong> pulled straight from Curriculum, and the 5 most recent Finance entries.</li>
-        <li><strong>Needs attention</strong> panel — pending approvals, members with allergies on file, and unpaid fees for the period — each one links straight to the relevant tab.</li>
-      </ul>
-    </section>
-
-    <section id="roster" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="star" size={20} strokeWidth={1.8} /></span>
-        <h2>Roster</h2>
-      </div>
-      <p class="guide-intro">The active member list for your group, and where new members get added directly.</p>
-      <ol class="guide-steps">
-        <li>
-          Fill in the form at the top: <strong>full name</strong>, date of birth, and Guardian 1's
-          <strong>relation</strong> and <strong>phone</strong> are the only required fields. "+ Add second
-          guardian" and "+ Add allergy info" reveal optional fields only when you need them.
-        </li>
-        <li>Names auto-capitalize each word as soon as you tab out of the field — no need to fix casing yourself.</li>
-        <li>Submit to add the member, or use <strong>search</strong> above the table to find someone already on the roster.</li>
-        <li>
-          Click <strong>Edit</strong> on a row to load that member back into the form (its title changes to
-          "Editing &lt;name&gt;" and the submit button becomes "Save changes"); <strong>Cancel edit</strong>
-          discards it without saving.
-        </li>
-        <li>
-          <strong>Archive</strong> a member instead of deleting them — see the <a href="#archive">Archive</a>
-          section for what that does and doesn't change.
-        </li>
-      </ol>
-    </section>
-
-    <section id="archive" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="fleur" size={20} strokeWidth={1.8} /></span>
-        <h2>Archive</h2>
-      </div>
-      <p class="guide-intro">Where members go when they leave — nothing about them is ever deleted.</p>
-      <ul class="guide-list">
-        <li>Archived members disappear from Attendance and Fees going forward, but every past record tied to them (attendance history, fee payments) stays exactly as it was.</li>
-        <li><strong>Restore</strong> brings someone straight back onto the active roster at any time.</li>
-        <li>Anyone with no recorded attendance for 3+ months gets archived automatically, tagged <strong>"Auto-archived"</strong> so you can tell it apart from someone you archived on purpose.</li>
-      </ul>
-    </section>
-
-    <section id="approvals" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="plus" size={20} strokeWidth={1.8} /></span>
-        <h2>Approvals</h2>
-      </div>
-      <p class="guide-intro">
-        Parents and new members can request to join a group at <strong>/join</strong> without needing an account
-        of their own.
-      </p>
-      <ul class="guide-list">
-        <li>Every pending request for your currently-selected group shows up here, with a badge on the tab itself when there's at least one waiting.</li>
-        <li><strong>Approve</strong> adds them straight onto that group's active roster with everything they submitted; <strong>reject</strong> just declines it. Nothing is created either way until you act.</li>
-      </ul>
-    </section>
-
-    <section id="attendance" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="calendar" size={20} strokeWidth={1.8} /></span>
-        <h2>Attendance</h2>
-      </div>
-      <p class="guide-intro">A calendar on the left, that day's member list on the right.</p>
-      <ol class="guide-steps">
-        <li>Click any date on the calendar — past or future — to pull up that day's list.</li>
-        <li><strong>Tick the Present checkbox</strong> next to a member's name — it saves instantly, no separate save button to remember.</li>
-        <li>Use the day-arrows above the list, or the calendar itself, to move between dates; search narrows the list to one member.</li>
-      </ol>
-    </section>
-
-    <section id="fees" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="cash" size={20} strokeWidth={1.8} /></span>
-        <h2>Fees</h2>
-      </div>
-      <p class="guide-intro">Tracks each active member's monthly dues, one period at a time.</p>
-      <ol class="guide-steps">
-        <li>Pick the <strong>Month</strong> and <strong>Year</strong> at the top; set a <strong>default fee</strong> for that month if it's different from usual.</li>
-        <li>Tick <strong>Paid</strong> for a member and (if needed) adjust the amount — the paid date is stamped automatically the moment you mark it, so there's nothing to type there.</li>
-        <li>Marking someone paid also drops a matching entry into that group's <a href="#finance">Finance</a> ledger automatically, tagged <strong>"Auto"</strong> — unmark it here to remove that entry too.</li>
-      </ol>
-    </section>
-
-    <section id="curriculum" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="flag" size={20} strokeWidth={1.8} /></span>
-        <h2>Curriculum</h2>
-      </div>
-      <p class="guide-intro">Plan what happens at each meeting, shared with everyone leading that group.</p>
-      <ol class="guide-steps">
-        <li>On the <strong>Plan</strong> sub-tab, click any date on the month calendar to open that meeting's planner.</li>
-        <li>Set a <strong>theme</strong> and <strong>notes</strong>, then add activities either by picking one from the dropdown (built from the <strong>Activity Bank</strong>) or typing a custom one — changes save as you go, shown by a "Saved ✓" indicator.</li>
-        <li>Switch to <strong>List</strong> view for a plain read-through of everything planned that month, or <strong>Export PDF</strong> to download it.</li>
-        <li>
-          The <strong>Activity Bank</strong> sub-tab is where you manage the reusable chips everyone leading this
-          group can drag into a meeting — adding or removing one here doesn't change any meeting that already
-          used it.
-        </li>
-      </ol>
-    </section>
-
-    <section id="finance" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="bank" size={20} strokeWidth={1.8} /></span>
-        <h2>Finance</h2>
-      </div>
-      <p class="guide-intro">Your group's income and expense ledger.</p>
-      <ol class="guide-steps">
-        <li>On <strong>Ledger</strong>, use "Add an entry" — type (income/expense), category, amount, date, an optional description, and an optional receipt photo or PDF.</li>
-        <li>Pick a <strong>Month</strong>/<strong>Year</strong> to see that period's totals and every transaction in it; each row's receipt (if any) is a click away.</li>
-        <li><strong>Categories</strong> lets you add your own expense/income categories — these are shared across every group, so a category you add here shows up for everyone. (The default monthly fee amount lives on the Fees tab instead, since it changes month to month.)</li>
-      </ol>
-    </section>
-
-    <section id="library" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="diamond" size={20} strokeWidth={1.8} /></span>
-        <h2>Library</h2>
-      </div>
-      <p class="guide-intro">Documents that belong to your group, plus troop-wide lesson resources.</p>
-      <ul class="guide-list">
-        <li><strong>Documents</strong> — upload a file (optionally give it a title), and it's downloadable by anyone leading this group. Each group's library is its own; nothing here is shared across groups.</li>
-        <li><strong>Lessons</strong> — a fixed set of shared resource links, the same for every group.</li>
-      </ul>
-    </section>
-
-    <section id="reports" class="ws-dash-card guide-card">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="envelope" size={20} strokeWidth={1.8} /></span>
-        <h2>Reports</h2>
-      </div>
-      <p class="guide-intro">One-click PDF downloads for a chosen month and year, for your group.</p>
-      <ul class="guide-list">
-        <li><strong>Income Statement</strong> — income and expenses by category, with totals and net income.</li>
-        <li><strong>Monthly Fees</strong> — every active member's paid status and amount for the period.</li>
-        <li><strong>Attendance</strong> — every active member's attendance count and rate for the period.</li>
-        <li><strong>Curriculum</strong> — the meeting plan (theme, notes, activities) for each date in the period.</li>
-      </ul>
-    </section>
-
-    <section id="admin" class="ws-dash-card guide-card guide-card--admin">
-      <div class="guide-card-head">
-        <span class="guide-card-icon"><Icon name="pin" size={20} strokeWidth={1.8} /></span>
-        <h2>Admin <span class="guide-badge">Admin only</span></h2>
-      </div>
-      <p class="guide-intro">
-        Only visible to admins. Everything here is troop-wide — every group combined — split across its own
-        sub-tabs.
-      </p>
-      <div class="guide-subgrid">
-        <div class="guide-sub">
-          <h3>Overview</h3>
-          <p>The same numbers each group's own Dashboard shows, rolled up across the whole troop: KPI cards, a photo strip, active-members and fee-collection charts per group, and a full by-group breakdown table.</p>
+    {sections.map((s) => (
+      <section id={s.id} class={`ws-dash-card guide-card${s.adminOnly ? ' guide-card--admin' : ''}`}>
+        <div class="guide-card-head">
+          <span class="guide-card-icon"><Icon name={s.icon} size={20} strokeWidth={1.8} /></span>
+          <h2>{s.label}{s.adminOnly && <span class="guide-badge">Admins only</span>}</h2>
         </div>
-        <div class="guide-sub">
-          <h3>Finance</h3>
-          <p>Every group's Finance ledger together for one period — totals, a by-group breakdown, and every transaction with a Group column.</p>
-        </div>
-        <div class="guide-sub">
-          <h3>Reports</h3>
-          <p>The same PDF reports as a group's own Reports tab (Income Statement, Monthly Fees, Attendance), except every group is combined into one download.</p>
-        </div>
-        <div class="guide-sub">
-          <h3>Curriculum</h3>
-          <p>Every group's next planned meeting at a glance — theme and activities included.</p>
-        </div>
-        <div class="guide-sub">
-          <h3>Library</h3>
-          <p>Every group's uploaded documents, for oversight. To manage or delete one, do it from that group's own Library tab instead.</p>
-        </div>
-        <div class="guide-sub">
-          <h3>Roster</h3>
-          <p>Every group's roster together, with Group and Status (active/archived/all) filters plus search.</p>
-        </div>
-        <div class="guide-sub">
-          <h3>Leader Management</h3>
-          <p>
-            Approve new leaders and manage everyone's access:
-          </p>
-          <ol class="guide-steps">
-            <li>Set a person's <strong>Role</strong> — Pending, Leader, or Admin. Pending is where every new sign-up starts.</li>
-            <li>For Leaders, tick which <strong>groups</strong> they can access (admins automatically get every group, so there's nothing to tick for them).</li>
-            <li>Click <strong>Save</strong> to apply it — they'll get in the next time they reload or hit "Check again".</li>
-            <li><strong>Remove access</strong> (the × button) sends someone back to Pending with no groups — they're signed out of everything immediately, but stay in this list so you can re-approve them later if it was a mistake. It doesn't delete their actual login; that has to be done from the Supabase dashboard directly.</li>
-          </ol>
-        </div>
-      </div>
-    </section>
+        <ul class="guide-list">
+          {s.lines.map((line) => <li>{line}</li>)}
+        </ul>
+      </section>
+    ))}
 
-    <a class="btn-primary guide-back guide-back--bottom" href="/leaders/app">← Back to the Workspace</a>
+    <a class="btn-primary guide-back guide-back--bottom" href="/leaders/app">← Back to the workspace</a>
   </div>
 </BaseLayout>
 
 <style>
-  .guide-wrap { max-width: 56rem; margin: 0 auto; }
+  .guide-wrap { max-width: 44rem; margin: 0 auto; }
   .guide-back { display: inline-flex; margin-top: 1.25rem; }
-  .guide-back--bottom { margin: 2rem 0 0.5rem; }
+  .guide-back--bottom { margin: 1rem 0 0.5rem; }
 
   /* ----- Quick-jump nav — a wrapping pill row, same "no orphans" spirit
      as the workspace's own tab bar, just simpler since it never needs
@@ -321,8 +162,8 @@ const sections: { id: string; label: string; icon: string; adminOnly?: boolean }
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin: 1.75rem 0 2.25rem;
-    padding: 0.75rem;
+    margin: 1.5rem 0 2rem;
+    padding: 0.6rem;
     background: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
@@ -330,27 +171,27 @@ const sections: { id: string; label: string; icon: string; adminOnly?: boolean }
   .guide-toc-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 0.9rem;
+    gap: 0.35rem;
+    padding: 0.4rem 0.8rem;
     border-radius: 999px;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     color: var(--color-brand);
     font-weight: 600;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     text-decoration: none;
   }
   .guide-toc-link:hover { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
   .guide-toc-link:hover :global(svg) { stroke: #fff; }
 
-  .guide-card { margin-bottom: 1.5rem; scroll-margin-top: 5.5rem; }
-  .guide-card-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.6rem; }
+  .guide-card { margin-bottom: 1rem; scroll-margin-top: 5.5rem; padding: 1.1rem 1.3rem 1.25rem; }
+  .guide-card-head { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.6rem; }
   .guide-card-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.4rem;
-    height: 2.4rem;
+    width: 2.1rem;
+    height: 2.1rem;
     border-radius: 50%;
     background: var(--color-bg);
     color: var(--color-brand);
@@ -359,21 +200,20 @@ const sections: { id: string; label: string; icon: string; adminOnly?: boolean }
   .guide-card-head h2 {
     font-family: var(--font-display);
     color: var(--color-brand-dark);
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.55rem;
   }
-  .guide-intro { color: var(--color-muted); margin: 0 0 1rem; line-height: 1.55; }
 
   .guide-badge {
     display: inline-block;
-    padding: 0.15rem 0.55rem;
+    padding: 0.12rem 0.5rem;
     border-radius: 999px;
     background: var(--color-brand);
     color: #fff;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -381,33 +221,6 @@ const sections: { id: string; label: string; icon: string; adminOnly?: boolean }
   }
   .guide-card--admin { border-color: var(--color-brand); }
 
-  .guide-steps { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.55rem; }
-  .guide-steps li { line-height: 1.6; }
-  .guide-list { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.55rem; list-style: disc; }
-  .guide-list li { line-height: 1.6; }
-
-  .guide-subgrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.1rem;
-    margin-top: 0.5rem;
-  }
-  .guide-sub {
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    padding: 1rem 1.1rem;
-  }
-  .guide-sub h3 {
-    font-family: var(--font-display);
-    color: var(--color-brand);
-    font-size: 1rem;
-    margin: 0 0 0.4rem;
-  }
-  .guide-sub p { margin: 0; color: var(--color-muted); line-height: 1.55; font-size: 0.92rem; }
-  .guide-sub .guide-steps { margin-top: 0.6rem; font-size: 0.92rem; }
-
-  @media (max-width: 640px) {
-    .guide-subgrid { grid-template-columns: 1fr; }
-  }
+  .guide-list { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem; list-style: disc; }
+  .guide-list li { line-height: 1.5; font-size: 0.92rem; }
 </style>
