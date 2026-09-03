@@ -501,7 +501,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
                 <tbody>
                   {LESSON_LINKS.map((l) => (
                     <tr>
-                      <td>{l.label}</td>
+                      <td data-label="Resource">{l.label}</td>
                       <td class="ws-row-actions">
                         {l.url
                           ? <a class="ws-edit-btn" href={l.url} target="_blank" rel="noopener">Open →</a>
@@ -800,11 +800,13 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       renderArchive();
     }
     function memberRowHTML(m: any, actionsHTML: string) {
+      // data-label feeds the phone card-view (::before shows it as the
+      // field name) — inert on desktop, where the real <th> is used.
       return `
         <tr data-member-id="${m.id}">
-          <td>${escapeHtml(m.full_name)}${m.archived_reason === 'inactive' ? ' <span class="ws-allergy-badge" title="Auto-archived: no attendance recorded in 3+ months">Auto-archived</span>' : ''}</td>
-          <td>${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
-          <td>${m.has_allergies
+          <td data-label="Name">${escapeHtml(m.full_name)}${m.archived_reason === 'inactive' ? ' <span class="ws-allergy-badge" title="Auto-archived: no attendance recorded in 3+ months">Auto-archived</span>' : ''}</td>
+          <td data-label="Guardian 1">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
+          <td data-label="Allergies">${m.has_allergies
               ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ' — ' + escapeHtml(m.allergy_detail) : ''}</span>`
               : '—'}</td>
           <td class="ws-row-actions">${actionsHTML}</td>
@@ -926,12 +928,12 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       }
       els.approvalsBody.innerHTML = state.approvals.map((r: any) => `
         <tr data-request-id="${r.id}">
-          <td>${escapeHtml(r.full_name)}</td>
-          <td>${r.guardian1_relation ? `${escapeHtml(r.guardian1_relation)}: ${escapeHtml(r.guardian1_phone || '—')}` : '—'}</td>
-          <td>${r.has_allergies
+          <td data-label="Name">${escapeHtml(r.full_name)}</td>
+          <td data-label="Guardian 1">${r.guardian1_relation ? `${escapeHtml(r.guardian1_relation)}: ${escapeHtml(r.guardian1_phone || '—')}` : '—'}</td>
+          <td data-label="Allergies">${r.has_allergies
               ? `<span class="ws-allergy-badge" title="${escapeHtml(r.allergy_detail || '')}">Yes${r.allergy_detail ? ' — ' + escapeHtml(r.allergy_detail) : ''}</span>`
               : '—'}</td>
-          <td>${escapeHtml(r.notes || '—')}</td>
+          <td data-label="Notes">${escapeHtml(r.notes || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-approve-request>Approve</button>
             <button type="button" class="ws-row-del" data-reject-request title="Reject">×</button>
@@ -1112,9 +1114,9 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         if (rec && rec.present) presentCount++;
         return `
           <tr data-member-id="${m.id}">
-            <td>${escapeHtml(m.full_name)}</td>
-            <td><input type="checkbox" data-att-present ${rec && rec.present ? 'checked' : ''} /></td>
-            <td><input type="text" class="ws-inline-note" data-att-note value="${escapeHtml(rec ? rec.note || '' : '')}" placeholder="optional" /></td>
+            <td data-label="Name">${escapeHtml(m.full_name)}</td>
+            <td data-label="Present"><input type="checkbox" data-att-present ${rec && rec.present ? 'checked' : ''} /></td>
+            <td data-label="Note"><input type="text" class="ws-inline-note" data-att-note value="${escapeHtml(rec ? rec.note || '' : '')}" placeholder="optional" /></td>
           </tr>`;
       }).join('');
       els.attSummary.textContent = `${presentCount} of ${active.length} present`;
@@ -1218,10 +1220,10 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         const amount = rec && rec.amount != null ? rec.amount : (defaultAmount != null ? defaultAmount : '');
         return `
           <tr data-member-id="${m.id}">
-            <td>${escapeHtml(m.full_name)}</td>
-            <td><input type="checkbox" data-fee-paid ${rec && rec.paid ? 'checked' : ''} /></td>
-            <td><input type="number" step="0.01" min="0" class="ws-inline-amount" data-fee-amount value="${amount}" /></td>
-            <td><input type="date" data-fee-paidon value="${rec && rec.paid_on ? rec.paid_on : ''}" /></td>
+            <td data-label="Name">${escapeHtml(m.full_name)}</td>
+            <td data-label="Paid"><input type="checkbox" data-fee-paid ${rec && rec.paid ? 'checked' : ''} /></td>
+            <td data-label="Amount"><input type="number" step="0.01" min="0" class="ws-inline-amount" data-fee-amount value="${amount}" /></td>
+            <td data-label="Paid on"><input type="date" data-fee-paidon value="${rec && rec.paid_on ? rec.paid_on : ''}" /></td>
           </tr>`;
       }).join('');
       els.feeSummary.textContent = `${paidCount} of ${active.length} paid — ${collected.toFixed(2)} collected`;
@@ -1382,13 +1384,13 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       }
       els.finBody.innerHTML = state.finEntries.map((e: any) => `
         <tr data-entry-id="${e.id}" data-receipt-path="${escapeHtml(e.receipt_path || '')}">
-          <td>${e.entry_date}</td>
-          <td>${e.entry_type === 'income' ? 'Income' : 'Expense'}</td>
-          <td>${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab — unmark it paid there to remove this">Auto</span>' : ''}</td>
-          <td>${escapeHtml(e.description || '—')}</td>
-          <td>${Number(e.amount).toFixed(2)}</td>
-          <td>${e.receipt_path ? '<button type="button" class="ws-edit-btn" data-fin-receipt-view>View</button>' : '—'}</td>
-          <td>${e.fee_payment_id ? '' : '<button type="button" class="ws-row-del" data-fin-del>×</button>'}</td>
+          <td data-label="Date">${e.entry_date}</td>
+          <td data-label="Type">${e.entry_type === 'income' ? 'Income' : 'Expense'}</td>
+          <td data-label="Category">${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab — unmark it paid there to remove this">Auto</span>' : ''}</td>
+          <td data-label="Description">${escapeHtml(e.description || '—')}</td>
+          <td data-label="Amount">${Number(e.amount).toFixed(2)}</td>
+          <td data-label="Receipt">${e.receipt_path ? '<button type="button" class="ws-edit-btn" data-fin-receipt-view>View</button>' : '—'}</td>
+          <td class="ws-row-actions">${e.fee_payment_id ? '' : '<button type="button" class="ws-row-del" data-fin-del>×</button>'}</td>
         </tr>
       `).join('');
       els.finBody.querySelectorAll('[data-fin-receipt-view]').forEach((btn: any) => {
@@ -1469,9 +1471,9 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       }
       els.libBody.innerHTML = state.docs.map((d: any) => `
         <tr data-doc-id="${d.id}" data-doc-path="${escapeHtml(d.file_path)}">
-          <td>${escapeHtml(d.title)}${d.group_key === null ? ' <span class="ws-allergy-badge">Shared</span>' : ''}</td>
-          <td>${escapeHtml(d.file_type || '—')}</td>
-          <td>${new Date(d.uploaded_at).toLocaleDateString()}</td>
+          <td data-label="Title">${escapeHtml(d.title)}${d.group_key === null ? ' <span class="ws-allergy-badge">Shared</span>' : ''}</td>
+          <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
+          <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-doc-download>Download</button>
             ${d.group_key !== null ? '<button type="button" class="ws-row-del" data-doc-del>×</button>' : ''}
@@ -2332,34 +2334,49 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       if (error) { console.error(error); showToast('Could not load leaders.'); return; }
       renderAdmin(data || []);
     }
+    // Admins have access to every group by definition (see setupGroups())
+    // — a per-admin group checklist would just be dead, confusing UI, so
+    // it's swapped for a plain note whenever the selected role is Admin,
+    // live as the dropdown changes and not only after a save.
+    function adminGroupsCellHTML(groups: string[], isAdmin: boolean) {
+      if (isAdmin) return '<p class="ws-empty" style="padding:0.15rem 0">All groups (admin)</p>';
+      return GROUPS.map((g) => `
+        <label class="ws-group-check">
+          <input type="checkbox" value="${g.key}" ${groups.includes(g.key) ? 'checked' : ''} />
+          ${escapeHtml(g.en)}
+        </label>
+      `).join('');
+    }
     function renderAdmin(profiles: any) {
       els.adminBody.innerHTML = profiles.map((p: any) => `
         <tr data-profile-id="${p.id}" class="${p.role === 'pending' ? 'ws-row--pending' : ''}">
-          <td>${escapeHtml(p.name)}</td>
-          <td>
+          <td data-label="Name">${escapeHtml(p.name)}</td>
+          <td data-label="Role">
             <select data-admin-role>
               <option value="pending" ${p.role === 'pending' ? 'selected' : ''}>Pending</option>
               <option value="leader" ${p.role === 'leader' ? 'selected' : ''}>Leader</option>
               <option value="admin" ${p.role === 'admin' ? 'selected' : ''}>Admin</option>
             </select>
           </td>
-          <td class="ws-admin-groups">
-            ${GROUPS.map((g) => `
-              <label class="ws-group-check">
-                <input type="checkbox" value="${g.key}" ${p.groups.includes(g.key) ? 'checked' : ''} />
-                ${escapeHtml(g.en)}
-              </label>
-            `).join('')}
+          <td class="ws-admin-groups" data-label="Groups" data-groups="${p.groups.join(',')}">
+            ${adminGroupsCellHTML(p.groups, p.role === 'admin')}
           </td>
-          <td><button type="button" class="btn-primary ws-admin-save" data-admin-save>Save</button></td>
+          <td class="ws-row-actions"><button type="button" class="btn-primary ws-admin-save" data-admin-save>Save</button></td>
         </tr>
       `).join('');
 
       els.adminBody.querySelectorAll('tr').forEach((row: any) => {
         const id = row.dataset.profileId;
+        const groupsCell = row.querySelector('.ws-admin-groups');
+        row.querySelector('[data-admin-role]').addEventListener('change', (e: any) => {
+          const savedGroups = (groupsCell.dataset.groups || '').split(',').filter(Boolean);
+          groupsCell.innerHTML = adminGroupsCellHTML(savedGroups, e.target.value === 'admin');
+        });
         row.querySelector('[data-admin-save]').addEventListener('click', async () => {
           const role = row.querySelector('[data-admin-role]').value;
-          const groups = Array.from(row.querySelectorAll('.ws-group-check input:checked')).map((i: any) => i.value);
+          const groups = role === 'admin'
+            ? []
+            : Array.from(row.querySelectorAll('.ws-group-check input:checked')).map((i: any) => i.value);
           const { error } = await db.from('profiles').update({ role, groups }).eq('id', id);
           if (error) { console.error(error); showToast('Could not save — ' + (error.message || 'unknown error') + '.'); return; }
           showToast('Saved.');

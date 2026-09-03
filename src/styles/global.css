@@ -3239,7 +3239,9 @@ main.wide {
 }
 @media (max-width: 720px) {
   .portal-picker { padding: 1.3rem 1.1rem 1.2rem; }
-  .portal-picker-grid { grid-template-columns: 1fr 1fr; }
+  /* One column, not two — GROUPS has 5 entries, and 2 columns leaves a
+     lone orphan button alone on the last row. */
+  .portal-picker-grid { grid-template-columns: 1fr; }
 }
 
 /* ---------- Curriculum (Workspace tab) ----------------------------------
@@ -4981,4 +4983,155 @@ main.wide {
     width: 100%;
     text-align: center;
   }
+}
+
+/* ---------- Leaders Workspace: phone redesign (≤640px) ------------------
+   A real mobile layout, not a shrunk desktop one — entirely inside this
+   media query, so none of it touches the computer view. Three rules
+   drove every decision here: fill the screen width, never leave a lone
+   card/tab orphaned on its own row, and never require sideways scrolling
+   (tables become stacked field-cards instead of scrolling sideways, the
+   calendar grid drops its minimum column width instead of overflowing,
+   the tab bar wraps into even rows instead of scrolling). */
+@media (max-width: 640px) {
+  /* ----- Header: compact. The account avatar is pinned to the top-right
+     corner — same row as the logo — instead of flowing after the group
+     switcher, which (stacked full-width below, see .ws-group-switch)
+     would otherwise push it all the way down past every group pill. ----- */
+  .ws-header { padding: 0.85rem 1rem; gap: 0.65rem; }
+  .ws-logo { font-size: 1.05rem; }
+  .ws-logo-mark { width: 1.75rem; height: 1.75rem; }
+  .ws-header-right { width: 100%; justify-content: space-between; margin-top: 0.75rem; }
+  .ws-account { position: absolute; inset-block-start: 0.85rem; inset-inline-end: 1rem; z-index: 2; }
+
+  /* ----- Group banner ----- */
+  .ws-group-banner { padding: 0.55rem 0.85rem; }
+  .ws-group-banner-name { font-size: 0.95rem; }
+
+  /* ----- Tab bar: an even 4-column grid (11 tabs → rows of 4/4/3, never
+     a lone tab by itself) with icon-over-label cells instead of a
+     side-scrolling strip — the whole bar stays inside the screen width. */
+  .ws-tabs { grid-template-columns: repeat(4, 1fr); gap: 0.3rem; padding: 0.35rem; }
+  .ws-tab {
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.5rem 0.2rem;
+    font-size: 0.62rem;
+    line-height: 1.15;
+  }
+  .ws-tab-badge { position: absolute; inset-block-start: 0.3rem; inset-inline-end: 0.3rem; }
+  .ws-tab { position: relative; }
+
+  /* ----- Dashboard: tighter cards, still the same content/order ----- */
+  .ws-dash-kpi { padding: 1.1rem 1.2rem; }
+  .ws-dash-kpi-num { font-size: 1.85rem; }
+  .ws-dash-card { padding: 1.15rem 1.2rem 1.3rem; }
+  .ws-dash-bars { height: 8rem; gap: 0.5rem; }
+
+  /* ----- Forms: full-width inline fields instead of a wrapped row of
+     fixed-width ones (avoids an odd lone field stranded on its own
+     line). ----- */
+  .ws-toolbar-row { gap: 0.85rem; }
+  .ws-field--inline { width: 100%; }
+
+  /* ----- Header's group switcher (admins/multi-group leaders): a full-
+     width single-column stack instead of pills wrapping by their own
+     text width, which — with 5 groups of very different name lengths —
+     left one lone pill stranded by itself on the last row. A single
+     column can never orphan, at any group count. ----- */
+  .ws-group-switch { flex-direction: column; align-items: stretch; width: 100%; }
+  .ws-group-switch .curr-tab { width: 100%; justify-content: center; }
+
+  /* ----- Button pairs/rows that use the site-wide "primary buttons go
+     full-width on phone" rule: stacking them (instead of leaving them in
+     a flex row where a 100%-wide button collides with its sibling) is
+     what that rule actually needs here to look right. ----- */
+  .ws-form-actions { flex-direction: column; align-items: stretch; gap: 0.6rem; }
+  .ws-form-actions .ws-form-cancel { text-align: center; }
+  .ws-category-add { flex-direction: column; }
+  .ws-category-add input { width: 100%; box-sizing: border-box; }
+  .curr-day-custom-add { flex-direction: column; }
+  .curr-day-custom-add input { flex: none; width: 100%; box-sizing: border-box; }
+  .curr-day-actions { flex-direction: column; gap: 0.6rem; }
+  .curr-day-actions .ws-form-cancel { text-align: center; }
+
+  /* ----- Tables → stacked field-cards, label above value. Every
+     .ws-table td already carries a data-label attribute (added
+     specifically for this) that ::before turns into the field name —
+     one generic rule for every table in the Workspace. Stacked (not
+     label-left/value-right) specifically because a value can be
+     arbitrarily long — a leader's full name, a Finance description —
+     and a side-by-side row has no room to let that wrap cleanly. ----- */
+  .ws-table-wrap { overflow-x: visible; border: 0; border-radius: 0; box-shadow: none; background: none; }
+  .ws-table, .ws-table thead, .ws-table tbody, .ws-table tr, .ws-table th, .ws-table td {
+    display: block;
+    width: 100%;
+  }
+  .ws-table thead { display: none; }
+  .ws-table tbody tr {
+    margin-bottom: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .ws-table tbody tr:last-child { margin-bottom: 0; }
+  .ws-table tr.ws-row--pending { background: #fff9ec; }
+  .ws-table tr.ws-row--pending td { background: none; }
+  .ws-table td {
+    padding: 0.5rem 0;
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    overflow-wrap: anywhere;
+  }
+  .ws-table td:first-child { border-top: 0; padding-top: 0; }
+  .ws-table td:last-child { padding-bottom: 0; }
+  .ws-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 700;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+  .ws-table td > input, .ws-table td > select {
+    display: block;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+  }
+  .ws-table td > input[type="checkbox"] { display: inline-block; width: 1.15rem; height: 1.15rem; }
+  /* Empty-state and action cells don't have a field name to show. */
+  .ws-table td.ws-empty { text-align: center; border-top: 0; padding: 1.5rem !important; }
+  .ws-table td.ws-empty::before { content: none; }
+  .ws-table td.ws-row-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    border-top: 1px solid var(--color-border);
+    margin-top: 0.25rem;
+    padding-top: 0.65rem;
+  }
+  .ws-table td.ws-row-actions::before { content: none; }
+
+  /* ----- Attendance / Curriculum month grid: drop the minimum column
+     width instead of ever overflowing sideways, and hide the theme/
+     activity-chip preview text inside each cell — full detail is one
+     tap away in the day popup, and cramming it in here was the one
+     thing on this page that could force a cell (and the grid) wider
+     than the screen. ----- */
+  .curr-month-cells, .ws-att-calendar .curr-month-cells { grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .curr-day-cell { min-height: 3.2rem; padding: 0.25rem 0.3rem; }
+  .curr-day-num { font-size: 0.72rem; }
+  .curr-day-theme, .curr-day-cell .curr-day-mini { display: none; }
+  .curr-weekday { padding: 0.35rem 0.15rem; font-size: 0.62rem; }
+
+  /* ----- Curriculum day popup: a touch tighter so content isn't packed
+     right up against the rounded corners on a narrow screen. ----- */
+  .curr-day-panel { padding: 1.25rem 1.15rem; }
+  .curr-day-banner { margin: -1.25rem -1.15rem 1.1rem; padding: 0.75rem 1rem; }
 }
