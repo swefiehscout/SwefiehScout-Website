@@ -64,6 +64,14 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         <button type="button" class="ws-tab" data-tab="admin" data-admin-only hidden><Icon name="pin" size={16} strokeWidth={1.8} /> Admin</button>
       </nav>
 
+      <!-- Shown above every tab's content (not just the header switcher up
+           top) so it's never ambiguous which group's data is on screen —
+           especially for admins who can be looking at any of the five. -->
+      <div class="ws-group-banner" data-ws-group-banner>
+        <span class="ws-group-banner-label">Viewing</span>
+        <span class="ws-group-banner-name" data-ws-group-banner-name></span>
+      </div>
+
       <div class="ws-panels">
         <section class="ws-panel" data-panel="dashboard">
           <div class="ws-dash" data-dash-root>
@@ -671,6 +679,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.pending = el('[data-ws-pending]');
       els.main = el('[data-ws-main]');
       els.groupSwitch = el('[data-ws-group-switch]');
+      els.groupBannerName = el('[data-ws-group-banner-name]');
       els.accountBtn = el('[data-ws-account-btn]');
       els.accountMenu = el('[data-ws-account-menu]');
       els.who = el('[data-ws-who]');
@@ -2369,7 +2378,12 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       }
       renderGroupSwitch();
     }
+    function renderGroupBanner() {
+      const g = GROUPS.find((x: any) => x.key === state.activeGroup);
+      els.groupBannerName.textContent = g ? g.en : 'No group assigned yet';
+    }
     function renderGroupSwitch() {
+      renderGroupBanner();
       if (state.availableGroups.length <= 1) {
         const g = GROUPS.find((x) => x.key === state.availableGroups[0]);
         els.groupSwitch.innerHTML = g ? `<span class="ws-single-group">${escapeHtml(g.en)}</span>` : '';
