@@ -5001,8 +5001,16 @@ main.wide {
   .ws-header { padding: 0.85rem 1rem; gap: 0.65rem; }
   .ws-logo { font-size: 1.05rem; }
   .ws-logo-mark { width: 1.75rem; height: 1.75rem; }
+  /* Reserve the same height as the pinned account circle so the logo row
+     it's meant to line up with is never shorter than it. */
+  .ws-header-left { min-height: 2.4rem; padding-inline-end: 3rem; }
   .ws-header-right { width: 100%; justify-content: space-between; margin-top: 0.75rem; }
-  .ws-account { position: absolute; inset-block-start: 0.85rem; inset-inline-end: 1rem; z-index: 2; }
+  .ws-account {
+    position: absolute;
+    inset-block-start: 0.85rem;
+    inset-inline-end: 1rem;
+    z-index: 2;
+  }
 
   /* ----- Group banner ----- */
   .ws-group-banner { padding: 0.55rem 0.85rem; }
