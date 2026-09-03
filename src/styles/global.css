@@ -4336,6 +4336,14 @@ main.wide {
 
 .ws-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1.1rem; margin-bottom: 0.9rem; }
 .ws-form-grid--4 { grid-template-columns: repeat(4, 1fr); }
+/* Tablet gap: the 720px query below collapses this straight to 1
+   column, but nothing covered the space between that and full desktop
+   width — an iPad (portrait especially) rendered 4 fields, Guardian 1
+   phone included, at an uncomfortably cramped width. Two even columns
+   in between fixes it without touching phone or desktop. */
+@media (min-width: 721px) and (max-width: 1024px) {
+  .ws-form-grid--4 { grid-template-columns: repeat(2, 1fr); }
+}
 .ws-field { display: block; margin-bottom: 0.9rem; font-size: 0.78rem; color: var(--color-muted); font-weight: 600; }
 .ws-form-grid .ws-field { margin-bottom: 0; }
 .ws-field--full { max-width: none; }
