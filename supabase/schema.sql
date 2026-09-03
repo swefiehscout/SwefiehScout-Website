@@ -150,12 +150,15 @@ create policy "group access" on attendance
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
 -- ============================================================
--- group_settings — per-group config (currently just the default
--- monthly fee amount).
+-- group_settings — per-group config: the default monthly fee (kept
+-- per period, e.g. {"2026-09": 10}, since the amount can change
+-- month to month) plus configurable Finance category lists.
 -- ============================================================
 create table if not exists group_settings (
   group_key text primary key,
-  monthly_fee_amount numeric(10, 2),
+  monthly_fee_defaults jsonb not null default '{}',
+  expense_categories text[] not null default '{}',
+  income_categories text[] not null default '{}',
   updated_at timestamptz not null default now()
 );
 
@@ -197,6 +200,13 @@ create table if not exists finance_entries (
   amount numeric(10, 2) not null,
   entry_date date not null,
   description text,
+  -- Set only on entries auto-generated from a paid fee_payments row (see
+  -- the Fees tab) — lets us find/update/remove that entry automatically
+  -- as the fee's paid status changes, instead of double-entry bookkeeping.
+  fee_payment_id uuid references fee_payments(id) on delete cascade,
+  -- Path of an optional attached receipt inside the 'documents' storage
+  -- bucket (same bucket the Library tab uses).
+  receipt_path text,
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now()
 );

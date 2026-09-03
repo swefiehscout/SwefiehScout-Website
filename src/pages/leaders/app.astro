@@ -1,11 +1,19 @@
 ---
 // Leaders Workspace — the shell. Gated by a real Supabase Auth session
 // (not the old shared-password localStorage flag). Tabs: Dashboard,
-// Roster, Attendance, Fees, Curriculum, Finance, Library, Lessons, and
-// (admin only) Admin. Only Dashboard/Roster/Admin are wired up so far —
-// the rest are placeholders filled in over the next few passes.
+// Roster, Archive, Approvals, Attendance, Fees, Curriculum (links out to
+// the dedicated tool), Finance, Library, Lessons, and (admin only) Admin.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
+import { loadPortalData, TOOL_LABELS } from '../../lib/leader-portal';
+
+// Lessons tab reads the same build-time markdown as the old portal did —
+// shared, troop-wide Drive links, not per-group data.
+const lessonsData = loadPortalData()['Lessons'] ?? {};
+const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
+  label: TOOL_LABELS[key]?.en ?? key,
+  url: v.url,
+}));
 ---
 <BaseLayout title="Leaders Workspace" bare wide>
   <div class="ws-shell" data-ws-shell hidden>
@@ -52,6 +60,8 @@ import Icon from '../../components/Icon.astro';
         <button type="button" class="ws-tab" data-tab="finance"><Icon name="bank" size={16} strokeWidth={1.8} /> Finance</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
         <button type="button" class="ws-tab" data-tab="lessons"><Icon name="sparkle" size={16} strokeWidth={1.8} /> Lessons</button>
+        <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
+        <button type="button" class="ws-tab" data-tab="settings"><Icon name="cliq" size={16} strokeWidth={1.8} /> Settings</button>
         <button type="button" class="ws-tab" data-tab="admin" data-admin-only hidden><Icon name="pin" size={16} strokeWidth={1.8} /> Admin</button>
       </nav>
 
@@ -194,12 +204,234 @@ import Icon from '../../components/Icon.astro';
           </div>
         </section>
 
-        <section class="ws-panel" data-panel="attendance" hidden><p class="ws-soon">Attendance is coming in the next pass.</p></section>
-        <section class="ws-panel" data-panel="fees" hidden><p class="ws-soon">Monthly fees are coming in the next pass.</p></section>
-        <section class="ws-panel" data-panel="curriculum" hidden><p class="ws-soon">The curriculum maker is moving in here next.</p></section>
-        <section class="ws-panel" data-panel="finance" hidden><p class="ws-soon">The income/expense ledger is coming in the next pass.</p></section>
-        <section class="ws-panel" data-panel="library" hidden><p class="ws-soon">The document library is coming in the next pass.</p></section>
-        <section class="ws-panel" data-panel="lessons" hidden><p class="ws-soon">Shared lesson resources are coming in the next pass.</p></section>
+        <section class="ws-panel" data-panel="attendance" hidden>
+          <div class="ws-toolbar-row">
+            <label class="ws-field ws-field--inline">
+              <span>Date</span>
+              <input type="date" data-att-date />
+            </label>
+            <span class="ws-inline-summary" data-att-summary></span>
+          </div>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-att-table>
+              <thead>
+                <tr><th>Name</th><th>Present</th><th>Note</th></tr>
+              </thead>
+              <tbody data-att-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="fees" hidden>
+          <div class="ws-toolbar-row">
+            <label class="ws-field ws-field--inline">
+              <span>Month</span>
+              <select data-fee-month></select>
+            </label>
+            <label class="ws-field ws-field--inline">
+              <span>Year</span>
+              <select data-fee-year></select>
+            </label>
+            <label class="ws-field ws-field--inline">
+              <span>Default fee this month</span>
+              <input type="number" step="0.01" min="0" data-fee-default placeholder="0.00" />
+            </label>
+            <span class="ws-inline-summary" data-fee-summary></span>
+          </div>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-fee-table>
+              <thead>
+                <tr><th>Name</th><th>Paid</th><th>Amount</th><th>Paid on</th></tr>
+              </thead>
+              <tbody data-fee-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="curriculum" hidden>
+          <p class="ws-soon">
+            The curriculum maker opens as its own full-screen tool so the calendar and drag-and-drop have room to
+            breathe — it already uses your group and account.
+          </p>
+          <a class="btn-primary" href="/leaders/curriculum" data-curriculum-link>Open Curriculum Maker →</a>
+        </section>
+
+        <section class="ws-panel" data-panel="finance" hidden>
+          <form class="ws-member-form" data-fin-form>
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title">Add an entry</p>
+            <div class="ws-form-grid ws-form-grid--4">
+              <label class="ws-field">
+                <span>Type *</span>
+                <select data-fin-type required>
+                  <option value="expense" selected>Expense</option>
+                  <option value="income">Income</option>
+                </select>
+              </label>
+              <label class="ws-field">
+                <span>Category</span>
+                <select data-fin-category></select>
+              </label>
+              <label class="ws-field">
+                <span>Amount *</span>
+                <input type="number" step="0.01" min="0" data-fin-amount required />
+              </label>
+              <label class="ws-field">
+                <span>Date *</span>
+                <input type="date" data-fin-date required />
+              </label>
+            </div>
+            <div class="ws-form-grid">
+              <label class="ws-field ws-field--full">
+                <span>Description</span>
+                <input type="text" data-fin-description />
+              </label>
+              <label class="ws-field">
+                <span>Receipt (optional)</span>
+                <input type="file" accept="image/*,.pdf" data-fin-receipt />
+              </label>
+            </div>
+            <div class="ws-form-actions">
+              <button type="submit" class="btn-primary" data-fin-submit>Add entry</button>
+            </div>
+          </form>
+
+          <div class="ws-toolbar-row">
+            <label class="ws-field ws-field--inline">
+              <span>Month</span>
+              <select data-fin-month></select>
+            </label>
+            <label class="ws-field ws-field--inline">
+              <span>Year</span>
+              <select data-fin-year></select>
+            </label>
+          </div>
+          <div class="ws-stat-row ws-stat-row--3" data-fin-stats></div>
+
+          <div class="ws-statement" data-fin-statement></div>
+
+          <h3 class="ws-admin-h3">Transactions</h3>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-fin-table>
+              <thead>
+                <tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Receipt</th><th></th></tr>
+              </thead>
+              <tbody data-fin-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="library" hidden>
+          <div class="ws-member-form ws-library-upload">
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title">Upload a document</p>
+            <div class="ws-form-grid">
+              <label class="ws-field">
+                <span>File *</span>
+                <input type="file" data-lib-file />
+              </label>
+              <label class="ws-field">
+                <span>Title (optional)</span>
+                <input type="text" data-lib-title placeholder="Defaults to the file name" />
+              </label>
+            </div>
+            <div class="ws-form-actions">
+              <button type="button" class="btn-primary" data-lib-upload>Upload</button>
+            </div>
+          </div>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-lib-table>
+              <thead>
+                <tr><th>Title</th><th>Type</th><th>Uploaded</th><th></th></tr>
+              </thead>
+              <tbody data-lib-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="lessons" hidden>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-lessons-table>
+              <thead><tr><th>Resource</th><th></th></tr></thead>
+              <tbody>
+                {LESSON_LINKS.map((l) => (
+                  <tr>
+                    <td>{l.label}</td>
+                    <td class="ws-row-actions">
+                      {l.url
+                        ? <a class="ws-edit-btn" href={l.url} target="_blank" rel="noopener">Open →</a>
+                        : <span class="ws-empty" style="padding:0">Not linked yet</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="reports" hidden>
+          <div class="ws-toolbar-row">
+            <label class="ws-field ws-field--inline">
+              <span>Scope</span>
+              <select data-report-scope>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
+            </label>
+            <label class="ws-field ws-field--inline" data-report-month-field>
+              <span>Month</span>
+              <select data-report-month></select>
+            </label>
+            <label class="ws-field ws-field--inline">
+              <span>Year</span>
+              <select data-report-year></select>
+            </label>
+          </div>
+          <div class="ws-report-grid">
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Income Statement</h3>
+              <p class="ws-report-desc">Income and expenses by category, with totals and net income.</p>
+              <button type="button" class="btn-primary" data-report-finance>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Monthly Fees</h3>
+              <p class="ws-report-desc">Every active member's paid status and amount for the period.</p>
+              <button type="button" class="btn-primary" data-report-fees>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Attendance</h3>
+              <p class="ws-report-desc">Every active member's attendance count and rate for the period.</p>
+              <button type="button" class="btn-primary" data-report-attendance>Download PDF</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="settings" hidden>
+          <p class="ws-soon">
+            The default monthly fee lives on the Fees tab now (it can change month to month) — Settings is for
+            things that apply to every month, like your Finance category lists below.
+          </p>
+          <div class="ws-form-grid">
+            <div class="ws-member-form">
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Expense categories</p>
+              <div class="ws-category-add">
+                <input type="text" data-settings-expense-input placeholder="e.g. Supplies" />
+                <button type="button" class="btn-primary" data-settings-expense-add>Add</button>
+              </div>
+              <div class="ws-category-list" data-settings-expense-list></div>
+            </div>
+            <div class="ws-member-form">
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Income categories</p>
+              <div class="ws-category-add">
+                <input type="text" data-settings-income-input placeholder="e.g. Donations" />
+                <button type="button" class="btn-primary" data-settings-income-add>Add</button>
+              </div>
+              <div class="ws-category-list" data-settings-income-list></div>
+            </div>
+          </div>
+        </section>
 
         <section class="ws-panel" data-panel="admin" hidden>
           <h3 class="ws-admin-h3">Leaders</h3>
@@ -221,9 +453,13 @@ import Icon from '../../components/Icon.astro';
     </div>
   </div>
 
+  <!-- Print-only sheet for Reports PDF export (see the .curr-print rules
+       in global.css — hidden on screen, shown only inside @media print). -->
+  <div class="curr-print" data-report-print></div>
+
   <script>
     import { supabase, supabaseConfigured, getSession, getProfile, signOut } from '../../lib/workspace/auth';
-    import { GROUPS } from '../../lib/curriculum/constants';
+    import { GROUPS, MONTHS, ACTIVITY_BANK, WEEKDAYS } from '../../lib/curriculum/constants';
 
     // Loose alias for actual query calls below — supabaseConfigured is
     // checked once in init() before any of this runs, so by the time these
@@ -231,7 +467,7 @@ import Icon from '../../components/Icon.astro';
     // non-null assertions through every single query call.
     const db: any = supabase;
 
-    const state: any = { session: null, profile: null, availableGroups: [], activeGroup: null, activeTab: 'dashboard', members: [], approvals: [], editingMemberId: null };
+    const state: any = { session: null, profile: null, availableGroups: [], activeGroup: null, activeTab: 'dashboard', members: [], approvals: [], finEntries: [], docs: [], editingMemberId: null };
     const els: any = {};
 
     function el(sel: string): any { return document.querySelector(sel); }
@@ -268,6 +504,39 @@ import Icon from '../../components/Icon.astro';
       els.adminBody = el('[data-admin-body]');
       els.approvalsBody = el('[data-approvals-body]');
       els.approvalsBadge = el('[data-approvals-badge]');
+      els.attDate = el('[data-att-date]');
+      els.attBody = el('[data-att-body]');
+      els.attSummary = el('[data-att-summary]');
+      els.feeMonth = el('[data-fee-month]');
+      els.feeYear = el('[data-fee-year]');
+      els.feeDefault = el('[data-fee-default]');
+      els.settingsExpenseInput = el('[data-settings-expense-input]');
+      els.settingsExpenseAdd = el('[data-settings-expense-add]');
+      els.settingsExpenseList = el('[data-settings-expense-list]');
+      els.settingsIncomeInput = el('[data-settings-income-input]');
+      els.settingsIncomeAdd = el('[data-settings-income-add]');
+      els.settingsIncomeList = el('[data-settings-income-list]');
+      els.reportScope = el('[data-report-scope]');
+      els.reportMonthField = el('[data-report-month-field]');
+      els.reportMonth = el('[data-report-month]');
+      els.reportYear = el('[data-report-year]');
+      els.reportPrint = el('[data-report-print]');
+      els.feeBody = el('[data-fee-body]');
+      els.feeSummary = el('[data-fee-summary]');
+      els.finForm = el('[data-fin-form]');
+      els.finMonth = el('[data-fin-month]');
+      els.finYear = el('[data-fin-year]');
+      els.finType = el('[data-fin-type]');
+      els.finCategory = el('[data-fin-category]');
+      els.finReceipt = el('[data-fin-receipt]');
+      els.finSubmit = el('[data-fin-submit]');
+      els.finBody = el('[data-fin-body]');
+      els.finStats = el('[data-fin-stats]');
+      els.finStatement = el('[data-fin-statement]');
+      els.libFile = el('[data-lib-file]');
+      els.libTitle = el('[data-lib-title]');
+      els.libUpload = el('[data-lib-upload]');
+      els.libBody = el('[data-lib-body]');
       els.mName = el('[data-m-name]');
       els.mDob = el('[data-m-dob]');
       els.mG1Rel = el('[data-m-g1-rel]');
@@ -461,6 +730,539 @@ import Icon from '../../components/Icon.astro';
       await refreshApprovalsBadge();
     }
 
+    // ---------- Shared date helpers --------------------------------------
+    function todayStr() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    // Month/Year dropdown pair used by both Fees and Finance instead of a
+    // native <input type="month">.
+    function populatePeriodSelects(monthSel: any, yearSel: any) {
+      if (monthSel.options.length) return; // already populated
+      monthSel.innerHTML = MONTHS.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}">${m.en}</option>`).join('');
+      const nowYear = new Date().getFullYear();
+      const years: number[] = [];
+      for (let y = nowYear - 3; y <= nowYear + 1; y++) years.push(y);
+      yearSel.innerHTML = years.map((y) => `<option value="${y}">${y}</option>`).join('');
+      const now = new Date();
+      monthSel.value = String(now.getMonth() + 1).padStart(2, '0');
+      yearSel.value = String(now.getFullYear());
+    }
+    function getPeriod(monthSel: any, yearSel: any) {
+      return `${yearSel.value}-${monthSel.value}`;
+    }
+
+    // ---------- Attendance -------------------------------------------------
+    async function loadAttendance() {
+      if (!state.activeGroup) return;
+      if (!els.attDate.value) els.attDate.value = todayStr();
+      const date = els.attDate.value;
+      const active = state.members.filter((m: any) => m.active);
+      const { data, error } = await db.from('attendance').select('*').eq('group_key', state.activeGroup).eq('date', date);
+      if (error) { console.error(error); showToast('Could not load attendance.'); return; }
+      const map: Map<string, any> = new Map((data || []).map((r: any) => [r.member_id, r]));
+      renderAttendance(active, map, date);
+    }
+    function renderAttendance(active: any[], map: Map<string, any>, date: string) {
+      if (!active.length) {
+        els.attBody.innerHTML = '<tr><td colspan="3" class="ws-empty">No active members in this group yet.</td></tr>';
+        els.attSummary.textContent = '';
+        return;
+      }
+      let presentCount = 0;
+      els.attBody.innerHTML = active.map((m: any) => {
+        const rec: any = map.get(m.id);
+        if (rec && rec.present) presentCount++;
+        return `
+          <tr data-member-id="${m.id}">
+            <td>${escapeHtml(m.full_name)}</td>
+            <td><input type="checkbox" data-att-present ${rec && rec.present ? 'checked' : ''} /></td>
+            <td><input type="text" class="ws-inline-note" data-att-note value="${escapeHtml(rec ? rec.note || '' : '')}" placeholder="optional" /></td>
+          </tr>`;
+      }).join('');
+      els.attSummary.textContent = `${presentCount} of ${active.length} present`;
+
+      els.attBody.querySelectorAll('tr').forEach((row: any) => {
+        const memberId = row.dataset.memberId;
+        const commit = () => {
+          const present = row.querySelector('[data-att-present]').checked;
+          const note = row.querySelector('[data-att-note]').value.trim();
+          saveAttendance(memberId, date, present, note);
+        };
+        row.querySelector('[data-att-present]').addEventListener('change', commit);
+        row.querySelector('[data-att-note]').addEventListener('blur', commit);
+      });
+    }
+    async function saveAttendance(memberId: string, date: string, present: boolean, note: string) {
+      const { error } = await db.from('attendance').upsert({
+        group_key: state.activeGroup, date, member_id: memberId, present, note: note || null,
+        updated_by: state.session.user.id,
+      }, { onConflict: 'group_key,date,member_id' });
+      if (error) { console.error(error); showToast('Could not save attendance.'); return; }
+      await loadAttendance();
+    }
+
+    // ---------- Fees ---------------------------------------------------
+    async function loadGroupSettings() {
+      if (!state.activeGroup) return;
+      const { data } = await db.from('group_settings').select('*').eq('group_key', state.activeGroup).maybeSingle();
+      state.groupSettings = data || {
+        group_key: state.activeGroup, monthly_fee_defaults: {}, expense_categories: [], income_categories: [],
+      };
+    }
+    async function loadFees() {
+      if (!state.activeGroup) return;
+      populatePeriodSelects(els.feeMonth, els.feeYear);
+      const period = getPeriod(els.feeMonth, els.feeYear);
+      await loadGroupSettings();
+      const defaults = state.groupSettings.monthly_fee_defaults || {};
+      els.feeDefault.value = defaults[period] != null ? defaults[period] : '';
+
+      const active = state.members.filter((m: any) => m.active);
+      const { data, error } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).eq('period', period);
+      if (error) { console.error(error); showToast('Could not load fees.'); return; }
+      const map: Map<string, any> = new Map((data || []).map((r: any) => [r.member_id, r]));
+      renderFees(active, map, period);
+    }
+    function renderFees(active: any[], map: Map<string, any>, period: string) {
+      const defaultAmount = els.feeDefault.value ? Number(els.feeDefault.value) : null;
+      if (!active.length) {
+        els.feeBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No active members in this group yet.</td></tr>';
+        els.feeSummary.textContent = '';
+        return;
+      }
+      let paidCount = 0, collected = 0;
+      els.feeBody.innerHTML = active.map((m: any) => {
+        const rec: any = map.get(m.id);
+        if (rec && rec.paid) { paidCount++; collected += Number(rec.amount || 0); }
+        const amount = rec && rec.amount != null ? rec.amount : (defaultAmount != null ? defaultAmount : '');
+        return `
+          <tr data-member-id="${m.id}">
+            <td>${escapeHtml(m.full_name)}</td>
+            <td><input type="checkbox" data-fee-paid ${rec && rec.paid ? 'checked' : ''} /></td>
+            <td><input type="number" step="0.01" min="0" class="ws-inline-amount" data-fee-amount value="${amount}" /></td>
+            <td><input type="date" data-fee-paidon value="${rec && rec.paid_on ? rec.paid_on : ''}" /></td>
+          </tr>`;
+      }).join('');
+      els.feeSummary.textContent = `${paidCount} of ${active.length} paid — ${collected.toFixed(2)} collected`;
+
+      els.feeBody.querySelectorAll('tr').forEach((row: any) => {
+        const memberId = row.dataset.memberId;
+        const commit = () => {
+          const paid = row.querySelector('[data-fee-paid]').checked;
+          const amountVal = row.querySelector('[data-fee-amount]').value;
+          let paidOn = row.querySelector('[data-fee-paidon]').value;
+          if (paid && !paidOn) paidOn = todayStr();
+          saveFee(memberId, period, paid, amountVal ? Number(amountVal) : null, paid ? paidOn : null);
+        };
+        row.querySelector('[data-fee-paid]').addEventListener('change', commit);
+        row.querySelector('[data-fee-amount]').addEventListener('blur', commit);
+        row.querySelector('[data-fee-paidon]').addEventListener('change', commit);
+      });
+    }
+    async function saveFee(memberId: string, period: string, paid: boolean, amount: number | null, paidOn: string | null) {
+      const { data: feeRow, error } = await db.from('fee_payments').upsert({
+        group_key: state.activeGroup, member_id: memberId, period, paid, amount, paid_on: paidOn,
+        updated_by: state.session.user.id,
+      }, { onConflict: 'group_key,member_id,period' }).select().single();
+      if (error) { console.error(error); showToast('Could not save.'); return; }
+      await syncFeeToFinance(feeRow);
+      await loadFees();
+    }
+    // Keeps a fee payment mirrored into the Finance ledger as an income
+    // line — created/updated while paid, removed the moment it's unmarked
+    // — so leaders never have to log the same collection twice.
+    async function syncFeeToFinance(feeRow: any) {
+      if (feeRow.paid && feeRow.amount) {
+        const member = state.members.find((m: any) => m.id === feeRow.member_id);
+        const payload = {
+          group_key: state.activeGroup, entry_type: 'income', category: 'Monthly Fees',
+          amount: feeRow.amount, entry_date: feeRow.paid_on || (feeRow.period + '-01'),
+          description: `${member ? member.full_name : 'Member'} — ${feeRow.period}`,
+          fee_payment_id: feeRow.id, created_by: state.session.user.id,
+        };
+        const { data: existing } = await db.from('finance_entries').select('id').eq('fee_payment_id', feeRow.id).maybeSingle();
+        if (existing) await db.from('finance_entries').update(payload).eq('id', existing.id);
+        else await db.from('finance_entries').insert(payload);
+      } else {
+        await db.from('finance_entries').delete().eq('fee_payment_id', feeRow.id);
+      }
+      if (state.activeTab === 'finance') await loadFinance();
+    }
+    async function saveDefaultFee() {
+      if (!state.activeGroup) return;
+      const period = getPeriod(els.feeMonth, els.feeYear);
+      const current = state.groupSettings.monthly_fee_defaults || {};
+      const val = els.feeDefault.value ? Number(els.feeDefault.value) : null;
+      const updated = { ...current, [period]: val };
+      const { error } = await db.from('group_settings').upsert({ group_key: state.activeGroup, monthly_fee_defaults: updated }, { onConflict: 'group_key' });
+      if (error) { console.error(error); showToast('Could not save default fee.'); return; }
+      await loadFees();
+    }
+
+    // ---------- Settings (per-group config: Finance category lists) ------
+    async function loadSettings() {
+      if (!state.activeGroup) return;
+      await loadGroupSettings();
+      renderSettings();
+    }
+    function renderSettings() {
+      renderCategoryList(els.settingsExpenseList, state.groupSettings.expense_categories || [], 'expense_categories');
+      renderCategoryList(els.settingsIncomeList, state.groupSettings.income_categories || [], 'income_categories');
+    }
+    function renderCategoryList(container: any, list: string[], field: string) {
+      container.innerHTML = list.length
+        ? list.map((c) => `<span class="ws-category-chip">${escapeHtml(c)}<button type="button" data-remove-cat="${escapeHtml(c)}">×</button></span>`).join('')
+        : '<p class="ws-empty" style="padding:0.5rem 0">None yet</p>';
+      container.querySelectorAll('[data-remove-cat]').forEach((btn: any) => {
+        btn.addEventListener('click', () => saveCategoryList(field, list.filter((c) => c !== btn.dataset.removeCat)));
+      });
+    }
+    async function saveCategoryList(field: string, updated: string[]) {
+      const { error } = await db.from('group_settings').upsert({ group_key: state.activeGroup, [field]: updated }, { onConflict: 'group_key' });
+      if (error) { console.error(error); showToast('Could not save.'); return; }
+      await loadSettings();
+    }
+    function bindSettings() {
+      els.settingsExpenseAdd.addEventListener('click', () => {
+        const val = els.settingsExpenseInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.expense_categories || [];
+        if (current.includes(val)) { els.settingsExpenseInput.value = ''; return; }
+        saveCategoryList('expense_categories', [...current, val]);
+        els.settingsExpenseInput.value = '';
+      });
+      els.settingsIncomeAdd.addEventListener('click', () => {
+        const val = els.settingsIncomeInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.income_categories || [];
+        if (current.includes(val)) { els.settingsIncomeInput.value = ''; return; }
+        saveCategoryList('income_categories', [...current, val]);
+        els.settingsIncomeInput.value = '';
+      });
+    }
+
+    // ---------- Finance ---------------------------------------------------
+    async function loadFinance() {
+      if (!state.activeGroup) return;
+      populatePeriodSelects(els.finMonth, els.finYear);
+      await loadGroupSettings();
+      updateFinCategoryOptions();
+      const period = getPeriod(els.finMonth, els.finYear);
+      const [y, m] = period.split('-').map(Number);
+      const start = `${period}-01`;
+      const end = `${period}-${String(new Date(y, m, 0).getDate()).padStart(2, '0')}`;
+      const { data, error } = await db.from('finance_entries').select('*')
+        .eq('group_key', state.activeGroup).gte('entry_date', start).lte('entry_date', end)
+        .order('entry_date', { ascending: false });
+      if (error) { console.error(error); showToast('Could not load finance entries.'); return; }
+      state.finEntries = data || [];
+      renderFinance();
+    }
+    function categoryTotals(type: string) {
+      const map = new Map<string, number>();
+      state.finEntries.filter((e: any) => e.entry_type === type).forEach((e: any) => {
+        const cat = e.category || 'Uncategorized';
+        map.set(cat, (map.get(cat) || 0) + Number(e.amount));
+      });
+      return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+    }
+    function renderFinance() {
+      const incomeRows = categoryTotals('income');
+      const expenseRows = categoryTotals('expense');
+      const income = incomeRows.reduce((s, [, v]) => s + v, 0);
+      const expense = expenseRows.reduce((s, [, v]) => s + v, 0);
+
+      els.finStats.innerHTML = `
+        <div class="ws-stat ws-stat--accent"><span class="ws-stat-icon">↑</span><span class="ws-stat-text"><span class="ws-stat-num">${income.toFixed(2)}</span><span class="ws-stat-label">Income</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">↓</span><span class="ws-stat-text"><span class="ws-stat-num">${expense.toFixed(2)}</span><span class="ws-stat-label">Expenses</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">=</span><span class="ws-stat-text"><span class="ws-stat-num">${(income - expense).toFixed(2)}</span><span class="ws-stat-label">Net</span></span></div>
+      `;
+
+      const rowsHtml = (rows: [string, number][]) => rows.length
+        ? rows.map(([cat, amt]) => `<tr><td>${escapeHtml(cat)}</td><td>${amt.toFixed(2)}</td></tr>`).join('')
+        : '<tr><td class="ws-empty" colspan="2">None</td></tr>';
+      els.finStatement.innerHTML = `
+        <h3 class="ws-admin-h3">Income Statement — ${els.finMonth.selectedOptions[0]?.textContent} ${els.finYear.value}</h3>
+        <table class="ws-statement-table">
+          <tbody>
+            <tr class="ws-statement-section"><td colspan="2">Income</td></tr>
+            ${rowsHtml(incomeRows)}
+            <tr class="ws-statement-total"><td>Total Income</td><td>${income.toFixed(2)}</td></tr>
+            <tr class="ws-statement-section"><td colspan="2">Expenses</td></tr>
+            ${rowsHtml(expenseRows)}
+            <tr class="ws-statement-total"><td>Total Expenses</td><td>${expense.toFixed(2)}</td></tr>
+            <tr class="ws-statement-net"><td>Net Income</td><td>${(income - expense).toFixed(2)}</td></tr>
+          </tbody>
+        </table>
+      `;
+
+      if (!state.finEntries.length) {
+        els.finBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No entries this month.</td></tr>';
+        return;
+      }
+      els.finBody.innerHTML = state.finEntries.map((e: any) => `
+        <tr data-entry-id="${e.id}" data-receipt-path="${escapeHtml(e.receipt_path || '')}">
+          <td>${e.entry_date}</td>
+          <td>${e.entry_type === 'income' ? 'Income' : 'Expense'}</td>
+          <td>${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab — unmark it paid there to remove this">Auto</span>' : ''}</td>
+          <td>${escapeHtml(e.description || '—')}</td>
+          <td>${Number(e.amount).toFixed(2)}</td>
+          <td>${e.receipt_path ? '<button type="button" class="ws-edit-btn" data-fin-receipt-view>View</button>' : '—'}</td>
+          <td>${e.fee_payment_id ? '' : '<button type="button" class="ws-row-del" data-fin-del>×</button>'}</td>
+        </tr>
+      `).join('');
+      els.finBody.querySelectorAll('[data-fin-receipt-view]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const path = btn.closest('tr').dataset.receiptPath;
+          const { data, error } = await db.storage.from('documents').createSignedUrl(path, 60);
+          if (error || !data) { showToast('Could not open receipt.'); return; }
+          window.open(data.signedUrl, '_blank');
+        });
+      });
+      els.finBody.querySelectorAll('[data-fin-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const row = btn.closest('tr');
+          const id = row.dataset.entryId;
+          if (!confirm('Delete this entry?')) return;
+          const { error } = await db.from('finance_entries').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          await loadFinance();
+        });
+      });
+    }
+    function updateFinCategoryOptions() {
+      const list = els.finType.value === 'income'
+        ? (state.groupSettings?.income_categories || [])
+        : (state.groupSettings?.expense_categories || []);
+      els.finCategory.innerHTML = list.length
+        ? list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
+        : '<option value="">No categories yet — add some in Settings</option>';
+    }
+    function bindFinanceForm() {
+      els.finType.addEventListener('change', updateFinCategoryOptions);
+      els.finForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const type = els.finType.value;
+        const category = els.finCategory.value.trim();
+        const amount = el('[data-fin-amount]').value;
+        const date = el('[data-fin-date]').value;
+        const description = el('[data-fin-description]').value.trim();
+        if (!amount || !date) { showToast('Amount and date are required.'); return; }
+        els.finSubmit.disabled = true;
+
+        let receiptPath: string | null = null;
+        const file = els.finReceipt.files[0];
+        if (file) {
+          const path = `${state.activeGroup}/receipts/${Date.now()}-${file.name}`;
+          const { error: upErr } = await db.storage.from('documents').upload(path, file);
+          if (upErr) { console.error(upErr); showToast('Could not upload receipt.'); els.finSubmit.disabled = false; return; }
+          receiptPath = path;
+        }
+
+        const { error } = await db.from('finance_entries').insert({
+          group_key: state.activeGroup, entry_type: type, category: category || null,
+          amount: Number(amount), entry_date: date, description: description || null,
+          receipt_path: receiptPath, created_by: state.session.user.id,
+        });
+        els.finSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not add entry.'); return; }
+        els.finForm.reset();
+        updateFinCategoryOptions();
+        await loadFinance();
+      });
+    }
+
+    // ---------- Library (document storage) ---------------------------------
+    async function loadLibrary() {
+      if (!state.activeGroup) return;
+      const { data, error } = await db.from('documents').select('*')
+        .or(`group_key.eq.${state.activeGroup},group_key.is.null`)
+        .order('uploaded_at', { ascending: false });
+      if (error) { console.error(error); showToast('Could not load documents.'); return; }
+      state.docs = data || [];
+      renderLibrary();
+    }
+    function renderLibrary() {
+      if (!state.docs.length) {
+        els.libBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No documents yet.</td></tr>';
+        return;
+      }
+      els.libBody.innerHTML = state.docs.map((d: any) => `
+        <tr data-doc-id="${d.id}" data-doc-path="${escapeHtml(d.file_path)}">
+          <td>${escapeHtml(d.title)}${d.group_key === null ? ' <span class="ws-allergy-badge">Shared</span>' : ''}</td>
+          <td>${escapeHtml(d.file_type || '—')}</td>
+          <td>${new Date(d.uploaded_at).toLocaleDateString()}</td>
+          <td class="ws-row-actions">
+            <button type="button" class="ws-edit-btn" data-doc-download>Download</button>
+            ${d.group_key !== null ? '<button type="button" class="ws-row-del" data-doc-del>×</button>' : ''}
+          </td>
+        </tr>
+      `).join('');
+      els.libBody.querySelectorAll('tr').forEach((row: any) => {
+        const path = row.dataset.docPath;
+        const id = row.dataset.docId;
+        row.querySelector('[data-doc-download]').addEventListener('click', async () => {
+          const { data, error } = await db.storage.from('documents').createSignedUrl(path, 60);
+          if (error || !data) { showToast('Could not open file.'); return; }
+          window.open(data.signedUrl, '_blank');
+        });
+        const delBtn = row.querySelector('[data-doc-del]');
+        if (delBtn) delBtn.addEventListener('click', async () => {
+          if (!confirm('Delete this document?')) return;
+          await db.storage.from('documents').remove([path]);
+          const { error } = await db.from('documents').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          await loadLibrary();
+        });
+      });
+    }
+    function bindLibraryUpload() {
+      els.libUpload.addEventListener('click', async () => {
+        const file = els.libFile.files[0];
+        if (!file) { showToast('Choose a file first.'); return; }
+        els.libUpload.disabled = true;
+        const path = `${state.activeGroup}/${Date.now()}-${file.name}`;
+        const { error: upErr } = await db.storage.from('documents').upload(path, file);
+        if (upErr) { console.error(upErr); showToast('Could not upload.'); els.libUpload.disabled = false; return; }
+        const title = els.libTitle.value.trim() || file.name;
+        const { error } = await db.from('documents').insert({
+          group_key: state.activeGroup, category: 'general', title, file_path: path,
+          file_type: file.type || null, size_bytes: file.size, uploaded_by: state.session.user.id,
+        });
+        els.libUpload.disabled = false;
+        if (error) { console.error(error); showToast('Could not save document.'); return; }
+        els.libFile.value = '';
+        els.libTitle.value = '';
+        await loadLibrary();
+      });
+    }
+
+    // ---------- Reports (PDF export via print) -----------------------------
+    function reportRange(): { start: string; end: string; label: string; period: string } {
+      const year = Number(els.reportYear.value);
+      if (els.reportScope.value === 'year') {
+        return { start: `${year}-01-01`, end: `${year}-12-31`, label: String(year), period: String(year) };
+      }
+      const month = els.reportMonth.value;
+      const period = `${year}-${month}`;
+      const lastDay = new Date(year, Number(month), 0).getDate();
+      const label = `${els.reportMonth.selectedOptions[0]?.textContent} ${year}`;
+      return { start: `${period}-01`, end: `${period}-${String(lastDay).padStart(2, '0')}`, label, period };
+    }
+    async function downloadFinanceReport() {
+      const { start, end, label } = reportRange();
+      const { data, error } = await db.from('finance_entries').select('*')
+        .eq('group_key', state.activeGroup).gte('entry_date', start).lte('entry_date', end);
+      if (error) { showToast('Could not load data.'); return; }
+      const entries = data || [];
+      const totals = (type: string) => {
+        const map = new Map<string, number>();
+        entries.filter((e: any) => e.entry_type === type).forEach((e: any) => {
+          const cat = e.category || 'Uncategorized';
+          map.set(cat, (map.get(cat) || 0) + Number(e.amount));
+        });
+        return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+      };
+      const incomeRows = totals('income'), expenseRows = totals('expense');
+      const income = incomeRows.reduce((s, [, v]) => s + v, 0);
+      const expense = expenseRows.reduce((s, [, v]) => s + v, 0);
+      const g = GROUPS.find((x) => x.key === state.activeGroup);
+      const rowsHtml = (rows: [string, number][]) => rows.length
+        ? rows.map(([c, v]) => `<tr><td>${escapeHtml(c)}</td><td>${v.toFixed(2)}</td></tr>`).join('')
+        : '<tr><td colspan="2">None</td></tr>';
+      els.reportPrint.innerHTML = `
+        <h1>${g ? escapeHtml(g.en) : ''} — Income Statement</h1>
+        <p class="curr-print-range">${escapeHtml(label)}</p>
+        <table class="ws-statement-table"><tbody>
+          <tr class="ws-statement-section"><td colspan="2">Income</td></tr>
+          ${rowsHtml(incomeRows)}
+          <tr class="ws-statement-total"><td>Total Income</td><td>${income.toFixed(2)}</td></tr>
+          <tr class="ws-statement-section"><td colspan="2">Expenses</td></tr>
+          ${rowsHtml(expenseRows)}
+          <tr class="ws-statement-total"><td>Total Expenses</td><td>${expense.toFixed(2)}</td></tr>
+          <tr class="ws-statement-net"><td>Net Income</td><td>${(income - expense).toFixed(2)}</td></tr>
+        </tbody></table>`;
+      window.print();
+    }
+    async function downloadFeesReport() {
+      const { period, label } = reportRange();
+      const g = GROUPS.find((x) => x.key === state.activeGroup);
+      const active = state.members.filter((m: any) => m.active);
+      if (els.reportScope.value === 'month') {
+        const { data } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).eq('period', period);
+        const map: Map<string, any> = new Map((data || []).map((r: any) => [r.member_id, r]));
+        let collected = 0, paidCount = 0;
+        const rows = active.map((m: any) => {
+          const rec = map.get(m.id);
+          if (rec && rec.paid) { collected += Number(rec.amount || 0); paidCount++; }
+          return `<tr><td>${escapeHtml(m.full_name)}</td><td>${rec && rec.paid ? 'Paid' : 'Unpaid'}</td><td>${rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'}</td></tr>`;
+        }).join('');
+        els.reportPrint.innerHTML = `
+          <h1>${g ? escapeHtml(g.en) : ''} — Monthly Fees</h1>
+          <p class="curr-print-range">${escapeHtml(label)} — ${paidCount} of ${active.length} paid, ${collected.toFixed(2)} collected</p>
+          <table class="ws-statement-table"><tbody>
+            <tr class="ws-statement-section"><td>Member</td><td>Status</td><td>Amount</td></tr>
+            ${rows || '<tr><td colspan="3">No active members</td></tr>'}
+          </tbody></table>`;
+      } else {
+        const year = els.reportYear.value;
+        const { data } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).like('period', `${year}-%`);
+        const byMember = new Map<string, { months: number; total: number }>();
+        (data || []).forEach((r: any) => {
+          if (!r.paid) return;
+          const cur = byMember.get(r.member_id) || { months: 0, total: 0 };
+          cur.months++; cur.total += Number(r.amount || 0);
+          byMember.set(r.member_id, cur);
+        });
+        const rows = active.map((m: any) => {
+          const s = byMember.get(m.id) || { months: 0, total: 0 };
+          return `<tr><td>${escapeHtml(m.full_name)}</td><td>${s.months} / 12</td><td>${s.total.toFixed(2)}</td></tr>`;
+        }).join('');
+        const grandTotal = active.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
+        els.reportPrint.innerHTML = `
+          <h1>${g ? escapeHtml(g.en) : ''} — Yearly Fees Summary</h1>
+          <p class="curr-print-range">${escapeHtml(label)} — ${grandTotal.toFixed(2)} collected total</p>
+          <table class="ws-statement-table"><tbody>
+            <tr class="ws-statement-section"><td>Member</td><td>Months Paid</td><td>Total</td></tr>
+            ${rows || '<tr><td colspan="3">No active members</td></tr>'}
+          </tbody></table>`;
+      }
+      window.print();
+    }
+    async function downloadAttendanceReport() {
+      const { start, end, label } = reportRange();
+      const g = GROUPS.find((x) => x.key === state.activeGroup);
+      const active = state.members.filter((m: any) => m.active);
+      const { data } = await db.from('attendance').select('*').eq('group_key', state.activeGroup).gte('date', start).lte('date', end);
+      const rows = data || [];
+      const totalSessions = new Set(rows.map((r: any) => r.date)).size;
+      const presentByMember = new Map<string, number>();
+      rows.forEach((r: any) => { if (r.present) presentByMember.set(r.member_id, (presentByMember.get(r.member_id) || 0) + 1); });
+      const bodyRows = active.map((m: any) => {
+        const present = presentByMember.get(m.id) || 0;
+        const rate = totalSessions ? Math.round((present / totalSessions) * 100) : 0;
+        return `<tr><td>${escapeHtml(m.full_name)}</td><td>${present} / ${totalSessions}</td><td>${rate}%</td></tr>`;
+      }).join('');
+      els.reportPrint.innerHTML = `
+        <h1>${g ? escapeHtml(g.en) : ''} — Attendance</h1>
+        <p class="curr-print-range">${escapeHtml(label)} — ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held</p>
+        <table class="ws-statement-table"><tbody>
+          <tr class="ws-statement-section"><td>Member</td><td>Present</td><td>Rate</td></tr>
+          ${bodyRows || '<tr><td colspan="3">No active members</td></tr>'}
+        </tbody></table>`;
+      window.print();
+    }
+    function bindReports() {
+      populatePeriodSelects(els.reportMonth, els.reportYear);
+      els.reportScope.addEventListener('change', () => {
+        els.reportMonthField.toggleAttribute('hidden', els.reportScope.value === 'year');
+      });
+      el('[data-report-finance]').addEventListener('click', downloadFinanceReport);
+      el('[data-report-fees]').addEventListener('click', downloadFeesReport);
+      el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);
+    }
+
     function showG2(focus = true) {
       els.g2Fields.hidden = false;
       els.g2Add.hidden = true;
@@ -609,7 +1411,7 @@ import Icon from '../../components/Icon.astro';
         const id = row.dataset.profileId;
         row.querySelector('[data-admin-save]').addEventListener('click', async () => {
           const role = row.querySelector('[data-admin-role]').value;
-          const groups = Array.from(row.querySelectorAll('.ws-group-check input:checked')).map((i) => i.value);
+          const groups = Array.from(row.querySelectorAll('.ws-group-check input:checked')).map((i: any) => i.value);
           const { error } = await db.from('profiles').update({ role, groups }).eq('id', id);
           if (error) { console.error(error); showToast('Could not save — ' + (error.message || 'unknown error') + '.'); return; }
           showToast('Saved.');
@@ -643,19 +1445,28 @@ import Icon from '../../components/Icon.astro';
           state.activeGroup = btn.dataset.group;
           renderGroupSwitch();
           refreshApprovalsBadge();
-          if (state.activeTab === 'roster' || state.activeTab === 'dashboard' || state.activeTab === 'archive') loadRoster();
-          if (state.activeTab === 'approvals') loadApprovals();
+          loadActiveTabData();
         });
       });
+    }
+
+    function loadActiveTabData() {
+      const tab = state.activeTab;
+      if (tab === 'roster' || tab === 'dashboard' || tab === 'archive') loadRoster();
+      if (tab === 'admin') loadAdmin();
+      if (tab === 'approvals') loadApprovals();
+      if (tab === 'attendance') loadAttendance();
+      if (tab === 'fees') loadFees();
+      if (tab === 'finance') loadFinance();
+      if (tab === 'library') loadLibrary();
+      if (tab === 'settings') loadSettings();
     }
 
     function setTab(tab: any) {
       state.activeTab = tab;
       els.tabs.querySelectorAll('.ws-tab').forEach((b: any) => b.classList.toggle('ws-tab--active', b.dataset.tab === tab));
       document.querySelectorAll('.ws-panel').forEach((p: any) => p.toggleAttribute('hidden', p.dataset.panel !== tab));
-      if (tab === 'roster' || tab === 'dashboard' || tab === 'archive') loadRoster();
-      if (tab === 'admin') loadAdmin();
-      if (tab === 'approvals') loadApprovals();
+      loadActiveTabData();
     }
     function bindTabs() {
       els.tabs.querySelectorAll('.ws-tab').forEach((btn: any) => {
@@ -717,6 +1528,16 @@ import Icon from '../../components/Icon.astro';
       setupGroups();
       bindTabs();
       bindRosterForm();
+      bindFinanceForm();
+      bindLibraryUpload();
+      bindReports();
+      els.attDate.addEventListener('change', loadAttendance);
+      els.feeMonth.addEventListener('change', loadFees);
+      els.feeYear.addEventListener('change', loadFees);
+      els.feeDefault.addEventListener('blur', saveDefaultFee);
+      bindSettings();
+      els.finMonth.addEventListener('change', loadFinance);
+      els.finYear.addEventListener('change', loadFinance);
       refreshApprovalsBadge();
       setTab('dashboard');
     }
