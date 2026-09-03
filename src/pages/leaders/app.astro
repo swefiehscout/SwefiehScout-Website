@@ -279,7 +279,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
               <div class="ws-table-wrap">
                 <table class="ws-table" data-att-table>
                   <thead>
-                    <tr><th>Name</th><th>Present</th><th>Note</th></tr>
+                    <tr><th>Name</th><th>Present</th></tr>
                   </thead>
                   <tbody data-att-body></tbody>
                 </table>
@@ -1137,7 +1137,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     }
     function renderAttendance(active: any[], map: Map<string, any>, date: string) {
       if (!active.length) {
-        els.attBody.innerHTML = '<tr><td colspan="3" class="ws-empty">No active members in this group yet.</td></tr>';
+        els.attBody.innerHTML = '<tr><td colspan="2" class="ws-empty">No active members in this group yet.</td></tr>';
         els.attSummary.textContent = '';
         return;
       }
@@ -1149,25 +1149,24 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
           <tr data-member-id="${m.id}">
             <td data-label="Name">${escapeHtml(m.full_name)}</td>
             <td data-label="Present"><input type="checkbox" data-att-present ${rec && rec.present ? 'checked' : ''} /></td>
-            <td data-label="Note"><input type="text" class="ws-inline-note" data-att-note value="${escapeHtml(rec ? rec.note || '' : '')}" placeholder="optional" /></td>
           </tr>`;
       }).join('');
       els.attSummary.textContent = `${presentCount} of ${active.length} present`;
 
+      // Ticking the box saves immediately — no separate save step.
       els.attBody.querySelectorAll('tr').forEach((row: any) => {
         const memberId = row.dataset.memberId;
-        const commit = () => {
-          const present = row.querySelector('[data-att-present]').checked;
-          const note = row.querySelector('[data-att-note]').value.trim();
-          saveAttendance(memberId, date, present, note);
-        };
-        row.querySelector('[data-att-present]').addEventListener('change', commit);
-        row.querySelector('[data-att-note]').addEventListener('blur', commit);
+        row.querySelector('[data-att-present]').addEventListener('change', () => {
+          saveAttendance(memberId, date, row.querySelector('[data-att-present]').checked);
+        });
       });
     }
-    async function saveAttendance(memberId: string, date: string, present: boolean, note: string) {
+    // note isn't left in the payload here (not just set to null) so any
+    // note recorded before the Notes column was removed from this table
+    // stays intact in the database instead of getting silently wiped.
+    async function saveAttendance(memberId: string, date: string, present: boolean) {
       const { error } = await db.from('attendance').upsert({
-        group_key: state.activeGroup, date, member_id: memberId, present, note: note || null,
+        group_key: state.activeGroup, date, member_id: memberId, present,
         updated_by: state.session.user.id,
       }, { onConflict: 'group_key,date,member_id' });
       if (error) { console.error(error); showToast('Could not save attendance.'); return; }
