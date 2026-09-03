@@ -3962,6 +3962,260 @@ main.wide {
 .ws-stat-num { font-family: var(--font-display); font-size: 1.9rem; line-height: 1.1; color: var(--color-brand-dark); }
 .ws-stat-label { font-size: 0.78rem; color: var(--color-muted); margin-top: 0.15rem; }
 
+/* ----- Dashboard (executive overview) -----------------------------------
+   Greeting hero, four headline KPI cards with trend badges, an attendance
+   bar chart + fee-collection donut, and three compact feed cards (next
+   meeting, recent finance, needs attention). Every number here is a real
+   query against this group's data — nothing hardcoded. */
+.ws-dash { display: flex; flex-direction: column; gap: 1.75rem; }
+
+.ws-dash-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.ws-dash-eyebrow {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 0.5rem;
+}
+.ws-dash-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  color: var(--color-brand-dark);
+  line-height: 1.15;
+}
+.ws-dash-sub { margin: 0.35rem 0 0; color: var(--color-muted); font-size: 0.95rem; }
+
+/* ----- KPI row ----- */
+.ws-dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.1rem;
+}
+@media (max-width: 900px) { .ws-dash-kpis { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .ws-dash-kpis { grid-template-columns: 1fr; } }
+.ws-dash-kpi {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+.ws-dash-kpi::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-brand) 0%, var(--color-accent) 100%);
+  opacity: 0.85;
+}
+.ws-dash-kpi:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.ws-dash-kpi-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.9rem; }
+.ws-dash-kpi-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-brand);
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+.ws-dash-kpi-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  text-transform: uppercase;
+}
+.ws-dash-kpi-num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2.15rem;
+  line-height: 1;
+  color: var(--color-brand-dark);
+  margin-bottom: 0.55rem;
+}
+.ws-dash-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.ws-dash-delta--up { color: var(--color-accent); }
+.ws-dash-delta--down { color: var(--color-brand-light); }
+.ws-dash-delta--flat { color: var(--color-muted); }
+
+/* ----- Card grids ----- */
+.ws-dash-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.1rem; }
+.ws-dash-grid--3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 900px) {
+  .ws-dash-grid, .ws-dash-grid--3 { grid-template-columns: 1fr; }
+}
+.ws-dash-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem 1.5rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+.ws-dash-card--wide { min-width: 0; }
+.ws-dash-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+}
+.ws-dash-card-head h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--color-brand);
+}
+.ws-dash-card-sub { font-size: 0.78rem; color: var(--color-muted); white-space: nowrap; }
+
+/* ----- Attendance bar chart ----- */
+.ws-dash-bars { display: flex; align-items: flex-end; gap: 0.85rem; height: 9.5rem; }
+.ws-dash-bar-col {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+.ws-dash-bar-pct { font-size: 0.68rem; font-weight: 700; color: var(--color-brand-dark); }
+.ws-dash-bar-track {
+  width: 100%;
+  max-width: 2.1rem;
+  flex: 1;
+  background: var(--color-bg);
+  border-radius: 999px 999px 4px 4px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.ws-dash-bar-fill {
+  width: 100%;
+  background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-brand) 100%);
+  border-radius: 999px 999px 4px 4px;
+  transition: height 0.7s var(--ease-out);
+}
+.ws-dash-bar-label {
+  font-size: 0.68rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+/* ----- Fee collection donut (CSS conic-gradient, no chart library) ----- */
+.ws-dash-donut {
+  --pct: 0%;
+  width: 9rem;
+  height: 9rem;
+  margin: 0.25rem auto 1.1rem;
+  border-radius: 50%;
+  background: conic-gradient(var(--color-accent) var(--pct), var(--color-bg) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.ws-dash-donut::before {
+  content: '';
+  position: absolute;
+  inset: 0.85rem;
+  background: var(--color-surface);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+.ws-dash-donut-center { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+.ws-dash-donut-num { font-family: var(--font-display); font-size: 1.6rem; line-height: 1; color: var(--color-brand-dark); }
+.ws-dash-donut-label { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); margin-top: 0.2rem; }
+.ws-dash-donut-foot { margin: 0; text-align: center; color: var(--color-muted); font-size: 0.82rem; }
+
+/* ----- Compact feed cards: next meeting / recent finance / attention ----- */
+.ws-dash-empty-mini { margin: 0; color: var(--color-muted); font-size: 0.85rem; line-height: 1.5; }
+.ws-dash-mini-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-brand);
+  cursor: pointer;
+}
+.ws-dash-mini-link:hover { text-decoration: underline; }
+.ws-dash-mini-date { margin: 0 0 0.3rem; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-accent); }
+.ws-dash-mini-theme { margin: 0 0 0.3rem; font-family: var(--font-display); font-size: 1.15rem; color: var(--color-brand-dark); line-height: 1.25; }
+.ws-dash-mini-sub { margin: 0; font-size: 0.82rem; color: var(--color-muted); }
+
+.ws-dash-feed-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--color-border);
+}
+.ws-dash-feed-row:first-child { border-top: 0; padding-top: 0; }
+.ws-dash-feed-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; flex-shrink: 0; }
+.ws-dash-feed-dot--income { background: var(--color-accent); }
+.ws-dash-feed-dot--expense { background: var(--color-brand-light); }
+.ws-dash-feed-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.ws-dash-feed-title { font-size: 0.86rem; font-weight: 600; color: var(--color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-dash-feed-date { font-size: 0.72rem; color: var(--color-muted); }
+.ws-dash-feed-amount { font-size: 0.86rem; font-weight: 700; white-space: nowrap; }
+.ws-dash-feed-amount--income { color: var(--color-accent); }
+.ws-dash-feed-amount--expense { color: var(--color-brand-light); }
+
+.ws-dash-attn-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 0.5rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-brand-dark);
+  cursor: pointer;
+  text-align: start;
+  transition: background 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+}
+.ws-dash-attn-row:last-child { margin-bottom: 0; }
+.ws-dash-attn-row:hover { background: var(--color-surface); border-color: var(--color-brand); }
+.ws-dash-attn-row span { color: var(--color-muted); }
+
 /* ----- Roster member form (add + edit share one form) -----
    A symmetric two-column grid, grouped into labeled sections (identity,
    Guardian 1, Guardian 2, allergies) so it reads as a real form rather

@@ -66,8 +66,46 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
 
       <div class="ws-panels">
         <section class="ws-panel" data-panel="dashboard">
-          <div class="ws-stat-row" data-ws-stats></div>
-          <p class="ws-soon">Attendance rates, fee-collection %, and curriculum progress will show up here as those tabs go live.</p>
+          <div class="ws-dash" data-dash-root>
+            <div class="ws-dash-hero">
+              <div class="ws-dash-hero-text">
+                <span class="ws-dash-eyebrow" data-dash-date></span>
+                <h2 class="ws-dash-title" data-dash-greeting>Welcome back</h2>
+                <p class="ws-dash-sub" data-dash-group></p>
+              </div>
+            </div>
+
+            <div class="ws-dash-kpis" data-dash-kpis></div>
+
+            <div class="ws-dash-grid">
+              <div class="ws-dash-card ws-dash-card--wide">
+                <div class="ws-dash-card-head">
+                  <h3>Attendance trend</h3>
+                  <span class="ws-dash-card-sub" data-dash-att-sub></span>
+                </div>
+                <div data-dash-att-chart></div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Fees this month</h3></div>
+                <div data-dash-fees-donut></div>
+              </div>
+            </div>
+
+            <div class="ws-dash-grid ws-dash-grid--3">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Next meeting</h3></div>
+                <div data-dash-next-meeting></div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Recent finance activity</h3></div>
+                <div data-dash-recent-finance></div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Needs attention</h3></div>
+                <div data-dash-attention></div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="ws-panel" data-panel="roster" hidden>
@@ -639,7 +677,17 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.signout = el('[data-ws-signout]');
       els.signoutPending = el('[data-ws-signout-pending]');
       els.tabs = el('[data-ws-tabs]');
-      els.stats = el('[data-ws-stats]');
+      els.dashRoot = el('[data-dash-root]');
+      els.dashDate = el('[data-dash-date]');
+      els.dashGreeting = el('[data-dash-greeting]');
+      els.dashGroup = el('[data-dash-group]');
+      els.dashKpis = el('[data-dash-kpis]');
+      els.dashAttChart = el('[data-dash-att-chart]');
+      els.dashAttSub = el('[data-dash-att-sub]');
+      els.dashFeesDonut = el('[data-dash-fees-donut]');
+      els.dashNextMeeting = el('[data-dash-next-meeting]');
+      els.dashRecentFinance = el('[data-dash-recent-finance]');
+      els.dashAttention = el('[data-dash-attention]');
       els.rosterForm = el('[data-roster-form]');
       els.rosterBody = el('[data-roster-body]');
       els.rosterSearch = el('[data-roster-search]');
@@ -741,7 +789,6 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       await autoArchiveInactive();
       renderRoster();
       renderArchive();
-      renderStats();
     }
     function memberRowHTML(m: any, actionsHTML: string) {
       return `
@@ -2076,20 +2123,198 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       });
     }
 
-    // ---------- Dashboard --------------------------------------------------
-    function renderStats() {
-      const active = state.members.filter((m: any) => m.active).length;
-      const archived = state.members.length - active;
-      els.stats.innerHTML = `
-        <div class="ws-stat ws-stat--accent">
-          <span class="ws-stat-icon">★</span>
-          <span class="ws-stat-text"><span class="ws-stat-num">${active}</span><span class="ws-stat-label">Active members</span></span>
+    // ---------- Dashboard ---------------------------------------------------
+    function dashGreeting() {
+      const h = new Date().getHours();
+      const first = (state.profile?.name || '').trim().split(/\s+/)[0];
+      const time = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+      return first ? `${time}, ${first}` : time;
+    }
+    function dashDeltaBadge(val: number | null, suffix = ''): string {
+      if (val == null || Number.isNaN(val) || val === 0) {
+        return `<span class="ws-dash-delta ws-dash-delta--flat">– steady</span>`;
+      }
+      const up = val > 0;
+      return `<span class="ws-dash-delta ${up ? 'ws-dash-delta--up' : 'ws-dash-delta--down'}">${up ? '↑' : '↓'} ${Math.abs(val)}${suffix} vs last period</span>`;
+    }
+    async function loadDashboard() {
+      if (!state.activeGroup) return;
+      await ensureMembersLoaded();
+      await loadGroupSettings();
+
+      const g = GROUPS.find((x: any) => x.key === state.activeGroup);
+      els.dashGreeting.textContent = dashGreeting();
+      els.dashGroup.textContent = g ? `${g.en} workspace` : 'Your workspace';
+      els.dashDate.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+      const active = state.members.filter((m: any) => m.active);
+      const archivedCount = state.members.length - active.length;
+      const allergyCount = active.filter((m: any) => m.has_allergies).length;
+
+      const now = new Date();
+      const day30 = toDateStr(addDays(now, -30));
+      const day60 = toDateStr(addDays(now, -60));
+      const day90 = toDateStr(addDays(now, -90));
+      const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const monthEnd = `${period}-${String(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()).padStart(2, '0')}`;
+      const prevD = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const prevPeriod = `${prevD.getFullYear()}-${String(prevD.getMonth() + 1).padStart(2, '0')}`;
+      const prevMonthEnd = `${prevPeriod}-${String(new Date(prevD.getFullYear(), prevD.getMonth() + 1, 0).getDate()).padStart(2, '0')}`;
+
+      const [attRes, curRes, feeRes, finRes, pendingRes] = await Promise.all([
+        db.from('attendance').select('date, present').eq('group_key', state.activeGroup).gte('date', day90).order('date', { ascending: true }),
+        db.from('curriculum_meetings').select('date, theme, activities').eq('group_key', state.activeGroup).gte('date', todayStr()).order('date', { ascending: true }).limit(1),
+        db.from('fee_payments').select('paid, amount').eq('group_key', state.activeGroup).eq('period', period),
+        db.from('finance_entries').select('entry_type, amount, entry_date, category, description').eq('group_key', state.activeGroup).gte('entry_date', `${prevPeriod}-01`).lte('entry_date', monthEnd).order('entry_date', { ascending: false }),
+        db.from('join_requests').select('id', { count: 'exact', head: true }).eq('group_key', state.activeGroup).eq('status', 'pending'),
+      ]);
+      const attRows = attRes.data || [];
+      const feeRows = feeRes.data || [];
+      const finRows = finRes.data || [];
+      const nextMeeting = (curRes.data || [])[0] || null;
+      const pendingCount = pendingRes.count || 0;
+
+      // Attendance: per-date rollup (chart) + 30-day rate vs the prior 30
+      // days (KPI trend).
+      const byDate = new Map<string, { present: number; total: number }>();
+      attRows.forEach((r: any) => {
+        const e = byDate.get(r.date) || { present: 0, total: 0 };
+        e.total++; if (r.present) e.present++;
+        byDate.set(r.date, e);
+      });
+      const lastDates = Array.from(byDate.keys()).sort().slice(-8);
+      const rateOf = (rows: any[]) => rows.length ? Math.round((rows.filter((r: any) => r.present).length / rows.length) * 100) : null;
+      const rate30 = rateOf(attRows.filter((r: any) => r.date >= day30));
+      const ratePrev30 = rateOf(attRows.filter((r: any) => r.date >= day60 && r.date < day30));
+
+      // Fees: this period's paid count/amount out of every active member.
+      const paidCount = feeRows.filter((r: any) => r.paid).length;
+      const collected = feeRows.reduce((s: number, r: any) => s + (r.paid ? Number(r.amount || 0) : 0), 0);
+      const feePct = active.length ? Math.round((paidCount / active.length) * 100) : 0;
+
+      // Finance: net income this month vs last month.
+      const netFor = (start: string, end: string) => finRows
+        .filter((r: any) => r.entry_date >= start && r.entry_date <= end)
+        .reduce((s: number, r: any) => s + (r.entry_type === 'income' ? Number(r.amount) : -Number(r.amount)), 0);
+      const netThis = netFor(`${period}-01`, monthEnd);
+      const netPrev = netFor(`${prevPeriod}-01`, prevMonthEnd);
+
+      renderDashKpis({ activeCount: active.length, archivedCount, rate30, ratePrev30, feePct, paidCount, totalActive: active.length, collected, netThis, netPrev });
+      renderDashAttendanceChart(lastDates, byDate);
+      renderDashFeesDonut(feePct, paidCount, active.length, collected);
+      renderDashNextMeeting(nextMeeting);
+      renderDashRecentFinance(finRows.slice(0, 5));
+      renderDashAttention({ pendingCount, allergyCount, unpaidCount: active.length - paidCount, hasActiveMembers: active.length > 0 });
+    }
+    function renderDashKpis(d: any) {
+      els.dashKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active members</span></div>
+          <span class="ws-dash-kpi-num">${d.activeCount}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${d.archivedCount} archived</span>
         </div>
-        <div class="ws-stat">
-          <span class="ws-stat-icon">◆</span>
-          <span class="ws-stat-text"><span class="ws-stat-num">${archived}</span><span class="ws-stat-label">Archived members</span></span>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Attendance (30d)</span></div>
+          <span class="ws-dash-kpi-num">${d.rate30 != null ? d.rate30 + '%' : '—'}</span>
+          ${d.rate30 != null ? dashDeltaBadge(d.ratePrev30 != null ? d.rate30 - d.ratePrev30 : null, 'pt') : '<span class="ws-dash-delta ws-dash-delta--flat">No sessions yet</span>'}
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Fees collected</span></div>
+          <span class="ws-dash-kpi-num">${d.feePct}%</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${d.paidCount}/${d.totalActive} paid · ${d.collected.toFixed(0)}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">±</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
+          <span class="ws-dash-kpi-num">${d.netThis >= 0 ? '+' : '−'}${Math.abs(d.netThis).toFixed(0)}</span>
+          ${dashDeltaBadge(Math.round(d.netThis - d.netPrev))}
         </div>
       `;
+    }
+    function renderDashAttendanceChart(lastDates: string[], byDate: Map<string, { present: number; total: number }>) {
+      if (!lastDates.length) {
+        els.dashAttChart.innerHTML = '<p class="ws-dash-empty-mini">No attendance recorded in the last 90 days.</p>';
+        els.dashAttSub.textContent = '';
+        return;
+      }
+      els.dashAttSub.textContent = `Last ${lastDates.length} session${lastDates.length === 1 ? '' : 's'}`;
+      els.dashAttChart.innerHTML = `
+        <div class="ws-dash-bars">
+          ${lastDates.map((dateStr) => {
+            const e = byDate.get(dateStr)!;
+            const pct = e.total ? Math.round((e.present / e.total) * 100) : 0;
+            const d = parseDateStr(dateStr);
+            const label = `${MONTHS[d.getMonth()].en.slice(0, 3)} ${d.getDate()}`;
+            return `
+              <div class="ws-dash-bar-col" title="${label} — ${pct}% present (${e.present}/${e.total})">
+                <span class="ws-dash-bar-pct">${pct}%</span>
+                <div class="ws-dash-bar-track"><div class="ws-dash-bar-fill" style="height:${Math.max(pct, 4)}%"></div></div>
+                <span class="ws-dash-bar-label">${label}</span>
+              </div>`;
+          }).join('')}
+        </div>
+      `;
+    }
+    function renderDashFeesDonut(pct: number, paidCount: number, total: number, collected: number) {
+      if (!total) {
+        els.dashFeesDonut.innerHTML = '<p class="ws-dash-empty-mini">No active members yet.</p>';
+        return;
+      }
+      els.dashFeesDonut.innerHTML = `
+        <div class="ws-dash-donut" style="--pct:${pct}%">
+          <div class="ws-dash-donut-center">
+            <span class="ws-dash-donut-num">${pct}%</span>
+            <span class="ws-dash-donut-label">Collected</span>
+          </div>
+        </div>
+        <p class="ws-dash-donut-foot">${paidCount} of ${total} paid · ${collected.toFixed(2)} in</p>
+      `;
+    }
+    function renderDashNextMeeting(meeting: any) {
+      if (!meeting) {
+        els.dashNextMeeting.innerHTML = `
+          <p class="ws-dash-empty-mini">Nothing planned yet.</p>
+          <button type="button" class="ws-dash-mini-link" data-goto-tab="curriculum">Plan a meeting →</button>
+        `;
+        return;
+      }
+      const d = parseDateStr(meeting.date);
+      const dateLabel = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}`;
+      const count = (meeting.activities || []).length;
+      els.dashNextMeeting.innerHTML = `
+        <p class="ws-dash-mini-date">${dateLabel}</p>
+        <p class="ws-dash-mini-theme">${escapeHtml(meeting.theme || 'Theme not set yet')}</p>
+        <p class="ws-dash-mini-sub">${count} ${count === 1 ? 'activity' : 'activities'} planned</p>
+      `;
+    }
+    function renderDashRecentFinance(rows: any[]) {
+      if (!rows.length) {
+        els.dashRecentFinance.innerHTML = '<p class="ws-dash-empty-mini">No entries yet this month.</p>';
+        return;
+      }
+      els.dashRecentFinance.innerHTML = rows.map((r: any) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-dot ws-dash-feed-dot--${r.entry_type}"></span>
+          <span class="ws-dash-feed-text">
+            <span class="ws-dash-feed-title">${escapeHtml(r.category || (r.entry_type === 'income' ? 'Income' : 'Expense'))}</span>
+            <span class="ws-dash-feed-date">${r.entry_date}</span>
+          </span>
+          <span class="ws-dash-feed-amount ws-dash-feed-amount--${r.entry_type}">${r.entry_type === 'income' ? '+' : '−'}${Number(r.amount).toFixed(2)}</span>
+        </div>
+      `).join('');
+    }
+    function renderDashAttention(d: any) {
+      const items: { label: string; tab: string }[] = [];
+      if (d.pendingCount) items.push({ label: `${d.pendingCount} pending approval${d.pendingCount === 1 ? '' : 's'}`, tab: 'approvals' });
+      if (d.hasActiveMembers && d.unpaidCount > 0) items.push({ label: `${d.unpaidCount} unpaid fee${d.unpaidCount === 1 ? '' : 's'} this month`, tab: 'fees' });
+      if (d.allergyCount) items.push({ label: `${d.allergyCount} member${d.allergyCount === 1 ? '' : 's'} with allergies on file`, tab: 'roster' });
+      if (!items.length) { els.dashAttention.innerHTML = '<p class="ws-dash-empty-mini">All caught up. Nothing needs attention.</p>'; return; }
+      els.dashAttention.innerHTML = items.map((it) => `<button type="button" class="ws-dash-attn-row" data-goto-tab="${it.tab}">${escapeHtml(it.label)} <span aria-hidden="true">→</span></button>`).join('');
+    }
+    function bindDashboard() {
+      els.dashRoot.addEventListener('click', (e: any) => {
+        const btn = e.target.closest('[data-goto-tab]');
+        if (btn) setTab(btn.dataset.gotoTab);
+      });
     }
 
     // ---------- Admin: approve leaders, assign groups --------------------
@@ -2166,7 +2391,8 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
 
     function loadActiveTabData() {
       const tab = state.activeTab;
-      if (tab === 'roster' || tab === 'dashboard' || tab === 'archive') loadRoster();
+      if (tab === 'dashboard') loadDashboard();
+      if (tab === 'roster' || tab === 'archive') loadRoster();
       if (tab === 'admin') loadAdmin();
       if (tab === 'approvals') loadApprovals();
       if (tab === 'attendance') loadAttendance();
@@ -2255,6 +2481,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       setupGroups();
       bindTabs();
       bindSubtabs();
+      bindDashboard();
       bindRosterForm();
       bindFinanceForm();
       bindLibraryUpload();
