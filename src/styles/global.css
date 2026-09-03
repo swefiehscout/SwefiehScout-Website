@@ -3549,24 +3549,34 @@ main.wide {
   background: rgba(26, 26, 26, 0.4);
 }
 .curr-day-panel {
-  /* Wide enough that the activity bank's chips wrap onto just a couple of
-     rows instead of a long single column, so the panel is rarely taller
-     than the viewport and rarely needs its own scrollbar at a normal
-     100%-zoom desktop window. */
-  width: min(720px, 94vw);
-  max-height: min(90vh, 820px);
+  width: min(560px, 94vw);
+  /* vh is unreliable on mobile Safari (100vh includes the space behind
+     the address bar, which can leave the bottom of the panel — the Save
+     button — rendered past what's actually visible). dvh tracks the
+     real visible viewport instead; the vh rule right before it is the
+     fallback for the handful of browsers that don't support dvh yet. */
+  max-height: min(88vh, 640px);
+  max-height: min(88dvh, 640px);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  padding: 1.75rem 2rem;
+  padding: 1.5rem 1.75rem;
 }
+/* Pinned to the top and bottom of the panel's own scroll area (not the
+   page) — the day you're planning and the Save/Cancel buttons stay on
+   screen the whole time you're scrolling a long activity list, so
+   there's never a "now scroll to find Save" moment. */
 .curr-day-banner {
+  position: sticky;
+  inset-block-start: -1.5rem;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.85rem 1.25rem;
-  margin: -1.75rem -2rem 1.25rem;
+  margin: -1.5rem -1.75rem 1.25rem;
   background: var(--color-brand);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   color: #fff;
@@ -3590,11 +3600,11 @@ main.wide {
 @media (max-width: 560px) {
   .curr-day-field-row { grid-template-columns: 1fr; }
 }
-.curr-day-field { display: block; margin-bottom: 1rem; font-size: 0.82rem; color: var(--color-muted); }
-.curr-day-field span { display: block; margin-bottom: 0.3rem; font-weight: 600; }
+.curr-day-field { display: block; margin-bottom: 0.75rem; font-size: 0.82rem; color: var(--color-muted); }
+.curr-day-field span { display: block; margin-bottom: 0.25rem; font-weight: 600; }
 .curr-day-field input, .curr-day-field textarea {
   width: 100%;
-  padding: 0.55rem 0.7rem;
+  padding: 0.5rem 0.65rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   font: inherit;
@@ -3603,7 +3613,7 @@ main.wide {
   resize: vertical;
 }
 .curr-day-section-label {
-  margin: 1.25rem 0 0.6rem;
+  margin: 1rem 0 0.5rem;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -3611,13 +3621,16 @@ main.wide {
   color: var(--color-brand-dark);
 }
 /* Shared by "Select from the activity bank" (a <select>) and "Or add a
-   custom activity" (a text <input>) — same row shape either way. */
-.curr-day-custom-add { display: flex; gap: 0.5rem; margin-bottom: 0.25rem; }
+   custom activity" (a text <input>) — same row shape either way, one
+   right under the other under a single "Add an activity" label instead
+   of each getting its own heading. */
+.curr-day-custom-add { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.curr-day-custom-add--tight { margin-bottom: 0; }
 .curr-day-custom-add input,
 .curr-day-custom-add select {
   flex: 1;
   min-width: 0;
-  padding: 0.55rem 0.7rem;
+  padding: 0.5rem 0.65rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   font: inherit;
@@ -3625,9 +3638,20 @@ main.wide {
   color: var(--color-text);
 }
 .curr-day-custom-add select:disabled { color: var(--color-muted); background: var(--color-bg); }
-.curr-day-custom-add button { padding: 0.55rem 1rem; font-size: 0.82rem; }
-.curr-day-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 2.5rem; }
-.curr-day-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border); }
+.curr-day-custom-add button { padding: 0.5rem 0.9rem; font-size: 0.82rem; }
+.curr-day-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 2.5rem; margin-bottom: 0.5rem; }
+.curr-day-actions {
+  position: sticky;
+  inset-block-end: -1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin: 1.25rem -1.75rem -1.5rem;
+  padding: 0.9rem 1.75rem 1.5rem;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -6px 12px -8px rgba(0, 0, 0, 0.12);
+}
 
 /* ----- Toast ----- */
 .curr-toast {
@@ -5108,8 +5132,10 @@ main.wide {
   .curr-day-theme, .curr-day-cell .curr-day-mini { display: none; }
   .curr-weekday { padding: 0.35rem 0.15rem; font-size: 0.62rem; }
 
-  /* ----- Curriculum day popup: a touch tighter so content isn't packed
-     right up against the rounded corners on a narrow screen. ----- */
-  .curr-day-panel { padding: 1.25rem 1.15rem; }
-  .curr-day-banner { margin: -1.25rem -1.15rem 1.1rem; padding: 0.75rem 1rem; }
+  /* ----- Curriculum day popup: taller usable height (phones lose more
+     of the viewport to browser chrome) and tighter, uniform padding so
+     the sticky banner/actions bars' negative margins stay simple. ----- */
+  .curr-day-panel { max-height: min(92vh, 640px); max-height: min(92dvh, 640px); padding: 1.1rem; }
+  .curr-day-banner { inset-block-start: -1.1rem; margin: -1.1rem -1.1rem 1rem; padding: 0.7rem 0.9rem; }
+  .curr-day-actions { inset-block-end: -1.1rem; margin: 1rem -1.1rem -1.1rem; padding: 0.7rem 1.1rem 1.1rem; }
 }

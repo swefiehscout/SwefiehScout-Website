@@ -593,17 +593,15 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         </label>
       </div>
 
-      <p class="curr-day-section-label">Select from the activity bank</p>
+      <p class="curr-day-section-label">Add an activity</p>
       <form class="curr-day-custom-add" data-curr-bank-select-form>
         <select data-curr-bank-select>
-          <option value="">Choose an activity…</option>
+          <option value="">Choose from the activity bank…</option>
         </select>
         <button type="submit" class="btn-primary">Add</button>
       </form>
-
-      <p class="curr-day-section-label">Or add a custom activity</p>
-      <form class="curr-day-custom-add" data-curr-custom-add-form>
-        <input type="text" data-custom-en placeholder="Type an activity…" />
+      <form class="curr-day-custom-add curr-day-custom-add--tight" data-curr-custom-add-form>
+        <input type="text" data-custom-en placeholder="…or type a custom one" />
         <button type="submit" class="btn-primary">Add</button>
       </form>
 
