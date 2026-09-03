@@ -605,7 +605,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
   </div>
 
   <script>
-    import { supabase, supabaseConfigured, getSession, getProfile, signOut } from '../../lib/workspace/auth';
+    import { supabase, supabaseConfigured, getSession, getProfile, signOut, isSessionExpired, msUntilSessionExpiry } from '../../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
     import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK } from '../../lib/curriculum/constants';
@@ -2434,7 +2434,15 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
 
       const session = await getSession();
       if (!session) { window.location.replace('/leaders'); return; }
+      if (isSessionExpired()) { await signOut(); window.location.replace('/leaders?expired=1'); return; }
       state.session = session;
+      // Kick the leader back to sign-in the moment the 3-hour cap hits,
+      // even if this tab is just left open and idle — not only on the
+      // next reload.
+      setTimeout(async () => {
+        await signOut();
+        window.location.replace('/leaders?expired=1');
+      }, msUntilSessionExpiry());
 
       const profile = await getProfile(session.user.id);
       if (!profile) { await signOut(); window.location.replace('/leaders'); return; }

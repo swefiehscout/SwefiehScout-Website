@@ -46,7 +46,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </div>
 
   <script>
-    import { supabase, supabaseConfigured, signIn, signUp, resetPassword, updatePassword, getSession } from '../lib/workspace/auth';
+    import { supabase, supabaseConfigured, signIn, signUp, resetPassword, updatePassword, getSession, isSessionExpired, signOut } from '../lib/workspace/auth';
 
     let mode = 'signin';
 
@@ -147,16 +147,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       el('[data-auth-forgot]').addEventListener('click', handleForgot);
       el('[data-recovery-submit]').addEventListener('click', handleRecoverySubmit);
 
+      if (window.location.search.includes('expired=1')) {
+        showNotice('You were signed out after 3 hours — sign in again to continue.');
+      }
+
       if (supabaseConfigured && supabase) {
         supabase.auth.onAuthStateChange((event) => {
           if (event === 'PASSWORD_RECOVERY') {
             el('[data-auth-recovery]').hidden = false;
           }
         });
-        getSession().then((session) => {
+        getSession().then(async (session) => {
           // Already signed in and this isn't a password-recovery landing —
-          // skip straight to the workspace.
+          // skip straight to the workspace, unless our own 3-hour cap has
+          // already passed (Supabase's refresh token would otherwise keep
+          // this session alive for much longer than that).
           if (session && !window.location.hash.includes('type=recovery')) {
+            if (isSessionExpired()) { await signOut(); return; }
             window.location.replace('/leaders/app');
           }
         });
