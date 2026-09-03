@@ -1477,11 +1477,12 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       });
     }
 
-    // ---------- Library (document storage) ---------------------------------
+    // ---------- Library (document storage, per group — no shared/troop-
+    // wide documents) -------------------------------------------------------
     async function loadLibrary() {
       if (!state.activeGroup) return;
       const { data, error } = await db.from('documents').select('*')
-        .or(`group_key.eq.${state.activeGroup},group_key.is.null`)
+        .eq('group_key', state.activeGroup)
         .order('uploaded_at', { ascending: false });
       if (error) { console.error(error); showToast('Could not load documents.'); return; }
       state.docs = data || [];
@@ -1494,12 +1495,12 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       }
       els.libBody.innerHTML = state.docs.map((d: any) => `
         <tr data-doc-id="${d.id}" data-doc-path="${escapeHtml(d.file_path)}">
-          <td data-label="Title">${escapeHtml(d.title)}${d.group_key === null ? ' <span class="ws-allergy-badge">Shared</span>' : ''}</td>
+          <td data-label="Title">${escapeHtml(d.title)}</td>
           <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
           <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-doc-download>Download</button>
-            ${d.group_key !== null ? '<button type="button" class="ws-row-del" data-doc-del>×</button>' : ''}
+            <button type="button" class="ws-row-del" data-doc-del>×</button>
           </td>
         </tr>
       `).join('');
@@ -1511,8 +1512,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
           if (error || !data) { showToast('Could not open file.'); return; }
           window.open(data.signedUrl, '_blank');
         });
-        const delBtn = row.querySelector('[data-doc-del]');
-        if (delBtn) delBtn.addEventListener('click', async () => {
+        row.querySelector('[data-doc-del]').addEventListener('click', async () => {
           if (!confirm('Delete this document?')) return;
           await db.storage.from('documents').remove([path]);
           const { error } = await db.from('documents').delete().eq('id', id);

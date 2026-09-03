@@ -271,13 +271,12 @@ create policy "group leaders can delete" on join_requests
   for delete using (has_group_access(group_key));
 
 -- ============================================================
--- documents — the file library. group_key = null means a shared,
--- troop-wide document (e.g. a Lessons resource); admins manage
--- those, any signed-in leader can read them.
+-- documents — the file library. Every document belongs to exactly
+-- one group's library — no shared/troop-wide documents.
 -- ============================================================
 create table if not exists documents (
   id uuid primary key default gen_random_uuid(),
-  group_key text,
+  group_key text not null,
   category text not null default 'general',
   title text not null,
   file_path text not null,
@@ -287,28 +286,33 @@ create table if not exists documents (
   uploaded_at timestamptz not null default now()
 );
 
+-- Widens an existing documents table from before shared/troop-wide docs
+-- were dropped — harmless if the table was already created not-null.
+-- Only runs cleanly if no group_key is actually null; there's no UI path
+-- that ever created one, so this should be a no-op in practice.
+alter table documents alter column group_key set not null;
+
 alter table documents enable row level security;
 
 drop policy if exists "read shared or own group" on documents;
-create policy "read shared or own group" on documents
-  for select using (group_key is null or has_group_access(group_key));
+drop policy if exists "read own group" on documents;
+create policy "read own group" on documents
+  for select using (has_group_access(group_key));
 
 drop policy if exists "write own group" on documents;
 create policy "write own group" on documents
-  for insert with check (group_key is not null and has_group_access(group_key));
+  for insert with check (has_group_access(group_key));
 
 drop policy if exists "update own group" on documents;
 create policy "update own group" on documents
-  for update using (group_key is not null and has_group_access(group_key))
-  with check (group_key is not null and has_group_access(group_key));
+  for update using (has_group_access(group_key))
+  with check (has_group_access(group_key));
 
 drop policy if exists "delete own group" on documents;
 create policy "delete own group" on documents
-  for delete using (group_key is not null and has_group_access(group_key));
+  for delete using (has_group_access(group_key));
 
 drop policy if exists "admin manage shared docs" on documents;
-create policy "admin manage shared docs" on documents
-  for all using (is_admin()) with check (is_admin());
 
 -- ============================================================
 -- curriculum_meetings already exists from the earlier build.
