@@ -50,9 +50,13 @@ returns boolean language sql security definer stable as $$
   );
 $$;
 
+-- A leader can only read their own profile row — not the whole
+-- roster of other leaders' names/roles/groups. Admins still see
+-- everyone (the Admin tab lists every leader to approve/assign).
 drop policy if exists "read all profiles" on profiles;
-create policy "read all profiles" on profiles
-  for select using (auth.uid() is not null);
+drop policy if exists "read own or admin" on profiles;
+create policy "read own or admin" on profiles
+  for select using (auth.uid() = id or is_admin());
 
 drop policy if exists "update own name" on profiles;
 create policy "update own name" on profiles
