@@ -1241,28 +1241,33 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         const rec: any = map.get(m.id);
         if (rec && rec.paid) { paidCount++; collected += Number(rec.amount || 0); }
         const amount = rec && rec.amount != null ? rec.amount : (defaultAmount != null ? defaultAmount : '');
+        const paidOn = rec && rec.paid_on ? rec.paid_on : '';
         return `
-          <tr data-member-id="${m.id}">
+          <tr data-member-id="${m.id}" data-paid-on="${paidOn}">
             <td data-label="Name">${escapeHtml(m.full_name)}</td>
             <td data-label="Paid"><input type="checkbox" data-fee-paid ${rec && rec.paid ? 'checked' : ''} /></td>
             <td data-label="Amount"><input type="number" step="0.01" min="0" class="ws-inline-amount" data-fee-amount value="${amount}" /></td>
-            <td data-label="Paid on"><input type="date" data-fee-paidon value="${rec && rec.paid_on ? rec.paid_on : ''}" /></td>
+            <td data-label="Paid on">${paidOn ? escapeHtml(paidOn) : '—'}</td>
           </tr>`;
       }).join('');
       els.feeSummary.textContent = `${paidCount} of ${active.length} paid — ${collected.toFixed(2)} collected`;
 
+      // "Paid on" isn't an editable field — with a whole group usually
+      // paying on the same day, picking a date per row was pure repetition.
+      // It's just stamped with today's date the moment a member is first
+      // marked paid, and cleared if unmarked; re-saving an already-paid
+      // row (e.g. fixing the amount) keeps whatever date it already has.
       els.feeBody.querySelectorAll('tr').forEach((row: any) => {
         const memberId = row.dataset.memberId;
         const commit = () => {
           const paid = row.querySelector('[data-fee-paid]').checked;
           const amountVal = row.querySelector('[data-fee-amount]').value;
-          let paidOn = row.querySelector('[data-fee-paidon]').value;
+          let paidOn = row.dataset.paidOn || '';
           if (paid && !paidOn) paidOn = todayStr();
           saveFee(memberId, period, paid, amountVal ? Number(amountVal) : null, paid ? paidOn : null);
         };
         row.querySelector('[data-fee-paid]').addEventListener('change', commit);
         row.querySelector('[data-fee-amount]').addEventListener('blur', commit);
-        row.querySelector('[data-fee-paidon]').addEventListener('change', commit);
       });
     }
     async function saveFee(memberId: string, period: string, paid: boolean, amount: number | null, paidOn: string | null) {
@@ -2435,12 +2440,16 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
           <td class="ws-admin-groups" data-label="Groups" data-groups="${p.groups.join(',')}">
             ${adminGroupsCellHTML(p.groups, p.role === 'admin')}
           </td>
-          <td class="ws-row-actions"><button type="button" class="btn-primary ws-admin-save" data-admin-save>Save</button></td>
+          <td class="ws-row-actions">
+            <button type="button" class="btn-primary ws-admin-save" data-admin-save>Save</button>
+            ${p.id !== state.session.user.id ? '<button type="button" class="ws-row-del" data-admin-remove title="Remove access">×</button>' : ''}
+          </td>
         </tr>
       `).join('');
 
       els.adminBody.querySelectorAll('tr').forEach((row: any) => {
         const id = row.dataset.profileId;
+        const name = row.querySelector('[data-label="Name"]').textContent;
         const groupsCell = row.querySelector('.ws-admin-groups');
         row.querySelector('[data-admin-role]').addEventListener('change', (e: any) => {
           const savedGroups = (groupsCell.dataset.groups || '').split(',').filter(Boolean);
@@ -2455,6 +2464,20 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
           if (error) { console.error(error); showToast('Could not save — ' + (error.message || 'unknown error') + '.'); return; }
           showToast('Saved.');
           if (id === state.session.user.id) { state.profile.role = role; state.profile.groups = groups; setupGroups(); }
+        });
+        // Soft-revoke: back to pending with no groups, so they lose all
+        // access immediately (enforced by RLS, not just this screen) but
+        // stay in the list — an admin can re-approve them later if this
+        // was a mistake. This can't delete their actual login (that needs
+        // the service-role key, which nothing in this app ever holds) —
+        // for that, remove them from Supabase Dashboard → Authentication →
+        // Users directly.
+        row.querySelector('[data-admin-remove]')?.addEventListener('click', async () => {
+          if (!confirm(`Remove ${name}'s access? They'll be signed out of every group and land back on the "waiting for approval" screen — you can re-approve them any time from here. This doesn't delete their account.`)) return;
+          const { error } = await db.from('profiles').update({ role: 'pending', groups: [] }).eq('id', id);
+          if (error) { console.error(error); showToast('Could not remove access — ' + (error.message || 'unknown error') + '.'); return; }
+          showToast(`${name}'s access removed.`);
+          await loadAdmin();
         });
       });
     }
