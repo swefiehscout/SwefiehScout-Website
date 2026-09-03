@@ -3293,12 +3293,16 @@ main.wide {
    Bank, Finance's Ledger / Categories, Library's Documents / Lessons) ----- */
 .curr-subtabs, .ws-subtabs {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 0.25rem;
   padding: 0.3rem;
   margin-bottom: 1.5rem;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  /* A full pill (999px) only reads right on one line — Admin's now has
+     enough sub-tabs to wrap on narrower screens, where that shape would
+     look broken on a multi-row box. */
+  border-radius: var(--radius-lg);
 }
 .curr-subtab, .ws-subtab {
   padding: 0.5rem 1.1rem;
