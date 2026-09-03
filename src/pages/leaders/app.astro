@@ -1409,14 +1409,28 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // note isn't left in the payload here (not just set to null) so any
     // note recorded before the Notes column was removed from this table
     // stays intact in the database instead of getting silently wiped.
+    // Unchecked means "no record" — same as a member whose box was never
+    // touched at all (leaders only tick who's present; nobody ticks the
+    // absent ones). So unticking deletes the row rather than storing
+    // present:false — otherwise a tick-then-untick (a misclick, say)
+    // would leave a phantom row behind that still counts that date as a
+    // real session everywhere attendance is summarized (Dashboard trend,
+    // Reports), even though nothing was actually recorded.
     async function saveAttendance(memberId: string, date: string, present: boolean) {
-      const { error } = await db.from('attendance').upsert({
-        group_key: state.activeGroup, date, member_id: memberId, present,
-        updated_by: state.session.user.id,
-      }, { onConflict: 'group_key,date,member_id' });
+      const error = present
+        ? (await db.from('attendance').upsert({
+            group_key: state.activeGroup, date, member_id: memberId, present,
+            updated_by: state.session.user.id,
+          }, { onConflict: 'group_key,date,member_id' })).error
+        : (await db.from('attendance').delete()
+            .eq('group_key', state.activeGroup).eq('date', date).eq('member_id', memberId)).error;
       if (error) { console.error(error); showToast('Could not save attendance.'); return; }
       if (!state.attDatesWithRecords) state.attDatesWithRecords = new Set();
-      state.attDatesWithRecords.add(date);
+      // Whether this date still "has records" now depends on whether
+      // anyone else in the currently-rendered list is still checked —
+      // deleting the last checked row for a date un-marks it entirely.
+      const stillHasRecords = els.attBody.querySelectorAll('[data-att-present]:checked').length > 0;
+      if (stillHasRecords) state.attDatesWithRecords.add(date); else state.attDatesWithRecords.delete(date);
       renderAttCalendar();
       // Deliberately not a full loadAttDay() reload+rerender here — the
       // checkbox the user just toggled already reflects what was saved;
