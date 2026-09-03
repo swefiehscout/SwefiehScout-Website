@@ -49,10 +49,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div data-auth-view="verify" hidden style="text-align: center;">
       <p class="gate-label">Check your email</p>
       <p class="ws-pending-text">
-        We sent a verification link to <strong data-verify-email></strong>. Click it to activate your
-        account, then come back here and sign in. An admin still needs to approve you and assign your
-        group after that before you can get in.
+        We sent a verification link to <strong data-verify-email></strong>. It can take a minute or two
+        to arrive — check your spam folder if you don't see it. Click it to activate your account, then
+        come back here and sign in. An admin still needs to approve you and assign your group after that
+        before you can get in.
       </p>
+      <p class="auth-notice" data-verify-notice hidden></p>
+      <button type="button" class="auth-forgot" data-verify-resend>Didn't get it? Resend the email</button>
       <button type="button" class="btn-primary" data-verify-back>Back to sign in</button>
     </div>
   </div>
@@ -89,19 +92,65 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       el('[data-auth-submit]').textContent = next === 'signup' ? 'Create account' : 'Sign in';
       clearMessages();
     }
+    // The email itself can take a minute or two to arrive — the Resend
+    // button stays disabled with a live countdown for 3 minutes after
+    // each send, so nobody fires off a second (or third) email before the
+    // first one had a real chance to show up.
+    let resendAvailableAt = 0;
+    let resendTimer: any = null;
+    function updateResendButton() {
+      const btn = el('[data-verify-resend]');
+      const remaining = resendAvailableAt - Date.now();
+      if (remaining <= 0) {
+        clearInterval(resendTimer);
+        resendTimer = null;
+        btn.disabled = false;
+        btn.textContent = "Didn't get it? Resend the email";
+        return;
+      }
+      btn.disabled = true;
+      const mins = Math.floor(remaining / 60000);
+      const secs = Math.floor((remaining % 60000) / 1000);
+      btn.textContent = `Resend available in ${mins}:${String(secs).padStart(2, '0')}`;
+    }
+    function startResendCooldown() {
+      resendAvailableAt = Date.now() + 3 * 60 * 1000;
+      clearInterval(resendTimer);
+      updateResendButton();
+      resendTimer = setInterval(updateResendButton, 1000);
+    }
+
     // Swaps the whole card between the sign-in/sign-up form and the
     // "check your email" screen shown right after Create account — a
     // dedicated screen rather than just flipping back to the sign-in tab
     // with a small notice, so it's unmissable.
     function showVerifyView(email: string) {
       el('[data-verify-email]').textContent = email;
+      el('[data-verify-notice]').hidden = true;
       el('[data-auth-view="form"]')!.hidden = true;
       el('[data-auth-view="verify"]')!.hidden = false;
+      startResendCooldown();
     }
     function showFormView() {
       el('[data-auth-view="verify"]')!.hidden = true;
       el('[data-auth-view="form"]')!.hidden = false;
       setMode('signin');
+    }
+    async function handleResend() {
+      const email = el('[data-verify-email]').textContent;
+      if (!email || !supabase || Date.now() < resendAvailableAt) return;
+      const notice = el('[data-verify-notice]');
+      try {
+        const emailRedirectTo = window.location.origin + '/leaders';
+        const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo } });
+        if (error) throw error;
+        notice.textContent = 'Sent again — check your email.';
+        notice.hidden = false;
+        startResendCooldown();
+      } catch (err: any) {
+        notice.textContent = err.message || 'Could not resend — try again in a moment.';
+        notice.hidden = false;
+      }
     }
 
     async function handleSubmit(e: Event) {
@@ -172,6 +221,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       el('[data-auth-forgot]').addEventListener('click', handleForgot);
       el('[data-recovery-submit]').addEventListener('click', handleRecoverySubmit);
       el('[data-verify-back]').addEventListener('click', showFormView);
+      el('[data-verify-resend]').addEventListener('click', handleResend);
 
       if (window.location.search.includes('expired=1')) {
         showNotice('You were signed out after 3 hours — sign in again to continue.');
