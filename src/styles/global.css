@@ -4369,6 +4369,9 @@ main.wide {
 
 /* ----- Tables ----- */
 .ws-table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+/* A table already sitting inside a .ws-dash-card doesn't need its own
+   nested border/shadow on top of the card's — that just doubles up. */
+.ws-dash-card .ws-table-wrap { border: 0; border-radius: 0; box-shadow: none; }
 .ws-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .ws-table th {
   text-align: start;

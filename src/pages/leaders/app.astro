@@ -610,9 +610,25 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <button type="button" class="ws-subtab" data-subtabs="admin" data-subtab="leaders">Leader Management</button>
           </div>
 
-          <div data-subpanel="admin:overview">
+          <div class="ws-dash" data-subpanel="admin:overview">
             <p class="ws-att-hint">Every group together — the same numbers each group's own Dashboard shows, rolled up troop-wide.</p>
+
+            <div class="band-marquee ws-dash-marquee" aria-label="Troop photos">
+              <div class="band-marquee-track" style={`--n: ${workspaceMarqueePhotos.length}`}>
+                {dashMarqueePhotos.map((src, i) => (
+                  <div class="band-marquee-slide">
+                    <img src={src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
+                  </div>
+                ))}
+              </div>
+              <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
+              <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
+            </div>
+
             <div class="ws-dash-kpis" data-ov-kpis></div>
+
+            <div class="ws-stat-row ws-stat-row--3" data-ov-ratios></div>
+
             <div class="ws-dash-grid ws-dash-grid--2">
               <div class="ws-dash-card">
                 <div class="ws-dash-card-head"><h3>Active members by group</h3></div>
@@ -623,14 +639,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <div data-ov-fees-chart></div>
               </div>
             </div>
-            <h3 class="ws-admin-h3">By group</h3>
-            <div class="ws-table-wrap">
+
+            <div class="ws-dash-card ws-dash-card--full">
+              <div class="ws-dash-card-head"><h3>By group</h3></div>
+              <div class="ws-table-wrap">
               <table class="ws-table" data-ov-table>
                 <thead>
                   <tr><th>Group</th><th>Active</th><th>% of Troop</th><th>Attendance (30d)</th><th>Fees Collected</th><th>Net Income</th></tr>
                 </thead>
                 <tbody data-ov-body></tbody>
               </table>
+              </div>
             </div>
           </div>
 
@@ -928,6 +947,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.ovFinBody = el('[data-ov-fin-body]');
       els.ovReportMonth = el('[data-ov-report-month]');
       els.ovReportYear = el('[data-ov-report-year]');
+      els.ovRatios = el('[data-ov-ratios]');
       els.ovCurrBody = el('[data-ov-curr-body]');
       els.ovLibBody = el('[data-ov-lib-body]');
       els.ovRosterGroup = el('[data-ov-roster-group]');
@@ -2767,6 +2787,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const retentionPct = (totalActive + totalArchived) ? Math.round((totalActive / (totalActive + totalArchived)) * 100) : null;
       const allergyPct = totalActive ? Math.round((totalAllergy / totalActive) * 100) : 0;
       const groupsFullyPaid = groups.filter((g) => g.activeMembers > 0 && g.feePaid === g.activeMembers).length;
+      const largestGroup = groups.reduce((max, g) => (g.activeMembers > max.activeMembers ? g : max), groups[0]);
+      const largestSharePct = totalActive ? Math.round((largestGroup.activeMembers / totalActive) * 100) : 0;
+      const avgPerGroup = (totalActive / GROUPS.length).toFixed(1);
+      const avgFeeAmount = totalFeePaid ? totalCollected / totalFeePaid : 0;
+
+      els.ovRatios.innerHTML = `
+        <div class="ws-stat"><span class="ws-stat-icon">#</span><span class="ws-stat-text"><span class="ws-stat-num">${avgPerGroup}</span><span class="ws-stat-label">Avg members / group</span></span></div>
+        <div class="ws-stat ws-stat--accent"><span class="ws-stat-icon">▲</span><span class="ws-stat-text"><span class="ws-stat-num">${largestSharePct}%</span><span class="ws-stat-label">Largest group: ${escapeHtml(largestGroup.en)}</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">$</span><span class="ws-stat-text"><span class="ws-stat-num">${avgFeeAmount.toFixed(2)}</span><span class="ws-stat-label">Avg fee collected / member</span></span></div>
+      `;
 
       els.ovKpis.innerHTML = `
         <div class="ws-dash-kpi">
