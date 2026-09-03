@@ -3376,7 +3376,6 @@ main.wide {
   border-inline-start: 1px solid var(--color-border);
 }
 .curr-view-toggle button:first-child { border-inline-start: 0; }
-.curr-view-toggle button span { font-family: var(--font-display-arabic); margin-inline-start: 0.3rem; unicode-bidi: plaintext; }
 .curr-view-btn--active { background: var(--color-brand) !important; color: #fff !important; }
 
 .curr-nav { display: inline-flex; align-items: center; gap: 0.5rem; }

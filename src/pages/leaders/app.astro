@@ -330,14 +330,32 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
                   <button type="button" class="curr-nav-btn" data-curr-next aria-label="Next month">›</button>
                 </div>
                 <span class="curr-nav-label" data-curr-nav-label></span>
+                <div class="curr-view-toggle" data-curr-plan-view-toggle>
+                  <button type="button" class="curr-view-btn--active" data-plan-view="calendar">Calendar</button>
+                  <button type="button" data-plan-view="list">List</button>
+                </div>
                 <span class="ws-save-indicator" data-curr-save-indicator hidden>Saved ✓</span>
                 <button type="button" class="btn-primary curr-export" data-curr-export>Export PDF</button>
               </div>
             </div>
-            <p class="ws-att-hint">Click any date to plan that meeting.</p>
 
-            <div class="curr-view curr-view--month" data-curr-month>
-              <div class="curr-month-grid" data-curr-month-grid></div>
+            <div data-curr-plan-view="calendar">
+              <p class="ws-att-hint">Click any date to plan that meeting.</p>
+              <div class="curr-view curr-view--month" data-curr-month>
+                <div class="curr-month-grid" data-curr-month-grid></div>
+              </div>
+            </div>
+
+            <div data-curr-plan-view="list" hidden>
+              <p class="ws-att-hint">Every meeting planned in this month — the same thing Export PDF downloads, right here on the page.</p>
+              <div class="ws-table-wrap">
+                <table class="ws-table">
+                  <thead>
+                    <tr><th>Date</th><th>Theme</th><th>Activities</th><th>Notes</th></tr>
+                  </thead>
+                  <tbody data-curr-list-body></tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -738,6 +756,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.currSaveIndicator = el('[data-curr-save-indicator]');
       els.currExport = el('[data-curr-export]');
       els.currMonthGrid = el('[data-curr-month-grid]');
+      els.currListBody = el('[data-curr-list-body]');
       els.currDayOverlay = el('[data-curr-day-overlay]');
       els.currDayHeader = el('[data-curr-day-header]');
       els.currDayTheme = el('[data-day-theme]');
@@ -1920,6 +1939,45 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       currUpdateNavLabel();
       await currLoadMeetings();
       currRenderMonth();
+      currRenderListView();
+    }
+    // Plain list of every meeting planned this month — the same rows
+    // Export PDF produces, rendered on the page instead of downloaded.
+    // Kept in sync alongside the calendar (not only when List is the
+    // active view) so switching to it never shows stale data.
+    function currRenderListView() {
+      const { start, end } = currComputeRange();
+      const rows: any[] = [];
+      let d = new Date(start);
+      while (d <= end) {
+        const dateStr = toDateStr(d);
+        const m = state.curr.meetings.get(dateStr);
+        if (m && ((m.activities && m.activities.length) || m.theme || m.notes)) {
+          rows.push({
+            dateLabel: `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}`,
+            theme: m.theme,
+            activities: m.activities || [],
+            notes: m.notes,
+          });
+        }
+        d = addDays(d, 1);
+      }
+      els.currListBody.innerHTML = rows.length
+        ? rows.map((r: any) => `
+            <tr>
+              <td data-label="Date">${escapeHtml(r.dateLabel)}</td>
+              <td data-label="Theme">${escapeHtml(r.theme || '—')}</td>
+              <td data-label="Activities">${r.activities.length
+                ? r.activities.map((a: any) => escapeHtml(a.en) + (a.duration ? ` (${a.duration} min)` : '')).join('<br>')
+                : '—'}</td>
+              <td data-label="Notes">${escapeHtml(r.notes || '—')}</td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="4" class="ws-empty">Nothing planned yet this month.</td></tr>';
+    }
+    function currSetPlanView(view: string) {
+      document.querySelectorAll('[data-plan-view]').forEach((b: any) => b.classList.toggle('curr-view-btn--active', b.dataset.planView === view));
+      document.querySelectorAll('[data-curr-plan-view]').forEach((p: any) => p.toggleAttribute('hidden', p.dataset.currPlanView !== view));
     }
     function currNavPrev() {
       state.curr.anchor = new Date(state.curr.anchor.getFullYear(), state.curr.anchor.getMonth() - 1, 1);
@@ -2007,6 +2065,9 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.currNext.addEventListener('click', currNavNext);
       els.currToday.addEventListener('click', currNavToday);
       els.currExport.addEventListener('click', currExportPDF);
+      document.querySelectorAll('[data-plan-view]').forEach((btn: any) => {
+        btn.addEventListener('click', () => currSetPlanView(btn.dataset.planView));
+      });
       els.currDaySave.addEventListener('click', currSaveDay);
       els.currDayCancel.addEventListener('click', currCancelDay);
       els.currDayPrev.addEventListener('click', () => currStepDay(-1));
