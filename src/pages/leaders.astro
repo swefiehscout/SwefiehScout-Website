@@ -10,39 +10,51 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </section>
 
   <div class="gate-form auth-card">
-    <div class="auth-tabs">
-      <button type="button" class="auth-tab auth-tab--active" data-auth-mode="signin">Sign in</button>
-      <button type="button" class="auth-tab" data-auth-mode="signup">Create account</button>
+    <div data-auth-view="form">
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab auth-tab--active" data-auth-mode="signin">Sign in</button>
+        <button type="button" class="auth-tab" data-auth-mode="signup">Create account</button>
+      </div>
+
+      <form data-auth-form>
+        <label class="form-row" data-field-name hidden>
+          <span class="gate-label">Your name</span>
+          <input type="text" data-auth-name autocomplete="name" placeholder="e.g. Fadi" />
+        </label>
+        <label class="form-row">
+          <span class="gate-label">Email</span>
+          <input type="email" data-auth-email autocomplete="email" required />
+        </label>
+        <label class="form-row">
+          <span class="gate-label">Password</span>
+          <input type="password" data-auth-password autocomplete="current-password" required minlength="6" />
+        </label>
+        <p class="gate-error" data-auth-error hidden></p>
+        <p class="auth-notice" data-auth-notice hidden></p>
+        <button type="submit" class="btn-primary" data-auth-submit>Sign in</button>
+      </form>
+      <button type="button" class="auth-forgot" data-auth-forgot>Forgot password?</button>
+
+      <div class="auth-recovery" data-auth-recovery hidden>
+        <p class="gate-label">Set a new password</p>
+        <input type="password" data-recovery-password minlength="6" placeholder="New password" />
+        <button type="button" class="btn-primary" data-recovery-submit>Save password</button>
+      </div>
+
+      <p class="gate-note">
+        New leaders: create an account, then wait for an admin to approve you and assign your group.
+      </p>
     </div>
 
-    <form data-auth-form>
-      <label class="form-row" data-field-name hidden>
-        <span class="gate-label">Your name</span>
-        <input type="text" data-auth-name autocomplete="name" placeholder="e.g. Fadi" />
-      </label>
-      <label class="form-row">
-        <span class="gate-label">Email</span>
-        <input type="email" data-auth-email autocomplete="email" required />
-      </label>
-      <label class="form-row">
-        <span class="gate-label">Password</span>
-        <input type="password" data-auth-password autocomplete="current-password" required minlength="6" />
-      </label>
-      <p class="gate-error" data-auth-error hidden></p>
-      <p class="auth-notice" data-auth-notice hidden></p>
-      <button type="submit" class="btn-primary" data-auth-submit>Sign in</button>
-    </form>
-    <button type="button" class="auth-forgot" data-auth-forgot>Forgot password?</button>
-
-    <div class="auth-recovery" data-auth-recovery hidden>
-      <p class="gate-label">Set a new password</p>
-      <input type="password" data-recovery-password minlength="6" placeholder="New password" />
-      <button type="button" class="btn-primary" data-recovery-submit>Save password</button>
+    <div data-auth-view="verify" hidden style="text-align: center;">
+      <p class="gate-label">Check your email</p>
+      <p class="ws-pending-text">
+        We sent a verification link to <strong data-verify-email></strong>. Click it to activate your
+        account, then come back here and sign in. An admin still needs to approve you and assign your
+        group after that before you can get in.
+      </p>
+      <button type="button" class="btn-primary" data-verify-back>Back to sign in</button>
     </div>
-
-    <p class="gate-note">
-      New leaders: create an account, then wait for an admin to approve you and assign your group.
-    </p>
   </div>
 
   <script>
@@ -77,6 +89,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       el('[data-auth-submit]').textContent = next === 'signup' ? 'Create account' : 'Sign in';
       clearMessages();
     }
+    // Swaps the whole card between the sign-in/sign-up form and the
+    // "check your email" screen shown right after Create account — a
+    // dedicated screen rather than just flipping back to the sign-in tab
+    // with a small notice, so it's unmissable.
+    function showVerifyView(email: string) {
+      el('[data-verify-email]').textContent = email;
+      el('[data-auth-view="form"]')!.hidden = true;
+      el('[data-auth-view="verify"]')!.hidden = false;
+    }
+    function showFormView() {
+      el('[data-auth-view="verify"]')!.hidden = true;
+      el('[data-auth-view="form"]')!.hidden = false;
+      setMode('signin');
+    }
 
     async function handleSubmit(e: Event) {
       e.preventDefault();
@@ -95,8 +121,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           if (data.session) {
             window.location.assign('/leaders/app');
           } else {
-            showNotice('Account created — check your email to confirm it, then sign in.');
-            setMode('signin');
+            showVerifyView(email);
           }
         } else {
           const { error } = await signIn(email, password);
@@ -146,6 +171,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       form.addEventListener('submit', handleSubmit);
       el('[data-auth-forgot]').addEventListener('click', handleForgot);
       el('[data-recovery-submit]').addEventListener('click', handleRecoverySubmit);
+      el('[data-verify-back]').addEventListener('click', showFormView);
 
       if (window.location.search.includes('expired=1')) {
         showNotice('You were signed out after 3 hours — sign in again to continue.');
@@ -157,12 +183,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             el('[data-auth-recovery]').hidden = false;
           }
         });
+        // Clicking the emailed verification link lands back here with the
+        // session Supabase just auto-established from it (type=signup in
+        // the hash) — sign that straight back out and show the sign-in
+        // form instead of continuing into the app, so "verify, then sign
+        // in" is an explicit, deliberate step rather than an implicit one.
+        const isSignupLanding = window.location.hash.includes('type=signup');
         getSession().then(async (session) => {
+          if (!session) return;
+          if (isSignupLanding) {
+            const email = session.user.email;
+            await signOut();
+            showFormView();
+            if (email) (el('[data-auth-email]') as HTMLInputElement).value = email;
+            showNotice('Email confirmed — sign in below to continue.');
+            return;
+          }
           // Already signed in and this isn't a password-recovery landing —
           // skip straight to the workspace, unless our own 3-hour cap has
           // already passed (Supabase's refresh token would otherwise keep
           // this session alive for much longer than that).
-          if (session && !window.location.hash.includes('type=recovery')) {
+          if (!window.location.hash.includes('type=recovery')) {
             if (isSessionExpired()) { await signOut(); return; }
             window.location.replace('/leaders/app');
           }

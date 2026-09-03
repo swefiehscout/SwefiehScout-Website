@@ -79,7 +79,8 @@ export async function signIn(email: string, password: string) {
 
 export async function signUp(name: string, email: string, password: string) {
   if (!supabase) throw new Error('Not connected to the workspace database.');
-  const result = await supabase.auth.signUp({ email, password, options: { data: { name } } });
+  const emailRedirectTo = window.location.origin + '/leaders';
+  const result = await supabase.auth.signUp({ email, password, options: { data: { name }, emailRedirectTo } });
   if (!result.error && result.data.session) markSessionStart();
   return result;
 }
