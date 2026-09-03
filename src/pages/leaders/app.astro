@@ -683,6 +683,16 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         ? crypto.randomUUID()
         : 'a' + Math.random().toString(36).slice(2) + Date.now();
     }
+    // "joy blah" / "JOY BLAH" → "Joy Blah" — applied on blur to name
+    // fields so leaders don't have to think about capitalization while
+    // typing. Capitalizes after spaces, hyphens, and apostrophes too, so
+    // hyphenated/O'-style names still come out right.
+    function titleCase(s: string) {
+      return s.trim().replace(/\s+/g, ' ').toLowerCase().replace(/(^|[\s'-])\p{L}/gu, (c) => c.toUpperCase());
+    }
+    function bindTitleCase(input: any) {
+      input.addEventListener('blur', () => { if (input.value.trim()) input.value = titleCase(input.value); });
+    }
     // A brief "Saved ✓" flash next to the curriculum toolbar's export
     // button — visible confirmation that autosave actually happened,
     // since most curriculum edits save immediately with no explicit
@@ -2192,6 +2202,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.rosterForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     function bindRosterForm() {
+      bindTitleCase(els.mName);
       els.g2Add.addEventListener('click', () => showG2());
       els.g2Remove.addEventListener('click', () => hideG2());
       els.allergyAdd.addEventListener('click', () => showAllergy());

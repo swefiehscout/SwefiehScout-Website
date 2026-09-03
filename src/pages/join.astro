@@ -139,6 +139,11 @@ import { GROUPS } from '../lib/curriculum/constants';
 
     let selectedGroup: string | null = null;
     function el(sel: string): any { return document.querySelector(sel); }
+    // "joy blah" / "JOY BLAH" → "Joy Blah" — applied on blur so parents
+    // don't have to think about capitalization while typing.
+    function titleCase(s: string) {
+      return s.trim().replace(/\s+/g, ' ').toLowerCase().replace(/(^|[\s'-])\p{L}/gu, (c) => c.toUpperCase());
+    }
 
     function showG2(focus = true) {
       el('[data-j-g2-fields]').hidden = false;
@@ -172,6 +177,10 @@ import { GROUPS } from '../lib/curriculum/constants';
       if (form.dataset.bound) return;
       form.dataset.bound = '1';
 
+      el('[data-j-name]').addEventListener('blur', () => {
+        const input = el('[data-j-name]');
+        if (input.value.trim()) input.value = titleCase(input.value);
+      });
       document.querySelectorAll('[data-join-group]').forEach((btn: any) => {
         btn.addEventListener('click', () => {
           selectedGroup = btn.dataset.joinGroup;

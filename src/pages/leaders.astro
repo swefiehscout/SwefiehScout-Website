@@ -19,7 +19,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <form data-auth-form>
         <label class="form-row" data-field-name hidden>
           <span class="gate-label">Your name</span>
-          <input type="text" data-auth-name autocomplete="name" placeholder="e.g. Fadi" />
+          <input type="text" data-auth-name autocomplete="name" placeholder="e.g. Fadi" required />
         </label>
         <label class="form-row">
           <span class="gate-label">Email</span>
@@ -74,6 +74,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     let mode = 'signin';
 
     function el(sel: string): any { return document.querySelector(sel); }
+    // "joy blah" / "JOY BLAH" → "Joy Blah" — applied on blur so leaders
+    // don't have to think about capitalization while typing.
+    function titleCase(s: string) {
+      return s.trim().replace(/\s+/g, ' ').toLowerCase().replace(/(^|[\s'-])\p{L}/gu, (c) => c.toUpperCase());
+    }
     function showError(msg: string) {
       const e = el('[data-auth-error]');
       e.textContent = msg;
@@ -244,6 +249,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       el('[data-verify-back]').addEventListener('click', showFormView);
       el('[data-verify-resend]').addEventListener('click', handleResend);
       document.querySelectorAll('[data-toggle-password]').forEach((btn) => bindPasswordToggle(btn as HTMLElement));
+      el('[data-auth-name]').addEventListener('blur', () => {
+        const input = el('[data-auth-name]');
+        if (input.value.trim()) input.value = titleCase(input.value);
+      });
 
       if (window.location.search.includes('expired=1')) {
         showNotice('You were signed out after 3 hours — sign in again to continue.');
