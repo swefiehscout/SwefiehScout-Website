@@ -3888,11 +3888,14 @@ main.wide {
 
 /* ----- Tabs: filled pill segmented control, icon + label ----- */
 .ws-tabs {
-  display: grid;
-  /* One row, evenly split across the full width. minmax(0, 1fr) — not
-     bare 1fr, whose minimum is content width — is what actually lets all
-     11 columns shrink to fit instead of overflowing the bar. */
-  grid-template-columns: repeat(11, minmax(0, 1fr));
+  /* Flex, not grid — a fixed column count leaves empty cells (and a
+     ragged, left-packed last row) whenever the tabs wrap, since a
+     partial row still only fills as many columns as it has items. Flex
+     wrap instead redistributes each row's own items evenly across that
+     row's full width, on its own, at any viewport width — including
+     the last, possibly-shorter row. */
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.3rem;
   padding: 0.4rem;
   background: var(--color-bg);
@@ -3900,14 +3903,14 @@ main.wide {
   border-radius: var(--radius-lg);
   width: 100%;
 }
-@media (max-width: 1180px) {
-  .ws-tabs { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
-}
 .ws-tab {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  /* Grow AND shrink evenly from a shared ideal width — this, not a
+     fixed column grid, is what keeps every tab on every row (full or
+     partial) the same size as its row-mates. */
+  flex: 1 1 9rem;
   min-width: 0;
   overflow: hidden;
   gap: 0.35rem;
@@ -5028,11 +5031,13 @@ main.wide {
   .ws-group-banner { padding: 0.55rem 0.85rem; }
   .ws-group-banner-name { font-size: 0.95rem; }
 
-  /* ----- Tab bar: an even 4-column grid (11 tabs → rows of 4/4/3, never
-     a lone tab by itself) with icon-over-label cells instead of a
-     side-scrolling strip — the whole bar stays inside the screen width. */
-  .ws-tabs { grid-template-columns: repeat(4, 1fr); gap: 0.3rem; padding: 0.35rem; }
+  /* ----- Tab bar: a smaller ideal width fits ~4 tabs per row instead of
+     ~2-3, with icon-over-label cells instead of a side-scrolling strip —
+     still flex-wrap (see .ws-tabs above), so every row, including a
+     shorter last one, stays evenly spread across the full width. ----- */
+  .ws-tabs { gap: 0.3rem; padding: 0.35rem; }
   .ws-tab {
+    flex-basis: 4.5rem;
     flex-direction: column;
     gap: 0.2rem;
     padding: 0.5rem 0.2rem;
