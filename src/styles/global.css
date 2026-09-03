@@ -3162,6 +3162,24 @@ main.wide {
   margin-bottom: 0.75rem;
 }
 
+/* ----- Password visibility toggle (sign-in/sign-up + recovery) ----- */
+.auth-password-wrap { position: relative; display: block; }
+.auth-password-wrap input { padding-inline-end: 3.5rem; }
+.auth-password-toggle {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  padding: 0 0.9rem;
+  border: 0;
+  background: none;
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.auth-password-toggle:hover { color: var(--color-brand); }
+
 /* The full leaders-portal page (hero, session pill, Lessons/Management
    directory rows, curriculum CTA) was retired once the real Workspace
    shipped — this group picker is the one piece still reused, by the

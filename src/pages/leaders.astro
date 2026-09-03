@@ -27,7 +27,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </label>
         <label class="form-row">
           <span class="gate-label">Password</span>
-          <input type="password" data-auth-password autocomplete="current-password" required minlength="6" />
+          <span class="auth-password-wrap">
+            <input type="password" data-auth-password autocomplete="current-password" required minlength="6" />
+            <button type="button" class="auth-password-toggle" data-toggle-password aria-label="Show password">Show</button>
+          </span>
+          <span class="help" data-auth-password-hint hidden>Minimum 6 characters.</span>
         </label>
         <p class="gate-error" data-auth-error hidden></p>
         <p class="auth-notice" data-auth-notice hidden></p>
@@ -37,7 +41,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <div class="auth-recovery" data-auth-recovery hidden>
         <p class="gate-label">Set a new password</p>
-        <input type="password" data-recovery-password minlength="6" placeholder="New password" />
+        <span class="auth-password-wrap">
+          <input type="password" data-recovery-password minlength="6" placeholder="New password" />
+          <button type="button" class="auth-password-toggle" data-toggle-password aria-label="Show password">Show</button>
+        </span>
+        <span class="help">Minimum 6 characters.</span>
         <button type="button" class="btn-primary" data-recovery-submit>Save password</button>
       </div>
 
@@ -89,8 +97,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         b.classList.toggle('auth-tab--active', (b as HTMLElement).dataset.authMode === next);
       });
       el('[data-field-name]').hidden = next !== 'signup';
+      el('[data-auth-password-hint]').hidden = next !== 'signup';
       el('[data-auth-submit]').textContent = next === 'signup' ? 'Create account' : 'Sign in';
       clearMessages();
+    }
+    // Shared by the sign-in/sign-up password field and the recovery
+    // "new password" field — toggles that one input between hidden and
+    // plain text.
+    function bindPasswordToggle(btn: HTMLElement) {
+      const input = btn.previousElementSibling as HTMLInputElement;
+      btn.addEventListener('click', () => {
+        const showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        btn.textContent = showing ? 'Show' : 'Hide';
+        btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+      });
     }
     // The email itself can take a minute or two to arrive — the Resend
     // button stays disabled with a live countdown for 3 minutes after
@@ -222,6 +243,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       el('[data-recovery-submit]').addEventListener('click', handleRecoverySubmit);
       el('[data-verify-back]').addEventListener('click', showFormView);
       el('[data-verify-resend]').addEventListener('click', handleResend);
+      document.querySelectorAll('[data-toggle-password]').forEach((btn) => bindPasswordToggle(btn as HTMLElement));
 
       if (window.location.search.includes('expired=1')) {
         showNotice('You were signed out after 3 hours — sign in again to continue.');
