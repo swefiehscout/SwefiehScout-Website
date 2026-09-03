@@ -3839,6 +3839,27 @@ main.wide {
   font-weight: 700;
   letter-spacing: 0.01em;
 }
+/* ----- Guide link: a small outlined pill next to the account avatar,
+   opening the step-by-step guide (src/pages/leaders/guide.astro) in a
+   new tab so nobody loses their place mid-task. ----- */
+.ws-guide-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 2.4rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-brand);
+  background: none;
+  color: var(--color-brand);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), background 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+.ws-guide-link:hover { background: var(--color-brand); color: #fff; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.ws-guide-link svg { flex-shrink: 0; }
+
 /* ----- Account menu: an avatar button that opens a small dropdown with
    the signed-in leader's name/role and Sign out, instead of cluttering
    the header with them directly. ----- */
@@ -5051,7 +5072,13 @@ main.wide {
   .ws-logo { font-size: 1.05rem; }
   .ws-logo-mark { width: 1.75rem; height: 1.75rem; }
   .ws-header-right { display: contents; }
-  .ws-account { order: 1; margin-inline-start: auto; }
+  /* .ws-guide-link and .ws-account share order:1 — equal-order flex
+     items keep their document order among themselves, and the link
+     comes first in the markup, so this reads Guide, then the avatar,
+     both pushed to the row's end by the margin-auto on the first of
+     the pair. */
+  .ws-guide-link { order: 1; margin-inline-start: auto; padding: 0 0.7rem; }
+  .ws-account { order: 1; }
   .ws-group-switch { order: 2; flex-basis: 100%; width: 100%; }
 
   /* ----- Group banner ----- */
