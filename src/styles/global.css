@@ -2832,6 +2832,8 @@ main.wide {
    the photo set. Pauses on hover and respects reduced-motion. */
 .band-marquee {
   position: relative;
+  width: 100%;
+  min-width: 0;
   max-width: 1180px;
   margin: 0 auto 3rem;
   border-radius: var(--radius-lg);
