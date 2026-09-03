@@ -4372,7 +4372,18 @@ main.wide {
    width:100% above doesn't reliably override that on its own, so the
    box can end up visibly narrower than every other field in the same
    grid despite sharing the identical rule. */
-.ws-field input[type="date"] { -webkit-appearance: none; appearance: none; }
+.ws-field input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  /* The appearance reset alone wasn't enough — WebKit's native date
+     value (day/month/year segments) can still render past its own
+     declared box on iPad regardless of width/box-sizing, since it's
+     drawn by an internal UA structure that doesn't fully participate
+     in standard box sizing. Hard-clip it so it physically cannot
+     bleed past the box's right edge into whatever sits next to it. */
+  max-width: 100%;
+  overflow: hidden;
+}
 .ws-field input:focus, .ws-field select:focus, .ws-field textarea:focus {
   outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(20, 56, 34, 0.1);
 }
