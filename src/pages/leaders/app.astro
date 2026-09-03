@@ -217,10 +217,12 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
               <div class="curr-month-cells" data-att-calendar></div>
             </div>
             <div class="ws-att-list">
-              <div class="ws-toolbar-row">
-                <p class="curr-nav-label" data-att-date-label></p>
+              <div class="ws-att-date-banner">
+                <span class="ws-att-date-banner-label">Taking attendance for</span>
+                <p class="ws-att-date-banner-value" data-att-date-label></p>
                 <span class="ws-inline-summary" data-att-summary></span>
               </div>
+              <p class="ws-att-hint">Click any date on the calendar — past or future — to view or edit it.</p>
               <div class="ws-table-wrap">
                 <table class="ws-table" data-att-table>
                   <thead>
@@ -471,7 +473,11 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     // non-null assertions through every single query call.
     const db: any = supabase;
 
-    const state: any = { session: null, profile: null, availableGroups: [], activeGroup: null, activeTab: 'dashboard', members: [], approvals: [], finEntries: [], docs: [], editingMemberId: null };
+    const state: any = {
+      session: null, profile: null, availableGroups: [], activeGroup: null, activeTab: 'dashboard',
+      members: [], approvals: [], finEntries: [], docs: [], editingMemberId: null,
+      attAnchor: new Date(), attSelected: todayStr(), attDatesWithRecords: null,
+    };
     const els: any = {};
 
     function el(sel: string): any { return document.querySelector(sel); }
@@ -508,7 +514,13 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.adminBody = el('[data-admin-body]');
       els.approvalsBody = el('[data-approvals-body]');
       els.approvalsBadge = el('[data-approvals-badge]');
-      els.attDate = el('[data-att-date]');
+      els.attCalendar = el('[data-att-calendar]');
+      els.attWeekdayRow = el('[data-att-weekday-row]');
+      els.attMonthLabel = el('[data-att-month-label]');
+      els.attDateLabel = el('[data-att-date-label]');
+      els.attPrev = el('[data-att-prev]');
+      els.attNext = el('[data-att-next]');
+      els.attToday = el('[data-att-today]');
       els.attBody = el('[data-att-body]');
       els.attSummary = el('[data-att-summary]');
       els.feeMonth = el('[data-fee-month]');
@@ -734,8 +746,24 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
 
     // ---------- Shared date helpers --------------------------------------
     function todayStr() {
-      const d = new Date();
+      return toDateStr(new Date());
+    }
+    function toDateStr(d: Date) {
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function parseDateStr(s: string) {
+      const [y, m, d] = s.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+    function addDays(d: Date, n: number) {
+      const c = new Date(d);
+      c.setDate(c.getDate() + n);
+      return c;
+    }
+    function startOfWeek(d: Date) {
+      const c = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      c.setDate(c.getDate() - c.getDay());
+      return c;
     }
     // Month/Year dropdown pair used by both Fees and Finance instead of a
     // native <input type="month">.
@@ -770,11 +798,65 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       return { start: `${period}-01`, end: `${period}-${String(lastDay).padStart(2, '0')}`, label, isYear: false, period };
     }
 
-    // ---------- Attendance -------------------------------------------------
+    // ---------- Attendance (calendar date-picker) ---------------------------
     async function loadAttendance() {
       if (!state.activeGroup) return;
-      if (!els.attDate.value) els.attDate.value = todayStr();
-      const date = els.attDate.value;
+      if (!els.attWeekdayRow.children.length) {
+        els.attWeekdayRow.innerHTML = WEEKDAYS.map((w) => `<div class="curr-weekday">${w.en}</div>`).join('');
+      }
+      const first = new Date(state.attAnchor.getFullYear(), state.attAnchor.getMonth(), 1);
+      const last = new Date(state.attAnchor.getFullYear(), state.attAnchor.getMonth() + 1, 0);
+      const gridStart = startOfWeek(first);
+      const gridEnd = addDays(startOfWeek(last), 6);
+      const { data, error } = await db.from('attendance').select('date, present')
+        .eq('group_key', state.activeGroup).gte('date', toDateStr(gridStart)).lte('date', toDateStr(gridEnd));
+      if (error) { console.error(error); showToast('Could not load attendance.'); return; }
+      state.attDatesWithRecords = new Set((data || []).map((r: any) => r.date));
+      renderAttCalendar();
+      await loadAttDay();
+    }
+    function renderAttCalendar() {
+      const anchor = state.attAnchor;
+      const y = anchor.getFullYear(), mo = anchor.getMonth();
+      const first = new Date(y, mo, 1);
+      const last = new Date(y, mo + 1, 0);
+      const start = startOfWeek(first);
+      const end = addDays(startOfWeek(last), 6);
+      const today = todayStr();
+      els.attMonthLabel.textContent = `${MONTHS[mo].en} ${y}`;
+
+      let html = '';
+      let d = new Date(start);
+      while (d <= end) {
+        const dateStr = toDateStr(d);
+        const inMonth = d.getMonth() === mo;
+        const cls = [
+          'curr-day-cell',
+          !inMonth && 'curr-day-cell--out',
+          dateStr === today && 'curr-day-cell--today',
+          dateStr === state.attSelected && 'curr-day-cell--selected',
+          state.attDatesWithRecords?.has(dateStr) && 'curr-day-cell--has',
+        ].filter(Boolean).join(' ');
+        const hasRecords = state.attDatesWithRecords?.has(dateStr);
+        html += `<div class="${cls}" data-date="${dateStr}" style="min-height:auto;cursor:pointer;">
+          <span class="curr-day-num">${d.getDate()}</span>
+          ${hasRecords ? '<span class="ws-att-dot" aria-hidden="true"></span>' : ''}
+        </div>`;
+        d = addDays(d, 1);
+      }
+      els.attCalendar.innerHTML = html;
+      els.attCalendar.querySelectorAll('.curr-day-cell').forEach((cell: any) => {
+        cell.addEventListener('click', () => {
+          state.attSelected = cell.dataset.date;
+          renderAttCalendar();
+          loadAttDay();
+        });
+      });
+    }
+    async function loadAttDay() {
+      const date = state.attSelected;
+      const d = parseDateStr(date);
+      els.attDateLabel.textContent = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}, ${d.getFullYear()}`;
       const active = state.members.filter((m: any) => m.active);
       const { data, error } = await db.from('attendance').select('*').eq('group_key', state.activeGroup).eq('date', date);
       if (error) { console.error(error); showToast('Could not load attendance.'); return; }
@@ -817,7 +899,25 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         updated_by: state.session.user.id,
       }, { onConflict: 'group_key,date,member_id' });
       if (error) { console.error(error); showToast('Could not save attendance.'); return; }
-      await loadAttendance();
+      if (!state.attDatesWithRecords) state.attDatesWithRecords = new Set();
+      state.attDatesWithRecords.add(date);
+      renderAttCalendar();
+      await loadAttDay();
+    }
+    function bindAttendance() {
+      els.attPrev.addEventListener('click', () => {
+        state.attAnchor = new Date(state.attAnchor.getFullYear(), state.attAnchor.getMonth() - 1, 1);
+        loadAttendance();
+      });
+      els.attNext.addEventListener('click', () => {
+        state.attAnchor = new Date(state.attAnchor.getFullYear(), state.attAnchor.getMonth() + 1, 1);
+        loadAttendance();
+      });
+      els.attToday.addEventListener('click', () => {
+        state.attAnchor = new Date();
+        state.attSelected = todayStr();
+        loadAttendance();
+      });
     }
 
     // ---------- Fees ---------------------------------------------------
@@ -1580,7 +1680,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       bindFinanceForm();
       bindLibraryUpload();
       bindReports();
-      els.attDate.addEventListener('change', loadAttendance);
+      bindAttendance();
       els.feeMonth.addEventListener('change', loadFees);
       els.feeYear.addEventListener('change', loadFees);
       els.feeDefault.addEventListener('blur', saveDefaultFee);
