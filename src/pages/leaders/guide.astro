@@ -149,17 +149,8 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
 
     <a class="btn-primary guide-back" href="/leaders/app">← Back to the workspace</a>
 
-    <nav class="guide-toc" aria-label="Jump to a section" data-guide-toc>
-      {sections.map((s) => (
-        <a class="guide-toc-link" href={`#${s.id}`} data-toc-link={s.id}>
-          <Icon name={s.icon} size={15} strokeWidth={1.8} />
-          {s.label}
-        </a>
-      ))}
-    </nav>
-
     {sections.map((s) => (
-      <section id={s.id} class={`guide-card${s.adminOnly ? ' guide-card--admin' : ''}`} data-guide-section>
+      <section id={s.id} class={`guide-card${s.adminOnly ? ' guide-card--admin' : ''}`}>
         <div class="guide-card-head">
           <span class="guide-card-icon"><Icon name={s.icon} size={20} strokeWidth={1.8} /></span>
           <div>
@@ -181,29 +172,6 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
 
     <a class="btn-primary guide-back guide-back--bottom" href="/leaders/app">← Back to the workspace</a>
   </div>
-
-  <script>
-    // Highlights the matching pill in the quick-jump nav as its section
-    // scrolls through view — a small touch that makes the nav feel like
-    // a real map of the page instead of a static list of links.
-    function bindGuideScrollSpy() {
-      const toc = document.querySelector('[data-guide-toc]');
-      if (!toc || (toc as HTMLElement).dataset.bound) return;
-      (toc as HTMLElement).dataset.bound = '1';
-      const links = new Map<string, Element>();
-      toc.querySelectorAll('[data-toc-link]').forEach((a) => links.set((a as HTMLElement).dataset.tocLink!, a));
-      const sections = document.querySelectorAll('[data-guide-section]');
-      if (!sections.length || !('IntersectionObserver' in window)) return;
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          const link = links.get(entry.target.id);
-          if (link) link.classList.toggle('guide-toc-link--active', entry.isIntersecting);
-        });
-      }, { rootMargin: '-45% 0px -50% 0px' });
-      sections.forEach((s) => observer.observe(s));
-    }
-    document.addEventListener('astro:page-load', bindGuideScrollSpy);
-  </script>
 </BaseLayout>
 
 <style>
@@ -215,55 +183,8 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   .guide-back { display: inline-flex; margin: 0 0 1.5rem; }
   .guide-back--bottom { margin: 1.5rem 0 0.5rem; }
 
-  /* ----- Quick-jump nav — a wrapping pill row, same "no orphans" spirit
-     as the workspace's own tab bar, just simpler since it never needs
-     JS-balanced columns (a wrapped last row of 1-2 pills reads fine for
-     a left-aligned nav, unlike a centered/stretched tab bar). Sticky so
-     it's always in reach while scrolling through a long page. ----- */
-  .guide-toc {
-    /* Sticks just under the site header once scrolled — only worth doing
-       on the widths where that header is itself sticky (see the 879px
-       breakpoint below); everywhere else it just sits in normal flow. */
-    position: sticky;
-    top: 5.25rem;
-    z-index: 5;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.75rem;
-    padding: 0.6rem;
-    background: rgba(249, 247, 241, 0.92);
-    backdrop-filter: blur(6px);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-  }
-  .guide-toc-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: 999px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    color: var(--color-brand);
-    font-weight: 600;
-    font-size: 0.8rem;
-    text-decoration: none;
-    transition: background 0.15s var(--ease-out), color 0.15s var(--ease-out), border-color 0.15s var(--ease-out);
-  }
-  .guide-toc-link:hover,
-  .guide-toc-link--active {
-    background: var(--color-brand);
-    color: #fff;
-    border-color: var(--color-brand);
-  }
-  .guide-toc-link:hover :global(svg),
-  .guide-toc-link--active :global(svg) { stroke: #fff; }
-
   .guide-card {
     margin-bottom: 1.1rem;
-    scroll-margin-top: 8rem;
     padding: 1.25rem 1.4rem 1.4rem;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -353,12 +274,5 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     bottom: 0;
     width: 2px;
     background: var(--color-border);
-  }
-
-  /* Matches the site header's own breakpoint (see .site-header in
-     global.css) — below it the header stops being sticky, so pinning
-     this underneath it would just leave a gap. */
-  @media (max-width: 879px) {
-    .guide-toc { position: static; }
   }
 </style>
