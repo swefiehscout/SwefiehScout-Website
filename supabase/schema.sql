@@ -162,6 +162,10 @@ create table if not exists group_settings (
   monthly_fee_defaults jsonb not null default '{}',
   expense_categories text[] not null default '{}',
   income_categories text[] not null default '{}',
+  -- Curriculum's drag-and-drop activity bank, editable per group:
+  -- [{id, en, ar}, ...]. Seeded client-side with the original starter
+  -- set the first time a group has none.
+  activity_bank jsonb not null default '[]',
   updated_at timestamptz not null default now()
 );
 

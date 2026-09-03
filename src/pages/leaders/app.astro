@@ -6,7 +6,6 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
 import { loadPortalData, TOOL_LABELS } from '../../lib/leader-portal';
-import { ACTIVITY_BANK } from '../../lib/curriculum/constants';
 
 // Lessons tab reads the same build-time markdown as the old portal did —
 // shared, troop-wide Drive links, not per-group data.
@@ -272,60 +271,48 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         </section>
 
         <section class="ws-panel" data-panel="curriculum" hidden>
-          <div class="curr-toolbar">
-            <div class="curr-toolbar-row">
-              <div class="curr-view-toggle" data-curr-view-toggle>
-                <button type="button" data-view="week">Week</button>
-                <button type="button" data-view="month">Month</button>
-                <button type="button" data-view="year">Year</button>
-              </div>
-              <div class="curr-nav">
-                <button type="button" class="curr-nav-btn" data-curr-prev aria-label="Previous">‹</button>
-                <button type="button" class="curr-nav-today" data-curr-today>Today</button>
-                <button type="button" class="curr-nav-btn" data-curr-next aria-label="Next">›</button>
-              </div>
-              <span class="curr-nav-label" data-curr-nav-label></span>
-              <span class="ws-save-indicator" data-curr-save-indicator hidden>Saved ✓</span>
-              <button type="button" class="btn-primary curr-export" data-curr-export>Export PDF</button>
-            </div>
+          <div class="curr-subtabs" data-curr-subtabs>
+            <button type="button" class="curr-subtab curr-subtab--active" data-subtab="plan">Plan</button>
+            <button type="button" class="curr-subtab" data-subtab="bank">Activity Bank</button>
           </div>
 
-          <div class="curr-bank">
-            <span class="curr-bank-label">Drag onto a date, or tap it while a date is open <span>اسحب إلى تاريخ، أو اضغط عليه عند فتح تاريخ</span></span>
-            <div class="curr-bank-chips">
-              {ACTIVITY_BANK.map((a) => (
-                <div
-                  class="curr-chip"
-                  draggable="true"
-                  data-bank-type={a.type}
-                  data-bank-en={a.en}
-                  data-bank-ar={a.ar}
-                >
-                  <Icon name={a.icon as any} size={16} strokeWidth={1.8} />
-                  <span class="curr-chip-text">
-                    <span class="curr-chip-en">{a.en}</span>
-                    <span class="curr-chip-ar">{a.ar}</span>
-                  </span>
+          <div data-curr-subpanel="plan">
+            <div class="curr-toolbar">
+              <div class="curr-toolbar-row">
+                <div class="curr-nav">
+                  <button type="button" class="curr-nav-btn" data-curr-prev aria-label="Previous month">‹</button>
+                  <button type="button" class="curr-nav-today" data-curr-today>Today</button>
+                  <button type="button" class="curr-nav-btn" data-curr-next aria-label="Next month">›</button>
                 </div>
-              ))}
-              <div class="curr-chip curr-chip--custom" data-bank-custom>
-                <Icon name="plus" size={16} strokeWidth={1.8} />
-                <span class="curr-chip-text">
-                  <span class="curr-chip-en">Custom</span>
-                  <span class="curr-chip-ar">مخصص</span>
-                </span>
+                <span class="curr-nav-label" data-curr-nav-label></span>
+                <span class="ws-save-indicator" data-curr-save-indicator hidden>Saved ✓</span>
+                <button type="button" class="btn-primary curr-export" data-curr-export>Export PDF</button>
               </div>
+            </div>
+            <p class="ws-att-hint">Click any date to plan that meeting.</p>
+
+            <div class="curr-view curr-view--month" data-curr-month>
+              <div class="curr-month-grid" data-curr-month-grid></div>
             </div>
           </div>
 
-          <div class="curr-view curr-view--month" data-curr-month hidden>
-            <div class="curr-month-grid" data-curr-month-grid></div>
-          </div>
-          <div class="curr-view curr-view--week" data-curr-week hidden>
-            <div class="curr-week-grid" data-curr-week-grid></div>
-          </div>
-          <div class="curr-view curr-view--year" data-curr-year hidden>
-            <div class="curr-year-grid" data-curr-year-grid></div>
+          <div data-curr-subpanel="bank" hidden>
+            <form class="ws-member-form" data-bank-add-form>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Add to the activity bank</p>
+              <label class="ws-field">
+                <span>Name *</span>
+                <input type="text" data-bank-add-en required />
+              </label>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary">Add to bank</button>
+              </div>
+            </form>
+            <p class="ws-soon">
+              These show up as draggable chips for everyone leading this group in the Plan tab. Removing one here
+              doesn't change any meeting that already used it.
+            </p>
+            <div class="curr-bank-list" data-curr-bank-list></div>
           </div>
         </section>
 
@@ -519,11 +506,18 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     </div>
   </div>
 
-  <!-- Curriculum day detail drawer -->
+  <!-- Curriculum day planner — centered popup, opened by clicking a date -->
   <div class="curr-day-overlay" data-curr-day-overlay hidden>
     <div class="curr-day-panel" data-curr-day-panel>
-      <button type="button" class="curr-day-close" data-curr-day-close aria-label="Close">×</button>
-      <div class="curr-day-header" data-curr-day-header></div>
+      <div class="curr-day-banner">
+        <button type="button" class="curr-day-nav-btn" data-curr-day-prev aria-label="Previous day">‹</button>
+        <span class="curr-day-banner-text">
+          <span class="curr-day-banner-label">Planning for</span>
+          <p class="curr-day-banner-value" data-curr-day-header></p>
+        </span>
+        <button type="button" class="curr-day-nav-btn" data-curr-day-next aria-label="Next day">›</button>
+      </div>
+
       <label class="curr-day-field">
         <span>Theme</span>
         <input type="text" data-day-theme placeholder="e.g. First Aid Badge" />
@@ -532,22 +526,22 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         <span>Notes</span>
         <textarea data-day-notes rows="2" placeholder="Anything to remember for this meeting…"></textarea>
       </label>
-      <div class="curr-day-list" data-curr-day-list></div>
-      <p class="curr-day-hint">
-        Drag activities in from the bank, drag rows to reorder, or drag a row onto another date to move it.
-      </p>
-    </div>
-  </div>
 
-  <!-- Curriculum custom activity mini-form -->
-  <div class="curr-custom-overlay" data-curr-custom-overlay hidden>
-    <div class="curr-custom-card">
-      <h3>Custom activity <span dir="rtl">نشاط مخصص</span></h3>
-      <label><span>English</span><input type="text" data-custom-en /></label>
-      <label><span>Arabic (optional)</span><input type="text" data-custom-ar dir="rtl" /></label>
-      <div class="curr-custom-actions">
-        <button type="button" data-custom-cancel>Cancel</button>
-        <button type="button" class="btn-primary" data-custom-add>Add</button>
+      <p class="curr-day-section-label">Select from the activity bank</p>
+      <div class="curr-bank-chips" data-curr-bank-chips></div>
+
+      <p class="curr-day-section-label">Or add a custom activity</p>
+      <form class="curr-day-custom-add" data-curr-custom-add-form>
+        <input type="text" data-custom-en placeholder="Type an activity…" />
+        <button type="submit" class="btn-primary">Add</button>
+      </form>
+
+      <p class="curr-day-section-label">This meeting</p>
+      <div class="curr-day-list" data-curr-day-list></div>
+
+      <div class="curr-day-actions">
+        <button type="button" class="ws-form-cancel" data-curr-day-close-cancel>Cancel</button>
+        <button type="button" class="btn-primary" data-curr-day-save>Save &amp; close</button>
       </div>
     </div>
   </div>
@@ -560,7 +554,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
 
   <script>
     import { supabase, supabaseConfigured, getSession, getProfile, signOut } from '../../lib/workspace/auth';
-    import { GROUPS, MONTHS, WEEKDAYS } from '../../lib/curriculum/constants';
+    import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK } from '../../lib/curriculum/constants';
 
     // Loose alias for actual query calls below — supabaseConfigured is
     // checked once in init() before any of this runs, so by the time these
@@ -572,7 +566,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       session: null, profile: null, availableGroups: [], activeGroup: null, activeTab: 'dashboard',
       members: [], approvals: [], finEntries: [], docs: [], editingMemberId: null,
       attAnchor: new Date(), attSelected: todayStr(), attDatesWithRecords: null,
-      curr: { view: 'month', anchor: new Date(), meetings: new Map(), currentDay: null, customTargetDate: null, channel: null },
+      curr: { anchor: new Date(), meetings: new Map(), currentDay: null, channel: null },
     };
     const els: any = {};
 
@@ -662,26 +656,28 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.reportMonth = el('[data-report-month]');
       els.reportYear = el('[data-report-year]');
       els.reportPrint = el('[data-report-print]');
-      els.currViewToggle = el('[data-curr-view-toggle]');
       els.currPrev = el('[data-curr-prev]');
       els.currNext = el('[data-curr-next]');
       els.currToday = el('[data-curr-today]');
       els.currNavLabel = el('[data-curr-nav-label]');
       els.currSaveIndicator = el('[data-curr-save-indicator]');
       els.currExport = el('[data-curr-export]');
-      els.currMonthView = el('[data-curr-month]');
       els.currMonthGrid = el('[data-curr-month-grid]');
-      els.currWeekView = el('[data-curr-week]');
-      els.currWeekGrid = el('[data-curr-week-grid]');
-      els.currYearView = el('[data-curr-year]');
-      els.currYearGrid = el('[data-curr-year-grid]');
       els.currDayOverlay = el('[data-curr-day-overlay]');
-      els.currDayClose = el('[data-curr-day-close]');
       els.currDayHeader = el('[data-curr-day-header]');
       els.currDayTheme = el('[data-day-theme]');
       els.currDayNotes = el('[data-day-notes]');
       els.currDayList = el('[data-curr-day-list]');
-      els.currCustomOverlay = el('[data-curr-custom-overlay]');
+      els.currDayPrev = el('[data-curr-day-prev]');
+      els.currDayNext = el('[data-curr-day-next]');
+      els.currDaySave = el('[data-curr-day-save]');
+      els.currDayCancel = el('[data-curr-day-close-cancel]');
+      els.currBankChips = el('[data-curr-bank-chips]');
+      els.currCustomAddForm = el('[data-curr-custom-add-form]');
+      els.currCustomEn = el('[data-custom-en]');
+      els.currBankAddForm = el('[data-bank-add-form]');
+      els.currBankAddEn = el('[data-bank-add-en]');
+      els.currBankList = el('[data-curr-bank-list]');
       els.feeBody = el('[data-fee-body]');
       els.feeSearch = el('[data-fee-search]');
       els.feeSummary = el('[data-fee-summary]');
@@ -1112,13 +1108,16 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       if (!state.activeGroup) return;
       const { data } = await db.from('group_settings').select('*').eq('group_key', state.activeGroup).maybeSingle();
       state.groupSettings = data || {
-        group_key: state.activeGroup, monthly_fee_defaults: {}, expense_categories: [], income_categories: [],
+        group_key: state.activeGroup, monthly_fee_defaults: {}, expense_categories: [], income_categories: [], activity_bank: [],
       };
       // Every group starts with the same sensible defaults — a leader
       // editing the list (add/remove) is what actually persists a custom
-      // one; until then this just fills the dropdown usefully.
+      // one; until then this just fills the dropdown/bank usefully.
       if (!state.groupSettings.expense_categories?.length) state.groupSettings.expense_categories = [...DEFAULT_EXPENSE_CATEGORIES];
       if (!state.groupSettings.income_categories?.length) state.groupSettings.income_categories = [...DEFAULT_INCOME_CATEGORIES];
+      if (!state.groupSettings.activity_bank?.length) {
+        state.groupSettings.activity_bank = ACTIVITY_BANK.map((a) => ({ id: a.type, en: a.en }));
+      }
     }
     async function loadFees() {
       if (!state.activeGroup) return;
@@ -1592,19 +1591,12 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);
     }
 
-    // ---------- Curriculum (embedded, shared per group) ---------------------
+    // ---------- Curriculum (embedded, shared per group; month view only,
+    // click-to-plan instead of drag-and-drop) ------------------------------
     function currComputeRange() {
-      if (state.curr.view === 'month') {
-        const first = new Date(state.curr.anchor.getFullYear(), state.curr.anchor.getMonth(), 1);
-        const last = new Date(state.curr.anchor.getFullYear(), state.curr.anchor.getMonth() + 1, 0);
-        return { start: startOfWeek(first), end: addDays(startOfWeek(last), 6) };
-      }
-      if (state.curr.view === 'week') {
-        const s = startOfWeek(state.curr.anchor);
-        return { start: s, end: addDays(s, 6) };
-      }
-      const y = state.curr.anchor.getFullYear();
-      return { start: new Date(y, 0, 1), end: new Date(y, 11, 31) };
+      const first = new Date(state.curr.anchor.getFullYear(), state.curr.anchor.getMonth(), 1);
+      const last = new Date(state.curr.anchor.getFullYear(), state.curr.anchor.getMonth() + 1, 0);
+      return { start: startOfWeek(first), end: addDays(startOfWeek(last), 6) };
     }
     async function currLoadMeetings() {
       const { start, end } = currComputeRange();
@@ -1660,13 +1652,8 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         })
         .subscribe();
     }
-    function currRenderCurrentView() {
-      if (state.curr.view === 'month') currRenderMonth();
-      else if (state.curr.view === 'week') currRenderWeek();
-      else currRenderYear();
-    }
     function currRefreshUI() {
-      currRenderCurrentView();
+      currRenderMonth();
       if (state.curr.currentDay && els.currDayOverlay && !els.currDayOverlay.hidden) {
         currRenderActivityList(els.currDayList, state.curr.currentDay);
       }
@@ -1674,49 +1661,11 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     function currActivityRowHTML(a: any) {
       return `
         <div class="curr-item" data-activity-id="${a.id}">
-          <span class="curr-item-handle" aria-hidden="true">⋮⋮</span>
-          <span class="curr-item-text">
-            <span class="curr-item-en">${escapeHtml(a.en)}</span>
-            <span class="curr-item-ar">${escapeHtml(a.ar || '')}</span>
-          </span>
+          <span class="curr-item-text"><span class="curr-item-en">${escapeHtml(a.en)}</span></span>
           <input type="number" min="0" step="5" class="curr-item-duration" placeholder="min"
                  value="${a.duration != null ? a.duration : ''}" data-duration="${a.id}" />
           <button type="button" class="curr-item-del" data-del="${a.id}" aria-label="Remove">×</button>
         </div>`;
-    }
-    function currSetupItemRow(row: any, dateStr: string) {
-      const activityId = row.dataset.activityId;
-      row.draggable = true;
-      row.addEventListener('dragstart', (e: any) => {
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', JSON.stringify({ source: 'existing', fromDate: dateStr, activityId }));
-      });
-      row.addEventListener('dragover', (e: any) => { e.preventDefault(); row.classList.add('curr-item--over'); });
-      row.addEventListener('dragleave', () => row.classList.remove('curr-item--over'));
-      row.addEventListener('drop', (e: any) => {
-        e.preventDefault();
-        e.stopPropagation();
-        row.classList.remove('curr-item--over');
-        const raw = e.dataTransfer.getData('text/plain');
-        let payload: any;
-        try { payload = JSON.parse(raw); } catch (err) { return; }
-        if (payload.source !== 'existing') { currHandleDropData(raw, dateStr); return; }
-        if (payload.activityId === activityId) return;
-        const rect = row.getBoundingClientRect();
-        const before = (e.clientY - rect.top) < rect.height / 2;
-        const src = state.curr.meetings.get(payload.fromDate);
-        if (!src) return;
-        const idx = src.activities.findIndex((a: any) => a.id === payload.activityId);
-        if (idx === -1) return;
-        const [moved] = src.activities.splice(idx, 1);
-        const dst = currGetOrCreateMeeting(dateStr);
-        let targetIdx = dst.activities.findIndex((a: any) => a.id === activityId);
-        if (targetIdx === -1) targetIdx = dst.activities.length;
-        dst.activities.splice(before ? targetIdx : targetIdx + 1, 0, moved);
-        currRefreshUI();
-        if (payload.fromDate !== dateStr) currPersistMeeting(payload.fromDate);
-        currPersistMeeting(dateStr);
-      });
     }
     function currRenderActivityList(container: any, dateStr: string) {
       if (!container) return;
@@ -1724,8 +1673,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       const activities = m ? m.activities : [];
       container.innerHTML = activities.length
         ? activities.map(currActivityRowHTML).join('')
-        : '<p class="curr-empty">No activities yet</p>';
-      container.querySelectorAll('.curr-item').forEach((row: any) => currSetupItemRow(row, dateStr));
+        : '<p class="curr-empty">No activities yet — pick one from the bank or add a custom one below.</p>';
       container.querySelectorAll('[data-del]').forEach((btn: any) => {
         btn.addEventListener('click', () => {
           const mm = state.curr.meetings.get(dateStr);
@@ -1745,48 +1693,13 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
           currPersistMeeting(dateStr);
         });
       });
-      container.addEventListener('dragover', (e: any) => { e.preventDefault(); container.classList.add('curr-list--over'); });
-      container.addEventListener('dragleave', () => container.classList.remove('curr-list--over'));
-      container.addEventListener('drop', (e: any) => {
-        e.preventDefault();
-        container.classList.remove('curr-list--over');
-        currHandleDropData(e.dataTransfer.getData('text/plain'), dateStr);
-      });
     }
-    function currHandleDropData(raw: string, targetDateStr: string) {
-      let payload: any;
-      try { payload = JSON.parse(raw); } catch (e) { return; }
-      if (payload.source === 'bank') {
-        const activity = { id: cryptoRandomId(), type: payload.type, en: payload.en, ar: payload.ar, duration: null };
-        const m = currGetOrCreateMeeting(targetDateStr);
-        m.activities.push(activity);
-        currRefreshUI();
-        currPersistMeeting(targetDateStr);
-      } else if (payload.source === 'custom-prompt') {
-        state.curr.customTargetDate = targetDateStr;
-        currOpenCustomOverlay();
-      } else if (payload.source === 'existing') {
-        if (payload.fromDate === targetDateStr) return;
-        const src = state.curr.meetings.get(payload.fromDate);
-        if (!src) return;
-        const idx = src.activities.findIndex((a: any) => a.id === payload.activityId);
-        if (idx === -1) return;
-        const [moved] = src.activities.splice(idx, 1);
-        const dst = currGetOrCreateMeeting(targetDateStr);
-        dst.activities.push(moved);
-        currRefreshUI();
-        currPersistMeeting(payload.fromDate);
-        currPersistMeeting(targetDateStr);
-      }
-    }
-    function currBindDropTarget(elm: any, dateStr: string) {
-      elm.addEventListener('dragover', (e: any) => { e.preventDefault(); elm.classList.add('curr-list--over'); });
-      elm.addEventListener('dragleave', () => elm.classList.remove('curr-list--over'));
-      elm.addEventListener('drop', (e: any) => {
-        e.preventDefault();
-        elm.classList.remove('curr-list--over');
-        currHandleDropData(e.dataTransfer.getData('text/plain'), dateStr);
-      });
+    function currAddActivity(dateStr: string, en: string) {
+      const activity = { id: cryptoRandomId(), en, duration: null };
+      const m = currGetOrCreateMeeting(dateStr);
+      m.activities.push(activity);
+      currRefreshUI();
+      currPersistMeeting(dateStr);
     }
     function currRenderMonth() {
       const anchor = state.curr.anchor;
@@ -1797,7 +1710,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       const end = addDays(startOfWeek(last), 6);
       const today = todayStr();
       let html = '<div class="curr-weekday-row">' + WEEKDAYS.map((w) =>
-        `<div class="curr-weekday"><span>${w.en}</span><span class="curr-weekday-ar">${w.ar}</span></div>`
+        `<div class="curr-weekday">${w.en}</div>`
       ).join('') + '</div><div class="curr-month-cells">';
       let d = new Date(start);
       while (d <= end) {
@@ -1820,75 +1733,14 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       html += '</div>';
       els.currMonthGrid.innerHTML = html;
       els.currMonthGrid.querySelectorAll('.curr-day-cell').forEach((cell: any) => {
-        const dateStr = cell.dataset.date;
-        cell.addEventListener('click', () => currOpenDayPanel(dateStr));
-        currBindDropTarget(cell, dateStr);
-      });
-    }
-    function currRenderWeek() {
-      const start = startOfWeek(state.curr.anchor);
-      let cols = '';
-      for (let i = 0; i < 7; i++) {
-        const d = addDays(start, i);
-        const dateStr = toDateStr(d);
-        const isToday = dateStr === todayStr();
-        cols += `<div class="curr-week-col${isToday ? ' curr-week-col--today' : ''}">
-          <button type="button" class="curr-week-head" data-open="${dateStr}">
-            <span class="curr-week-day">${WEEKDAYS[i].en} <span class="curr-week-day-ar">${WEEKDAYS[i].ar}</span></span>
-            <span class="curr-week-date">${d.getDate()} ${MONTHS[d.getMonth()].en}</span>
-          </button>
-          <div class="curr-week-list" data-list="${dateStr}"></div>
-        </div>`;
-      }
-      els.currWeekGrid.innerHTML = cols;
-      els.currWeekGrid.querySelectorAll('[data-open]').forEach((btn: any) => {
-        btn.addEventListener('click', () => currOpenDayPanel(btn.dataset.open));
-      });
-      els.currWeekGrid.querySelectorAll('[data-list]').forEach((list: any) => {
-        currRenderActivityList(list, list.dataset.list);
-      });
-    }
-    function currRenderYear() {
-      const year = state.curr.anchor.getFullYear();
-      let html = '';
-      for (let mo = 0; mo < 12; mo++) {
-        const first = new Date(year, mo, 1);
-        const last = new Date(year, mo + 1, 0);
-        const gridStart = startOfWeek(first);
-        const gridEnd = addDays(startOfWeek(last), 6);
-        let count = 0;
-        let cells = '';
-        let d = new Date(gridStart);
-        while (d <= gridEnd) {
-          const dateStr = toDateStr(d);
-          const inMonth = d.getMonth() === mo;
-          const meeting = state.curr.meetings.get(dateStr);
-          const has = inMonth && meeting && meeting.activities.length;
-          if (has) count++;
-          cells += `<span class="curr-yr-cell${inMonth ? '' : ' curr-yr-cell--out'}${has ? ' curr-yr-cell--has' : ''}">${inMonth ? d.getDate() : ''}</span>`;
-          d = addDays(d, 1);
-        }
-        html += `<button type="button" class="curr-yr-month" data-month="${mo}">
-          <span class="curr-yr-month-head">${MONTHS[mo].en}${count ? `<span class="curr-yr-month-count">${count} planned</span>` : ''}</span>
-          <span class="curr-yr-month-ar">${MONTHS[mo].ar}</span>
-          <div class="curr-yr-cells">${cells}</div>
-        </button>`;
-      }
-      els.currYearGrid.innerHTML = html;
-      els.currYearGrid.querySelectorAll('[data-month]').forEach((btn: any) => {
-        btn.addEventListener('click', () => {
-          state.curr.anchor = new Date(year, Number(btn.dataset.month), 1);
-          currSetView('month');
-        });
+        cell.addEventListener('click', () => currOpenDayPanel(cell.dataset.date));
       });
     }
     function currOpenDayPanel(dateStr: string) {
       state.curr.currentDay = dateStr;
       const d = parseDateStr(dateStr);
       const m = state.curr.meetings.get(dateStr);
-      els.currDayHeader.innerHTML = `
-        <span class="curr-day-h-en">${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}, ${d.getFullYear()}</span>
-        <span class="curr-day-h-ar">${WEEKDAYS[d.getDay()].ar} ${d.getDate()} ${MONTHS[d.getMonth()].ar} ${d.getFullYear()}</span>`;
+      els.currDayHeader.textContent = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}, ${d.getFullYear()}`;
       els.currDayTheme.value = (m && m.theme) || '';
       els.currDayNotes.value = (m && m.notes) || '';
       currRenderActivityList(els.currDayList, dateStr);
@@ -1898,54 +1750,52 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.currDayOverlay.setAttribute('hidden', '');
       state.curr.currentDay = null;
     }
-    function currOpenCustomOverlay() {
-      (document.querySelector('[data-custom-en]') as any).value = '';
-      (document.querySelector('[data-custom-ar]') as any).value = '';
-      els.currCustomOverlay.removeAttribute('hidden');
+    // Theme/Notes only commit when Save is pressed — activities (bank
+    // picks, custom adds, removes) still save instantly, same as
+    // everywhere else in the workspace.
+    function currSaveDay() {
+      if (!state.curr.currentDay) return;
+      const m = currGetOrCreateMeeting(state.curr.currentDay);
+      m.theme = els.currDayTheme.value.trim() || null;
+      m.notes = els.currDayNotes.value.trim() || null;
+      currPersistMeeting(state.curr.currentDay);
+      currRenderMonth();
+      currCloseDayPanel();
     }
-    function currCloseCustomOverlay() { els.currCustomOverlay.setAttribute('hidden', ''); }
+    function currCancelDay() {
+      currCloseDayPanel();
+    }
+    // Steps to the next/previous day, pulling in a different month's data
+    // first if that date falls outside what's currently loaded.
+    async function currStepDay(n: number) {
+      if (!state.curr.currentDay) return;
+      const next = addDays(parseDateStr(state.curr.currentDay), n);
+      const nextStr = toDateStr(next);
+      const { start, end } = currComputeRange();
+      if (next < start || next > end) {
+        state.curr.anchor = next;
+        await currReload();
+      }
+      currOpenDayPanel(nextStr);
+    }
     function currUpdateNavLabel() {
       const a = state.curr.anchor;
-      if (state.curr.view === 'month') {
-        els.currNavLabel.textContent = `${MONTHS[a.getMonth()].en} ${a.getFullYear()}`;
-      } else if (state.curr.view === 'week') {
-        const s = startOfWeek(a), e = addDays(s, 6);
-        const sameMonth = s.getMonth() === e.getMonth();
-        els.currNavLabel.textContent = sameMonth
-          ? `${MONTHS[s.getMonth()].en} ${s.getDate()}–${e.getDate()}, ${e.getFullYear()}`
-          : `${MONTHS[s.getMonth()].en} ${s.getDate()} – ${MONTHS[e.getMonth()].en} ${e.getDate()}, ${e.getFullYear()}`;
-      } else {
-        els.currNavLabel.textContent = String(a.getFullYear());
-      }
+      els.currNavLabel.textContent = `${MONTHS[a.getMonth()].en} ${a.getFullYear()}`;
     }
     async function currReload() {
       currUpdateNavLabel();
       await currLoadMeetings();
-      currRenderCurrentView();
+      currRenderMonth();
     }
     function currNavPrev() {
-      if (state.curr.view === 'month') state.curr.anchor = new Date(state.curr.anchor.getFullYear(), state.curr.anchor.getMonth() - 1, 1);
-      else if (state.curr.view === 'week') state.curr.anchor = addDays(state.curr.anchor, -7);
-      else state.curr.anchor = new Date(state.curr.anchor.getFullYear() - 1, 0, 1);
+      state.curr.anchor = new Date(state.curr.anchor.getFullYear(), state.curr.anchor.getMonth() - 1, 1);
       currReload();
     }
     function currNavNext() {
-      if (state.curr.view === 'month') state.curr.anchor = new Date(state.curr.anchor.getFullYear(), state.curr.anchor.getMonth() + 1, 1);
-      else if (state.curr.view === 'week') state.curr.anchor = addDays(state.curr.anchor, 7);
-      else state.curr.anchor = new Date(state.curr.anchor.getFullYear() + 1, 0, 1);
+      state.curr.anchor = new Date(state.curr.anchor.getFullYear(), state.curr.anchor.getMonth() + 1, 1);
       currReload();
     }
     function currNavToday() { state.curr.anchor = new Date(); currReload(); }
-    function currSetView(view: string) {
-      state.curr.view = view;
-      els.currViewToggle.querySelectorAll('button').forEach((b: any) => {
-        b.classList.toggle('curr-view-btn--active', b.dataset.view === view);
-      });
-      els.currMonthView.toggleAttribute('hidden', view !== 'month');
-      els.currWeekView.toggleAttribute('hidden', view !== 'week');
-      els.currYearView.toggleAttribute('hidden', view !== 'year');
-      currReload();
-    }
     function currExportPDF() {
       const { start, end } = currComputeRange();
       let html = printLetterhead('Curriculum', els.currNavLabel.textContent);
@@ -1959,7 +1809,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
           html += `<div class="curr-print-day">
             <h3>${WEEKDAYS[d.getDay()].en} · ${d.getDate()} ${MONTHS[d.getMonth()].en} ${d.getFullYear()}</h3>
             ${m.theme ? `<p class="curr-print-theme">${escapeHtml(m.theme)}</p>` : ''}
-            <ol>${m.activities.map((a: any) => `<li>${escapeHtml(a.en)}${a.ar ? ' <span dir="rtl">' + escapeHtml(a.ar) + '</span>' : ''}${a.duration ? ` — ${a.duration} min` : ''}</li>`).join('')}</ol>
+            <ol>${m.activities.map((a: any) => `<li>${escapeHtml(a.en)}${a.duration ? ` — ${a.duration} min` : ''}</li>`).join('')}</ol>
             ${m.notes ? `<p class="curr-print-notes">${escapeHtml(m.notes)}</p>` : ''}
           </div>`;
         }
@@ -1969,87 +1819,87 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.reportPrint.innerHTML = html;
       window.print();
     }
-    function currBindStatics() {
-      document.querySelectorAll('.curr-chip[data-bank-type]').forEach((chip: any) => {
-        chip.addEventListener('dragstart', (e: any) => {
-          e.dataTransfer.effectAllowed = 'copy';
-          e.dataTransfer.setData('text/plain', JSON.stringify({
-            source: 'bank', type: chip.dataset.bankType, en: chip.dataset.bankEn, ar: chip.dataset.bankAr,
-          }));
-        });
+
+    // ---------- Activity Bank (per-group, editable) -----------------------
+    function currRenderBankChips() {
+      const items = state.groupSettings?.activity_bank || [];
+      els.currBankChips.innerHTML = items.length
+        ? items.map((a: any) => `<button type="button" class="curr-chip" data-bank-en="${escapeHtml(a.en)}">${escapeHtml(a.en)}</button>`).join('')
+        : '<p class="ws-empty" style="padding:0.5rem 0">No activities yet — add some in the Activity Bank tab.</p>';
+      els.currBankChips.querySelectorAll('[data-bank-en]').forEach((chip: any) => {
         chip.addEventListener('click', () => {
-          if (!state.curr.currentDay || els.currDayOverlay.hidden) {
-            showToast('Open a date first, then tap an activity.');
-            return;
-          }
-          const activity = { id: cryptoRandomId(), type: chip.dataset.bankType, en: chip.dataset.bankEn, ar: chip.dataset.bankAr, duration: null };
-          const m = currGetOrCreateMeeting(state.curr.currentDay);
-          m.activities.push(activity);
-          currRefreshUI();
-          currPersistMeeting(state.curr.currentDay);
+          if (!state.curr.currentDay) return;
+          currAddActivity(state.curr.currentDay, chip.dataset.bankEn);
         });
       });
-      const customChip: any = document.querySelector('[data-bank-custom]');
-      if (customChip) {
-        customChip.draggable = true;
-        customChip.addEventListener('dragstart', (e: any) => {
-          e.dataTransfer.effectAllowed = 'copy';
-          e.dataTransfer.setData('text/plain', JSON.stringify({ source: 'custom-prompt' }));
-        });
-        customChip.addEventListener('click', () => {
-          state.curr.customTargetDate = (!els.currDayOverlay.hidden && state.curr.currentDay) ? state.curr.currentDay : null;
-          if (!state.curr.customTargetDate) { showToast('Open a date first.'); return; }
-          currOpenCustomOverlay();
-        });
-      }
-      els.currViewToggle.querySelectorAll('button[data-view]').forEach((btn: any) => {
-        btn.addEventListener('click', () => currSetView(btn.dataset.view));
+    }
+    function currRenderBankList() {
+      const items = state.groupSettings?.activity_bank || [];
+      els.currBankList.innerHTML = items.length
+        ? items.map((a: any) => `
+            <span class="curr-bank-item">${escapeHtml(a.en)}<button type="button" data-remove-bank="${escapeHtml(a.id)}" aria-label="Remove">×</button></span>
+          `).join('')
+        : '<p class="ws-empty" style="padding:0.5rem 0">No activities in the bank yet — add one above.</p>';
+      els.currBankList.querySelectorAll('[data-remove-bank]').forEach((btn: any) => {
+        btn.addEventListener('click', () => currRemoveBankItem(btn.dataset.removeBank));
       });
+    }
+    async function currSaveBank(items: any[]) {
+      const { error } = await db.from('group_settings').upsert({ group_key: state.activeGroup, activity_bank: items }, { onConflict: 'group_key' });
+      if (error) { console.error(error); showToast('Could not save the activity bank.'); return; }
+      state.groupSettings.activity_bank = items;
+      currRenderBankChips();
+      currRenderBankList();
+    }
+    async function currAddBankItem(en: string) {
+      if (!en.trim()) return;
+      const current = state.groupSettings?.activity_bank || [];
+      await currSaveBank([...current, { id: cryptoRandomId(), en: en.trim() }]);
+    }
+    async function currRemoveBankItem(id: string) {
+      const current = state.groupSettings?.activity_bank || [];
+      await currSaveBank(current.filter((a: any) => a.id !== id));
+    }
+    function currSetSubtab(name: string) {
+      document.querySelectorAll('.curr-subtab').forEach((b: any) => b.classList.toggle('curr-subtab--active', b.dataset.subtab === name));
+      document.querySelectorAll('[data-curr-subpanel]').forEach((p: any) => p.toggleAttribute('hidden', p.dataset.currSubpanel !== name));
+    }
+
+    function currBindStatics() {
       els.currPrev.addEventListener('click', currNavPrev);
       els.currNext.addEventListener('click', currNavNext);
       els.currToday.addEventListener('click', currNavToday);
       els.currExport.addEventListener('click', currExportPDF);
-      els.currDayClose.addEventListener('click', currCloseDayPanel);
+      els.currDaySave.addEventListener('click', currSaveDay);
+      els.currDayCancel.addEventListener('click', currCancelDay);
+      els.currDayPrev.addEventListener('click', () => currStepDay(-1));
+      els.currDayNext.addEventListener('click', () => currStepDay(1));
       document.addEventListener('click', (e: any) => {
         if (els.currDayOverlay.hidden) return;
         if (e.target.closest('[data-curr-day-panel]')) return;
-        if (e.target.closest('.curr-day-cell') || e.target.closest('[data-open]')) return;
-        currCloseDayPanel();
+        if (e.target.closest('.curr-day-cell')) return;
+        currCancelDay();
       });
-      let themeTimer: any, notesTimer: any;
-      els.currDayTheme.addEventListener('input', () => {
-        clearTimeout(themeTimer);
-        themeTimer = setTimeout(() => {
-          if (!state.curr.currentDay) return;
-          const m = currGetOrCreateMeeting(state.curr.currentDay);
-          m.theme = els.currDayTheme.value.trim() || null;
-          currPersistMeeting(state.curr.currentDay);
-          currRenderCurrentView();
-        }, 500);
+      els.currCustomAddForm.addEventListener('submit', (e: Event) => {
+        e.preventDefault();
+        const en = els.currCustomEn.value.trim();
+        if (!en || !state.curr.currentDay) return;
+        currAddActivity(state.curr.currentDay, en);
+        els.currCustomEn.value = '';
       });
-      els.currDayNotes.addEventListener('input', () => {
-        clearTimeout(notesTimer);
-        notesTimer = setTimeout(() => {
-          if (!state.curr.currentDay) return;
-          const m = currGetOrCreateMeeting(state.curr.currentDay);
-          m.notes = els.currDayNotes.value.trim() || null;
-          currPersistMeeting(state.curr.currentDay);
-        }, 500);
+      document.querySelectorAll('.curr-subtab').forEach((btn: any) => {
+        btn.addEventListener('click', () => currSetSubtab(btn.dataset.subtab));
       });
-      document.querySelector('[data-custom-cancel]')?.addEventListener('click', currCloseCustomOverlay);
-      document.querySelector('[data-custom-add]')?.addEventListener('click', () => {
-        const en = (document.querySelector('[data-custom-en]') as any).value.trim();
-        const ar = (document.querySelector('[data-custom-ar]') as any).value.trim();
-        if (!en) { showToast('Enter an activity name.'); return; }
-        const activity = { id: cryptoRandomId(), type: 'custom', en, ar, duration: null };
-        const m = currGetOrCreateMeeting(state.curr.customTargetDate);
-        m.activities.push(activity);
-        currRefreshUI();
-        currPersistMeeting(state.curr.customTargetDate);
-        currCloseCustomOverlay();
+      els.currBankAddForm.addEventListener('submit', (e: Event) => {
+        e.preventDefault();
+        currAddBankItem(els.currBankAddEn.value);
+        els.currBankAddForm.reset();
       });
     }
     async function currStart() {
+      await loadGroupSettings();
+      currRenderBankChips();
+      currRenderBankList();
       currSubscribeRealtime(state.activeGroup);
       await currReload();
     }

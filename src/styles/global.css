@@ -3759,6 +3759,52 @@ main.wide {
 }
 .curr-back-link:hover { color: var(--color-brand); text-decoration: underline; }
 
+/* ----- Curriculum sub-tabs (Plan / Activity Bank) ----- */
+.curr-subtabs {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  margin-bottom: 1.5rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+.curr-subtab {
+  padding: 0.5rem 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.curr-subtab--active { background: var(--color-brand); color: #fff; }
+.curr-subtab:hover:not(.curr-subtab--active) { color: var(--color-brand-dark); }
+[data-curr-subpanel][hidden] { display: none !important; }
+
+/* ----- Curriculum day drawer: prev/next-day nav around the header ----- */
+.curr-day-nav-row { display: flex; align-items: flex-start; gap: 0.75rem; margin: 0 2.5rem 1.25rem 0; }
+.curr-day-nav-row .curr-day-header { margin: 0; flex: 1; }
+
+/* ----- Activity Bank management list ----- */
+.curr-bank-list { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.curr-bank-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 0.9rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+.curr-bank-item button {
+  border: 0; background: none; color: var(--color-muted); cursor: pointer;
+  font-size: 1rem; line-height: 1; padding: 0.15rem;
+}
+.curr-bank-item button:hover { color: var(--color-brand-light); }
+
 .curr-warn {
   max-width: 1000px;
   margin: -1.5rem auto 2rem;
@@ -3947,11 +3993,11 @@ main.wide {
   border-radius: var(--radius);
   background: var(--color-bg);
   color: var(--color-brand);
-  cursor: grab;
+  cursor: pointer;
   user-select: none;
+  transition: background 0.15s var(--ease-out), color 0.15s var(--ease-out);
 }
-.curr-chip:active { cursor: grabbing; }
-.curr-chip--custom { border-style: dashed; }
+.curr-chip:hover { background: var(--color-brand); color: #fff; }
 .curr-chip-text { display: flex; flex-direction: column; line-height: 1.15; }
 .curr-chip-en { font-size: 0.78rem; font-weight: 600; }
 .curr-chip-ar { font-family: var(--font-display-arabic); font-size: 0.85rem; color: var(--color-muted); unicode-bidi: plaintext; }
@@ -4046,11 +4092,7 @@ main.wide {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  cursor: grab;
 }
-.curr-item:active { cursor: grabbing; }
-.curr-item--over { outline: 2px dashed var(--color-accent); }
-.curr-item-handle { color: var(--color-muted); font-size: 0.7rem; flex-shrink: 0; }
 .curr-item-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
 .curr-item-en { font-size: 0.78rem; font-weight: 600; color: var(--color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .curr-item-ar { font-family: var(--font-display-arabic); font-size: 0.82rem; color: var(--color-muted); unicode-bidi: plaintext; }
@@ -4089,42 +4131,55 @@ main.wide {
 .curr-yr-cell--out { opacity: 0.25; }
 .curr-yr-cell--has { background: var(--color-accent); color: #fff; font-weight: 700; }
 
-/* ----- Day detail drawer -----
-   Deliberately no full-page dimming: pointer-events are only enabled on
-   the panel itself, so the activity bank behind it stays fully usable —
-   you can drag a chip straight from the bank into an open day drawer. */
+/* ----- Day planner popup -----
+   Centered modal (not a side drawer) — opened by clicking a date. Picking
+   from the bank, adding a custom activity, and removing/duration-editing
+   existing ones all save instantly; Theme/Notes wait for Save. */
+.curr-day-overlay[hidden] { display: none !important; }
 .curr-day-overlay {
   position: fixed;
   inset: 0;
   z-index: 60;
-  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(26, 26, 26, 0.4);
 }
 .curr-day-panel {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-end: 0;
-  width: min(420px, 100vw);
+  width: min(480px, 100%);
+  max-height: min(88vh, 700px);
+  overflow-y: auto;
   background: var(--color-surface);
-  border-inline-start: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   padding: 1.5rem;
-  overflow-y: auto;
-  pointer-events: auto;
 }
-.curr-day-close {
-  position: absolute;
-  top: 1rem;
-  inset-inline-end: 1rem;
+.curr-day-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  margin: -1.5rem -1.5rem 1.25rem;
+  background: var(--color-brand);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  color: #fff;
+}
+.curr-day-banner-text { flex: 1; }
+.curr-day-banner-label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
+.curr-day-banner-value { margin: 0; font-family: var(--font-display); font-size: 1.1rem; }
+.curr-day-nav-btn {
   width: 2rem; height: 2rem;
-  border: 0; border-radius: 50%;
-  background: var(--color-bg);
-  color: var(--color-muted);
-  font-size: 1.2rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.1rem;
   cursor: pointer;
+  flex-shrink: 0;
 }
-.curr-day-header { margin: 0 2.5rem 1.25rem 0; display: flex; flex-direction: column; }
-.curr-day-h-en { font-family: var(--font-display); font-size: 1.1rem; color: var(--color-brand); }
-.curr-day-h-ar { font-family: var(--font-display-arabic); color: var(--color-muted); unicode-bidi: plaintext; }
+.curr-day-nav-btn:hover { background: rgba(255, 255, 255, 0.25); }
+.curr-day-header { font-weight: 700; }
 .curr-day-field { display: block; margin-bottom: 1rem; font-size: 0.82rem; color: var(--color-muted); }
 .curr-day-field span { display: block; margin-bottom: 0.3rem; font-weight: 600; }
 .curr-day-field input, .curr-day-field textarea {
@@ -4137,9 +4192,27 @@ main.wide {
   color: var(--color-text);
   resize: vertical;
 }
-.curr-day-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 3rem; margin: 1rem 0; }
-.curr-day-hint { font-size: 0.72rem; color: var(--color-muted); line-height: 1.5; }
-.curr-day-hint span { display: block; font-family: var(--font-arabic); margin-top: 0.2rem; unicode-bidi: plaintext; }
+.curr-day-section-label {
+  margin: 1.25rem 0 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-brand-dark);
+}
+.curr-day-panel .curr-bank-chips { margin-bottom: 0.25rem; }
+.curr-day-panel .curr-chip { cursor: pointer; }
+.curr-day-custom-add { display: flex; gap: 0.5rem; }
+.curr-day-custom-add input {
+  flex: 1;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font: inherit;
+}
+.curr-day-custom-add button { padding: 0.55rem 1rem; font-size: 0.82rem; }
+.curr-day-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 2.5rem; }
+.curr-day-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border); }
 
 /* ----- Custom activity mini-form ----- */
 .curr-custom-overlay {
