@@ -595,19 +595,80 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </section>
 
         <section class="ws-panel" data-panel="admin" hidden>
-          <h3 class="ws-admin-h3">Leaders</h3>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-admin-table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Groups</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody data-admin-body></tbody>
-            </table>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="admin" data-subtab="overview">Overview</button>
+            <button type="button" class="ws-subtab" data-subtabs="admin" data-subtab="finance">Finance</button>
+            <button type="button" class="ws-subtab" data-subtabs="admin" data-subtab="leaders">Leader Management</button>
+          </div>
+
+          <div data-subpanel="admin:overview">
+            <p class="ws-att-hint">Every group together — the same numbers each group's own Dashboard shows, rolled up troop-wide.</p>
+            <div class="ws-dash-kpis" data-ov-kpis></div>
+            <div class="ws-dash-card ws-dash-card--full">
+              <div class="ws-dash-card-head"><h3>Active members by group</h3></div>
+              <div data-ov-members-chart></div>
+            </div>
+            <h3 class="ws-admin-h3">By group</h3>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-ov-table>
+                <thead>
+                  <tr><th>Group</th><th>Active</th><th>Attendance (30d)</th><th>Fees this month</th><th>Net income (mtd)</th></tr>
+                </thead>
+                <tbody data-ov-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="admin:finance" hidden>
+            <p class="ws-att-hint">Every group's Finance ledger together, for one period.</p>
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline">
+                <span>Month</span>
+                <select data-ov-fin-month></select>
+              </label>
+              <label class="ws-field ws-field--inline">
+                <span>Year</span>
+                <select data-ov-fin-year></select>
+              </label>
+            </div>
+            <div class="ws-stat-row ws-stat-row--3" data-ov-fin-stats></div>
+
+            <h3 class="ws-admin-h3">By group</h3>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-ov-fin-group-table>
+                <thead>
+                  <tr><th>Group</th><th>Income</th><th>Expenses</th><th>Net</th></tr>
+                </thead>
+                <tbody data-ov-fin-group-body></tbody>
+              </table>
+            </div>
+
+            <h3 class="ws-admin-h3">Every transaction</h3>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-ov-fin-table>
+                <thead>
+                  <tr><th>Date</th><th>Group</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th></tr>
+                </thead>
+                <tbody data-ov-fin-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="admin:leaders" hidden>
+            <h3 class="ws-admin-h3">Leaders</h3>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-admin-table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Groups</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody data-admin-body></tbody>
+              </table>
+            </div>
           </div>
         </section>
       </div>
@@ -756,6 +817,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.dashAttention = el('[data-dash-attention]');
       els.dashFinChart = el('[data-dash-fin-chart]');
       els.dashFinSub = el('[data-dash-fin-sub]');
+      els.ovKpis = el('[data-ov-kpis]');
+      els.ovMembersChart = el('[data-ov-members-chart]');
+      els.ovBody = el('[data-ov-body]');
+      els.ovFinMonth = el('[data-ov-fin-month]');
+      els.ovFinYear = el('[data-ov-fin-year]');
+      els.ovFinStats = el('[data-ov-fin-stats]');
+      els.ovFinGroupBody = el('[data-ov-fin-group-body]');
+      els.ovFinBody = el('[data-ov-fin-body]');
       els.rosterForm = el('[data-roster-form]');
       els.rosterBody = el('[data-roster-body]');
       els.rosterSearch = el('[data-roster-search]');
@@ -2521,6 +2590,158 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
+    // ---------- Overview (admin-only): every group rolled up together ------
+    // One query per table, unfiltered by group — admins already have
+    // has_group_access() on every group, so a single unscoped select pulls
+    // every group's rows in one round trip instead of five (one per
+    // group), then buckets them client-side by group_key.
+    async function loadOverview() {
+      const now = new Date();
+      const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const monthEnd = `${period}-${String(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()).padStart(2, '0')}`;
+      const day30 = toDateStr(addDays(now, -30));
+
+      const [membersRes, attRes, feeRes, finRes] = await Promise.all([
+        db.from('members').select('group_key, active'),
+        db.from('attendance').select('group_key, present').gte('date', day30),
+        db.from('fee_payments').select('group_key, paid, amount').eq('period', period),
+        db.from('finance_entries').select('group_key, entry_type, amount').gte('entry_date', `${period}-01`).lte('entry_date', monthEnd),
+      ]);
+
+      const byGroup = new Map<string, any>();
+      GROUPS.forEach((g) => byGroup.set(g.key, {
+        activeMembers: 0, attPresent: 0, attTotal: 0, feePaid: 0, feeCollected: 0, netIncome: 0,
+      }));
+      (membersRes.data || []).forEach((m: any) => {
+        const b = byGroup.get(m.group_key); if (!b) return;
+        if (m.active) b.activeMembers++;
+      });
+      (attRes.data || []).forEach((r: any) => {
+        const b = byGroup.get(r.group_key); if (!b) return;
+        b.attTotal++; if (r.present) b.attPresent++;
+      });
+      (feeRes.data || []).forEach((r: any) => {
+        const b = byGroup.get(r.group_key); if (!b) return;
+        if (r.paid) { b.feePaid++; b.feeCollected += Number(r.amount || 0); }
+      });
+      (finRes.data || []).forEach((r: any) => {
+        const b = byGroup.get(r.group_key); if (!b) return;
+        b.netIncome += r.entry_type === 'income' ? Number(r.amount) : -Number(r.amount);
+      });
+      renderOverview(byGroup);
+    }
+    function renderOverview(byGroup: Map<string, any>) {
+      const groups = GROUPS.map((g) => ({ ...g, ...byGroup.get(g.key) }));
+      const totalActive = groups.reduce((s, g) => s + g.activeMembers, 0);
+      const attPresent = groups.reduce((s, g) => s + g.attPresent, 0);
+      const attTotal = groups.reduce((s, g) => s + g.attTotal, 0);
+      const overallRate = attTotal ? Math.round((attPresent / attTotal) * 100) : null;
+      const totalCollected = groups.reduce((s, g) => s + g.feeCollected, 0);
+      const totalNet = groups.reduce((s: number, g) => s + g.netIncome, 0);
+
+      els.ovKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active members</span></div>
+          <span class="ws-dash-kpi-num">${totalActive}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">across ${GROUPS.length} groups</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Attendance (30d)</span></div>
+          <span class="ws-dash-kpi-num">${overallRate != null ? overallRate + '%' : '—'}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">troop-wide</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Fees collected (mtd)</span></div>
+          <span class="ws-dash-kpi-num">${totalCollected.toFixed(0)}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">all groups combined</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">±</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
+          <span class="ws-dash-kpi-num">${totalNet >= 0 ? '+' : '−'}${Math.abs(totalNet).toFixed(0)}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">all groups combined</span>
+        </div>
+      `;
+
+      const maxActive = Math.max(1, ...groups.map((g) => g.activeMembers));
+      els.ovMembersChart.innerHTML = `
+        <div class="ws-dash-bars">
+          ${groups.map((g) => {
+            const pct = Math.round((g.activeMembers / maxActive) * 100);
+            return `
+              <div class="ws-dash-bar-col" title="${escapeHtml(g.en)} — ${g.activeMembers} active members">
+                <span class="ws-dash-bar-pct">${g.activeMembers}</span>
+                <div class="ws-dash-bar-track"><div class="ws-dash-bar-fill" style="height:${g.activeMembers ? Math.max(pct, 4) : 0}%"></div></div>
+                <span class="ws-dash-bar-label">${escapeHtml(g.en)}</span>
+              </div>`;
+          }).join('')}
+        </div>
+      `;
+
+      els.ovBody.innerHTML = groups.map((g) => {
+        const rate = g.attTotal ? Math.round((g.attPresent / g.attTotal) * 100) : null;
+        return `
+          <tr>
+            <td data-label="Group">${escapeHtml(g.en)}</td>
+            <td data-label="Active">${g.activeMembers}</td>
+            <td data-label="Attendance (30d)">${rate != null ? rate + '%' : '—'}</td>
+            <td data-label="Fees this month">${g.feePaid}/${g.activeMembers} · ${g.feeCollected.toFixed(0)}</td>
+            <td data-label="Net income (mtd)">${g.netIncome >= 0 ? '+' : '−'}${Math.abs(g.netIncome).toFixed(0)}</td>
+          </tr>`;
+      }).join('');
+    }
+    // Every group's finance_entries for one period, in a single unfiltered
+    // query (same reasoning as loadOverview()) — grouped into a per-group
+    // summary table plus the full transaction list with a Group column.
+    async function loadOverviewFinance() {
+      populatePeriodSelects(els.ovFinMonth, els.ovFinYear, true);
+      const { start, end } = periodRange(els.ovFinMonth, els.ovFinYear);
+      const { data, error } = await db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, description')
+        .gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: false });
+      if (error) { console.error(error); showToast('Could not load finance.'); return; }
+      renderOverviewFinance(data || []);
+    }
+    function renderOverviewFinance(rows: any[]) {
+      const income = rows.filter((r) => r.entry_type === 'income').reduce((s, r) => s + Number(r.amount), 0);
+      const expense = rows.filter((r) => r.entry_type === 'expense').reduce((s, r) => s + Number(r.amount), 0);
+      els.ovFinStats.innerHTML = `
+        <div class="ws-stat ws-stat--accent"><span class="ws-stat-icon">↑</span><span class="ws-stat-text"><span class="ws-stat-num">${income.toFixed(2)}</span><span class="ws-stat-label">Income</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">↓</span><span class="ws-stat-text"><span class="ws-stat-num">${expense.toFixed(2)}</span><span class="ws-stat-label">Expenses</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">=</span><span class="ws-stat-text"><span class="ws-stat-num">${(income - expense).toFixed(2)}</span><span class="ws-stat-label">Net</span></span></div>
+      `;
+
+      const byGroup = new Map<string, { income: number; expense: number }>();
+      GROUPS.forEach((g) => byGroup.set(g.key, { income: 0, expense: 0 }));
+      rows.forEach((r) => {
+        const b = byGroup.get(r.group_key); if (!b) return;
+        if (r.entry_type === 'income') b.income += Number(r.amount); else b.expense += Number(r.amount);
+      });
+      els.ovFinGroupBody.innerHTML = GROUPS.map((g) => {
+        const b = byGroup.get(g.key)!;
+        return `
+          <tr>
+            <td data-label="Group">${escapeHtml(g.en)}</td>
+            <td data-label="Income">${b.income.toFixed(2)}</td>
+            <td data-label="Expenses">${b.expense.toFixed(2)}</td>
+            <td data-label="Net">${(b.income - b.expense).toFixed(2)}</td>
+          </tr>`;
+      }).join('');
+
+      els.ovFinBody.innerHTML = rows.length
+        ? rows.map((r) => {
+            const g = GROUPS.find((x) => x.key === r.group_key);
+            return `
+              <tr>
+                <td data-label="Date">${r.entry_date}</td>
+                <td data-label="Group">${escapeHtml(g ? g.en : r.group_key)}</td>
+                <td data-label="Type">${r.entry_type === 'income' ? 'Income' : 'Expense'}</td>
+                <td data-label="Category">${escapeHtml(r.category || '—')}</td>
+                <td data-label="Description">${escapeHtml(r.description || '—')}</td>
+                <td data-label="Amount">${Number(r.amount).toFixed(2)}</td>
+              </tr>`;
+          }).join('')
+        : '<tr><td colspan="6" class="ws-empty">No entries this period.</td></tr>';
+    }
+
     // ---------- Admin: approve leaders, assign groups --------------------
     async function loadAdmin() {
       const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
@@ -2635,7 +2856,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const tab = state.activeTab;
       if (tab === 'dashboard') loadDashboard();
       if (tab === 'roster' || tab === 'archive') loadRoster();
-      if (tab === 'admin') loadAdmin();
+      if (tab === 'admin') { loadOverview(); loadOverviewFinance(); loadAdmin(); }
       if (tab === 'approvals') loadApprovals();
       if (tab === 'attendance') loadAttendance();
       if (tab === 'fees') loadFees();
@@ -2809,6 +3030,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindSettings();
         els.finMonth.addEventListener('change', loadFinance);
         els.finYear.addEventListener('change', loadFinance);
+        els.ovFinMonth.addEventListener('change', loadOverviewFinance);
+        els.ovFinYear.addEventListener('change', loadOverviewFinance);
       }
 
       refreshApprovalsBadge();
