@@ -48,3 +48,4 @@ const ALL = listMore().concat(CURATED_EXTRAS).concat(bandPhotos);
 export const homeMarqueePhotos = shuffleSeeded(ALL, 11);
 export const joinUsMarqueePhotos = shuffleSeeded(ALL, 73);
 export const aboutUsMarqueePhotos = shuffleSeeded(ALL, 137);
+export const workspaceMarqueePhotos = shuffleSeeded(ALL, 211);

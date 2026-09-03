@@ -7,6 +7,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
 import { loadPortalData, TOOL_LABELS } from '../../lib/leader-portal';
+import { workspaceMarqueePhotos } from '../../lib/scenic-photos';
 
 // Lessons tab reads the same build-time markdown as the old portal did —
 // shared, troop-wide Drive links, not per-group data.
@@ -15,6 +16,11 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
   label: TOOL_LABELS[key]?.en ?? key,
   url: v.url,
 }));
+
+// Doubled the same way the home page's marquee does, for a seamless
+// scrolling loop — the shared shuffle-on-load script in BaseLayout
+// handles the rest (any .band-marquee-track on any page gets it free).
+const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos];
 ---
 <BaseLayout title="Leaders Workspace" bare wide>
   <div class="ws-shell" data-ws-shell hidden>
@@ -83,6 +89,18 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
               </div>
             </div>
 
+            <div class="band-marquee ws-dash-marquee" aria-label="Troop photos">
+              <div class="band-marquee-track" style={`--n: ${workspaceMarqueePhotos.length}`}>
+                {dashMarqueePhotos.map((src, i) => (
+                  <div class="band-marquee-slide">
+                    <img src={src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
+                  </div>
+                ))}
+              </div>
+              <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
+              <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
+            </div>
+
             <div class="ws-dash-kpis" data-dash-kpis></div>
 
             <div class="ws-dash-grid">
@@ -97,6 +115,14 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
                 <div class="ws-dash-card-head"><h3>Fees this month</h3></div>
                 <div data-dash-fees-donut></div>
               </div>
+            </div>
+
+            <div class="ws-dash-card ws-dash-card--full">
+              <div class="ws-dash-card-head">
+                <h3>Income vs. expenses</h3>
+                <span class="ws-dash-card-sub" data-dash-fin-sub></span>
+              </div>
+              <div data-dash-fin-chart></div>
             </div>
 
             <div class="ws-dash-grid ws-dash-grid--3">
@@ -728,6 +754,8 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.dashNextMeeting = el('[data-dash-next-meeting]');
       els.dashRecentFinance = el('[data-dash-recent-finance]');
       els.dashAttention = el('[data-dash-attention]');
+      els.dashFinChart = el('[data-dash-fin-chart]');
+      els.dashFinSub = el('[data-dash-fin-sub]');
       els.rosterForm = el('[data-roster-form]');
       els.rosterBody = el('[data-roster-body]');
       els.rosterSearch = el('[data-roster-search]');
@@ -2260,12 +2288,22 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       const prevD = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const prevPeriod = `${prevD.getFullYear()}-${String(prevD.getMonth() + 1).padStart(2, '0')}`;
       const prevMonthEnd = `${prevPeriod}-${String(new Date(prevD.getFullYear(), prevD.getMonth() + 1, 0).getDate()).padStart(2, '0')}`;
+      // Six calendar months ending this month, for the Income vs. expenses
+      // chart — pulled in the same query as the KPI's this-month/last-
+      // month comparison rather than a second round trip.
+      const sixAgoD = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+      const sixStart = `${sixAgoD.getFullYear()}-${String(sixAgoD.getMonth() + 1).padStart(2, '0')}-01`;
+      const monthKeys: string[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+      }
 
       const [attRes, curRes, feeRes, finRes, pendingRes] = await Promise.all([
         db.from('attendance').select('date, present').eq('group_key', state.activeGroup).gte('date', day90).order('date', { ascending: true }),
         db.from('curriculum_meetings').select('date, theme, activities').eq('group_key', state.activeGroup).gte('date', todayStr()).order('date', { ascending: true }).limit(1),
         db.from('fee_payments').select('paid, amount').eq('group_key', state.activeGroup).eq('period', period),
-        db.from('finance_entries').select('entry_type, amount, entry_date, category, description').eq('group_key', state.activeGroup).gte('entry_date', `${prevPeriod}-01`).lte('entry_date', monthEnd).order('entry_date', { ascending: false }),
+        db.from('finance_entries').select('entry_type, amount, entry_date, category, description').eq('group_key', state.activeGroup).gte('entry_date', sixStart).lte('entry_date', monthEnd).order('entry_date', { ascending: false }),
         db.from('join_requests').select('id', { count: 'exact', head: true }).eq('group_key', state.activeGroup).eq('status', 'pending'),
       ]);
       const attRows = attRes.data || [];
@@ -2299,36 +2337,68 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       const netThis = netFor(`${period}-01`, monthEnd);
       const netPrev = netFor(`${prevPeriod}-01`, prevMonthEnd);
 
+      // Same finRows, bucketed by month instead of summed — for the
+      // Income vs. expenses chart.
+      const byMonth = new Map<string, { income: number; expense: number }>();
+      monthKeys.forEach((k) => byMonth.set(k, { income: 0, expense: 0 }));
+      finRows.forEach((r: any) => {
+        const bucket = byMonth.get(String(r.entry_date).slice(0, 7));
+        if (!bucket) return;
+        if (r.entry_type === 'income') bucket.income += Number(r.amount); else bucket.expense += Number(r.amount);
+      });
+
       renderDashKpis({ activeCount: active.length, archivedCount, rate30, ratePrev30, feePct, paidCount, totalActive: active.length, collected, netThis, netPrev });
+      renderDashFinanceChart(monthKeys, byMonth);
       renderDashAttendanceChart(lastDates, byDate);
       renderDashFeesDonut(feePct, paidCount, active.length, collected);
       renderDashNextMeeting(nextMeeting);
       renderDashRecentFinance(finRows.slice(0, 5));
       renderDashAttention({ pendingCount, allergyCount, unpaidCount: active.length - paidCount, hasActiveMembers: active.length > 0 });
     }
+    // Eases a KPI number up from 0 to its real value instead of just
+    // appearing — small thing, but it's what makes the dashboard feel
+    // alive rather than a static readout.
+    function animateCountUp(el: any, target: number, format: (v: number) => string, duration = 900) {
+      if (!el) return;
+      const start = performance.now();
+      function tick(now: number) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = format(target * eased);
+        if (t < 1) requestAnimationFrame(tick);
+        else el.textContent = format(target);
+      }
+      requestAnimationFrame(tick);
+    }
     function renderDashKpis(d: any) {
       els.dashKpis.innerHTML = `
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active members</span></div>
-          <span class="ws-dash-kpi-num">${d.activeCount}</span>
+          <span class="ws-dash-kpi-num" data-kpi="active">0</span>
           <span class="ws-dash-delta ws-dash-delta--flat">${d.archivedCount} archived</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Attendance (30d)</span></div>
-          <span class="ws-dash-kpi-num">${d.rate30 != null ? d.rate30 + '%' : '—'}</span>
+          <span class="ws-dash-kpi-num" data-kpi="rate">${d.rate30 != null ? '0%' : '—'}</span>
           ${d.rate30 != null ? dashDeltaBadge(d.ratePrev30 != null ? d.rate30 - d.ratePrev30 : null, 'pt') : '<span class="ws-dash-delta ws-dash-delta--flat">No sessions yet</span>'}
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Fees collected</span></div>
-          <span class="ws-dash-kpi-num">${d.feePct}%</span>
+          <span class="ws-dash-kpi-num" data-kpi="fees">0%</span>
           <span class="ws-dash-delta ws-dash-delta--flat">${d.paidCount}/${d.totalActive} paid · ${d.collected.toFixed(0)}</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">±</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
-          <span class="ws-dash-kpi-num">${d.netThis >= 0 ? '+' : '−'}${Math.abs(d.netThis).toFixed(0)}</span>
+          <span class="ws-dash-kpi-num" data-kpi="net">${d.netThis >= 0 ? '+0' : '−0'}</span>
           ${dashDeltaBadge(Math.round(d.netThis - d.netPrev))}
         </div>
       `;
+      animateCountUp(els.dashKpis.querySelector('[data-kpi="active"]'), d.activeCount, (v) => String(Math.round(v)));
+      if (d.rate30 != null) {
+        animateCountUp(els.dashKpis.querySelector('[data-kpi="rate"]'), d.rate30, (v) => Math.round(v) + '%');
+      }
+      animateCountUp(els.dashKpis.querySelector('[data-kpi="fees"]'), d.feePct, (v) => Math.round(v) + '%');
+      animateCountUp(els.dashKpis.querySelector('[data-kpi="net"]'), Math.abs(d.netThis), (v) => (d.netThis >= 0 ? '+' : '−') + Math.round(v));
     }
     function renderDashAttendanceChart(lastDates: string[], byDate: Map<string, { present: number; total: number }>) {
       if (!lastDates.length) {
@@ -2351,6 +2421,40 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
                 <span class="ws-dash-bar-label">${label}</span>
               </div>`;
           }).join('')}
+        </div>
+      `;
+    }
+    function renderDashFinanceChart(monthKeys: string[], byMonth: Map<string, { income: number; expense: number }>) {
+      const totalIncome = monthKeys.reduce((s, k) => s + byMonth.get(k)!.income, 0);
+      const totalExpense = monthKeys.reduce((s, k) => s + byMonth.get(k)!.expense, 0);
+      const net = totalIncome - totalExpense;
+      els.dashFinSub.textContent = `Last 6 months · Net ${net >= 0 ? '+' : '−'}${Math.abs(net).toFixed(0)}`;
+      if (!totalIncome && !totalExpense) {
+        els.dashFinChart.innerHTML = '<p class="ws-dash-empty-mini">No Finance entries in the last 6 months.</p>';
+        return;
+      }
+      const maxVal = Math.max(1, ...monthKeys.map((k) => Math.max(byMonth.get(k)!.income, byMonth.get(k)!.expense)));
+      els.dashFinChart.innerHTML = `
+        <div class="ws-dash-fin-bars">
+          ${monthKeys.map((k) => {
+            const b = byMonth.get(k)!;
+            const d = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1);
+            const label = MONTHS[d.getMonth()].en.slice(0, 3);
+            const incPct = Math.round((b.income / maxVal) * 100);
+            const expPct = Math.round((b.expense / maxVal) * 100);
+            return `
+              <div class="ws-dash-fin-col" title="${MONTHS[d.getMonth()].en} ${d.getFullYear()} — Income ${b.income.toFixed(2)}, Expenses ${b.expense.toFixed(2)}">
+                <div class="ws-dash-fin-pair">
+                  <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--income" style="height:${b.income ? Math.max(incPct, 3) : 0}%"></div></div>
+                  <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--expense" style="height:${b.expense ? Math.max(expPct, 3) : 0}%"></div></div>
+                </div>
+                <span class="ws-dash-fin-label">${label}</span>
+              </div>`;
+          }).join('')}
+        </div>
+        <div class="ws-dash-fin-legend">
+          <span><i class="ws-dash-fin-swatch ws-dash-fin-swatch--income"></i>Income</span>
+          <span><i class="ws-dash-fin-swatch ws-dash-fin-swatch--expense"></i>Expenses</span>
         </div>
       `;
     }
