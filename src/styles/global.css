@@ -4376,7 +4376,8 @@ main.wide {
 
 .ws-admin-h3 { font-family: var(--font-display); color: var(--color-brand); margin: 0 0 1rem; font-size: 1.3rem; }
 .ws-row--pending td { background: #fff9ec; }
-.ws-admin-groups { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.ws-admin-groups { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.ws-admin-note { margin: 0; color: var(--color-muted); font-size: 0.85rem; }
 .ws-group-check {
   display: inline-flex;
   align-items: center;

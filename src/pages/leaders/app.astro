@@ -2413,7 +2413,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     // it's swapped for a plain note whenever the selected role is Admin,
     // live as the dropdown changes and not only after a save.
     function adminGroupsCellHTML(groups: string[], isAdmin: boolean) {
-      if (isAdmin) return '<p class="ws-empty" style="padding:0.15rem 0">All groups (admin)</p>';
+      if (isAdmin) return '<p class="ws-admin-note">All groups (admin)</p>';
       return GROUPS.map((g) => `
         <label class="ws-group-check">
           <input type="checkbox" value="${g.key}" ${groups.includes(g.key) ? 'checked' : ''} />
