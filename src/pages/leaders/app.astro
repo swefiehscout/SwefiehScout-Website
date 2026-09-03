@@ -604,15 +604,21 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <div data-subpanel="admin:overview">
             <p class="ws-att-hint">Every group together — the same numbers each group's own Dashboard shows, rolled up troop-wide.</p>
             <div class="ws-dash-kpis" data-ov-kpis></div>
-            <div class="ws-dash-card ws-dash-card--full">
-              <div class="ws-dash-card-head"><h3>Active members by group</h3></div>
-              <div data-ov-members-chart></div>
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Active members by group</h3></div>
+                <div data-ov-members-chart></div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Fee collection by group</h3></div>
+                <div data-ov-fees-chart></div>
+              </div>
             </div>
             <h3 class="ws-admin-h3">By group</h3>
             <div class="ws-table-wrap">
               <table class="ws-table" data-ov-table>
                 <thead>
-                  <tr><th>Group</th><th>Active</th><th>Attendance (30d)</th><th>Fees this month</th><th>Net income (mtd)</th></tr>
+                  <tr><th>Group</th><th>Active</th><th>% of Troop</th><th>Attendance (30d)</th><th>Fees Collected</th><th>Net Income</th></tr>
                 </thead>
                 <tbody data-ov-body></tbody>
               </table>
@@ -819,6 +825,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.dashFinSub = el('[data-dash-fin-sub]');
       els.ovKpis = el('[data-ov-kpis]');
       els.ovMembersChart = el('[data-ov-members-chart]');
+      els.ovFeesChart = el('[data-ov-fees-chart]');
       els.ovBody = el('[data-ov-body]');
       els.ovFinMonth = el('[data-ov-fin-month]');
       els.ovFinYear = el('[data-ov-fin-year]');
@@ -2599,26 +2606,35 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const now = new Date();
       const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       const monthEnd = `${period}-${String(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()).padStart(2, '0')}`;
+      const prevD = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const prevPeriod = `${prevD.getFullYear()}-${String(prevD.getMonth() + 1).padStart(2, '0')}`;
+      const prevMonthEnd = `${prevPeriod}-${String(new Date(prevD.getFullYear(), prevD.getMonth() + 1, 0).getDate()).padStart(2, '0')}`;
       const day30 = toDateStr(addDays(now, -30));
+      const day60 = toDateStr(addDays(now, -60));
 
-      const [membersRes, attRes, feeRes, finRes] = await Promise.all([
-        db.from('members').select('group_key, active'),
-        db.from('attendance').select('group_key, present').gte('date', day30),
+      const [membersRes, attRes, feeRes, finRes, pendingRes] = await Promise.all([
+        db.from('members').select('group_key, active, has_allergies'),
+        db.from('attendance').select('group_key, present, date').gte('date', day60),
         db.from('fee_payments').select('group_key, paid, amount').eq('period', period),
-        db.from('finance_entries').select('group_key, entry_type, amount').gte('entry_date', `${period}-01`).lte('entry_date', monthEnd),
+        db.from('finance_entries').select('group_key, entry_type, amount, entry_date').gte('entry_date', `${prevPeriod}-01`).lte('entry_date', monthEnd),
+        db.from('join_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       ]);
 
       const byGroup = new Map<string, any>();
       GROUPS.forEach((g) => byGroup.set(g.key, {
-        activeMembers: 0, attPresent: 0, attTotal: 0, feePaid: 0, feeCollected: 0, netIncome: 0,
+        activeMembers: 0, archivedMembers: 0, allergyMembers: 0,
+        attPresent30: 0, attTotal30: 0, attPresent3060: 0, attTotal3060: 0,
+        feePaid: 0, feeCollected: 0, netThis: 0, netPrev: 0,
       }));
       (membersRes.data || []).forEach((m: any) => {
         const b = byGroup.get(m.group_key); if (!b) return;
-        if (m.active) b.activeMembers++;
+        if (m.active) { b.activeMembers++; if (m.has_allergies) b.allergyMembers++; }
+        else b.archivedMembers++;
       });
       (attRes.data || []).forEach((r: any) => {
         const b = byGroup.get(r.group_key); if (!b) return;
-        b.attTotal++; if (r.present) b.attPresent++;
+        if (r.date >= day30) { b.attTotal30++; if (r.present) b.attPresent30++; }
+        else { b.attTotal3060++; if (r.present) b.attPresent3060++; }
       });
       (feeRes.data || []).forEach((r: any) => {
         const b = byGroup.get(r.group_key); if (!b) return;
@@ -2626,39 +2642,71 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
       (finRes.data || []).forEach((r: any) => {
         const b = byGroup.get(r.group_key); if (!b) return;
-        b.netIncome += r.entry_type === 'income' ? Number(r.amount) : -Number(r.amount);
+        const amt = r.entry_type === 'income' ? Number(r.amount) : -Number(r.amount);
+        if (r.entry_date >= `${period}-01`) b.netThis += amt; else b.netPrev += amt;
       });
-      renderOverview(byGroup);
+      renderOverview(byGroup, pendingRes.count || 0);
     }
-    function renderOverview(byGroup: Map<string, any>) {
+    function renderOverview(byGroup: Map<string, any>, pendingApprovals: number) {
       const groups = GROUPS.map((g) => ({ ...g, ...byGroup.get(g.key) }));
       const totalActive = groups.reduce((s, g) => s + g.activeMembers, 0);
-      const attPresent = groups.reduce((s, g) => s + g.attPresent, 0);
-      const attTotal = groups.reduce((s, g) => s + g.attTotal, 0);
-      const overallRate = attTotal ? Math.round((attPresent / attTotal) * 100) : null;
+      const totalArchived = groups.reduce((s, g) => s + g.archivedMembers, 0);
+      const totalAllergy = groups.reduce((s, g) => s + g.allergyMembers, 0);
+      const attPresent30 = groups.reduce((s, g) => s + g.attPresent30, 0);
+      const attTotal30 = groups.reduce((s, g) => s + g.attTotal30, 0);
+      const attPresent3060 = groups.reduce((s, g) => s + g.attPresent3060, 0);
+      const attTotal3060 = groups.reduce((s, g) => s + g.attTotal3060, 0);
+      const rate30 = attTotal30 ? Math.round((attPresent30 / attTotal30) * 100) : null;
+      const ratePrev30 = attTotal3060 ? Math.round((attPresent3060 / attTotal3060) * 100) : null;
+      const totalFeePaid = groups.reduce((s, g) => s + g.feePaid, 0);
       const totalCollected = groups.reduce((s, g) => s + g.feeCollected, 0);
-      const totalNet = groups.reduce((s: number, g) => s + g.netIncome, 0);
+      const feePct = totalActive ? Math.round((totalFeePaid / totalActive) * 100) : 0;
+      const netThis = groups.reduce((s, g) => s + g.netThis, 0);
+      const netPrev = groups.reduce((s, g) => s + g.netPrev, 0);
+      const retentionPct = (totalActive + totalArchived) ? Math.round((totalActive / (totalActive + totalArchived)) * 100) : null;
+      const allergyPct = totalActive ? Math.round((totalAllergy / totalActive) * 100) : 0;
+      const groupsFullyPaid = groups.filter((g) => g.activeMembers > 0 && g.feePaid === g.activeMembers).length;
 
       els.ovKpis.innerHTML = `
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active members</span></div>
           <span class="ws-dash-kpi-num">${totalActive}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">across ${GROUPS.length} groups</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${totalArchived} archived · across ${GROUPS.length} groups</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Attendance (30d)</span></div>
-          <span class="ws-dash-kpi-num">${overallRate != null ? overallRate + '%' : '—'}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">troop-wide</span>
+          <span class="ws-dash-kpi-num">${rate30 != null ? rate30 + '%' : '—'}</span>
+          ${rate30 != null ? dashDeltaBadge(ratePrev30 != null ? rate30 - ratePrev30 : null, 'pt') : '<span class="ws-dash-delta ws-dash-delta--flat">No sessions yet</span>'}
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Fees collected (mtd)</span></div>
-          <span class="ws-dash-kpi-num">${totalCollected.toFixed(0)}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">all groups combined</span>
+          <span class="ws-dash-kpi-num">${feePct}%</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${totalFeePaid}/${totalActive} paid · ${totalCollected.toFixed(0)} in</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">±</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
-          <span class="ws-dash-kpi-num">${totalNet >= 0 ? '+' : '−'}${Math.abs(totalNet).toFixed(0)}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">all groups combined</span>
+          <span class="ws-dash-kpi-num">${netThis >= 0 ? '+' : '−'}${Math.abs(netThis).toFixed(0)}</span>
+          ${dashDeltaBadge(Math.round(netThis - netPrev))}
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⟳</span><span class="ws-dash-kpi-label">Retention rate</span></div>
+          <span class="ws-dash-kpi-num">${retentionPct != null ? retentionPct + '%' : '—'}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${totalActive} active of ${totalActive + totalArchived} ever registered</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⚑</span><span class="ws-dash-kpi-label">Allergy awareness</span></div>
+          <span class="ws-dash-kpi-num">${allergyPct}%</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${totalAllergy} of ${totalActive} active members</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">!</span><span class="ws-dash-kpi-label">Pending approvals</span></div>
+          <span class="ws-dash-kpi-num">${pendingApprovals}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${pendingApprovals ? 'waiting for review' : 'all caught up'}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Groups fully paid</span></div>
+          <span class="ws-dash-kpi-num">${groupsFullyPaid} / ${GROUPS.length}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">100% collected this month</span>
         </div>
       `;
 
@@ -2667,8 +2715,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <div class="ws-dash-bars">
           ${groups.map((g) => {
             const pct = Math.round((g.activeMembers / maxActive) * 100);
+            const share = totalActive ? Math.round((g.activeMembers / totalActive) * 100) : 0;
             return `
-              <div class="ws-dash-bar-col" title="${escapeHtml(g.en)} — ${g.activeMembers} active members">
+              <div class="ws-dash-bar-col" title="${escapeHtml(g.en)} — ${g.activeMembers} active members (${share}% of troop)">
                 <span class="ws-dash-bar-pct">${g.activeMembers}</span>
                 <div class="ws-dash-bar-track"><div class="ws-dash-bar-fill" style="height:${g.activeMembers ? Math.max(pct, 4) : 0}%"></div></div>
                 <span class="ws-dash-bar-label">${escapeHtml(g.en)}</span>
@@ -2676,16 +2725,32 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           }).join('')}
         </div>
       `;
+      els.ovFeesChart.innerHTML = `
+        <div class="ws-dash-bars">
+          ${groups.map((g) => {
+            const pct = g.activeMembers ? Math.round((g.feePaid / g.activeMembers) * 100) : 0;
+            return `
+              <div class="ws-dash-bar-col" title="${escapeHtml(g.en)} — ${pct}% collected (${g.feePaid}/${g.activeMembers})">
+                <span class="ws-dash-bar-pct">${g.activeMembers ? pct + '%' : '—'}</span>
+                <div class="ws-dash-bar-track"><div class="ws-dash-bar-fill" style="height:${pct ? Math.max(pct, 4) : 0}%"></div></div>
+                <span class="ws-dash-bar-label">${escapeHtml(g.en)}</span>
+              </div>`;
+          }).join('')}
+        </div>
+      `;
 
       els.ovBody.innerHTML = groups.map((g) => {
-        const rate = g.attTotal ? Math.round((g.attPresent / g.attTotal) * 100) : null;
+        const rate = g.attTotal30 ? Math.round((g.attPresent30 / g.attTotal30) * 100) : null;
+        const share = totalActive ? Math.round((g.activeMembers / totalActive) * 100) : 0;
+        const feeRate = g.activeMembers ? Math.round((g.feePaid / g.activeMembers) * 100) : 0;
         return `
           <tr>
             <td data-label="Group">${escapeHtml(g.en)}</td>
             <td data-label="Active">${g.activeMembers}</td>
+            <td data-label="% of Troop">${share}%</td>
             <td data-label="Attendance (30d)">${rate != null ? rate + '%' : '—'}</td>
-            <td data-label="Fees this month">${g.feePaid}/${g.activeMembers} · ${g.feeCollected.toFixed(0)}</td>
-            <td data-label="Net income (mtd)">${g.netIncome >= 0 ? '+' : '−'}${Math.abs(g.netIncome).toFixed(0)}</td>
+            <td data-label="Fees Collected">${feeRate}% · ${g.feeCollected.toFixed(0)}</td>
+            <td data-label="Net Income">${g.netThis >= 0 ? '+' : '−'}${Math.abs(g.netThis).toFixed(0)}</td>
           </tr>`;
       }).join('');
     }

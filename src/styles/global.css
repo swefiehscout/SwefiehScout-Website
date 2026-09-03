@@ -4105,9 +4105,10 @@ main.wide {
 
 /* ----- Card grids ----- */
 .ws-dash-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.1rem; }
+.ws-dash-grid--2 { grid-template-columns: repeat(2, 1fr); }
 .ws-dash-grid--3 { grid-template-columns: repeat(3, 1fr); }
 @media (max-width: 900px) {
-  .ws-dash-grid, .ws-dash-grid--3 { grid-template-columns: 1fr; }
+  .ws-dash-grid, .ws-dash-grid--2, .ws-dash-grid--3 { grid-template-columns: 1fr; }
 }
 .ws-dash-card {
   background: var(--color-surface);
