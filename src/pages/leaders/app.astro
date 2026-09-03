@@ -205,20 +205,31 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         </section>
 
         <section class="ws-panel" data-panel="attendance" hidden>
-          <div class="ws-toolbar-row">
-            <label class="ws-field ws-field--inline">
-              <span>Date</span>
-              <input type="date" data-att-date />
-            </label>
-            <span class="ws-inline-summary" data-att-summary></span>
-          </div>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-att-table>
-              <thead>
-                <tr><th>Name</th><th>Present</th><th>Note</th></tr>
-              </thead>
-              <tbody data-att-body></tbody>
-            </table>
+          <div class="ws-att-layout">
+            <div class="ws-att-calendar">
+              <div class="curr-nav">
+                <button type="button" class="curr-nav-btn" data-att-prev aria-label="Previous month">‹</button>
+                <button type="button" class="curr-nav-today" data-att-today>Today</button>
+                <button type="button" class="curr-nav-btn" data-att-next aria-label="Next month">›</button>
+              </div>
+              <p class="curr-nav-label" data-att-month-label></p>
+              <div class="curr-weekday-row" data-att-weekday-row></div>
+              <div class="curr-month-cells" data-att-calendar></div>
+            </div>
+            <div class="ws-att-list">
+              <div class="ws-toolbar-row">
+                <p class="curr-nav-label" data-att-date-label></p>
+                <span class="ws-inline-summary" data-att-summary></span>
+              </div>
+              <div class="ws-table-wrap">
+                <table class="ws-table" data-att-table>
+                  <thead>
+                    <tr><th>Name</th><th>Present</th><th>Note</th></tr>
+                  </thead>
+                  <tbody data-att-body></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -372,13 +383,6 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         <section class="ws-panel" data-panel="reports" hidden>
           <div class="ws-toolbar-row">
             <label class="ws-field ws-field--inline">
-              <span>Scope</span>
-              <select data-report-scope>
-                <option value="month">Month</option>
-                <option value="year">Year</option>
-              </select>
-            </label>
-            <label class="ws-field ws-field--inline" data-report-month-field>
               <span>Month</span>
               <select data-report-month></select>
             </label>
@@ -516,8 +520,6 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.settingsIncomeInput = el('[data-settings-income-input]');
       els.settingsIncomeAdd = el('[data-settings-income-add]');
       els.settingsIncomeList = el('[data-settings-income-list]');
-      els.reportScope = el('[data-report-scope]');
-      els.reportMonthField = el('[data-report-month-field]');
       els.reportMonth = el('[data-report-month]');
       els.reportYear = el('[data-report-year]');
       els.reportPrint = el('[data-report-print]');
@@ -737,9 +739,11 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     }
     // Month/Year dropdown pair used by both Fees and Finance instead of a
     // native <input type="month">.
-    function populatePeriodSelects(monthSel: any, yearSel: any) {
+    function populatePeriodSelects(monthSel: any, yearSel: any, withYearOption = false) {
       if (monthSel.options.length) return; // already populated
-      monthSel.innerHTML = MONTHS.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}">${m.en}</option>`).join('');
+      let opts = MONTHS.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}">${m.en}</option>`).join('');
+      if (withYearOption) opts = `<option value="ALL">Whole Year</option>` + opts;
+      monthSel.innerHTML = opts;
       const nowYear = new Date().getFullYear();
       const years: number[] = [];
       for (let y = nowYear - 3; y <= nowYear + 1; y++) years.push(y);
@@ -750,6 +754,20 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     }
     function getPeriod(monthSel: any, yearSel: any) {
       return `${yearSel.value}-${monthSel.value}`;
+    }
+    // Shared by Finance and Reports: resolves a month+year select pair
+    // (where the month select may have a "Whole Year" option) into a
+    // concrete date range plus a display label.
+    function periodRange(monthSel: any, yearSel: any) {
+      const year = Number(yearSel.value);
+      if (monthSel.value === 'ALL') {
+        return { start: `${year}-01-01`, end: `${year}-12-31`, label: String(year), isYear: true, period: String(year) };
+      }
+      const month = monthSel.value;
+      const period = `${year}-${month}`;
+      const lastDay = new Date(year, Number(month), 0).getDate();
+      const label = `${monthSel.selectedOptions[0]?.textContent} ${year}`;
+      return { start: `${period}-01`, end: `${period}-${String(lastDay).padStart(2, '0')}`, label, isYear: false, period };
     }
 
     // ---------- Attendance -------------------------------------------------
@@ -803,12 +821,24 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     }
 
     // ---------- Fees ---------------------------------------------------
+    const DEFAULT_EXPENSE_CATEGORIES = [
+      'Supplies', 'Uniforms', 'Badges & Awards', 'Camping & Trips', 'Food & Refreshments',
+      'Transportation', 'Equipment', 'Events & Ceremonies', 'Printing & Materials', 'Maintenance', 'Other',
+    ];
+    const DEFAULT_INCOME_CATEGORIES = [
+      'Monthly Fees', 'Donations', 'Fundraising', 'Event Tickets', 'Sponsorships', 'Troop Store Sales', 'Other',
+    ];
     async function loadGroupSettings() {
       if (!state.activeGroup) return;
       const { data } = await db.from('group_settings').select('*').eq('group_key', state.activeGroup).maybeSingle();
       state.groupSettings = data || {
         group_key: state.activeGroup, monthly_fee_defaults: {}, expense_categories: [], income_categories: [],
       };
+      // Every group starts with the same sensible defaults — a leader
+      // editing the list (add/remove) is what actually persists a custom
+      // one; until then this just fills the dropdown usefully.
+      if (!state.groupSettings.expense_categories?.length) state.groupSettings.expense_categories = [...DEFAULT_EXPENSE_CATEGORIES];
+      if (!state.groupSettings.income_categories?.length) state.groupSettings.income_categories = [...DEFAULT_INCOME_CATEGORIES];
     }
     async function loadFees() {
       if (!state.activeGroup) return;
@@ -945,13 +975,11 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     // ---------- Finance ---------------------------------------------------
     async function loadFinance() {
       if (!state.activeGroup) return;
-      populatePeriodSelects(els.finMonth, els.finYear);
+      populatePeriodSelects(els.finMonth, els.finYear, true);
       await loadGroupSettings();
       updateFinCategoryOptions();
-      const period = getPeriod(els.finMonth, els.finYear);
-      const [y, m] = period.split('-').map(Number);
-      const start = `${period}-01`;
-      const end = `${period}-${String(new Date(y, m, 0).getDate()).padStart(2, '0')}`;
+      const { start, end, label } = periodRange(els.finMonth, els.finYear);
+      state.finLabel = label;
       const { data, error } = await db.from('finance_entries').select('*')
         .eq('group_key', state.activeGroup).gte('entry_date', start).lte('entry_date', end)
         .order('entry_date', { ascending: false });
@@ -983,7 +1011,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         ? rows.map(([cat, amt]) => `<tr><td>${escapeHtml(cat)}</td><td>${amt.toFixed(2)}</td></tr>`).join('')
         : '<tr><td class="ws-empty" colspan="2">None</td></tr>';
       els.finStatement.innerHTML = `
-        <h3 class="ws-admin-h3">Income Statement — ${els.finMonth.selectedOptions[0]?.textContent} ${els.finYear.value}</h3>
+        <h3 class="ws-admin-h3">Income Statement — ${escapeHtml(state.finLabel)}</h3>
         <table class="ws-statement-table">
           <tbody>
             <tr class="ws-statement-section"><td colspan="2">Income</td></tr>
@@ -1139,125 +1167,146 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     }
 
     // ---------- Reports (PDF export via print) -----------------------------
-    function reportRange(): { start: string; end: string; label: string; period: string } {
-      const year = Number(els.reportYear.value);
-      if (els.reportScope.value === 'year') {
-        return { start: `${year}-01-01`, end: `${year}-12-31`, label: String(year), period: String(year) };
-      }
-      const month = els.reportMonth.value;
-      const period = `${year}-${month}`;
-      const lastDay = new Date(year, Number(month), 0).getDate();
-      const label = `${els.reportMonth.selectedOptions[0]?.textContent} ${year}`;
-      return { start: `${period}-01`, end: `${period}-${String(lastDay).padStart(2, '0')}`, label, period };
+    // Reports can be the very first tab someone opens after signing in, so
+    // the roster may never have loaded yet — fetch it on demand instead of
+    // silently reporting zero members.
+    async function ensureMembersLoaded() {
+      if (state.members.length || !state.activeGroup) return;
+      const { data } = await db.from('members').select('*').eq('group_key', state.activeGroup).order('full_name', { ascending: true });
+      state.members = data || [];
+    }
+    function printLetterhead(title: string, rangeLabel: string) {
+      const g = GROUPS.find((x) => x.key === state.activeGroup);
+      const now = new Date();
+      return `
+        <div class="curr-print-letterhead">
+          <img src="/images/logo.png" alt="" class="curr-print-logo" />
+          <div>
+            <p class="curr-print-org">Greek Orthodox Scouts &amp; Guides — Swefieh</p>
+            <h1>${g ? escapeHtml(g.en) : ''} — ${escapeHtml(title)}</h1>
+            <p class="curr-print-range">${escapeHtml(rangeLabel)}</p>
+          </div>
+        </div>
+        <p class="curr-print-meta">Generated by ${escapeHtml(state.profile?.name || '')} on ${now.toLocaleDateString()}</p>`;
     }
     async function downloadFinanceReport() {
-      const { start, end, label } = reportRange();
-      const { data, error } = await db.from('finance_entries').select('*')
-        .eq('group_key', state.activeGroup).gte('entry_date', start).lte('entry_date', end);
-      if (error) { showToast('Could not load data.'); return; }
-      const entries = data || [];
-      const totals = (type: string) => {
-        const map = new Map<string, number>();
-        entries.filter((e: any) => e.entry_type === type).forEach((e: any) => {
-          const cat = e.category || 'Uncategorized';
-          map.set(cat, (map.get(cat) || 0) + Number(e.amount));
-        });
-        return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
-      };
-      const incomeRows = totals('income'), expenseRows = totals('expense');
-      const income = incomeRows.reduce((s, [, v]) => s + v, 0);
-      const expense = expenseRows.reduce((s, [, v]) => s + v, 0);
-      const g = GROUPS.find((x) => x.key === state.activeGroup);
-      const rowsHtml = (rows: [string, number][]) => rows.length
-        ? rows.map(([c, v]) => `<tr><td>${escapeHtml(c)}</td><td>${v.toFixed(2)}</td></tr>`).join('')
-        : '<tr><td colspan="2">None</td></tr>';
-      els.reportPrint.innerHTML = `
-        <h1>${g ? escapeHtml(g.en) : ''} — Income Statement</h1>
-        <p class="curr-print-range">${escapeHtml(label)}</p>
-        <table class="ws-statement-table"><tbody>
-          <tr class="ws-statement-section"><td colspan="2">Income</td></tr>
-          ${rowsHtml(incomeRows)}
-          <tr class="ws-statement-total"><td>Total Income</td><td>${income.toFixed(2)}</td></tr>
-          <tr class="ws-statement-section"><td colspan="2">Expenses</td></tr>
-          ${rowsHtml(expenseRows)}
-          <tr class="ws-statement-total"><td>Total Expenses</td><td>${expense.toFixed(2)}</td></tr>
-          <tr class="ws-statement-net"><td>Net Income</td><td>${(income - expense).toFixed(2)}</td></tr>
-        </tbody></table>`;
-      window.print();
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const { data, error } = await db.from('finance_entries').select('*')
+          .eq('group_key', state.activeGroup).gte('entry_date', start).lte('entry_date', end);
+        if (error) throw error;
+        const entries = data || [];
+        const totals = (type: string) => {
+          const map = new Map<string, number>();
+          entries.filter((e: any) => e.entry_type === type).forEach((e: any) => {
+            const cat = e.category || 'Uncategorized';
+            map.set(cat, (map.get(cat) || 0) + Number(e.amount));
+          });
+          return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+        };
+        const incomeRows = totals('income'), expenseRows = totals('expense');
+        const income = incomeRows.reduce((s, [, v]) => s + v, 0);
+        const expense = expenseRows.reduce((s, [, v]) => s + v, 0);
+        const rowsHtml = (rows: [string, number][]) => rows.length
+          ? rows.map(([c, v]) => `<tr><td>${escapeHtml(c)}</td><td>${v.toFixed(2)}</td></tr>`).join('')
+          : '<tr><td colspan="2">No data available</td></tr>';
+        els.reportPrint.innerHTML = `
+          ${printLetterhead('Income Statement', label)}
+          <table class="ws-statement-table"><tbody>
+            <tr class="ws-statement-section"><td colspan="2">Income</td></tr>
+            ${rowsHtml(incomeRows)}
+            <tr class="ws-statement-total"><td>Total Income</td><td>${income.toFixed(2)}</td></tr>
+            <tr class="ws-statement-section"><td colspan="2">Expenses</td></tr>
+            ${rowsHtml(expenseRows)}
+            <tr class="ws-statement-total"><td>Total Expenses</td><td>${expense.toFixed(2)}</td></tr>
+            <tr class="ws-statement-net"><td>Net Income</td><td>${(income - expense).toFixed(2)}</td></tr>
+          </tbody></table>`;
+        window.print();
+      } catch (err) {
+        console.error('finance report failed', err);
+        showToast('Could not generate the report — check your connection and try again.');
+      }
     }
     async function downloadFeesReport() {
-      const { period, label } = reportRange();
-      const g = GROUPS.find((x) => x.key === state.activeGroup);
-      const active = state.members.filter((m: any) => m.active);
-      if (els.reportScope.value === 'month') {
-        const { data } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).eq('period', period);
-        const map: Map<string, any> = new Map((data || []).map((r: any) => [r.member_id, r]));
-        let collected = 0, paidCount = 0;
-        const rows = active.map((m: any) => {
-          const rec = map.get(m.id);
-          if (rec && rec.paid) { collected += Number(rec.amount || 0); paidCount++; }
-          return `<tr><td>${escapeHtml(m.full_name)}</td><td>${rec && rec.paid ? 'Paid' : 'Unpaid'}</td><td>${rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'}</td></tr>`;
-        }).join('');
-        els.reportPrint.innerHTML = `
-          <h1>${g ? escapeHtml(g.en) : ''} — Monthly Fees</h1>
-          <p class="curr-print-range">${escapeHtml(label)} — ${paidCount} of ${active.length} paid, ${collected.toFixed(2)} collected</p>
-          <table class="ws-statement-table"><tbody>
-            <tr class="ws-statement-section"><td>Member</td><td>Status</td><td>Amount</td></tr>
-            ${rows || '<tr><td colspan="3">No active members</td></tr>'}
-          </tbody></table>`;
-      } else {
-        const year = els.reportYear.value;
-        const { data } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).like('period', `${year}-%`);
-        const byMember = new Map<string, { months: number; total: number }>();
-        (data || []).forEach((r: any) => {
-          if (!r.paid) return;
-          const cur = byMember.get(r.member_id) || { months: 0, total: 0 };
-          cur.months++; cur.total += Number(r.amount || 0);
-          byMember.set(r.member_id, cur);
-        });
-        const rows = active.map((m: any) => {
-          const s = byMember.get(m.id) || { months: 0, total: 0 };
-          return `<tr><td>${escapeHtml(m.full_name)}</td><td>${s.months} / 12</td><td>${s.total.toFixed(2)}</td></tr>`;
-        }).join('');
-        const grandTotal = active.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
-        els.reportPrint.innerHTML = `
-          <h1>${g ? escapeHtml(g.en) : ''} — Yearly Fees Summary</h1>
-          <p class="curr-print-range">${escapeHtml(label)} — ${grandTotal.toFixed(2)} collected total</p>
-          <table class="ws-statement-table"><tbody>
-            <tr class="ws-statement-section"><td>Member</td><td>Months Paid</td><td>Total</td></tr>
-            ${rows || '<tr><td colspan="3">No active members</td></tr>'}
-          </tbody></table>`;
+      try {
+        await ensureMembersLoaded();
+        const { period, label, isYear } = periodRange(els.reportMonth, els.reportYear);
+        const active = state.members.filter((m: any) => m.active);
+        if (!isYear) {
+          const { data, error } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).eq('period', period);
+          if (error) throw error;
+          const map: Map<string, any> = new Map((data || []).map((r: any) => [r.member_id, r]));
+          let collected = 0, paidCount = 0;
+          const rows = active.map((m: any) => {
+            const rec = map.get(m.id);
+            if (rec && rec.paid) { collected += Number(rec.amount || 0); paidCount++; }
+            return `<tr><td>${escapeHtml(m.full_name)}</td><td>${rec && rec.paid ? 'Paid' : 'Unpaid'}</td><td>${rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'}</td></tr>`;
+          }).join('');
+          els.reportPrint.innerHTML = `
+            ${printLetterhead('Monthly Fees', `${label} — ${paidCount} of ${active.length} paid, ${collected.toFixed(2)} collected`)}
+            <table class="ws-statement-table"><tbody>
+              <tr class="ws-statement-section"><td>Member</td><td>Status</td><td>Amount</td></tr>
+              ${rows || '<tr><td colspan="3">No data available</td></tr>'}
+            </tbody></table>`;
+        } else {
+          const year = els.reportYear.value;
+          const { data, error } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).like('period', `${year}-%`);
+          if (error) throw error;
+          const byMember = new Map<string, { months: number; total: number }>();
+          (data || []).forEach((r: any) => {
+            if (!r.paid) return;
+            const cur = byMember.get(r.member_id) || { months: 0, total: 0 };
+            cur.months++; cur.total += Number(r.amount || 0);
+            byMember.set(r.member_id, cur);
+          });
+          const rows = active.map((m: any) => {
+            const s = byMember.get(m.id) || { months: 0, total: 0 };
+            return `<tr><td>${escapeHtml(m.full_name)}</td><td>${s.months} / 12</td><td>${s.total.toFixed(2)}</td></tr>`;
+          }).join('');
+          const grandTotal = active.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
+          els.reportPrint.innerHTML = `
+            ${printLetterhead('Yearly Fees Summary', `${label} — ${grandTotal.toFixed(2)} collected total`)}
+            <table class="ws-statement-table"><tbody>
+              <tr class="ws-statement-section"><td>Member</td><td>Months Paid</td><td>Total</td></tr>
+              ${rows || '<tr><td colspan="3">No data available</td></tr>'}
+            </tbody></table>`;
+        }
+        window.print();
+      } catch (err) {
+        console.error('fees report failed', err);
+        showToast('Could not generate the report — check your connection and try again.');
       }
-      window.print();
     }
     async function downloadAttendanceReport() {
-      const { start, end, label } = reportRange();
-      const g = GROUPS.find((x) => x.key === state.activeGroup);
-      const active = state.members.filter((m: any) => m.active);
-      const { data } = await db.from('attendance').select('*').eq('group_key', state.activeGroup).gte('date', start).lte('date', end);
-      const rows = data || [];
-      const totalSessions = new Set(rows.map((r: any) => r.date)).size;
-      const presentByMember = new Map<string, number>();
-      rows.forEach((r: any) => { if (r.present) presentByMember.set(r.member_id, (presentByMember.get(r.member_id) || 0) + 1); });
-      const bodyRows = active.map((m: any) => {
-        const present = presentByMember.get(m.id) || 0;
-        const rate = totalSessions ? Math.round((present / totalSessions) * 100) : 0;
-        return `<tr><td>${escapeHtml(m.full_name)}</td><td>${present} / ${totalSessions}</td><td>${rate}%</td></tr>`;
-      }).join('');
-      els.reportPrint.innerHTML = `
-        <h1>${g ? escapeHtml(g.en) : ''} — Attendance</h1>
-        <p class="curr-print-range">${escapeHtml(label)} — ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held</p>
-        <table class="ws-statement-table"><tbody>
-          <tr class="ws-statement-section"><td>Member</td><td>Present</td><td>Rate</td></tr>
-          ${bodyRows || '<tr><td colspan="3">No active members</td></tr>'}
-        </tbody></table>`;
-      window.print();
+      try {
+        await ensureMembersLoaded();
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const active = state.members.filter((m: any) => m.active);
+        const { data, error } = await db.from('attendance').select('*').eq('group_key', state.activeGroup).gte('date', start).lte('date', end);
+        if (error) throw error;
+        const rows = data || [];
+        const totalSessions = new Set(rows.map((r: any) => r.date)).size;
+        const presentByMember = new Map<string, number>();
+        rows.forEach((r: any) => { if (r.present) presentByMember.set(r.member_id, (presentByMember.get(r.member_id) || 0) + 1); });
+        const bodyRows = active.map((m: any) => {
+          const present = presentByMember.get(m.id) || 0;
+          const rate = totalSessions ? Math.round((present / totalSessions) * 100) : 0;
+          return `<tr><td>${escapeHtml(m.full_name)}</td><td>${present} / ${totalSessions}</td><td>${rate}%</td></tr>`;
+        }).join('');
+        els.reportPrint.innerHTML = `
+          ${printLetterhead('Attendance', `${label} — ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held`)}
+          <table class="ws-statement-table"><tbody>
+            <tr class="ws-statement-section"><td>Member</td><td>Present</td><td>Rate</td></tr>
+            ${bodyRows || '<tr><td colspan="3">No data available</td></tr>'}
+          </tbody></table>`;
+        window.print();
+      } catch (err) {
+        console.error('attendance report failed', err);
+        showToast('Could not generate the report — check your connection and try again.');
+      }
     }
     function bindReports() {
-      populatePeriodSelects(els.reportMonth, els.reportYear);
-      els.reportScope.addEventListener('change', () => {
-        els.reportMonthField.toggleAttribute('hidden', els.reportScope.value === 'year');
-      });
+      populatePeriodSelects(els.reportMonth, els.reportYear, true);
       el('[data-report-finance]').addEventListener('click', downloadFinanceReport);
       el('[data-report-fees]').addEventListener('click', downloadFeesReport);
       el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);

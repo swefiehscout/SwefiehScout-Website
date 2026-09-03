@@ -4206,6 +4206,20 @@ main.wide {
   }
   .curr-print h1 { font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 0.2cm; }
   .curr-print .curr-print-range { color: #555; margin-bottom: 0.8cm; font-size: 0.9rem; }
+  .curr-print-letterhead {
+    display: flex;
+    align-items: center;
+    gap: 0.5cm;
+    padding-bottom: 0.4cm;
+    margin-bottom: 0.5cm;
+    border-bottom: 2px solid #571607;
+  }
+  .curr-print-logo { width: 1.6cm; height: 1.6cm; object-fit: contain; }
+  .curr-print-org { margin: 0 0 0.1cm; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: #571607; font-weight: 700; }
+  .curr-print-letterhead h1 { margin: 0 0 0.1cm; }
+  .curr-print-letterhead .curr-print-range { margin: 0; }
+  .curr-print-meta { color: #888; font-size: 0.78rem; margin: 0 0 0.6cm; }
+  .ws-statement-table td:first-child { padding-inline-end: 0.5cm; }
   .curr-print-day { break-inside: avoid; margin-bottom: 0.6cm; }
   .curr-print-day h3 { font-size: 1rem; border-bottom: 1px solid #ccc; padding-bottom: 0.1cm; margin-bottom: 0.2cm; }
   .curr-print-day h3 span { float: inline-end; font-weight: 400; color: #555; }
@@ -4345,20 +4359,20 @@ main.wide {
 
 /* ----- Tabs: filled pill segmented control, icon + label ----- */
 .ws-tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
   gap: 0.4rem;
   padding: 0.4rem;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-lg);
   width: 100%;
-  overflow-x: auto;
 }
 .ws-tab {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  width: 100%;
   gap: 0.4rem;
   padding: 0.55rem 1rem;
   border: 0;
