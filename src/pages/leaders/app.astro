@@ -3237,6 +3237,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.groupSwitch.querySelectorAll('[data-group]').forEach((btn: any) => {
         btn.addEventListener('click', () => {
           state.activeGroup = btn.dataset.group;
+          // Members are cached per-group (see ensureMembersLoaded) — clear
+          // it on every switch so Dashboard/Reports re-fetch for the new
+          // group instead of reusing the previous group's roster.
+          state.members = [];
           renderGroupSwitch();
           refreshApprovalsBadge();
           loadActiveTabData();
