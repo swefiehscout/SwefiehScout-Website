@@ -1,21 +1,24 @@
 ---
 // Step-by-step guide for leaders and admins using the Leaders Workspace.
 // Linked from a "Guide" button in app.astro's header, next to the account
-// avatar. Kept short and plain on purpose — leaders are not technical,
-// so this stays scannable (short bullets, no jargon, no raw URLs/paths)
-// instead of reading like documentation. Anyone who wants more detail
-// still has the workspace itself to poke around in.
+// avatar. Kept short and plain on purpose — leaders are not technical, so
+// each section is one clarifying sentence plus a couple of short bullets,
+// no jargon, no raw URLs/paths, no cross-references to chase.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
+import { workspaceMarqueePhotos } from '../../lib/scenic-photos';
+
+const marqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos];
 
 type IconName =
   | 'sparkle' | 'cross' | 'star' | 'heart' | 'flag' | 'music' | 'flower' | 'fleur'
   | 'arrow-right' | 'phone' | 'envelope' | 'pin' | 'bank' | 'cliq' | 'cash'
   | 'calendar' | 'compass' | 'plus' | 'diamond' | 'sun';
 
-const sections: { id: string; label: string; icon: IconName; lines: string[]; adminOnly?: boolean }[] = [
+const sections: { id: string; label: string; icon: IconName; intro: string; lines: string[]; numbered?: boolean; adminOnly?: boolean }[] = [
   {
-    id: 'getting-started', label: 'Getting started', icon: 'sun',
+    id: 'getting-started', label: 'Getting started', icon: 'sun', numbered: true,
+    intro: 'Every leader signs in with their own account.',
     lines: [
       'Tap Sign up and enter your name, email, and a password.',
       'Check your email and tap the confirmation link.',
@@ -26,92 +29,101 @@ const sections: { id: string; label: string; icon: IconName; lines: string[]; ad
   },
   {
     id: 'groups', label: 'Groups', icon: 'flower',
+    intro: 'Everything you do happens inside one group at a time.',
     lines: [
-      "Lead one group? That's all you'll see — nothing to switch.",
-      'Lead more than one? Tap a group\'s name at the top to switch to it.',
-      'The bar under the tabs always shows which group you\'re looking at.',
+      "Lead one group? That's all you'll see.",
+      "Lead more than one? Tap a group's name at the top to switch.",
+      "The bar under the tabs always shows which group you're viewing.",
     ],
   },
   {
     id: 'dashboard', label: 'Dashboard', icon: 'compass',
+    intro: "Your group's story at a glance, the moment you sign in.",
     lines: [
-      "A quick snapshot of your group.",
       'Member count, attendance, fees, and money in and out.',
       'Your next planned meeting.',
-      "Anything that needs your attention — unpaid fees, new requests, allergies.",
+      'Anything that needs attention — unpaid fees, new requests, allergies.',
     ],
   },
   {
     id: 'roster', label: 'Roster', icon: 'star',
+    intro: 'Everyone currently in your group.',
     lines: [
       "Add a member — their name and a guardian's contact info.",
-      'Use search to find someone.',
-      'Tap Edit to change their details.',
-      'Tap Archive when they leave the group.',
+      'Search to find someone quickly.',
+      'Edit to update their details, or Archive when they leave.',
     ],
   },
   {
     id: 'archive', label: 'Archive', icon: 'fleur',
+    intro: "Members who've left — kept, not deleted.",
     lines: [
-      'Members who left — nothing about them is deleted.',
-      'Tap Restore to bring someone back at any time.',
+      'Nothing about them is lost — their history stays intact.',
+      'Restore brings someone back at any time.',
     ],
   },
   {
     id: 'approvals', label: 'Approvals', icon: 'plus',
+    intro: 'New people asking to join your group.',
     lines: [
-      'New people who asked to join your group show up here.',
-      'Approve adds them to your roster. Reject declines the request.',
+      'Approve adds them straight to your roster.',
+      'Reject just declines the request — nothing is saved.',
     ],
   },
   {
     id: 'attendance', label: 'Attendance', icon: 'calendar',
+    intro: 'Mark who showed up, one meeting at a time.',
     lines: [
       'Pick a date on the calendar.',
-      "Tick who's present — it saves right away, nothing else to do.",
+      "Tick who's present — it saves instantly.",
     ],
   },
   {
     id: 'fees', label: 'Fees', icon: 'cash',
+    intro: "Track who's paid their dues each month.",
     lines: [
       'Pick the month.',
-      "Tick who's paid — the date is recorded for you automatically.",
+      "Tick who's paid — the date is recorded automatically.",
     ],
   },
   {
     id: 'curriculum', label: 'Curriculum', icon: 'flag',
+    intro: 'Plan what happens at each meeting.',
     lines: [
       'Tap a date to plan that meeting.',
-      'Add a theme and pick or type the activities.',
-      'Download a PDF of the whole month\'s plan whenever you like.',
+      'Add a theme and pick or type activities.',
+      "Download a PDF of the month's plan anytime.",
     ],
   },
   {
     id: 'finance', label: 'Finance', icon: 'bank',
+    intro: "Keep track of your group's money.",
     lines: [
-      'Add money coming in or going out, with an amount and date.',
+      'Log money coming in or going out.',
       'See totals for whichever month you pick.',
     ],
   },
   {
     id: 'library', label: 'Library', icon: 'diamond',
+    intro: 'Share files with your group.',
     lines: [
-      'Upload documents to share with your group.',
+      'Upload documents for your leaders to use.',
       'Find shared lesson resources here too.',
     ],
   },
   {
     id: 'reports', label: 'Reports', icon: 'envelope',
+    intro: 'Download a clean PDF summary anytime.',
     lines: [
-      'Pick a month, then download a PDF — fees, attendance, money, or the meeting plan.',
+      'Pick a month, then choose fees, attendance, money, or the meeting plan.',
     ],
   },
   {
     id: 'admin', label: 'Admin', icon: 'pin', adminOnly: true,
+    intro: 'Everything above, but for every group at once — plus managing leaders.',
     lines: [
-      'Everything below is admin only, and covers every group at once.',
-      'Overview, Finance, Reports, Curriculum, Library, Roster — the same information as each group\'s own tabs, just all groups together.',
-      'Leader Management — approve new leaders, choose which groups each one can access, or remove someone\'s access.',
+      'Overview, Finance, Reports, Curriculum, Library, Roster — all groups together.',
+      'Leader Management — approve leaders, set which groups they can access, or remove access.',
     ],
   },
 ];
@@ -121,12 +133,25 @@ const sections: { id: string; label: string; icon: IconName; lines: string[]; ad
     <section class="page-hero" data-animate>
       <h1 class="page-h1">Leaders Workspace Guide</h1>
       <p class="page-tag">A quick look at how everything works.</p>
-      <a class="btn-primary guide-back" href="/leaders/app">← Back to the workspace</a>
     </section>
 
-    <nav class="guide-toc" aria-label="Jump to a section">
+    <div class="band-marquee guide-marquee ws-dash-marquee" aria-label="Troop photos">
+      <div class="band-marquee-track" style={`--n: ${workspaceMarqueePhotos.length}`}>
+        {marqueePhotos.map((src, i) => (
+          <div class="band-marquee-slide">
+            <img src={src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
+          </div>
+        ))}
+      </div>
+      <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
+      <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
+    </div>
+
+    <a class="btn-primary guide-back" href="/leaders/app">← Back to the workspace</a>
+
+    <nav class="guide-toc" aria-label="Jump to a section" data-guide-toc>
       {sections.map((s) => (
-        <a class="guide-toc-link" href={`#${s.id}`}>
+        <a class="guide-toc-link" href={`#${s.id}`} data-toc-link={s.id}>
           <Icon name={s.icon} size={15} strokeWidth={1.8} />
           {s.label}
         </a>
@@ -134,39 +159,84 @@ const sections: { id: string; label: string; icon: IconName; lines: string[]; ad
     </nav>
 
     {sections.map((s) => (
-      <section id={s.id} class={`ws-dash-card guide-card${s.adminOnly ? ' guide-card--admin' : ''}`}>
+      <section id={s.id} class={`guide-card${s.adminOnly ? ' guide-card--admin' : ''}`} data-guide-section>
         <div class="guide-card-head">
           <span class="guide-card-icon"><Icon name={s.icon} size={20} strokeWidth={1.8} /></span>
-          <h2>{s.label}{s.adminOnly && <span class="guide-badge">Admins only</span>}</h2>
+          <div>
+            <h2>{s.label}{s.adminOnly && <span class="guide-badge">Admins only</span>}</h2>
+            <p class="guide-card-intro">{s.intro}</p>
+          </div>
         </div>
-        <ul class="guide-list">
-          {s.lines.map((line) => <li>{line}</li>)}
-        </ul>
+        {s.numbered ? (
+          <ol class="guide-list guide-list--steps">
+            {s.lines.map((line) => <li>{line}</li>)}
+          </ol>
+        ) : (
+          <ul class="guide-list">
+            {s.lines.map((line) => <li>{line}</li>)}
+          </ul>
+        )}
       </section>
     ))}
 
     <a class="btn-primary guide-back guide-back--bottom" href="/leaders/app">← Back to the workspace</a>
   </div>
+
+  <script>
+    // Highlights the matching pill in the quick-jump nav as its section
+    // scrolls through view — a small touch that makes the nav feel like
+    // a real map of the page instead of a static list of links.
+    function bindGuideScrollSpy() {
+      const toc = document.querySelector('[data-guide-toc]');
+      if (!toc || (toc as HTMLElement).dataset.bound) return;
+      (toc as HTMLElement).dataset.bound = '1';
+      const links = new Map<string, Element>();
+      toc.querySelectorAll('[data-toc-link]').forEach((a) => links.set((a as HTMLElement).dataset.tocLink!, a));
+      const sections = document.querySelectorAll('[data-guide-section]');
+      if (!sections.length || !('IntersectionObserver' in window)) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const link = links.get(entry.target.id);
+          if (link) link.classList.toggle('guide-toc-link--active', entry.isIntersecting);
+        });
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      sections.forEach((s) => observer.observe(s));
+    }
+    document.addEventListener('astro:page-load', bindGuideScrollSpy);
+  </script>
 </BaseLayout>
 
 <style>
   .guide-wrap { max-width: 44rem; margin: 0 auto; }
-  .guide-back { display: inline-flex; margin-top: 1.25rem; }
-  .guide-back--bottom { margin: 1rem 0 0.5rem; }
+
+  .guide-marquee { margin: 0 auto 1.5rem; }
+  .guide-marquee.band-marquee { max-width: 100%; }
+
+  .guide-back { display: inline-flex; margin: 0 0 1.5rem; }
+  .guide-back--bottom { margin: 1.5rem 0 0.5rem; }
 
   /* ----- Quick-jump nav — a wrapping pill row, same "no orphans" spirit
      as the workspace's own tab bar, just simpler since it never needs
      JS-balanced columns (a wrapped last row of 1-2 pills reads fine for
-     a left-aligned nav, unlike a centered/stretched tab bar). ----- */
+     a left-aligned nav, unlike a centered/stretched tab bar). Sticky so
+     it's always in reach while scrolling through a long page. ----- */
   .guide-toc {
+    /* Sticks just under the site header once scrolled — only worth doing
+       on the widths where that header is itself sticky (see the 879px
+       breakpoint below); everywhere else it just sits in normal flow. */
+    position: sticky;
+    top: 5.25rem;
+    z-index: 5;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin: 1.5rem 0 2rem;
+    margin-bottom: 1.75rem;
     padding: 0.6rem;
-    background: var(--color-bg);
+    background: rgba(249, 247, 241, 0.92);
+    backdrop-filter: blur(6px);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
   }
   .guide-toc-link {
     display: inline-flex;
@@ -180,32 +250,57 @@ const sections: { id: string; label: string; icon: IconName; lines: string[]; ad
     font-weight: 600;
     font-size: 0.8rem;
     text-decoration: none;
+    transition: background 0.15s var(--ease-out), color 0.15s var(--ease-out), border-color 0.15s var(--ease-out);
   }
-  .guide-toc-link:hover { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
-  .guide-toc-link:hover :global(svg) { stroke: #fff; }
+  .guide-toc-link:hover,
+  .guide-toc-link--active {
+    background: var(--color-brand);
+    color: #fff;
+    border-color: var(--color-brand);
+  }
+  .guide-toc-link:hover :global(svg),
+  .guide-toc-link--active :global(svg) { stroke: #fff; }
 
-  .guide-card { margin-bottom: 1rem; scroll-margin-top: 5.5rem; padding: 1.1rem 1.3rem 1.25rem; }
-  .guide-card-head { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.6rem; }
+  .guide-card {
+    margin-bottom: 1.1rem;
+    scroll-margin-top: 8rem;
+    padding: 1.25rem 1.4rem 1.4rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+  }
+  .guide-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+  .guide-card--admin {
+    border-color: var(--color-brand);
+    background: linear-gradient(180deg, #fff 0%, var(--color-bg) 100%);
+  }
+
+  .guide-card-head { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.8rem; }
   .guide-card-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.1rem;
-    height: 2.1rem;
+    width: 2.4rem;
+    height: 2.4rem;
     border-radius: 50%;
-    background: var(--color-bg);
-    color: var(--color-brand);
+    background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-light) 100%);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
     flex-shrink: 0;
   }
   .guide-card-head h2 {
     font-family: var(--font-display);
     color: var(--color-brand-dark);
     font-size: 1.15rem;
-    margin: 0;
+    margin: 0 0 0.2rem;
     display: flex;
     align-items: center;
     gap: 0.55rem;
   }
+  .guide-card-intro { margin: 0; color: var(--color-muted); font-size: 0.88rem; line-height: 1.5; }
 
   .guide-badge {
     display: inline-block;
@@ -219,8 +314,51 @@ const sections: { id: string; label: string; icon: IconName; lines: string[]; ad
     text-transform: uppercase;
     vertical-align: middle;
   }
-  .guide-card--admin { border-color: var(--color-brand); }
 
   .guide-list { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem; list-style: disc; }
   .guide-list li { line-height: 1.5; font-size: 0.92rem; }
+
+  /* ----- Getting Started's list only: a small numbered stepper instead
+     of plain bullets, since it's the one genuinely sequential section —
+     everything else is a feature summary, not a process. ----- */
+  .guide-list--steps { list-style: none; padding-left: 0; counter-reset: step; gap: 0; }
+  .guide-list--steps li {
+    position: relative;
+    display: block;
+    padding: 0 0 1.05rem 2.35rem;
+    counter-increment: step;
+  }
+  .guide-list--steps li:last-child { padding-bottom: 0; }
+  .guide-list--steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: -0.05rem;
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-light) 100%);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .guide-list--steps li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 0.77rem;
+    top: 1.6rem;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-border);
+  }
+
+  /* Matches the site header's own breakpoint (see .site-header in
+     global.css) — below it the header stops being sticky, so pinning
+     this underneath it would just leave a gap. */
+  @media (max-width: 879px) {
+    .guide-toc { position: static; }
+  }
 </style>
