@@ -1548,13 +1548,29 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         row.querySelector('[data-fee-amount]').addEventListener('blur', commit);
       });
     }
+    // Same reasoning as Attendance's saveAttendance(): unpaid means no
+    // record, same as a member whose Paid box was never touched — so
+    // unmarking deletes the row instead of storing paid:false. Any
+    // custom amount typed in before unmarking is lost along with it
+    // (accepted tradeoff — a stray check-then-uncheck otherwise leaves a
+    // phantom "unpaid" row, and its synced Finance entry, behind).
     async function saveFee(memberId: string, period: string, paid: boolean, amount: number | null, paidOn: string | null) {
-      const { data: feeRow, error } = await db.from('fee_payments').upsert({
-        group_key: state.activeGroup, member_id: memberId, period, paid, amount, paid_on: paidOn,
-        updated_by: state.session.user.id,
-      }, { onConflict: 'group_key,member_id,period' }).select().single();
-      if (error) { console.error(error); showToast('Could not save.'); return; }
-      await syncFeeToFinance(feeRow);
+      let feeRow: any;
+      if (paid) {
+        const { data, error } = await db.from('fee_payments').upsert({
+          group_key: state.activeGroup, member_id: memberId, period, paid, amount, paid_on: paidOn,
+          updated_by: state.session.user.id,
+        }, { onConflict: 'group_key,member_id,period' }).select().single();
+        if (error) { console.error(error); showToast('Could not save.'); return; }
+        feeRow = data;
+      } else {
+        const { data, error } = await db.from('fee_payments').delete()
+          .eq('group_key', state.activeGroup).eq('member_id', memberId).eq('period', period)
+          .select().maybeSingle();
+        if (error) { console.error(error); showToast('Could not save.'); return; }
+        feeRow = data; // null if there was nothing to delete (e.g. checked then unchecked without ever having saved)
+      }
+      if (feeRow) await syncFeeToFinance({ ...feeRow, paid });
       // Deliberately not a full loadFees() reload+rerender here — same
       // reasoning as saveAttendance(): the row already reflects what was
       // just saved, and a reload racing a rapid check/uncheck pair can
@@ -1563,9 +1579,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       // recompute the summary from the DOM.
       const row = els.feeBody.querySelector(`tr[data-member-id="${memberId}"]`);
       if (row) {
-        row.dataset.paidOn = feeRow.paid_on || '';
+        row.dataset.paidOn = feeRow?.paid_on || '';
         const paidOnCell = row.querySelector('[data-label="Paid on"]');
-        if (paidOnCell) paidOnCell.textContent = feeRow.paid_on ? feeRow.paid_on : '—';
+        if (paidOnCell) paidOnCell.textContent = feeRow?.paid_on ? feeRow.paid_on : '—';
       }
       const paidCheckboxes: any[] = Array.from(els.feeBody.querySelectorAll('[data-fee-paid]'));
       const total = paidCheckboxes.length;
