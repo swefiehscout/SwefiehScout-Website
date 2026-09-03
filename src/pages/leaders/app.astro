@@ -495,6 +495,11 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
               <p class="ws-report-desc">Every active member's attendance count and rate for the period.</p>
               <button type="button" class="btn-primary" data-report-attendance>Download PDF</button>
             </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Curriculum</h3>
+              <p class="ws-report-desc">The meeting plan — theme, notes, and activities for each date in the period.</p>
+              <button type="button" class="btn-primary" data-report-curriculum>Download PDF</button>
+            </div>
           </div>
         </section>
 
@@ -1613,11 +1618,41 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         showToast('Could not generate the report — check your connection and try again.');
       }
     }
+    async function downloadCurriculumReport() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const { data, error } = await db.from('curriculum_meetings').select('*')
+          .eq('group_key', state.activeGroup).gte('date', start).lte('date', end)
+          .order('date', { ascending: true });
+        if (error) throw error;
+        const rows = (data || [])
+          .filter((m: any) => (m.activities && m.activities.length) || m.theme || m.notes)
+          .map((m: any) => {
+            const d = new Date(m.date + 'T00:00:00');
+            const dateLabel = `${WEEKDAYS[d.getDay()].en} ${d.getDate()} ${MONTHS[d.getMonth()].en}`;
+            const activitiesText = (m.activities || []).map((a: any) => a.en + (a.duration ? ` (${a.duration} min)` : '')).join('\n');
+            return [dateLabel, m.theme || '—', activitiesText || '—', m.notes || '—'];
+          });
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Curriculum', label);
+        autoTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9, valign: 'top' },
+          columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 32 } },
+          head: [['Date', 'Theme', 'Activities', 'Notes']],
+          body: rows.length ? rows : [['No meetings planned in this range yet.', '', '', '']],
+        });
+        doc.save(pdfFilename('Curriculum', label));
+      } catch (err) {
+        console.error('curriculum report failed', err);
+        showToast('Could not generate the report — check your connection and try again.');
+      }
+    }
     function bindReports() {
       populatePeriodSelects(els.reportMonth, els.reportYear, true);
       el('[data-report-finance]').addEventListener('click', downloadFinanceReport);
       el('[data-report-fees]').addEventListener('click', downloadFeesReport);
       el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);
+      el('[data-report-curriculum]').addEventListener('click', downloadCurriculumReport);
     }
 
     // ---------- Curriculum (embedded, shared per group; month view only,

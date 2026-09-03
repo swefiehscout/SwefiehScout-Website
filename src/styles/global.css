@@ -4434,10 +4434,11 @@ main.wide {
 /* ----- Tabs: filled pill segmented control, icon + label ----- */
 .ws-tabs {
   display: grid;
-  /* One row, evenly split across the full width — falls back to wrapping
-     at narrower widths (see media queries below) so labels stay readable. */
-  grid-template-columns: repeat(11, 1fr);
-  gap: 0.4rem;
+  /* One row, evenly split across the full width. minmax(0, 1fr) — not
+     bare 1fr, whose minimum is content width — is what actually lets all
+     11 columns shrink to fit instead of overflowing the bar. */
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 0.3rem;
   padding: 0.4rem;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
@@ -4452,17 +4453,20 @@ main.wide {
   align-items: center;
   justify-content: center;
   width: 100%;
-  gap: 0.4rem;
-  padding: 0.55rem 1rem;
+  min-width: 0;
+  overflow: hidden;
+  gap: 0.35rem;
+  padding: 0.55rem 0.6rem;
   border: 0;
   border-radius: 999px;
   background: none;
   color: var(--color-muted);
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  text-overflow: ellipsis;
   transition: background 0.2s var(--ease-out), color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 .ws-tab svg { flex-shrink: 0; opacity: 0.75; }
@@ -4857,7 +4861,12 @@ main.wide {
 .ws-field--inline[hidden] { display: none !important; }
 
 /* ----- Reports ----- */
-.ws-report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+/* Fixed 2x2 (4 report cards) rather than auto-fit, which can leave an
+   orphan card alone on its own row at in-between widths. */
+.ws-report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+@media (max-width: 560px) {
+  .ws-report-grid { grid-template-columns: 1fr; }
+}
 .ws-report-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
