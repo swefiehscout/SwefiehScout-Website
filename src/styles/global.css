@@ -4758,6 +4758,20 @@ main.wide {
   color: var(--color-text);
 }
 .ws-search:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(20, 56, 34, 0.1); }
+
+.ws-save-indicator[hidden] { display: none !important; }
+.ws-save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(20, 56, 34, 0.1);
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  animation: fadeIn 0.2s var(--ease-out);
+}
 @media (max-width: 880px) {
   .ws-att-layout { grid-template-columns: 1fr; }
 }
