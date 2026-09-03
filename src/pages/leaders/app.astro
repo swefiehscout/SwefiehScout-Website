@@ -6,6 +6,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
 import { loadPortalData, TOOL_LABELS } from '../../lib/leader-portal';
+import { ACTIVITY_BANK } from '../../lib/curriculum/constants';
 
 // Lessons tab reads the same build-time markdown as the old portal did —
 // shared, troop-wide Drive links, not per-group data.
@@ -146,6 +147,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
             </div>
           </form>
 
+          <input type="search" class="ws-search" data-roster-search placeholder="Search members…" />
           <div class="ws-table-wrap">
             <table class="ws-table" data-roster-table>
               <thead>
@@ -165,8 +167,10 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
           <p class="ws-soon" data-archive-hint>
             Archived members are hidden from Attendance and Fees going forward, but every past record tied to
             them (attendance history, fee payments) stays exactly as it was — nothing is deleted or recalculated.
-            Restore someone here any time to bring them back into the active roster.
+            Restore someone here any time to bring them back into the active roster. Anyone with no recorded
+            attendance for 3+ months gets archived automatically (marked "Auto-archived" below).
           </p>
+          <input type="search" class="ws-search" data-archive-search placeholder="Search members…" />
           <div class="ws-table-wrap">
             <table class="ws-table" data-archive-table>
               <thead>
@@ -188,6 +192,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
             straight to this group's active roster; rejecting just declines it — nothing is created either way
             until you act.
           </p>
+          <input type="search" class="ws-search" data-approvals-search placeholder="Search requests…" />
           <div class="ws-table-wrap">
             <table class="ws-table" data-approvals-table>
               <thead>
@@ -209,7 +214,6 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
             <div class="ws-att-calendar">
               <div class="curr-nav">
                 <button type="button" class="curr-nav-btn" data-att-prev aria-label="Previous month">‹</button>
-                <button type="button" class="curr-nav-today" data-att-today>Today</button>
                 <button type="button" class="curr-nav-btn" data-att-next aria-label="Next month">›</button>
               </div>
               <p class="curr-nav-label" data-att-month-label></p>
@@ -218,11 +222,16 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
             </div>
             <div class="ws-att-list">
               <div class="ws-att-date-banner">
-                <span class="ws-att-date-banner-label">Taking attendance for</span>
-                <p class="ws-att-date-banner-value" data-att-date-label></p>
+                <button type="button" class="ws-att-day-nav" data-att-day-prev aria-label="Previous day">‹</button>
+                <span class="ws-att-date-banner-text">
+                  <span class="ws-att-date-banner-label">Taking attendance for</span>
+                  <p class="ws-att-date-banner-value" data-att-date-label></p>
+                </span>
+                <button type="button" class="ws-att-day-nav" data-att-day-next aria-label="Next day">›</button>
                 <span class="ws-inline-summary" data-att-summary></span>
               </div>
               <p class="ws-att-hint">Click any date on the calendar — past or future — to view or edit it.</p>
+              <input type="search" class="ws-search" data-att-search placeholder="Search members…" />
               <div class="ws-table-wrap">
                 <table class="ws-table" data-att-table>
                   <thead>
@@ -251,6 +260,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
             </label>
             <span class="ws-inline-summary" data-fee-summary></span>
           </div>
+          <input type="search" class="ws-search" data-fee-search placeholder="Search members…" />
           <div class="ws-table-wrap">
             <table class="ws-table" data-fee-table>
               <thead>
@@ -495,6 +505,16 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => t.classList.remove('curr-toast--show'), 3500);
     }
+    // Generic client-side row filter — matches the search term against a
+    // row's full text, so it works unchanged across every table shape.
+    function bindTableSearch(input: any, tbody: any) {
+      input.addEventListener('input', () => {
+        const term = input.value.trim().toLowerCase();
+        tbody.querySelectorAll('tr').forEach((row: any) => {
+          row.hidden = !!term && !row.textContent.toLowerCase().includes(term);
+        });
+      });
+    }
 
     function cacheEls() {
       els.shell = el('[data-ws-shell]');
@@ -510,9 +530,12 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.stats = el('[data-ws-stats]');
       els.rosterForm = el('[data-roster-form]');
       els.rosterBody = el('[data-roster-body]');
+      els.rosterSearch = el('[data-roster-search]');
       els.archiveBody = el('[data-archive-body]');
+      els.archiveSearch = el('[data-archive-search]');
       els.adminBody = el('[data-admin-body]');
       els.approvalsBody = el('[data-approvals-body]');
+      els.approvalsSearch = el('[data-approvals-search]');
       els.approvalsBadge = el('[data-approvals-badge]');
       els.attCalendar = el('[data-att-calendar]');
       els.attWeekdayRow = el('[data-att-weekday-row]');
@@ -520,8 +543,10 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.attDateLabel = el('[data-att-date-label]');
       els.attPrev = el('[data-att-prev]');
       els.attNext = el('[data-att-next]');
-      els.attToday = el('[data-att-today]');
+      els.attDayPrev = el('[data-att-day-prev]');
+      els.attDayNext = el('[data-att-day-next]');
       els.attBody = el('[data-att-body]');
+      els.attSearch = el('[data-att-search]');
       els.attSummary = el('[data-att-summary]');
       els.feeMonth = el('[data-fee-month]');
       els.feeYear = el('[data-fee-year]');
@@ -536,6 +561,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.reportYear = el('[data-report-year]');
       els.reportPrint = el('[data-report-print]');
       els.feeBody = el('[data-fee-body]');
+      els.feeSearch = el('[data-fee-search]');
       els.feeSummary = el('[data-fee-summary]');
       els.finForm = el('[data-fin-form]');
       els.finMonth = el('[data-fin-month]');
@@ -579,6 +605,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         .order('full_name', { ascending: true });
       if (error) { console.error(error); showToast('Could not load the roster.'); return; }
       state.members = data || [];
+      await autoArchiveInactive();
       renderRoster();
       renderArchive();
       renderStats();
@@ -586,7 +613,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     function memberRowHTML(m: any, actionsHTML: string) {
       return `
         <tr data-member-id="${m.id}">
-          <td>${escapeHtml(m.full_name)}</td>
+          <td>${escapeHtml(m.full_name)}${m.archived_reason === 'inactive' ? ' <span class="ws-allergy-badge" title="Auto-archived: no attendance recorded in 3+ months">Auto-archived</span>' : ''}</td>
           <td>${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
           <td>${m.has_allergies
               ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ' — ' + escapeHtml(m.allergy_detail) : ''}</span>`
@@ -596,15 +623,36 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     }
     async function archiveMember(id: string) {
       if (!confirm('Archive this member? They\'ll disappear from Attendance and Fees going forward, but nothing already recorded for them changes. You can restore them any time from the Archive tab.')) return;
-      const { error } = await db.from('members').update({ active: false }).eq('id', id);
+      const { error } = await db.from('members').update({ active: false, archived_reason: null }).eq('id', id);
       if (error) { showToast('Could not archive.'); return; }
       if (state.editingMemberId === id) resetMemberForm();
       await loadRoster();
     }
     async function restoreMember(id: string) {
-      const { error } = await db.from('members').update({ active: true }).eq('id', id);
+      const { error } = await db.from('members').update({ active: true, archived_reason: null }).eq('id', id);
       if (error) { showToast('Could not restore.'); return; }
       await loadRoster();
+    }
+    // Anyone active for 3+ months with zero "present" attendance in that
+    // window gets archived automatically, tagged so Archive can show why.
+    async function autoArchiveInactive() {
+      if (!state.activeGroup) return;
+      const cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - 3);
+      const cutoffStr = toDateStr(cutoff);
+      const candidates = state.members.filter((m: any) => m.active && (!m.created_at || m.created_at.slice(0, 10) <= cutoffStr));
+      if (!candidates.length) return;
+      const { data, error } = await db.from('attendance').select('member_id')
+        .eq('group_key', state.activeGroup).eq('present', true).gte('date', cutoffStr);
+      if (error) { console.error(error); return; }
+      const attendedRecently = new Set((data || []).map((r: any) => r.member_id));
+      const toArchive = candidates.filter((m: any) => !attendedRecently.has(m.id));
+      if (!toArchive.length) return;
+      await Promise.all(toArchive.map((m: any) =>
+        db.from('members').update({ active: false, archived_reason: 'inactive' }).eq('id', m.id)
+      ));
+      toArchive.forEach((m: any) => { m.active = false; m.archived_reason = 'inactive'; });
+      showToast(`${toArchive.length} member${toArchive.length === 1 ? '' : 's'} auto-archived — no attendance in 3+ months.`);
     }
     async function deleteMemberForever(id: string) {
       if (!confirm('Permanently delete this member? This also deletes their attendance/fee history — this cannot be undone. Archiving is usually what you want instead.')) return;
@@ -913,11 +961,21 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         state.attAnchor = new Date(state.attAnchor.getFullYear(), state.attAnchor.getMonth() + 1, 1);
         loadAttendance();
       });
-      els.attToday.addEventListener('click', () => {
-        state.attAnchor = new Date();
-        state.attSelected = todayStr();
-        loadAttendance();
-      });
+      const stepDay = (n: number) => {
+        const next = addDays(parseDateStr(state.attSelected), n);
+        state.attSelected = toDateStr(next);
+        // Crossing into a different visible month reloads the whole
+        // calendar; staying within it just re-renders in place.
+        if (next.getMonth() !== state.attAnchor.getMonth() || next.getFullYear() !== state.attAnchor.getFullYear()) {
+          state.attAnchor = new Date(next.getFullYear(), next.getMonth(), 1);
+          loadAttendance();
+        } else {
+          renderAttCalendar();
+          loadAttDay();
+        }
+      };
+      els.attDayPrev.addEventListener('click', () => stepDay(-1));
+      els.attDayNext.addEventListener('click', () => stepDay(1));
     }
 
     // ---------- Fees ---------------------------------------------------
@@ -1680,6 +1738,11 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       bindFinanceForm();
       bindLibraryUpload();
       bindReports();
+      bindTableSearch(els.rosterSearch, els.rosterBody);
+      bindTableSearch(els.archiveSearch, els.archiveBody);
+      bindTableSearch(els.approvalsSearch, els.approvalsBody);
+      bindTableSearch(els.attSearch, els.attBody);
+      bindTableSearch(els.feeSearch, els.feeBody);
       bindAttendance();
       els.feeMonth.addEventListener('change', loadFees);
       els.feeYear.addEventListener('change', loadFees);

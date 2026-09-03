@@ -119,6 +119,9 @@ create table if not exists members (
   allergy_detail text,
   notes text,
   active boolean not null default true,
+  -- Set to 'inactive' when the 3-months-no-attendance auto-archive runs;
+  -- left null for a leader's own manual archive. Cleared on restore.
+  archived_reason text,
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
