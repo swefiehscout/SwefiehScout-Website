@@ -2518,6 +2518,42 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         btn.addEventListener('click', () => setTab(btn.dataset.tab));
       });
     }
+    // Whatever number of rows the tab bar needs at the current width, every
+    // row should have as close to an equal COUNT of tabs as possible (e.g.
+    // 6 + 5, never 7 + 4) — a plain CSS grid/flex wrap just greedily packs
+    // each row to capacity instead. Measures how many tabs fit per row at
+    // their natural (--ws-tab-ideal) width, then sets a fixed column count
+    // that divides the *visible* tab count as evenly as possible across
+    // that many rows.
+    let tabsResizeTimer: any;
+    function balanceTabs() {
+      const visible = Array.from(els.tabs.querySelectorAll('.ws-tab')).filter((b: any) => !b.hidden);
+      const n = visible.length;
+      if (!n) return;
+      const prevDisplay = els.tabs.style.display;
+      const prevWrap = els.tabs.style.flexWrap;
+      const ideal = getComputedStyle(els.tabs).getPropertyValue('--ws-tab-ideal').trim() || '9rem';
+      els.tabs.style.display = 'flex';
+      els.tabs.style.flexWrap = 'wrap';
+      visible.forEach((b: any) => { b.style.flex = `0 1 ${ideal}`; });
+      const firstTop = (visible[0] as any).offsetTop;
+      let natural = 0;
+      for (const b of visible) { if ((b as any).offsetTop === firstTop) natural++; else break; }
+      visible.forEach((b: any) => { b.style.flex = ''; });
+      els.tabs.style.display = prevDisplay;
+      els.tabs.style.flexWrap = prevWrap;
+
+      natural = Math.max(1, Math.min(natural, n));
+      const rows = Math.ceil(n / natural);
+      const perRow = Math.ceil(n / rows);
+      els.tabs.style.setProperty('--ws-tab-cols', String(perRow));
+    }
+    function bindTabsResize() {
+      window.addEventListener('resize', () => {
+        clearTimeout(tabsResizeTimer);
+        tabsResizeTimer = setTimeout(balanceTabs, 150);
+      });
+    }
 
     // ---------- Generic sub-tabs (Finance's Ledger/Categories, Library's
     // Documents/Lessons) — same pattern as Curriculum's Plan/Activity Bank,
@@ -2593,6 +2629,9 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       if (profile.role === 'admin') {
         document.querySelectorAll('[data-admin-only]').forEach((elm) => elm.removeAttribute('hidden'));
       }
+      // Re-measured every load (not just once) since admin-only visibility
+      // — and so the tab count itself — can differ between loads.
+      balanceTabs();
 
       // setupGroups()/renderGroupSwitch() rebuild their own innerHTML (and
       // rebind onto those fresh nodes) every call, so they're always safe
@@ -2613,6 +2652,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         els.signout.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
 
         bindTabs();
+        bindTabsResize();
         bindSubtabs();
         bindDashboard();
         bindRosterForm();

@@ -3888,14 +3888,18 @@ main.wide {
 
 /* ----- Tabs: filled pill segmented control, icon + label ----- */
 .ws-tabs {
-  /* Flex, not grid — a fixed column count leaves empty cells (and a
-     ragged, left-packed last row) whenever the tabs wrap, since a
-     partial row still only fills as many columns as it has items. Flex
-     wrap instead redistributes each row's own items evenly across that
-     row's full width, on its own, at any viewport width — including
-     the last, possibly-shorter row. */
-  display: flex;
-  flex-wrap: wrap;
+  /* A grid with a JS-computed, balanced column count (see balanceTabs()
+     in app.astro) — --ws-tab-cols is set so however many rows the tabs
+     need, every row gets as close to an equal COUNT of tabs as possible
+     (e.g. 6 + 5, never 7 + 4), and since inactive tabs have no visible
+     background, an evenly-stretched-but-lopsided flex row read as
+     "uneven gaps" rather than actually looking balanced. --ws-tab-ideal
+     is the width balanceTabs() tests against to find how many tabs fit
+     per row in the first place; it's also what phones override below to
+     get more, narrower tabs per row. */
+  --ws-tab-ideal: 9rem;
+  display: grid;
+  grid-template-columns: repeat(var(--ws-tab-cols, 11), minmax(0, 1fr));
   gap: 0.3rem;
   padding: 0.4rem;
   background: var(--color-bg);
@@ -3907,10 +3911,6 @@ main.wide {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Grow AND shrink evenly from a shared ideal width — this, not a
-     fixed column grid, is what keeps every tab on every row (full or
-     partial) the same size as its row-mates. */
-  flex: 1 1 9rem;
   min-width: 0;
   overflow: hidden;
   gap: 0.35rem;
@@ -5031,13 +5031,11 @@ main.wide {
   .ws-group-banner { padding: 0.55rem 0.85rem; }
   .ws-group-banner-name { font-size: 0.95rem; }
 
-  /* ----- Tab bar: a smaller ideal width fits ~4 tabs per row instead of
-     ~2-3, with icon-over-label cells instead of a side-scrolling strip —
-     still flex-wrap (see .ws-tabs above), so every row, including a
-     shorter last one, stays evenly spread across the full width. ----- */
-  .ws-tabs { gap: 0.3rem; padding: 0.35rem; }
+  /* ----- Tab bar: a smaller ideal width fits ~4-5 tabs per row instead
+     of ~2-3 (balanceTabs() re-measures against this on resize), with
+     icon-over-label cells instead of a side-scrolling strip. ----- */
+  .ws-tabs { --ws-tab-ideal: 4.5rem; gap: 0.3rem; padding: 0.35rem; }
   .ws-tab {
-    flex-basis: 4.5rem;
     flex-direction: column;
     gap: 0.2rem;
     padding: 0.5rem 0.2rem;
