@@ -594,7 +594,12 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       </div>
 
       <p class="curr-day-section-label">Select from the activity bank</p>
-      <div class="curr-bank-chips" data-curr-bank-chips></div>
+      <form class="curr-day-custom-add" data-curr-bank-select-form>
+        <select data-curr-bank-select>
+          <option value="">Choose an activity…</option>
+        </select>
+        <button type="submit" class="btn-primary">Add</button>
+      </form>
 
       <p class="curr-day-section-label">Or add a custom activity</p>
       <form class="curr-day-custom-add" data-curr-custom-add-form>
@@ -744,7 +749,8 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       els.currDayNext = el('[data-curr-day-next]');
       els.currDaySave = el('[data-curr-day-save]');
       els.currDayCancel = el('[data-curr-day-close-cancel]');
-      els.currBankChips = el('[data-curr-bank-chips]');
+      els.currBankSelectForm = el('[data-curr-bank-select-form]');
+      els.currBankSelect = el('[data-curr-bank-select]');
       els.currCustomAddForm = el('[data-curr-custom-add-form]');
       els.currCustomEn = el('[data-custom-en]');
       els.currBankAddForm = el('[data-bank-add-form]');
@@ -1952,17 +1958,19 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     }
 
     // ---------- Activity Bank (per-group, editable) -----------------------
-    function currRenderBankChips() {
+    // A dropdown rather than a wall of chips — chips stop being scannable
+    // once a group has more than a handful of activities in their bank,
+    // a <select> stays efficient no matter how long the list gets.
+    function currRenderBankOptions() {
       const items = state.groupSettings?.activity_bank || [];
-      els.currBankChips.innerHTML = items.length
-        ? items.map((a: any) => `<button type="button" class="curr-chip" data-bank-en="${escapeHtml(a.en)}">${escapeHtml(a.en)}</button>`).join('')
-        : '<p class="ws-empty" style="padding:0.5rem 0">No activities yet — add some in the Activity Bank tab.</p>';
-      els.currBankChips.querySelectorAll('[data-bank-en]').forEach((chip: any) => {
-        chip.addEventListener('click', () => {
-          if (!state.curr.currentDay) return;
-          currAddActivity(state.curr.currentDay, chip.dataset.bankEn);
-        });
-      });
+      if (!items.length) {
+        els.currBankSelect.innerHTML = '<option value="">No activities yet — add some in the Activity Bank tab</option>';
+        els.currBankSelect.disabled = true;
+        return;
+      }
+      els.currBankSelect.disabled = false;
+      els.currBankSelect.innerHTML = '<option value="">Choose an activity…</option>' +
+        items.map((a: any) => `<option value="${escapeHtml(a.en)}">${escapeHtml(a.en)}</option>`).join('');
     }
     function currRenderBankList() {
       const items = state.groupSettings?.activity_bank || [];
@@ -1979,7 +1987,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
       const { error } = await db.from('group_settings').upsert({ group_key: state.activeGroup, activity_bank: items }, { onConflict: 'group_key' });
       if (error) { console.error(error); showToast('Could not save the activity bank.'); return; }
       state.groupSettings.activity_bank = items;
-      currRenderBankChips();
+      currRenderBankOptions();
       currRenderBankList();
     }
     async function currAddBankItem(en: string) {
@@ -2011,6 +2019,13 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
         if (e.target.closest('.curr-day-cell')) return;
         currCancelDay();
       });
+      els.currBankSelectForm.addEventListener('submit', (e: Event) => {
+        e.preventDefault();
+        const val = els.currBankSelect.value;
+        if (!val || !state.curr.currentDay) return;
+        currAddActivity(state.curr.currentDay, val);
+        els.currBankSelect.value = '';
+      });
       els.currCustomAddForm.addEventListener('submit', (e: Event) => {
         e.preventDefault();
         const en = els.currCustomEn.value.trim();
@@ -2029,7 +2044,7 @@ const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
     }
     async function currStart() {
       await loadGroupSettings();
-      currRenderBankChips();
+      currRenderBankOptions();
       currRenderBankList();
       currSubscribeRealtime(state.activeGroup);
       await currReload();

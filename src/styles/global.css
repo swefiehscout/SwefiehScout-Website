@@ -3402,44 +3402,6 @@ main.wide {
 .curr-nav-label { font-weight: 700; color: var(--color-brand-dark); font-size: 0.95rem; }
 .curr-export { padding: 0.55rem 1.1rem; font-size: 0.85rem; }
 
-/* ----- Activity bank ----- */
-.curr-bank {
-  max-width: 1180px;
-  margin: 0 auto 1.5rem;
-  padding: 1rem 1.1rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-.curr-bank-label {
-  display: block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-  margin-bottom: 0.7rem;
-}
-.curr-bank-label span { display: block; font-family: var(--font-display-arabic); text-transform: none; letter-spacing: 0; font-size: 0.95rem; color: var(--color-brand); unicode-bidi: plaintext; }
-.curr-bank-chips { display: flex; flex-wrap: wrap; gap: 0.55rem; }
-.curr-chip {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.8rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-bg);
-  color: var(--color-brand);
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.15s var(--ease-out), color 0.15s var(--ease-out);
-}
-.curr-chip:hover { background: var(--color-brand); color: #fff; }
-.curr-chip-text { display: flex; flex-direction: column; line-height: 1.15; }
-.curr-chip-en { font-size: 0.78rem; font-weight: 600; }
-.curr-chip-ar { font-family: var(--font-display-arabic); font-size: 0.85rem; color: var(--color-muted); unicode-bidi: plaintext; }
-
 /* ----- Calendar views ----- */
 .curr-view { max-width: 1180px; margin: 0 auto 3rem; }
 .curr-weekday-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 2px; }
@@ -3648,16 +3610,21 @@ main.wide {
   text-transform: uppercase;
   color: var(--color-brand-dark);
 }
-.curr-day-panel .curr-bank-chips { margin-bottom: 0.25rem; }
-.curr-day-panel .curr-chip { cursor: pointer; }
-.curr-day-custom-add { display: flex; gap: 0.5rem; }
-.curr-day-custom-add input {
+/* Shared by "Select from the activity bank" (a <select>) and "Or add a
+   custom activity" (a text <input>) — same row shape either way. */
+.curr-day-custom-add { display: flex; gap: 0.5rem; margin-bottom: 0.25rem; }
+.curr-day-custom-add input,
+.curr-day-custom-add select {
   flex: 1;
+  min-width: 0;
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   font: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
+.curr-day-custom-add select:disabled { color: var(--color-muted); background: var(--color-bg); }
 .curr-day-custom-add button { padding: 0.55rem 1rem; font-size: 0.82rem; }
 .curr-day-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 2.5rem; }
 .curr-day-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border); }
@@ -5062,7 +5029,7 @@ main.wide {
   .ws-category-add { flex-direction: column; }
   .ws-category-add input { width: 100%; box-sizing: border-box; }
   .curr-day-custom-add { flex-direction: column; }
-  .curr-day-custom-add input { flex: none; width: 100%; box-sizing: border-box; }
+  .curr-day-custom-add input, .curr-day-custom-add select { flex: none; width: 100%; box-sizing: border-box; }
   .curr-day-actions { flex-direction: column; gap: 0.6rem; }
   .curr-day-actions .ws-form-cancel { text-align: center; }
 
