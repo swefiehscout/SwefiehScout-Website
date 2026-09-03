@@ -3754,7 +3754,7 @@ main.wide {
    `.curr-tab` pill style. English-only UI — Arabic stays available as
    free-text input inside the curriculum tool itself, not as paired chrome
    labels throughout. */
-.ws-main[hidden], .ws-pending[hidden], .ws-panel[hidden], .ws-tab[hidden], .ws-guide-link[hidden] {
+.ws-main[hidden], .ws-pending[hidden], .ws-panel[hidden], .ws-tab[hidden] {
   display: none !important;
 }
 
