@@ -224,7 +224,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= Reports ================= -->
         <section class="ws-panel" data-panel="reports" hidden>
-          <p class="ws-att-hint">Same reports as each group's own Reports tab, except every group is combined into one PDF, the Income Statement includes Music, Fees and Attendance stay troop-only (Music has neither).</p>
+          <p class="ws-att-hint">Same reports as each group's own Reports tab, except every group is combined into one PDF. The Full Accounting Report already covers income and expenses in full detail; Fees and Attendance stay troop-only (Music and General have neither).</p>
           <div class="ws-toolbar-row">
             <label class="ws-field ws-field--inline"><span>Month</span><select data-report-month></select></label>
             <label class="ws-field ws-field--inline"><span>Year</span><select data-report-year></select></label>
@@ -236,11 +236,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <button type="button" class="btn-primary" data-report-full>Download PDF</button>
             </div>
             <div class="ws-report-card">
-              <h3 class="ws-admin-h3">Income Statement</h3>
-              <p class="ws-report-desc">Every group's income and expenses, plus an org-wide total. Includes Music.</p>
-              <button type="button" class="btn-primary" data-report-finance>Download PDF</button>
-            </div>
-            <div class="ws-report-card">
               <h3 class="ws-admin-h3">Monthly Fees</h3>
               <p class="ws-report-desc">Every active member across the 5 troops, with their group, paid status, and amount.</p>
               <button type="button" class="btn-primary" data-report-fees>Download PDF</button>
@@ -249,6 +244,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <h3 class="ws-admin-h3">Attendance</h3>
               <p class="ws-report-desc">Every active member across the 5 troops, with their group, attendance count, and rate.</p>
               <button type="button" class="btn-primary" data-report-attendance>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Curriculum</h3>
+              <p class="ws-report-desc">Every troop's meeting plan for the period, one page per group.</p>
+              <button type="button" class="btn-primary" data-report-curriculum>Download PDF</button>
             </div>
           </div>
         </section>
@@ -945,42 +945,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
-    // ---------- Reports (Income Statement includes Music; Fees/Attendance
-    // stay troop-only) --------------------------------------------------------
-    async function downloadFinanceReport() {
-      try {
-        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
-        const { data, error } = await db.from('finance_entries').select('group_key, entry_type, amount').gte('entry_date', start).lte('entry_date', end);
-        if (error) throw error;
-        const rows = data || [];
-        const byGroup = new Map<string, { income: number; expense: number }>();
-        GROUPS.forEach((g) => byGroup.set(g.key, { income: 0, expense: 0 }));
-        rows.forEach((r: any) => {
-          const b = byGroup.get(r.group_key); if (!b) return;
-          if (r.entry_type === 'income') b.income += Number(r.amount); else b.expense += Number(r.amount);
-        });
-        const totalIncome = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
-        const totalExpense = rows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
-        const bodyRows = GROUPS.map((g) => {
-          const b = byGroup.get(g.key)!;
-          return [g.en, b.income.toFixed(2), b.expense.toFixed(2), (b.income - b.expense).toFixed(2)];
-        });
-        const doc = new jsPDF();
-        const y = pdfHeader(doc, 'Income Statement', label);
-        autoTable(doc, {
-          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
-          columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
-          head: [['Group', 'Income', 'Expenses', 'Net']],
-          body: rows.length ? bodyRows : [['No data available', '', '', '']],
-          foot: [['Org Total', totalIncome.toFixed(2), totalExpense.toFixed(2), (totalIncome - totalExpense).toFixed(2)]],
-        });
-        doc.save(pdfFilename('Income-Statement', label));
-      } catch (err) {
-        console.error('finance report failed', err);
-        showToast('Could not generate the report, check your connection and try again.');
-      }
-    }
+    // ---------- Reports (Fees/Attendance stay troop-only) --------------------
     async function downloadFeesReport() {
       try {
         const { period, label, isYear } = periodRange(els.reportMonth, els.reportYear);
@@ -1208,12 +1173,59 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
+    async function downloadCurriculumReport() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const troopKeys = TROOP_GROUPS.map((g) => g.key);
+        const { data, error } = await db.from('curriculum_meetings').select('group_key, date, theme, notes, activities')
+          .in('group_key', troopKeys).gte('date', start).lte('date', end).order('date', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const meetingRows = (groupRows: any[]) => groupRows
+          .filter((m: any) => (m.activities && m.activities.length) || m.theme || m.notes)
+          .map((m: any) => {
+            const d = new Date(m.date + 'T00:00:00');
+            const dateLabel = `${WEEKDAYS[d.getDay()].en} ${d.getDate()} ${MONTHS[d.getMonth()].en}`;
+            const activitiesText = (m.activities || []).map((a: any) => a.en + (a.duration ? ` (${a.duration} min)` : '')).join('\n');
+            return [dateLabel, m.theme || '—', activitiesText || '—', m.notes || '—'];
+          });
+        const tableOpts = {
+          theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9, valign: 'top' },
+          columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 32 } },
+          head: [['Date', 'Theme', 'Activities', 'Notes']],
+        };
+
+        const doc = new jsPDF();
+        TROOP_GROUPS.forEach((g, i) => {
+          let y: number;
+          if (i === 0) {
+            y = pdfHeader(doc, 'Curriculum', label);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...PDF_BRAND);
+            doc.text(g.en, 14, y);
+            y += 6;
+          } else {
+            doc.addPage();
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(...PDF_BRAND);
+            doc.text(g.en, 14, 20);
+            doc.setDrawColor(...PDF_BRAND); doc.setLineWidth(0.4);
+            doc.line(14, 24, 196, 24);
+            y = 31;
+          }
+          const body = meetingRows(rows.filter((r: any) => r.group_key === g.key));
+          autoTable(doc, { ...tableOpts, startY: y, body: body.length ? body : [['No data', '', '', '']] });
+        });
+        doc.save(pdfFilename('Curriculum', label));
+      } catch (err) {
+        console.error('curriculum report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
     function bindReports() {
       populatePeriodSelects(els.reportMonth, els.reportYear, true);
       el('[data-report-full]').addEventListener('click', downloadFullAccountingReport);
-      el('[data-report-finance]').addEventListener('click', downloadFinanceReport);
       el('[data-report-fees]').addEventListener('click', downloadFeesReport);
       el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);
+      el('[data-report-curriculum]').addEventListener('click', downloadCurriculumReport);
     }
 
     // ---------- Curriculum: next meeting per troop --------------------------

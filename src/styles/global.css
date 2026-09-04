@@ -4688,8 +4688,12 @@ main.wide {
 /* Fixed 2x2 (4 report cards) rather than auto-fit, which can leave an
    orphan card alone on its own row at in-between widths. */
 .ws-report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+.ws-report-grid--3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 800px) {
+  .ws-report-grid--3 { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 560px) {
-  .ws-report-grid { grid-template-columns: 1fr; }
+  .ws-report-grid, .ws-report-grid--3 { grid-template-columns: 1fr; }
 }
 .ws-report-card {
   background: var(--color-surface);
