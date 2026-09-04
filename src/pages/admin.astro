@@ -109,9 +109,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <section class="ws-panel" data-panel="finance" hidden>
           <p class="ws-att-hint">One accounting system across every group, the 5 troops' own Finance ledgers, plus Music's and General's. Nothing here duplicates a group's own Finance tab; it reads the same finance_entries every group already writes to.</p>
 
-          <div class="ws-dash-kpis" data-fin-kpis style="margin-bottom: 1.75rem"></div>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="finance" data-subtab="balances">Balances</button>
+            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="ledger">Ledger</button>
+            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="reconcile">Reconcile</button>
+            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="adjustments">Adjustments</button>
+          </div>
 
-          <div class="ws-dash-grid ws-dash-grid--2" style="margin-bottom: 1.75rem">
+          <div data-subpanel="finance:balances">
+            <div class="ws-dash-kpis" data-fin-kpis style="margin-bottom: 1.75rem"></div>
+
             <div class="ws-member-form">
               <div class="ws-member-form-bar" aria-hidden="true"></div>
               <p class="ws-member-form-title">Opening balance</p>
@@ -121,7 +128,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               </div>
               <div class="ws-form-actions"><button type="button" class="btn-primary" data-open-save>Save</button></div>
             </div>
+          </div>
 
+          <div data-subpanel="finance:ledger" hidden>
             <form class="ws-member-form" data-tx-form>
               <div class="ws-member-form-bar" aria-hidden="true"></div>
               <p class="ws-member-form-title">Add a transaction</p>
@@ -143,70 +152,73 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               </div>
               <div class="ws-form-actions"><button type="submit" class="btn-primary" data-tx-submit>Add entry</button></div>
             </form>
-          </div>
 
-          <div class="ws-toolbar-row">
-            <label class="ws-field ws-field--inline"><span>Month</span><select data-fin-month></select></label>
-            <label class="ws-field ws-field--inline"><span>Year</span><select data-fin-year></select></label>
-          </div>
-          <div class="ws-stat-row ws-stat-row--3" data-fin-stats></div>
-
-          <h3 class="ws-admin-h3">By group</h3>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-fin-group-table>
-              <thead><tr><th>Group</th><th>Income</th><th>Expenses</th><th>Net</th></tr></thead>
-              <tbody data-fin-group-body></tbody>
-            </table>
-          </div>
-
-          <h3 class="ws-admin-h3">Every transaction</h3>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-fin-table>
-              <thead><tr><th>Date</th><th>Group</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead>
-              <tbody data-fin-body></tbody>
-            </table>
-          </div>
-
-          <h3 class="ws-admin-h3">Reconcile</h3>
-          <p class="ws-att-hint">Not every entry ever hits the bank the same way, some are cash, some sit in a group's own hands for a while, so this doesn't tick off individual transactions. It just compares what the system says the balance is, as of a date, against the real bank balance. A mismatch gets posted as a single adjustment entry (attributed to whichever group it belongs to) so the two line back up.</p>
-          <div class="ws-toolbar-row">
-            <label class="ws-field ws-field--inline"><span>As of</span><input type="date" data-rec-asof /></label>
-            <label class="ws-field ws-field--inline"><span>Actual bank balance</span><input type="number" step="0.01" data-rec-bank placeholder="0.00" /></label>
-            <button type="button" class="btn-primary" data-rec-load>Compare</button>
-          </div>
-          <div class="ws-stat-row ws-stat-row--3" data-rec-stats></div>
-
-          <div class="ws-member-form" data-rec-adjust-block hidden>
-            <div class="ws-member-form-bar" aria-hidden="true"></div>
-            <p class="ws-member-form-title">Post an adjustment for the difference</p>
-            <div class="ws-form-grid">
-              <label class="ws-field"><span>Belongs to group *</span><select data-rec-adjust-group required></select></label>
-              <label class="ws-field ws-field--full"><span>Note</span><input type="text" data-rec-adjust-note placeholder="e.g. cash on hand not yet deposited" /></label>
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline"><span>Month</span><select data-fin-month></select></label>
+              <label class="ws-field ws-field--inline"><span>Year</span><select data-fin-year></select></label>
             </div>
-            <div class="ws-form-actions">
-              <button type="button" class="btn-primary" data-rec-save>Post adjustment &amp; save</button>
+            <div class="ws-stat-row ws-stat-row--3" data-fin-stats></div>
+
+            <h3 class="ws-admin-h3">By group</h3>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-fin-group-table>
+                <thead><tr><th>Group</th><th>Income</th><th>Expenses</th><th>Net</th></tr></thead>
+                <tbody data-fin-group-body></tbody>
+              </table>
+            </div>
+
+            <h3 class="ws-admin-h3">Every transaction</h3>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-fin-table>
+                <thead><tr><th>Date</th><th>Group</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Added by</th></tr></thead>
+                <tbody data-fin-body></tbody>
+              </table>
             </div>
           </div>
-          <div class="ws-form-actions" data-rec-match-block hidden>
-            <button type="button" class="btn-primary" data-rec-save-match>Save reconciliation, balances match</button>
+
+          <div data-subpanel="finance:reconcile" hidden>
+            <p class="ws-att-hint">Not every entry ever hits the bank the same way, some are cash, some sit in a group's own hands for a while, so this doesn't tick off individual transactions. It just compares what the system says the balance is, as of a date, against the real bank balance. A mismatch gets posted as a single adjustment entry (attributed to whichever group it belongs to) so the two line back up.</p>
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline"><span>As of</span><input type="date" data-rec-asof /></label>
+              <label class="ws-field ws-field--inline"><span>Actual bank balance</span><input type="number" step="0.01" data-rec-bank placeholder="0.00" /></label>
+              <button type="button" class="btn-primary" data-rec-load>Compare</button>
+            </div>
+            <div class="ws-stat-row ws-stat-row--3" data-rec-stats></div>
+
+            <div class="ws-member-form" data-rec-adjust-block hidden>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Post an adjustment for the difference</p>
+              <div class="ws-form-grid">
+                <label class="ws-field"><span>Belongs to group *</span><select data-rec-adjust-group required></select></label>
+                <label class="ws-field ws-field--full"><span>Note</span><input type="text" data-rec-adjust-note placeholder="e.g. cash on hand not yet deposited" /></label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="button" class="btn-primary" data-rec-save>Post adjustment &amp; save</button>
+              </div>
+            </div>
+            <div class="ws-form-actions" data-rec-match-block hidden>
+              <button type="button" class="btn-primary" data-rec-save-match>Save reconciliation, balances match</button>
+            </div>
+
+            <h3 class="ws-admin-h3">Reconciliation history</h3>
+            <p class="ws-att-hint">One row every time you check, even when nothing needed fixing. Proof of when you last looked, and what you found.</p>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-rec-history-table>
+                <thead><tr><th>As of</th><th>Bank Balance</th><th>System Balance</th><th>Adjustment</th><th>Saved</th><th>By</th></tr></thead>
+                <tbody data-rec-history-body></tbody>
+              </table>
+            </div>
           </div>
 
-          <h3 class="ws-admin-h3">Reconciliation history</h3>
-          <p class="ws-att-hint">One row every time you check, even when nothing needed fixing. Proof of when you last looked, and what you found.</p>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-rec-history-table>
-              <thead><tr><th>As of</th><th>Bank Balance</th><th>System Balance</th><th>Adjustment</th><th>Saved</th></tr></thead>
-              <tbody data-rec-history-body></tbody>
-            </table>
-          </div>
-
-          <h3 class="ws-admin-h3">Adjustment entries</h3>
-          <p class="ws-att-hint">Only the actual correcting transactions, a check above only adds a row here when the balances didn't already match. These are real ledger entries (they affect that group's own balance too), pulled out here as a focused audit trail.</p>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-adj-table>
-              <thead><tr><th>Date</th><th>Group</th><th>Type</th><th>Amount</th><th>Note</th><th>Posted by</th></tr></thead>
-              <tbody data-adj-body></tbody>
-            </table>
+          <div data-subpanel="finance:adjustments" hidden>
+            <h3 class="ws-admin-h3">Adjustment entries</h3>
+            <p class="ws-att-hint">Only the actual correcting transactions, a check on the Reconcile tab only adds a row here when the balances didn't already match. These are real ledger entries (they affect that group's own balance too), pulled out here as a focused audit trail.</p>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-adj-table>
+                <thead><tr><th>Date</th><th>Group</th><th>Type</th><th>Amount</th><th>Note</th><th>Posted by</th></tr></thead>
+                <tbody data-adj-body></tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -383,6 +395,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // ---------- PDF helpers (simplified — always "All Groups", no active
     // group concept here like the per-group Reports tab has) -------------
     const PDF_BRAND: [number, number, number] = [87, 22, 7];
+    const PDF_ACCENT: [number, number, number] = [20, 56, 34];
     const PDF_FOOT_BG: [number, number, number] = [250, 243, 232];
     function pdfHeader(doc: any, title: string, rangeLabel: string): number {
       doc.setFont('helvetica', 'bold');
@@ -757,7 +770,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           return;
         }
         els.txSubmit.disabled = true;
-        const { error } = await db.from('finance_entries').insert({ ...payload, created_by: state.session.user.id });
+        const { error } = await db.from('finance_entries').insert({
+          ...payload, created_by: state.session.user.id, created_by_name: state.profile?.name || null,
+        });
         els.txSubmit.disabled = false;
         if (error) { console.error(error); showToast('Could not add, ' + (error.message || 'unknown error') + '.'); return; }
         showToast('Added.');
@@ -771,7 +786,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function loadFinancePeriod() {
       populatePeriodSelects(els.finMonth, els.finYear, true);
       const { start, end } = periodRange(els.finMonth, els.finYear);
-      const { data, error } = await db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, description')
+      const { data, error } = await db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, description, created_by_name')
         .gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: false });
       if (error) { console.error(error); showToast('Could not load finance.'); return; }
       renderFinancePeriod(data || []);
@@ -805,9 +820,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <td data-label="Category">${escapeHtml(r.category || '—')}</td>
                 <td data-label="Description">${escapeHtml(r.description || '—')}</td>
                 <td data-label="Amount">${fmt(r.amount)}</td>
+                <td data-label="Added by">${escapeHtml(r.created_by_name || '—')}</td>
               </tr>`;
           }).join('')
-        : '<tr><td colspan="6" class="ws-empty">No entries this period.</td></tr>';
+        : '<tr><td colspan="7" class="ws-empty">No entries this period.</td></tr>';
     }
 
     // ---------- Reconcile: compare the system's balance to the real bank
@@ -842,13 +858,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const { error } = await db.from('finance_reconciliations').insert({
         as_of_date: asOf, statement_balance: bank, system_balance: state.recSystemBalance,
         difference: state.recDiff, notes: note, adjustment_entry_id: adjustmentEntryId,
-        created_by: state.session.user.id,
+        created_by: state.session.user.id, created_by_name: state.profile?.name || null,
       });
       if (error) { showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return false; }
       return true;
     }
     function renderReconcileHistory(rows: any[]) {
-      if (!rows.length) { els.recHistoryBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No reconciliations saved yet.</td></tr>'; return; }
+      if (!rows.length) { els.recHistoryBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No reconciliations saved yet.</td></tr>'; return; }
       els.recHistoryBody.innerHTML = rows.map((r: any) => `
         <tr>
           <td data-label="As of">${r.as_of_date}</td>
@@ -856,6 +872,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="System Balance">${fmt(r.system_balance)}</td>
           <td data-label="Adjustment">${r.adjustment_entry_id ? fmt(r.difference) : '—'}</td>
           <td data-label="Saved">${new Date(r.created_at).toLocaleDateString()}</td>
+          <td data-label="By">${escapeHtml(r.created_by_name || '—')}</td>
         </tr>
       `).join('');
     }
@@ -865,15 +882,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       renderReconcileHistory(data || []);
     }
     async function loadAdjustmentEntries() {
-      const [entriesRes, profilesRes] = await Promise.all([
-        db.from('finance_entries').select('*').eq('is_adjustment', true).order('entry_date', { ascending: false }),
-        db.from('profiles').select('id, name'),
-      ]);
-      if (entriesRes.error) { console.error(entriesRes.error); return; }
-      const nameById: Map<string, string> = new Map((profilesRes.data || []).map((p: any) => [p.id, p.name]));
-      renderAdjustmentEntries(entriesRes.data || [], nameById);
+      const { data, error } = await db.from('finance_entries').select('*').eq('is_adjustment', true).order('entry_date', { ascending: false });
+      if (error) { console.error(error); return; }
+      renderAdjustmentEntries(data || []);
     }
-    function renderAdjustmentEntries(rows: any[], nameById: Map<string, string>) {
+    function renderAdjustmentEntries(rows: any[]) {
       if (!rows.length) { els.adjBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No adjustments posted yet.</td></tr>'; return; }
       els.adjBody.innerHTML = rows.map((r: any) => {
         const g = GROUPS.find((x) => x.key === r.group_key);
@@ -884,7 +897,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <td data-label="Type">${r.entry_type === 'income' ? 'Income' : 'Expense'}</td>
             <td data-label="Amount">${fmt(r.amount)}</td>
             <td data-label="Note">${escapeHtml(r.description || '—')}</td>
-            <td data-label="Posted by">${escapeHtml(nameById.get(r.created_by) || '—')}</td>
+            <td data-label="Posted by">${escapeHtml(r.created_by_name || '—')}</td>
           </tr>`;
       }).join('');
     }
@@ -907,7 +920,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           amount: Math.abs(diff),
           entry_date: els.recAsof.value,
           description: note || `Reconciliation adjustment as of ${els.recAsof.value}`,
-          created_by: state.session.user.id,
+          created_by: state.session.user.id, created_by_name: state.profile?.name || null,
         }).select().single();
         if (error) { showToast('Could not post the adjustment, ' + (error.message || 'unknown error') + '.'); els.recSave.disabled = false; return; }
         const ok = await saveReconciliation(inserted?.id || null, note);
@@ -1068,15 +1081,97 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
         const [allEntriesRes, periodEntriesRes, lastRecRes] = await Promise.all([
           db.from('finance_entries').select('entry_type, amount, entry_date'),
-          db.from('finance_entries').select('group_key, entry_type, amount').gte('entry_date', start).lte('entry_date', end),
+          db.from('finance_entries').select('group_key, entry_type, category, amount').gte('entry_date', start).lte('entry_date', end),
           db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).limit(1).maybeSingle(),
         ]);
         if (allEntriesRes.error) throw allEntriesRes.error;
+        const allRows = allEntriesRes.data || [];
         const opening = Number(state.settings?.opening_balance || 0);
-        const running = opening + (allEntriesRes.data || []).reduce((s: number, r: any) => s + signedAmount(r), 0);
+        const running = opening + allRows.reduce((s: number, r: any) => s + signedAmount(r), 0);
         const lastRec = lastRecRes.data;
+        const actualBalance = lastRec
+          ? Number(lastRec.statement_balance) + allRows.filter((r: any) => r.entry_date > lastRec.as_of_date).reduce((s: number, r: any) => s + signedAmount(r), 0)
+          : running;
 
         const periodRows = periodEntriesRes.data || [];
+
+        // A full Income Statement (categories, not just a group total) for
+        // one set of rows — reused for every group's own page, and once
+        // more for the whole organization combined.
+        const renderIncomeStatement = (doc: any, title: string, rows: any[]) => {
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(...PDF_BRAND);
+          doc.text(title, 14, 20);
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(90, 90, 90);
+          doc.text(label, 14, 27);
+          doc.setDrawColor(...PDF_BRAND); doc.setLineWidth(0.4);
+          doc.line(14, 31, 196, 31);
+
+          const byCategory = (type: string) => {
+            const map = new Map<string, number>();
+            rows.filter((r: any) => r.entry_type === type).forEach((r: any) => {
+              const cat = r.category || 'Uncategorized';
+              map.set(cat, (map.get(cat) || 0) + Number(r.amount));
+            });
+            return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+          };
+          const incomeRows = byCategory('income'), expenseRows = byCategory('expense');
+          const income = incomeRows.reduce((s, [, v]) => s + v, 0);
+          const expense = expenseRows.reduce((s, [, v]) => s + v, 0);
+          const tableOpts = {
+            theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+            footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
+            columnStyles: { 1: { halign: 'right' } },
+          };
+          let sy = 38;
+          autoTable(doc, {
+            ...tableOpts, startY: sy, head: [['Income', '']],
+            body: incomeRows.length ? incomeRows.map(([c, v]) => [c, fmt(v)]) : [['No data', '']],
+            foot: [['Total Income', fmt(income)]],
+          });
+          sy = pdfNextY(doc, sy);
+          autoTable(doc, {
+            ...tableOpts, startY: sy, head: [['Expenses', '']],
+            body: expenseRows.length ? expenseRows.map(([c, v]) => [c, fmt(v)]) : [['No data', '']],
+            foot: [['Total Expenses', fmt(expense)]],
+          });
+          sy = pdfNextY(doc, sy);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...PDF_ACCENT);
+          doc.text(`Net Income: ${fmt(income - expense)}`, 14, sy);
+        };
+
+        const doc = new jsPDF();
+        let y = pdfHeader(doc, 'Full Accounting Report', `${label} · generated ${new Date().toLocaleString()}`);
+
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90, 90, 90);
+        const introLines = doc.splitTextToSize(
+          `Summary below is where things stand right now, as of today, followed by a quick Net Income by Group table for ${label}. After that, a full Net Income Statement, one page per group, ending with one combined statement for the whole scout group.`,
+          182,
+        );
+        doc.text(introLines, 14, y);
+        y += introLines.length * 4.2 + 6;
+
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...PDF_BRAND);
+        doc.text('Summary', 14, y);
+        autoTable(doc, {
+          startY: y + 4, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9, cellPadding: 2.5 },
+          columnStyles: { 0: { fontStyle: 'bold', cellWidth: 44 }, 1: { cellWidth: 100 }, 2: { halign: 'right', fontStyle: 'bold', cellWidth: 38 } },
+          head: [['', 'What this means', 'Amount']],
+          body: [
+            ['Opening Balance', `The starting balance before any recorded transaction, set as of ${state.settings?.opening_balance_date || '—'}.`, fmt(opening)],
+            ['Running Balance', "Opening balance plus every transaction ever logged, across every group. The system's live total.", fmt(running)],
+            ['Actual Running Balance', 'The last confirmed bank balance, carried forward by everything logged since. Grounded in a real bank check.', fmt(actualBalance)],
+            ['Last Reconciled', 'The most recent date the books were checked against the real bank statement.', lastRec ? lastRec.as_of_date : 'Never reconciled'],
+            ['Bank Balance', 'What the bank statement actually showed, as of the last reconciliation.', lastRec ? fmt(lastRec.statement_balance) : '—'],
+            ['System Balance', 'What our own records showed on that same date, before any correction.', lastRec ? fmt(lastRec.system_balance) : '—'],
+            ['Adjustment Posted', "The correcting entry made to true the two up, if the balances didn't already match.", lastRec && lastRec.adjustment_entry_id ? fmt(lastRec.difference) : (lastRec ? 'None needed, already matched' : '—')],
+          ],
+        });
+
+        y = pdfNextY(doc, y);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...PDF_BRAND);
+        doc.text(`Net Income by Group, ${label}`, 14, y);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(120, 120, 120);
+        doc.text('At a glance, the full statement for each one follows on its own page.', 14, y + 5);
         const periodIncome = periodRows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
         const periodExpense = periodRows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
         const byGroup = new Map<string, { income: number; expense: number }>();
@@ -1085,48 +1180,27 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           const b = byGroup.get(r.group_key); if (!b) return;
           if (r.entry_type === 'income') b.income += Number(r.amount); else b.expense += Number(r.amount);
         });
-
-        const doc = new jsPDF();
-        let y = pdfHeader(doc, 'Full Accounting Report', `${label} · generated ${new Date().toLocaleString()}`);
-
         autoTable(doc, {
-          startY: y, theme: 'grid', styles: { fontSize: 10 }, showHead: false,
-          columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } },
-          body: [
-            ['Opening balance', `${fmt(opening)}  (as of ${state.settings?.opening_balance_date || '—'})`],
-            ['Running balance (today, every group)', fmt(running)],
-            ['Last reconciled', lastRec ? lastRec.as_of_date : 'Never reconciled'],
-            ['Bank balance (per last reconciliation)', lastRec ? fmt(lastRec.statement_balance) : '—'],
-            ["System's balance (per last reconciliation)", lastRec ? fmt(lastRec.system_balance) : '—'],
-            ['Adjustment posted', lastRec && lastRec.adjustment_entry_id ? fmt(lastRec.difference) : (lastRec ? 'None needed, matched' : '—')],
-          ],
-        });
-
-        y = pdfNextY(doc, y);
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...PDF_BRAND);
-        doc.text(`Net Income, ${label}`, 14, y);
-        autoTable(doc, {
-          startY: y + 4, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          columnStyles: { 0: { halign: 'right' }, 1: { halign: 'right' }, 2: { halign: 'right' } },
-          head: [['Income', 'Expenses', 'Net']],
-          body: [[fmt(periodIncome), fmt(periodExpense), fmt(periodIncome - periodExpense)]],
-        });
-
-        y = pdfNextY(doc, y);
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...PDF_BRAND);
-        doc.text(`By Group, ${label}`, 14, y);
-        const groupRows = GROUPS.map((g) => {
-          const b = byGroup.get(g.key)!;
-          return [g.en, fmt(b.income), fmt(b.expense), fmt(b.income - b.expense)];
-        });
-        autoTable(doc, {
-          startY: y + 4, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+          startY: y + 9, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
           footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
           columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
           head: [['Group', 'Income', 'Expenses', 'Net']],
-          body: groupRows,
-          foot: [['Org Total', fmt(periodIncome), fmt(periodExpense), fmt(periodIncome - periodExpense)]],
+          body: GROUPS.map((g) => {
+            const b = byGroup.get(g.key)!;
+            return [g.en, fmt(b.income), fmt(b.expense), fmt(b.income - b.expense)];
+          }),
+          foot: [['All Groups Combined', fmt(periodIncome), fmt(periodExpense), fmt(periodIncome - periodExpense)]],
         });
+
+        // One full Income Statement per group, each starting on its own
+        // page, then one more combining every group for the whole
+        // organization, also its own page.
+        GROUPS.forEach((g) => {
+          doc.addPage();
+          renderIncomeStatement(doc, `Net Income Statement, ${g.en}`, periodRows.filter((r: any) => r.group_key === g.key));
+        });
+        doc.addPage();
+        renderIncomeStatement(doc, 'Net Income Statement, Whole Scout Group', periodRows);
 
         doc.save(pdfFilename('Full-Accounting-Report', label));
       } catch (err) {
@@ -1288,6 +1362,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         btn.addEventListener('click', () => setTab(btn.dataset.tab));
       });
     }
+    // Generic sub-tabs (Finance's Balances/Ledger/Reconcile/Adjustments) —
+    // scoped by a "group" name so unrelated sub-tab sets don't collide.
+    function setSubtab(group: string, name: string) {
+      document.querySelectorAll(`.ws-subtab[data-subtabs="${group}"]`).forEach((b: any) => b.classList.toggle('ws-subtab--active', b.dataset.subtab === name));
+      document.querySelectorAll(`[data-subpanel^="${group}:"]`).forEach((p: any) => p.toggleAttribute('hidden', p.dataset.subpanel !== `${group}:${name}`));
+    }
+    function bindSubtabs() {
+      document.querySelectorAll('.ws-subtab').forEach((btn: any) => {
+        btn.addEventListener('click', () => setSubtab(btn.dataset.subtabs, btn.dataset.subtab));
+      });
+    }
 
     // ---------- Boot -------------------------------------------------------
     let boundOnce = false;
@@ -1332,6 +1417,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         els.signout.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
 
         bindTabs();
+        bindSubtabs();
         bindOpeningBalanceForm();
         bindTransactionForm();
         bindReconcile();

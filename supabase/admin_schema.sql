@@ -100,3 +100,15 @@ alter table finance_reconciliations enable row level security;
 drop policy if exists "admin only" on finance_reconciliations;
 create policy "admin only" on finance_reconciliations
   for all using (is_admin()) with check (is_admin());
+
+-- ============================================================
+-- "Who added this" — a plain-text snapshot of the name, taken at insert
+-- time, rather than a live join back to profiles. A join would need
+-- profiles read access across group lines (a leader can currently only
+-- read their own profile row, not a groupmate's — see "read own or
+-- admin" in schema.sql), and a snapshot survives someone's name
+-- changing or their account being removed later anyway. Every insert
+-- site in the app now fills this in from the signed-in user's own name.
+-- ============================================================
+alter table finance_entries add column if not exists created_by_name text;
+alter table finance_reconciliations add column if not exists created_by_name text;

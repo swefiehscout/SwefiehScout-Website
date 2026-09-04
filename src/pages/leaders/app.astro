@@ -509,7 +509,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-table-wrap">
               <table class="ws-table" data-fin-table>
                 <thead>
-                  <tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Receipt</th><th></th></tr>
+                  <tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Added by</th><th>Receipt</th><th></th></tr>
                 </thead>
                 <tbody data-fin-body></tbody>
               </table>
@@ -1516,6 +1516,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           amount: feeRow.amount, entry_date: feeRow.paid_on || (feeRow.period + '-01'),
           description: `${member ? member.full_name : 'Member'}, ${feeRow.period}`,
           fee_payment_id: feeRow.id, created_by: state.session.user.id,
+          created_by_name: state.profile?.name || null,
         };
         const { data: existing } = await db.from('finance_entries').select('id').eq('fee_payment_id', feeRow.id).maybeSingle();
         if (existing) await db.from('finance_entries').update(payload).eq('id', existing.id);
@@ -1643,6 +1644,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Category">${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab, unmark it paid there to remove this">Auto</span>' : ''}</td>
           <td data-label="Description">${escapeHtml(e.description || '—')}</td>
           <td data-label="Amount">${Number(e.amount).toFixed(2)}</td>
+          <td data-label="Added by">${escapeHtml(e.created_by_name || '—')}</td>
           <td data-label="Receipt">${e.receipt_path ? '<button type="button" class="ws-edit-btn" data-fin-receipt-view>View</button>' : '—'}</td>
           <td class="ws-row-actions">${e.fee_payment_id ? '' : '<button type="button" class="ws-row-del" data-fin-del>×</button>'}</td>
         </tr>
@@ -1709,6 +1711,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           group_key: state.activeGroup, entry_type: type, category: category || null,
           amount: Number(amount), entry_date: date, description: description || null,
           receipt_path: receiptPath, created_by: state.session.user.id,
+          created_by_name: state.profile?.name || null,
         });
         els.finSubmit.disabled = false;
         if (error) { console.error(error); showToast('Could not add entry.'); return; }
