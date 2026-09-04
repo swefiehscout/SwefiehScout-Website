@@ -304,6 +304,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Phone</th>
                   <th>Emergency Contact</th>
                   <th>Allergies</th>
                   <th>Notes</th>
@@ -547,6 +548,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <section class="ws-panel" data-panel="library" hidden>
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="library" data-subtab="documents">Documents</button>
+            <button type="button" class="ws-subtab" data-subtabs="library" data-subtab="shared">Shared Library</button>
             <button type="button" class="ws-subtab" data-subtabs="library" data-subtab="lessons">Lessons</button>
           </div>
 
@@ -571,9 +573,21 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-table-wrap">
               <table class="ws-table" data-lib-table>
                 <thead>
-                  <tr><th>Title</th><th>Type</th><th>Uploaded</th><th></th></tr>
+                  <tr><th>Title</th><th>Type</th><th>Uploaded</th><th>Uploaded by</th><th></th></tr>
                 </thead>
                 <tbody data-lib-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="library:shared" hidden>
+            <p class="ws-att-hint">Uploaded once by an admin, for one or more groups at once — manage or remove these from the Admin console's own Library.</p>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-lib-shared-table>
+                <thead>
+                  <tr><th>Title</th><th>Type</th><th>Uploaded</th><th>Uploaded by</th><th></th></tr>
+                </thead>
+                <tbody data-lib-shared-body></tbody>
               </table>
             </div>
           </div>
@@ -873,6 +887,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.libTitle = el('[data-lib-title]');
       els.libUpload = el('[data-lib-upload]');
       els.libBody = el('[data-lib-body]');
+      els.libSharedBody = el('[data-lib-shared-body]');
       els.mName = el('[data-m-name]');
       els.mPhone = el('[data-m-phone]');
       els.mDob = el('[data-m-dob]');
@@ -1097,12 +1112,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderApprovals() {
       if (!state.approvals.length) {
-        els.approvalsBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No pending requests.</td></tr>';
+        els.approvalsBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No pending requests.</td></tr>';
         return;
       }
       els.approvalsBody.innerHTML = state.approvals.map((r: any) => `
         <tr data-request-id="${r.id}">
           <td data-label="Name">${escapeHtml(r.full_name)}</td>
+          <td data-label="Phone">${escapeHtml(r.phone || '—')}</td>
           <td data-label="Emergency Contact">${r.guardian1_relation ? `${escapeHtml(r.guardian1_relation)}: ${escapeHtml(r.guardian1_phone || '—')}` : '—'}</td>
           <td data-label="Allergies">${r.has_allergies
               ? `<span class="ws-allergy-badge" title="${escapeHtml(r.allergy_detail || '')}">Yes${r.allergy_detail ? ', ' + escapeHtml(r.allergy_detail) : ''}</span>`
@@ -1721,8 +1737,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
-    // ---------- Library (document storage, per group — no shared/troop-
-    // wide documents) -------------------------------------------------------
+    // ---------- Library (document storage, per group) ----------------------
     async function loadLibrary() {
       if (!state.activeGroup) return;
       const { data, error } = await db.from('documents').select('*')
@@ -1731,10 +1746,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (error) { console.error(error); showToast('Could not load documents.'); return; }
       state.docs = data || [];
       renderLibrary();
+      loadSharedLibrary();
     }
     function renderLibrary() {
       if (!state.docs.length) {
-        els.libBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No documents yet.</td></tr>';
+        els.libBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No documents yet.</td></tr>';
         return;
       }
       els.libBody.innerHTML = state.docs.map((d: any) => `
@@ -1742,6 +1758,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Title">${escapeHtml(d.title)}</td>
           <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
           <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
+          <td data-label="Uploaded by">${escapeHtml(d.uploaded_by_name || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-doc-download>Download</button>
             <button type="button" class="ws-row-del" data-doc-del>×</button>
@@ -1765,6 +1782,37 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         });
       });
     }
+    // Shared Library: documents an admin uploaded once and ticked this
+    // group into (see shared_document_groups) — read-only here, managed
+    // from the Admin console's own Library.
+    async function loadSharedLibrary() {
+      if (!state.activeGroup) return;
+      const { data, error } = await db.from('shared_document_groups').select('shared_documents(*)').eq('group_key', state.activeGroup);
+      if (error) { console.error(error); return; }
+      const docs = (data || []).map((r: any) => r.shared_documents).filter(Boolean)
+        .sort((a: any, b: any) => (a.uploaded_at < b.uploaded_at ? 1 : -1));
+      if (!docs.length) {
+        els.libSharedBody.innerHTML = '<tr><td colspan="5" class="ws-empty">Nothing shared into this group yet.</td></tr>';
+        return;
+      }
+      els.libSharedBody.innerHTML = docs.map((d: any) => `
+        <tr data-doc-path="${escapeHtml(d.file_path)}">
+          <td data-label="Title">${escapeHtml(d.title)}</td>
+          <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
+          <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
+          <td data-label="Uploaded by">${escapeHtml(d.uploaded_by_name || '—')}</td>
+          <td class="ws-row-actions"><button type="button" class="ws-edit-btn" data-doc-download>Download</button></td>
+        </tr>
+      `).join('');
+      els.libSharedBody.querySelectorAll('[data-doc-download]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const path = btn.closest('tr').dataset.docPath;
+          const { data, error } = await db.storage.from('documents').createSignedUrl(path, 60);
+          if (error || !data) { showToast('Could not open file.'); return; }
+          window.open(data.signedUrl, '_blank');
+        });
+      });
+    }
     function bindLibraryUpload() {
       els.libUpload.addEventListener('click', async () => {
         const file = els.libFile.files[0];
@@ -1777,6 +1825,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const { error } = await db.from('documents').insert({
           group_key: state.activeGroup, category: 'general', title, file_path: path,
           file_type: file.type || null, size_bytes: file.size, uploaded_by: state.session.user.id,
+          uploaded_by_name: state.profile?.name || null,
         });
         els.libUpload.disabled = false;
         if (error) { console.error(error); showToast('Could not save document.'); return; }

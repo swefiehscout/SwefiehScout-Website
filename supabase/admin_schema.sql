@@ -112,3 +112,58 @@ create policy "admin only" on finance_reconciliations
 -- ============================================================
 alter table finance_entries add column if not exists created_by_name text;
 alter table finance_reconciliations add column if not exists created_by_name text;
+
+-- Same "who added this" idea, on the existing per-group document library.
+alter table documents add column if not exists uploaded_by_name text;
+
+-- ============================================================
+-- Shared Library — the Admin console's own document upload, distinct
+-- from each group's own Library tab: an admin uploads a file once and
+-- ticks which group(s) it should show up for, instead of it belonging
+-- to exactly one group like `documents` does. shared_document_groups is
+-- the many-to-many join (one row per group it's shared into); a leader
+-- sees a shared_documents row only if it's shared into at least one
+-- group they have access to. Reuses the same 'documents' storage
+-- bucket, uploaded under a "shared/" path — the bucket's existing read
+-- policy already allows any authenticated user to read any path, and
+-- the existing write policy already allows an admin to write any path
+-- (has_group_access() returns true for an admin regardless of the
+-- group), so no new storage policies are needed.
+-- ============================================================
+create table if not exists shared_documents (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  file_path text not null,
+  file_type text,
+  size_bytes bigint,
+  uploaded_by uuid references auth.users(id),
+  uploaded_by_name text,
+  uploaded_at timestamptz not null default now()
+);
+
+alter table shared_documents enable row level security;
+drop policy if exists "admin manage" on shared_documents;
+create policy "admin manage" on shared_documents
+  for all using (is_admin()) with check (is_admin());
+drop policy if exists "group access read" on shared_documents;
+create policy "group access read" on shared_documents
+  for select using (
+    exists (
+      select 1 from shared_document_groups sdg
+      where sdg.shared_document_id = shared_documents.id and has_group_access(sdg.group_key)
+    )
+  );
+
+create table if not exists shared_document_groups (
+  shared_document_id uuid not null references shared_documents(id) on delete cascade,
+  group_key text not null,
+  primary key (shared_document_id, group_key)
+);
+
+alter table shared_document_groups enable row level security;
+drop policy if exists "admin manage" on shared_document_groups;
+create policy "admin manage" on shared_document_groups
+  for all using (is_admin()) with check (is_admin());
+drop policy if exists "group access read" on shared_document_groups;
+create policy "group access read" on shared_document_groups
+  for select using (has_group_access(group_key));

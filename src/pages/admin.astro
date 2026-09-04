@@ -58,6 +58,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
         <button type="button" class="ws-tab" data-tab="curriculum"><Icon name="flag" size={16} strokeWidth={1.8} /> Curriculum</button>
         <button type="button" class="ws-tab" data-tab="roster"><Icon name="star" size={16} strokeWidth={1.8} /> Roster</button>
+        <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
         <button type="button" class="ws-tab" data-tab="people"><Icon name="pin" size={16} strokeWidth={1.8} /> People</button>
       </nav>
 
@@ -290,6 +291,38 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         </section>
 
+        <!-- ================= Library (Shared) ================= -->
+        <section class="ws-panel" data-panel="library" hidden>
+          <p class="ws-att-hint">Upload a file once and tick which of the 5 troops it should show up for, instead of it belonging to just one group. Each sees it on their own Library tab, under Shared Library. Music and General don't have a Library tab, so they're not an option here.</p>
+
+          <div class="ws-member-form ws-library-upload">
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title">Upload to Shared Library</p>
+            <div class="ws-form-grid">
+              <label class="ws-field">
+                <span>File *</span>
+                <input type="file" data-lib-file />
+              </label>
+              <label class="ws-field">
+                <span>Title (optional)</span>
+                <input type="text" data-lib-title placeholder="Defaults to the file name" />
+              </label>
+            </div>
+            <label class="ws-field ws-field--full"><span>Groups *</span></label>
+            <div class="ws-admin-groups" data-lib-groups></div>
+            <div class="ws-form-actions">
+              <button type="button" class="btn-primary" data-lib-upload>Upload</button>
+            </div>
+          </div>
+
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-lib-table>
+              <thead><tr><th>Title</th><th>Groups</th><th>Type</th><th>Uploaded</th><th>Uploaded by</th><th></th></tr></thead>
+              <tbody data-lib-body></tbody>
+            </table>
+          </div>
+        </section>
+
         <!-- ================= People ================= -->
         <section class="ws-panel" data-panel="people" hidden>
           <p class="ws-att-hint">Approve who gets into the Leaders Workspace and which groups they can access, Music and General included, same as any troop. Admin is the one flag that also grants full access here and to the accounting system on the Finance tab.</p>
@@ -480,6 +513,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.rosterStatus = el('[data-roster-status]');
       els.rosterSearch = el('[data-roster-search]');
       els.rosterBody = el('[data-roster-body]');
+
+      els.libFile = el('[data-lib-file]');
+      els.libTitle = el('[data-lib-title]');
+      els.libGroups = el('[data-lib-groups]');
+      els.libUpload = el('[data-lib-upload]');
+      els.libBody = el('[data-lib-body]');
 
       els.peopleBody = el('[data-people-body]');
     }
@@ -1285,6 +1324,96 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }).join('');
     }
 
+    // ---------- Shared Library: one upload, ticked into any group(s) -------
+    async function loadSharedDocs() {
+      const { data, error } = await db.from('shared_documents')
+        .select('*, shared_document_groups(group_key)')
+        .order('uploaded_at', { ascending: false });
+      if (error) { console.error(error); showToast('Could not load the shared library.'); return; }
+      renderSharedDocs(data || []);
+    }
+    function renderSharedDocs(docs: any[]) {
+      if (!docs.length) { els.libBody.innerHTML = '<tr><td colspan="6" class="ws-empty">Nothing uploaded yet.</td></tr>'; return; }
+      els.libBody.innerHTML = docs.map((d: any) => {
+        const checked = new Set((d.shared_document_groups || []).map((r: any) => r.group_key));
+        const groupChecks = TROOP_GROUPS.map((g) => `
+          <label class="ws-group-check">
+            <input type="checkbox" data-doc-group value="${g.key}" ${checked.has(g.key) ? 'checked' : ''} />
+            ${escapeHtml(g.en)}
+          </label>
+        `).join('');
+        return `
+          <tr data-doc-id="${d.id}" data-doc-path="${escapeHtml(d.file_path)}">
+            <td data-label="Title">${escapeHtml(d.title)}</td>
+            <td class="ws-admin-groups" data-label="Groups">${groupChecks}</td>
+            <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
+            <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
+            <td data-label="Uploaded by">${escapeHtml(d.uploaded_by_name || '—')}</td>
+            <td class="ws-row-actions">
+              <button type="button" class="ws-edit-btn" data-doc-download>Download</button>
+              <button type="button" class="ws-row-del" data-doc-del>×</button>
+            </td>
+          </tr>`;
+      }).join('');
+      els.libBody.querySelectorAll('tr').forEach((row: any) => {
+        const id = row.dataset.docId;
+        const path = row.dataset.docPath;
+        row.querySelector('[data-doc-download]').addEventListener('click', async () => {
+          const { data, error } = await db.storage.from('documents').createSignedUrl(path, 60);
+          if (error || !data) { showToast('Could not open file.'); return; }
+          window.open(data.signedUrl, '_blank');
+        });
+        row.querySelector('[data-doc-del]').addEventListener('click', async () => {
+          if (!confirm('Delete this shared document? It disappears from every group it was shared into.')) return;
+          await db.storage.from('documents').remove([path]);
+          const { error } = await db.from('shared_documents').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          await loadSharedDocs();
+        });
+        row.querySelectorAll('[data-doc-group]').forEach((cb: any) => {
+          cb.addEventListener('change', async () => {
+            cb.disabled = true;
+            const { error } = cb.checked
+              ? await db.from('shared_document_groups').upsert({ shared_document_id: id, group_key: cb.value }, { onConflict: 'shared_document_id,group_key' })
+              : await db.from('shared_document_groups').delete().eq('shared_document_id', id).eq('group_key', cb.value);
+            cb.disabled = false;
+            if (error) { showToast('Could not update, ' + (error.message || 'unknown error') + '.'); cb.checked = !cb.checked; return; }
+          });
+        });
+      });
+    }
+    function bindLibraryUpload() {
+      els.libGroups.innerHTML = TROOP_GROUPS.map((g) => `
+        <label class="ws-group-check"><input type="checkbox" data-lib-group value="${g.key}" /> ${escapeHtml(g.en)}</label>
+      `).join('');
+      els.libUpload.addEventListener('click', async () => {
+        const file = els.libFile.files[0];
+        const groupKeys = Array.from(els.libGroups.querySelectorAll('[data-lib-group]:checked')).map((i: any) => i.value);
+        if (!file) { showToast('Choose a file first.'); return; }
+        if (!groupKeys.length) { showToast('Tick at least one group.'); return; }
+        els.libUpload.disabled = true;
+        const path = `shared/${Date.now()}-${file.name}`;
+        const { error: upErr } = await db.storage.from('documents').upload(path, file);
+        if (upErr) { console.error(upErr); showToast('Could not upload.'); els.libUpload.disabled = false; return; }
+        const title = els.libTitle.value.trim() || file.name;
+        const { data: inserted, error } = await db.from('shared_documents').insert({
+          title, file_path: path, file_type: file.type || null, size_bytes: file.size,
+          uploaded_by: state.session.user.id, uploaded_by_name: state.profile?.name || null,
+        }).select().single();
+        if (error) { console.error(error); showToast('Could not save document.'); els.libUpload.disabled = false; return; }
+        const { error: groupsError } = await db.from('shared_document_groups').insert(
+          groupKeys.map((group_key: string) => ({ shared_document_id: inserted.id, group_key })),
+        );
+        els.libUpload.disabled = false;
+        if (groupsError) { console.error(groupsError); showToast('Uploaded, but could not save which groups.'); return; }
+        els.libFile.value = '';
+        els.libTitle.value = '';
+        els.libGroups.querySelectorAll('[data-lib-group]').forEach((cb: any) => { cb.checked = false; });
+        showToast('Uploaded.');
+        await loadSharedDocs();
+      });
+    }
+
     // ---------- People: approve leaders/admins, assign groups ---------------
     async function loadPeople() {
       const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
@@ -1361,6 +1490,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'finance') { loadFinanceKpis(); loadFinancePeriod(); compareReconcile(); loadReconcileHistory(); loadAdjustmentEntries(); }
       if (tab === 'curriculum') loadCurriculum();
       if (tab === 'roster') loadRoster();
+      if (tab === 'library') loadSharedDocs();
       if (tab === 'people') loadPeople();
     }
     function setTab(tab: string) {
@@ -1434,6 +1564,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindTransactionForm();
         bindReconcile();
         bindReports();
+        bindLibraryUpload();
         els.finMonth.addEventListener('change', loadFinancePeriod);
         els.finYear.addEventListener('change', loadFinancePeriod);
         els.rosterGroup.innerHTML = '<option value="">All Groups</option>' + GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
