@@ -58,7 +58,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p class="gate-label">Check your email</p>
       <p class="ws-pending-text">
         We sent a verification link to <strong data-verify-email></strong>. It can take a minute or two
-        to arrive — check your spam folder if you don't see it. Click it to activate your account, then
+        to arrive, check your spam folder if you don't see it. Click it to activate your account, then
         come back here and sign in. An admin still needs to approve you and assign your group after that
         before you can get in.
       </p>
@@ -182,11 +182,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         const emailRedirectTo = window.location.origin + '/leaders';
         const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo } });
         if (error) throw error;
-        notice.textContent = 'Sent again — check your email.';
+        notice.textContent = 'Sent again, check your email.';
         notice.hidden = false;
         startResendCooldown();
       } catch (err: any) {
-        notice.textContent = err.message || 'Could not resend — try again in a moment.';
+        notice.textContent = err.message || 'Could not resend, try again in a moment.';
         notice.hidden = false;
       }
     }
@@ -240,7 +240,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       try {
         const { error } = await updatePassword(password);
         if (error) throw error;
-        showNotice('Password updated — you can sign in now.');
+        showNotice('Password updated, you can sign in now.');
         el('[data-auth-recovery]').hidden = true;
       } catch (err: any) {
         showError(err.message || 'Something went wrong.');
@@ -267,7 +267,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       });
 
       if (window.location.search.includes('expired=1')) {
-        showNotice('You were signed out after 3 hours — sign in again to continue.');
+        showNotice('You were signed out after 3 hours, sign in again to continue.');
       }
 
       if (supabaseConfigured && supabase) {
@@ -289,7 +289,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             await signOut();
             showFormView();
             if (email) (el('[data-auth-email]') as HTMLInputElement).value = email;
-            showNotice('Email confirmed — sign in below to continue.');
+            showNotice('Email confirmed, sign in below to continue.');
             return;
           }
           // Already signed in and this isn't a password-recovery landing —
@@ -309,7 +309,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   <style>
     /* Mirrors .gate-form's width so this reads as the sign-in card's
-       companion, not an unrelated block — same reasoning that applies
+       companion, not an unrelated block, same reasoning that applies
        to the rest of this page's sizing. */
     .auth-steps {
       max-width: 460px;

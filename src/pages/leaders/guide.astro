@@ -34,6 +34,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       "Lead one group? That's all you'll see.",
       "Lead more than one? Tap a group's name at the top to switch.",
       "The bar under the tabs always shows which group you're viewing.",
+      "Music and General aren't scout troops, switching to either only shows Roster and Finance, nothing else.",
     ],
   },
   {
@@ -42,23 +43,24 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     lines: [
       'Member count, attendance, fees, and money in and out.',
       'Your next planned meeting.',
-      'Anything that needs attention — unpaid fees, new requests, allergies.',
+      'Anything that needs attention, unpaid fees, new requests, allergies.',
     ],
   },
   {
     id: 'roster', label: 'Roster', icon: 'star',
     intro: 'Everyone currently in your group.',
     lines: [
-      "Add a member — their name and a guardian's contact info.",
+      "Add a member, their name, their own phone number, and a guardian's contact info.",
+      "In Music or General, check people off from another group's roster instead of retyping them, most band and board members are already scouts somewhere.",
       'Search to find someone quickly.',
       'Edit to update their details, or Archive when they leave.',
     ],
   },
   {
     id: 'archive', label: 'Archive', icon: 'fleur',
-    intro: "Members who've left — kept, not deleted.",
+    intro: "Members who've left, kept, not deleted.",
     lines: [
-      'Nothing about them is lost — their history stays intact.',
+      'Nothing about them is lost, their history stays intact.',
       'Restore brings someone back at any time.',
     ],
   },
@@ -67,7 +69,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     intro: 'New people asking to join your group.',
     lines: [
       'Approve adds them straight to your roster.',
-      'Reject just declines the request — nothing is saved.',
+      'Reject just declines the request, nothing is saved.',
     ],
   },
   {
@@ -75,7 +77,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     intro: 'Mark who showed up, one meeting at a time.',
     lines: [
       'Pick a date on the calendar.',
-      "Tick who's present — it saves instantly.",
+      "Tick who's present, it saves instantly.",
     ],
   },
   {
@@ -83,7 +85,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     intro: "Track who's paid their dues each month.",
     lines: [
       'Pick the month.',
-      "Tick who's paid — the date is recorded automatically.",
+      "Tick who's paid, the date is recorded automatically.",
     ],
   },
   {
@@ -101,6 +103,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     lines: [
       'Log money coming in or going out.',
       'See totals for whichever month you pick.',
+      'Download a PDF of any month right from this tab.',
     ],
   },
   {
@@ -120,10 +123,11 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'admin', label: 'Admin', icon: 'pin', adminOnly: true,
-    intro: 'Everything above, but for every group at once — plus managing leaders.',
+    intro: 'A separate page for admins, tap Admin in the header to get there.',
     lines: [
-      'Overview, Finance, Reports, Curriculum, Library, Roster — all groups together.',
-      'Leader Management — approve leaders, set which groups they can access, or remove access.',
+      'Overview, Reports, Curriculum, Roster, every group rolled up together.',
+      "Finance, one accounting system for the whole organization: an opening balance, a running balance, logging a transaction to any group, and reconciling against what the bank actually shows.",
+      'People, approve leaders and admins, and set which groups each one can access.',
     ],
   },
 ];

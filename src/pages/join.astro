@@ -4,7 +4,7 @@
 // uses; it lands in `join_requests` for a leader/admin of that group to
 // approve (which creates the real roster member) or reject.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { GROUPS } from '../lib/curriculum/constants';
+import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
 ---
 <BaseLayout title="Join a Group" bare>
   <section class="page-hero" data-animate>
@@ -29,7 +29,7 @@ import { GROUPS } from '../lib/curriculum/constants';
         <span class="portal-picker-label-ar">أي مجموعة تريد الانضمام إليها؟</span>
       </p>
       <div class="portal-picker-grid">
-        {GROUPS.map((g) => (
+        {JOINABLE_GROUPS.map((g) => (
           <button type="button" class="portal-picker-btn" data-join-group={g.key}>
             <span class="portal-picker-ar">{g.ar}</span>
             <span class="portal-picker-en">{g.en}</span>
@@ -55,6 +55,10 @@ import { GROUPS } from '../lib/curriculum/constants';
             <input type="text" data-j-name required />
           </label>
           <label class="ws-field">
+            <span>Phone · هاتفك الخاص</span>
+            <input type="tel" data-j-phone />
+          </label>
+          <label class="ws-field">
             <span>Date of birth · تاريخ الميلاد</span>
             <input type="date" data-j-dob />
           </label>
@@ -67,11 +71,12 @@ import { GROUPS } from '../lib/curriculum/constants';
               <option>Other</option>
             </select>
           </label>
-          <label class="ws-field">
-            <span>Guardian 1 phone · الهاتف *</span>
-            <input type="tel" data-j-g1-phone required />
-          </label>
         </div>
+
+        <label class="ws-field ws-field--full">
+          <span>Guardian 1 phone · هاتف ولي الأمر *</span>
+          <input type="tel" data-j-g1-phone required />
+        </label>
 
         <div class="ws-form-grid">
           <div class="ws-optional-block" data-j-g2-block>
@@ -202,7 +207,7 @@ import { GROUPS } from '../lib/curriculum/constants';
       form.addEventListener('submit', async (e: Event) => {
         e.preventDefault();
         el('[data-join-error]').hidden = true;
-        if (!supabaseConfigured || !supabase) { showError('Not connected — please try again later. · غير متصل، حاول مرة أخرى لاحقًا.'); return; }
+        if (!supabaseConfigured || !supabase) { showError('Not connected, please try again later. · غير متصل، حاول مرة أخرى لاحقًا.'); return; }
         if (!selectedGroup) { showError('Pick a group first. · اختر مجموعة أولاً.'); return; }
 
         const name = el('[data-j-name]').value.trim();
@@ -219,6 +224,7 @@ import { GROUPS } from '../lib/curriculum/constants';
         const { error } = await supabase.from('join_requests').insert({
           group_key: selectedGroup,
           full_name: name,
+          phone: el('[data-j-phone]').value.trim() || null,
           birth_date: el('[data-j-dob]').value || null,
           guardian1_relation: g1Rel,
           guardian1_phone: g1Phone,
@@ -232,7 +238,7 @@ import { GROUPS } from '../lib/curriculum/constants';
         submitBtn.disabled = false;
         if (error) {
           console.error(error);
-          showError('Could not submit — please try again. · تعذر الإرسال، حاول مرة أخرى.');
+          showError('Could not submit, please try again. · تعذر الإرسال، حاول مرة أخرى.');
           return;
         }
         el('[data-join-step-form]').hidden = true;

@@ -3216,7 +3216,7 @@ main.wide {
 }
 .portal-picker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.7rem;
 }
 .portal-picker-btn {
@@ -3259,8 +3259,6 @@ main.wide {
 }
 @media (max-width: 720px) {
   .portal-picker { padding: 1.3rem 1.1rem 1.2rem; }
-  /* One column, not two — GROUPS has 5 entries, and 2 columns leaves a
-     lone orphan button alone on the last row. */
   .portal-picker-grid { grid-template-columns: 1fr; }
 }
 
@@ -4513,6 +4511,33 @@ main.wide {
   font-size: 0.82rem;
   background: var(--color-surface);
 }
+
+/* A scrollable, checkable list of names — e.g. bulk-picking existing
+   members to copy into another group's roster. */
+.ws-pick-list {
+  max-height: 16rem;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 0.9rem;
+  background: var(--color-surface);
+}
+.ws-pick-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+}
+.ws-pick-row:last-child { border-bottom: 0; }
+.ws-pick-row:hover { background: var(--color-bg); }
+.ws-pick-row input[type="checkbox"] { flex-shrink: 0; width: 1rem; height: 1rem; }
+.ws-pick-row-name { flex: 1; min-width: 0; }
+.ws-pick-row-group { color: var(--color-muted); font-size: 0.75rem; flex-shrink: 0; }
+.ws-pick-empty { padding: 0.9rem; color: var(--color-muted); font-size: 0.85rem; text-align: center; }
 .ws-admin-save { padding: 0.45rem 1rem; font-size: 0.78rem; }
 
 @media (max-width: 720px) {

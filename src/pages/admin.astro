@@ -1,0 +1,1348 @@
+---
+// Admin console — the single control tower for the whole org: org-wide
+// oversight across every group, the accounting layer on top of the
+// Leaders Workspace's finance_entries (opening balance, running/cleared
+// balance across every group combined, bank reconciliation, ad-hoc
+// transactions), and approving who gets into the Leaders Workspace and
+// which groups (Music included — see MUSIC_GROUP_KEY). Gated by the
+// single org admin flag (profiles.role = 'admin'). No separate login
+// screen — signs in through the same Supabase session as /leaders, and
+// a non-admin lands on a plain "not authorized" message instead of a
+// pending-approval flow, since admin isn't something you apply for here.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { workspaceMarqueePhotos } from '../lib/scenic-photos';
+
+const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos];
+---
+<BaseLayout title="Admin" bare wide>
+  <div class="ws-shell" data-ws-shell hidden>
+
+    <section class="ws-pending" data-ws-denied hidden>
+      <div class="ws-pending-card">
+        <h2 class="section-h2">Admin access only</h2>
+        <p class="ws-pending-text">
+          This console is for org admins. If that should be you, ask an existing admin to set your
+          role to Admin from here (People tab), from the Leaders Workspace, not this page.
+        </p>
+        <div class="ws-pending-actions">
+          <a class="btn-primary" href="/leaders">Go to Leaders Workspace</a>
+          <button type="button" class="curr-nav-today" data-ws-signout-denied>Sign out</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="ws-main" data-ws-main hidden>
+      <header class="ws-header">
+        <div class="ws-header-left">
+          <img class="ws-logo-mark" src="/images/logo.png" alt="" />
+          <span class="ws-logo">Admin</span>
+        </div>
+        <div class="ws-header-right">
+          <a class="ws-guide-link" href="/leaders" title="Leaders Workspace">
+            <Icon name="compass" size={14} strokeWidth={1.8} /> Leaders Workspace
+          </a>
+          <div class="ws-account">
+            <button type="button" class="ws-account-btn" data-ws-account-btn></button>
+            <div class="ws-account-menu" data-ws-account-menu hidden>
+              <div class="ws-account-info" data-ws-who></div>
+              <button type="button" class="ws-account-signout" data-ws-signout>Sign out</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <nav class="ws-tabs" data-ws-tabs>
+        <button type="button" class="ws-tab" data-tab="overview"><Icon name="compass" size={16} strokeWidth={1.8} /> Overview</button>
+        <button type="button" class="ws-tab" data-tab="finance"><Icon name="bank" size={16} strokeWidth={1.8} /> Finance</button>
+        <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
+        <button type="button" class="ws-tab" data-tab="curriculum"><Icon name="flag" size={16} strokeWidth={1.8} /> Curriculum</button>
+        <button type="button" class="ws-tab" data-tab="roster"><Icon name="star" size={16} strokeWidth={1.8} /> Roster</button>
+        <button type="button" class="ws-tab" data-tab="people"><Icon name="pin" size={16} strokeWidth={1.8} /> People</button>
+      </nav>
+
+      <div class="ws-panels">
+        <!-- ================= Overview (the 5 troops) ================= -->
+        <section class="ws-panel" data-panel="overview">
+          <div class="ws-dash" data-dash-root>
+            <p class="ws-att-hint">The 5 troops together, the same numbers each group's own Dashboard shows, rolled up troop-wide. Music and General aren't scouting troops, their own rosters live on their group pages (and on the Roster tab here too), and their money lives on the Finance tab instead, alongside the full accounting picture.</p>
+
+            <div class="band-marquee ws-dash-marquee" aria-label="Troop photos">
+              <div class="band-marquee-track" style={`--n: ${workspaceMarqueePhotos.length}`}>
+                {dashMarqueePhotos.map((src, i) => (
+                  <div class="band-marquee-slide">
+                    <img src={src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
+                  </div>
+                ))}
+              </div>
+              <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
+              <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
+            </div>
+
+            <div class="ws-dash-kpis" data-ov-kpis></div>
+            <div class="ws-stat-row ws-stat-row--3" data-ov-ratios></div>
+
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Active members by group</h3></div>
+                <div data-ov-members-chart></div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Fee collection by group</h3></div>
+                <div data-ov-fees-chart></div>
+              </div>
+            </div>
+
+            <div class="ws-dash-card ws-dash-card--full">
+              <div class="ws-dash-card-head"><h3>By group</h3></div>
+              <div class="ws-table-wrap">
+                <table class="ws-table" data-ov-table>
+                  <thead><tr><th>Group</th><th>Active</th><th>% of Troop</th><th>Attendance (30d)</th><th>Fees Collected</th><th>Net Income</th></tr></thead>
+                  <tbody data-ov-body></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= Finance (the accounting system) ================= -->
+        <section class="ws-panel" data-panel="finance" hidden>
+          <p class="ws-att-hint">One accounting system across every group, the 5 troops' own Finance ledgers, plus Music's and General's. Nothing here duplicates a group's own Finance tab; it reads the same finance_entries every group already writes to.</p>
+
+          <div class="ws-dash-kpis" data-fin-kpis style="margin-bottom: 1.75rem"></div>
+
+          <div class="ws-dash-grid ws-dash-grid--2" style="margin-bottom: 1.75rem">
+            <div class="ws-member-form">
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Opening balance</p>
+              <div class="ws-form-grid">
+                <label class="ws-field"><span>Amount</span><input type="number" step="0.01" data-open-amount /></label>
+                <label class="ws-field"><span>As of date</span><input type="date" data-open-date /></label>
+              </div>
+              <div class="ws-form-actions"><button type="button" class="btn-primary" data-open-save>Save</button></div>
+            </div>
+
+            <form class="ws-member-form" data-tx-form>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Add a transaction</p>
+              <div class="ws-form-grid ws-form-grid--4">
+                <label class="ws-field"><span>Group *</span><select data-tx-group required></select></label>
+                <label class="ws-field">
+                  <span>Type *</span>
+                  <select data-tx-type required>
+                    <option value="expense" selected>Expense</option>
+                    <option value="income">Income</option>
+                  </select>
+                </label>
+                <label class="ws-field"><span>Category</span><select data-tx-category></select></label>
+                <label class="ws-field"><span>Amount *</span><input type="number" step="0.01" min="0" data-tx-amount required /></label>
+              </div>
+              <div class="ws-form-grid">
+                <label class="ws-field"><span>Date *</span><input type="date" data-tx-date required /></label>
+                <label class="ws-field ws-field--full"><span>Description</span><input type="text" data-tx-description /></label>
+              </div>
+              <div class="ws-form-actions"><button type="submit" class="btn-primary" data-tx-submit>Add entry</button></div>
+            </form>
+          </div>
+
+          <div class="ws-toolbar-row">
+            <label class="ws-field ws-field--inline"><span>Month</span><select data-fin-month></select></label>
+            <label class="ws-field ws-field--inline"><span>Year</span><select data-fin-year></select></label>
+          </div>
+          <div class="ws-stat-row ws-stat-row--3" data-fin-stats></div>
+
+          <h3 class="ws-admin-h3">By group</h3>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-fin-group-table>
+              <thead><tr><th>Group</th><th>Income</th><th>Expenses</th><th>Net</th></tr></thead>
+              <tbody data-fin-group-body></tbody>
+            </table>
+          </div>
+
+          <h3 class="ws-admin-h3">Every transaction</h3>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-fin-table>
+              <thead><tr><th>Date</th><th>Group</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead>
+              <tbody data-fin-body></tbody>
+            </table>
+          </div>
+
+          <h3 class="ws-admin-h3">Reconcile</h3>
+          <p class="ws-att-hint">Not every entry ever hits the bank the same way, some are cash, some sit in a group's own hands for a while, so this doesn't tick off individual transactions. It just compares what the system says the balance is, as of a date, against the real bank balance. A mismatch gets posted as a single adjustment entry (attributed to whichever group it belongs to) so the two line back up.</p>
+          <div class="ws-toolbar-row">
+            <label class="ws-field ws-field--inline"><span>As of</span><input type="date" data-rec-asof /></label>
+            <label class="ws-field ws-field--inline"><span>Actual bank balance</span><input type="number" step="0.01" data-rec-bank placeholder="0.00" /></label>
+            <button type="button" class="btn-primary" data-rec-load>Compare</button>
+          </div>
+          <div class="ws-stat-row ws-stat-row--3" data-rec-stats></div>
+
+          <div class="ws-member-form" data-rec-adjust-block hidden>
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title">Post an adjustment for the difference</p>
+            <div class="ws-form-grid">
+              <label class="ws-field"><span>Belongs to group *</span><select data-rec-adjust-group required></select></label>
+              <label class="ws-field ws-field--full"><span>Note</span><input type="text" data-rec-adjust-note placeholder="e.g. cash on hand not yet deposited" /></label>
+            </div>
+            <div class="ws-form-actions">
+              <button type="button" class="btn-primary" data-rec-save>Post adjustment &amp; save</button>
+            </div>
+          </div>
+          <div class="ws-form-actions" data-rec-match-block hidden>
+            <button type="button" class="btn-primary" data-rec-save-match>Save reconciliation, balances match</button>
+          </div>
+
+          <h3 class="ws-admin-h3">Reconciliation history</h3>
+          <p class="ws-att-hint">One row every time you check, even when nothing needed fixing. Proof of when you last looked, and what you found.</p>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-rec-history-table>
+              <thead><tr><th>As of</th><th>Bank Balance</th><th>System Balance</th><th>Adjustment</th><th>Saved</th></tr></thead>
+              <tbody data-rec-history-body></tbody>
+            </table>
+          </div>
+
+          <h3 class="ws-admin-h3">Adjustment entries</h3>
+          <p class="ws-att-hint">Only the actual correcting transactions, a check above only adds a row here when the balances didn't already match. These are real ledger entries (they affect that group's own balance too), pulled out here as a focused audit trail.</p>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-adj-table>
+              <thead><tr><th>Date</th><th>Group</th><th>Type</th><th>Amount</th><th>Note</th><th>Posted by</th></tr></thead>
+              <tbody data-adj-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= Reports ================= -->
+        <section class="ws-panel" data-panel="reports" hidden>
+          <p class="ws-att-hint">Same reports as each group's own Reports tab, except every group is combined into one PDF, the Income Statement includes Music, Fees and Attendance stay troop-only (Music has neither).</p>
+          <div class="ws-toolbar-row">
+            <label class="ws-field ws-field--inline"><span>Month</span><select data-report-month></select></label>
+            <label class="ws-field ws-field--inline"><span>Year</span><select data-report-year></select></label>
+          </div>
+          <div class="ws-report-grid">
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Full Accounting Report</h3>
+              <p class="ws-report-desc">Everything in one document: opening &amp; running balance, the latest bank reconciliation (bank vs. system, and when), net income, and the full by-group breakdown.</p>
+              <button type="button" class="btn-primary" data-report-full>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Income Statement</h3>
+              <p class="ws-report-desc">Every group's income and expenses, plus an org-wide total. Includes Music.</p>
+              <button type="button" class="btn-primary" data-report-finance>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Monthly Fees</h3>
+              <p class="ws-report-desc">Every active member across the 5 troops, with their group, paid status, and amount.</p>
+              <button type="button" class="btn-primary" data-report-fees>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Attendance</h3>
+              <p class="ws-report-desc">Every active member across the 5 troops, with their group, attendance count, and rate.</p>
+              <button type="button" class="btn-primary" data-report-attendance>Download PDF</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= Curriculum ================= -->
+        <section class="ws-panel" data-panel="curriculum" hidden>
+          <p class="ws-att-hint">Every troop's next planned meeting, at a glance.</p>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-curr-table>
+              <thead><tr><th>Group</th><th>Next Meeting</th><th>Theme</th><th>Activities</th></tr></thead>
+              <tbody data-curr-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= Roster ================= -->
+        <section class="ws-panel" data-panel="roster" hidden>
+          <p class="ws-att-hint">Every group's roster together, including Music and General, filter down to what you need.</p>
+          <div class="ws-toolbar-row">
+            <label class="ws-field ws-field--inline">
+              <span>Group</span>
+              <select data-roster-group><option value="">All Groups</option></select>
+            </label>
+            <label class="ws-field ws-field--inline">
+              <span>Status</span>
+              <select data-roster-status>
+                <option value="active" selected>Active</option>
+                <option value="archived">Archived</option>
+                <option value="all">All</option>
+              </select>
+            </label>
+          </div>
+          <input type="search" class="ws-search" data-roster-search placeholder="Search members…" />
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-roster-table>
+              <thead><tr><th>Name</th><th>Group</th><th>Phone</th><th>Guardian 1</th><th>Allergies</th><th>Status</th></tr></thead>
+              <tbody data-roster-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= People ================= -->
+        <section class="ws-panel" data-panel="people" hidden>
+          <p class="ws-att-hint">Approve who gets into the Leaders Workspace and which groups they can access, Music and General included, same as any troop. Admin is the one flag that also grants full access here and to the accounting system on the Finance tab.</p>
+          <h3 class="ws-admin-h3">People</h3>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-people-table>
+              <thead><tr><th>Name</th><th>Role</th><th>Groups</th><th></th></tr></thead>
+              <tbody data-people-body></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import {
+      supabase, supabaseConfigured, getSession, isSessionExpired, msUntilSessionExpiry, signOut,
+    } from '../lib/workspace/auth';
+    import jsPDF from 'jspdf';
+    import autoTable from 'jspdf-autotable';
+    import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY } from '../lib/curriculum/constants';
+
+    const db: any = supabase;
+
+    const state: any = {
+      session: null,
+      profile: null,
+      isAdmin: false,
+      activeTab: 'overview',
+      settings: null,
+      ovMembers: [],
+      recSystemBalance: 0,
+      recDiff: null,
+    };
+    const els: any = {};
+
+    function el(sel: string): any { return document.querySelector(sel); }
+    function escapeHtml(s: any) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as any)[c]
+      ));
+    }
+    let toastTimer: any;
+    function showToast(msg: any) {
+      let t = document.querySelector('.curr-toast');
+      if (!t) { t = document.createElement('div'); t.className = 'curr-toast'; document.body.appendChild(t); }
+      t.textContent = msg;
+      t.classList.add('curr-toast--show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('curr-toast--show'), 3500);
+    }
+    function todayStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function parseDateStr(s: string) {
+      const [y, m, d] = s.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+    function bindTableSearch(input: any, tbody: any) {
+      input.addEventListener('input', () => {
+        const term = input.value.trim().toLowerCase();
+        tbody.querySelectorAll('tr').forEach((row: any) => {
+          row.hidden = !!term && !row.textContent.toLowerCase().includes(term);
+        });
+      });
+    }
+    function dashDeltaBadge(val: number | null, suffix = ''): string {
+      if (val == null || Number.isNaN(val) || val === 0) {
+        return `<span class="ws-dash-delta ws-dash-delta--flat">– steady</span>`;
+      }
+      const up = val > 0;
+      return `<span class="ws-dash-delta ${up ? 'ws-dash-delta--up' : 'ws-dash-delta--down'}">${up ? '↑' : '↓'} ${Math.abs(val)}${suffix} vs last period</span>`;
+    }
+    function populatePeriodSelects(monthSel: any, yearSel: any, withYearOption = false) {
+      if (monthSel.options.length) return;
+      let opts = MONTHS.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}">${m.en}</option>`).join('');
+      if (withYearOption) opts = `<option value="ALL">Whole Year</option>` + opts;
+      monthSel.innerHTML = opts;
+      const nowYear = new Date().getFullYear();
+      const years: number[] = [];
+      for (let y = nowYear - 3; y <= nowYear + 1; y++) years.push(y);
+      yearSel.innerHTML = years.map((y) => `<option value="${y}">${y}</option>`).join('');
+      const now = new Date();
+      monthSel.value = String(now.getMonth() + 1).padStart(2, '0');
+      yearSel.value = String(now.getFullYear());
+    }
+    function periodRange(monthSel: any, yearSel: any) {
+      const year = Number(yearSel.value);
+      if (monthSel.value === 'ALL') {
+        return { start: `${year}-01-01`, end: `${year}-12-31`, label: String(year), period: String(year), isYear: true };
+      }
+      const month = monthSel.value;
+      const period = `${year}-${month}`;
+      const lastDay = new Date(year, Number(month), 0).getDate();
+      const label = `${monthSel.selectedOptions[0]?.textContent} ${year}`;
+      return { start: `${period}-01`, end: `${period}-${String(lastDay).padStart(2, '0')}`, label, period, isYear: false };
+    }
+    function signedAmount(e: any) { return e.entry_type === 'income' ? Number(e.amount) : -Number(e.amount); }
+    function fmt(n: number) { return Number(n || 0).toFixed(2); }
+
+    // ---------- PDF helpers (simplified — always "All Groups", no active
+    // group concept here like the per-group Reports tab has) -------------
+    const PDF_BRAND: [number, number, number] = [87, 22, 7];
+    const PDF_FOOT_BG: [number, number, number] = [250, 243, 232];
+    function pdfHeader(doc: any, title: string, rangeLabel: string): number {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...PDF_BRAND);
+      doc.text('GREEK ORTHODOX SCOUTS & GUIDES, SWEFIEH', 14, 15);
+      doc.setFontSize(17);
+      doc.text(`All Groups, ${title}`, 14, 25);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(90, 90, 90);
+      doc.text(rangeLabel, 14, 32);
+      doc.setDrawColor(...PDF_BRAND);
+      doc.setLineWidth(0.6);
+      doc.line(14, 36, 196, 36);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Generated by ${state.profile?.name || ''} on ${new Date().toLocaleDateString()}`, 14, 41);
+      return 48;
+    }
+    function pdfFilename(title: string, label: string): string {
+      return `All-Groups-${title}-${label}`.replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/^-+|-+$/g, '') + '.pdf';
+    }
+    function pdfNextY(doc: any, fallback: number): number {
+      return (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 10 : fallback;
+    }
+
+    function cacheEls() {
+      els.shell = el('[data-ws-shell]');
+      els.denied = el('[data-ws-denied]');
+      els.main = el('[data-ws-main]');
+      els.accountBtn = el('[data-ws-account-btn]');
+      els.accountMenu = el('[data-ws-account-menu]');
+      els.who = el('[data-ws-who]');
+      els.signout = el('[data-ws-signout]');
+      els.signoutDenied = el('[data-ws-signout-denied]');
+      els.tabs = el('[data-ws-tabs]');
+
+      els.ovKpis = el('[data-ov-kpis]');
+      els.ovRatios = el('[data-ov-ratios]');
+      els.ovMembersChart = el('[data-ov-members-chart]');
+      els.ovFeesChart = el('[data-ov-fees-chart]');
+      els.ovBody = el('[data-ov-body]');
+
+      els.finKpis = el('[data-fin-kpis]');
+      els.openAmount = el('[data-open-amount]');
+      els.openDate = el('[data-open-date]');
+      els.openSave = el('[data-open-save]');
+      els.txForm = el('[data-tx-form]');
+      els.txGroup = el('[data-tx-group]');
+      els.txType = el('[data-tx-type]');
+      els.txCategory = el('[data-tx-category]');
+      els.txAmount = el('[data-tx-amount]');
+      els.txDate = el('[data-tx-date]');
+      els.txDescription = el('[data-tx-description]');
+      els.txSubmit = el('[data-tx-submit]');
+      els.finMonth = el('[data-fin-month]');
+      els.finYear = el('[data-fin-year]');
+      els.finStats = el('[data-fin-stats]');
+      els.finGroupBody = el('[data-fin-group-body]');
+      els.finBody = el('[data-fin-body]');
+
+      els.recAsof = el('[data-rec-asof]');
+      els.recBank = el('[data-rec-bank]');
+      els.recLoad = el('[data-rec-load]');
+      els.recStats = el('[data-rec-stats]');
+      els.recAdjustBlock = el('[data-rec-adjust-block]');
+      els.recAdjustGroup = el('[data-rec-adjust-group]');
+      els.recAdjustNote = el('[data-rec-adjust-note]');
+      els.recSave = el('[data-rec-save]');
+      els.recMatchBlock = el('[data-rec-match-block]');
+      els.recSaveMatch = el('[data-rec-save-match]');
+      els.recHistoryBody = el('[data-rec-history-body]');
+      els.adjBody = el('[data-adj-body]');
+
+      els.reportMonth = el('[data-report-month]');
+      els.reportYear = el('[data-report-year]');
+
+      els.currBody = el('[data-curr-body]');
+
+      els.rosterGroup = el('[data-roster-group]');
+      els.rosterStatus = el('[data-roster-status]');
+      els.rosterSearch = el('[data-roster-search]');
+      els.rosterBody = el('[data-roster-body]');
+
+      els.peopleBody = el('[data-people-body]');
+    }
+
+    // ---------- Overview (the 5 troops) -------------------------------------
+    async function loadOverview() {
+      const now = new Date();
+      const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const monthEnd = `${period}-${String(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()).padStart(2, '0')}`;
+      const prevD = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const prevPeriod = `${prevD.getFullYear()}-${String(prevD.getMonth() + 1).padStart(2, '0')}`;
+      const d30 = new Date(now); d30.setDate(d30.getDate() - 30);
+      const d60 = new Date(now); d60.setDate(d60.getDate() - 60);
+      const day30Str = `${d30.getFullYear()}-${String(d30.getMonth() + 1).padStart(2, '0')}-${String(d30.getDate()).padStart(2, '0')}`;
+      const day60Str = `${d60.getFullYear()}-${String(d60.getMonth() + 1).padStart(2, '0')}-${String(d60.getDate()).padStart(2, '0')}`;
+
+      const troopKeys = TROOP_GROUPS.map((g) => g.key);
+      const [membersRes, attRes, feeRes, finRes, pendingRes] = await Promise.all([
+        db.from('members').select('group_key, active, has_allergies').in('group_key', troopKeys),
+        db.from('attendance').select('group_key, present, date').in('group_key', troopKeys).gte('date', day60Str),
+        db.from('fee_payments').select('group_key, paid, amount').in('group_key', troopKeys).eq('period', period),
+        db.from('finance_entries').select('group_key, entry_type, amount, entry_date').in('group_key', troopKeys).gte('entry_date', `${prevPeriod}-01`).lte('entry_date', monthEnd),
+        db.from('join_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      ]);
+
+      const byGroup = new Map<string, any>();
+      TROOP_GROUPS.forEach((g) => byGroup.set(g.key, {
+        activeMembers: 0, archivedMembers: 0, allergyMembers: 0,
+        attPresent30: 0, attTotal30: 0, attPresent3060: 0, attTotal3060: 0,
+        feePaid: 0, feeCollected: 0, netThis: 0, netPrev: 0,
+      }));
+      (membersRes.data || []).forEach((m: any) => {
+        const b = byGroup.get(m.group_key); if (!b) return;
+        if (m.active) { b.activeMembers++; if (m.has_allergies) b.allergyMembers++; }
+        else b.archivedMembers++;
+      });
+      (attRes.data || []).forEach((r: any) => {
+        const b = byGroup.get(r.group_key); if (!b) return;
+        if (r.date >= day30Str) { b.attTotal30++; if (r.present) b.attPresent30++; }
+        else { b.attTotal3060++; if (r.present) b.attPresent3060++; }
+      });
+      (feeRes.data || []).forEach((r: any) => {
+        const b = byGroup.get(r.group_key); if (!b) return;
+        if (r.paid) { b.feePaid++; b.feeCollected += Number(r.amount || 0); }
+      });
+      (finRes.data || []).forEach((r: any) => {
+        const b = byGroup.get(r.group_key); if (!b) return;
+        const amt = signedAmount(r);
+        if (r.entry_date >= `${period}-01`) b.netThis += amt; else b.netPrev += amt;
+      });
+      renderOverview(byGroup, pendingRes.count || 0);
+    }
+    function renderOverview(byGroup: Map<string, any>, pendingApprovals: number) {
+      const groups = TROOP_GROUPS.map((g) => ({ ...g, ...byGroup.get(g.key) }));
+      const totalActive = groups.reduce((s, g) => s + g.activeMembers, 0);
+      const totalArchived = groups.reduce((s, g) => s + g.archivedMembers, 0);
+      const totalAllergy = groups.reduce((s, g) => s + g.allergyMembers, 0);
+      const attPresent30 = groups.reduce((s, g) => s + g.attPresent30, 0);
+      const attTotal30 = groups.reduce((s, g) => s + g.attTotal30, 0);
+      const attPresent3060 = groups.reduce((s, g) => s + g.attPresent3060, 0);
+      const attTotal3060 = groups.reduce((s, g) => s + g.attTotal3060, 0);
+      const rate30 = attTotal30 ? Math.round((attPresent30 / attTotal30) * 100) : null;
+      const ratePrev30 = attTotal3060 ? Math.round((attPresent3060 / attTotal3060) * 100) : null;
+      const totalFeePaid = groups.reduce((s, g) => s + g.feePaid, 0);
+      const totalCollected = groups.reduce((s, g) => s + g.feeCollected, 0);
+      const feePct = totalActive ? Math.round((totalFeePaid / totalActive) * 100) : 0;
+      const netThis = groups.reduce((s, g) => s + g.netThis, 0);
+      const netPrev = groups.reduce((s, g) => s + g.netPrev, 0);
+      const retentionPct = (totalActive + totalArchived) ? Math.round((totalActive / (totalActive + totalArchived)) * 100) : null;
+      const allergyPct = totalActive ? Math.round((totalAllergy / totalActive) * 100) : 0;
+      const groupsFullyPaid = groups.filter((g) => g.activeMembers > 0 && g.feePaid === g.activeMembers).length;
+      const largestGroup = groups.reduce((max, g) => (g.activeMembers > max.activeMembers ? g : max), groups[0]);
+      const largestSharePct = totalActive ? Math.round((largestGroup.activeMembers / totalActive) * 100) : 0;
+      const avgPerGroup = (totalActive / TROOP_GROUPS.length).toFixed(1);
+      const avgFeeAmount = totalFeePaid ? totalCollected / totalFeePaid : 0;
+
+      els.ovRatios.innerHTML = `
+        <div class="ws-stat"><span class="ws-stat-icon">#</span><span class="ws-stat-text"><span class="ws-stat-num">${avgPerGroup}</span><span class="ws-stat-label">Avg members / group</span></span></div>
+        <div class="ws-stat ws-stat--accent"><span class="ws-stat-icon">▲</span><span class="ws-stat-text"><span class="ws-stat-num">${largestSharePct}%</span><span class="ws-stat-label">Largest group: ${escapeHtml(largestGroup.en)}</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">$</span><span class="ws-stat-text"><span class="ws-stat-num">${avgFeeAmount.toFixed(2)}</span><span class="ws-stat-label">Avg fee collected / member</span></span></div>
+      `;
+
+      els.ovKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active members</span></div>
+          <span class="ws-dash-kpi-num">${totalActive}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${totalArchived} archived · across ${TROOP_GROUPS.length} troops</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Attendance (30d)</span></div>
+          <span class="ws-dash-kpi-num">${rate30 != null ? rate30 + '%' : '—'}</span>
+          ${rate30 != null ? dashDeltaBadge(ratePrev30 != null ? rate30 - ratePrev30 : null, 'pt') : '<span class="ws-dash-delta ws-dash-delta--flat">No sessions yet</span>'}
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Fees collected (mtd)</span></div>
+          <span class="ws-dash-kpi-num">${feePct}%</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${totalFeePaid}/${totalActive} paid · ${totalCollected.toFixed(0)} in</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">±</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
+          <span class="ws-dash-kpi-num">${netThis >= 0 ? '+' : '−'}${Math.abs(netThis).toFixed(0)}</span>
+          ${dashDeltaBadge(Math.round(netThis - netPrev))}
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⟳</span><span class="ws-dash-kpi-label">Retention rate</span></div>
+          <span class="ws-dash-kpi-num">${retentionPct != null ? retentionPct + '%' : '—'}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${totalActive} active of ${totalActive + totalArchived} ever registered</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⚑</span><span class="ws-dash-kpi-label">Allergy awareness</span></div>
+          <span class="ws-dash-kpi-num">${allergyPct}%</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${totalAllergy} of ${totalActive} active members</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">!</span><span class="ws-dash-kpi-label">Pending approvals</span></div>
+          <span class="ws-dash-kpi-num">${pendingApprovals}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${pendingApprovals ? 'waiting for review' : 'all caught up'}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Groups fully paid</span></div>
+          <span class="ws-dash-kpi-num">${groupsFullyPaid} / ${TROOP_GROUPS.length}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">100% collected this month</span>
+        </div>
+      `;
+
+      const maxActive = Math.max(1, ...groups.map((g) => g.activeMembers));
+      els.ovMembersChart.innerHTML = `
+        <div class="ws-dash-bars">
+          ${groups.map((g) => {
+            const pct = Math.round((g.activeMembers / maxActive) * 100);
+            const share = totalActive ? Math.round((g.activeMembers / totalActive) * 100) : 0;
+            return `
+              <div class="ws-dash-bar-col" title="${escapeHtml(g.en)}, ${g.activeMembers} active members (${share}% of troop)">
+                <span class="ws-dash-bar-pct">${g.activeMembers}</span>
+                <div class="ws-dash-bar-track"><div class="ws-dash-bar-fill" style="height:${g.activeMembers ? Math.max(pct, 4) : 0}%"></div></div>
+                <span class="ws-dash-bar-label">${escapeHtml(g.en)}</span>
+              </div>`;
+          }).join('')}
+        </div>
+      `;
+      els.ovFeesChart.innerHTML = `
+        <div class="ws-dash-bars">
+          ${groups.map((g) => {
+            const pct = g.activeMembers ? Math.round((g.feePaid / g.activeMembers) * 100) : 0;
+            return `
+              <div class="ws-dash-bar-col" title="${escapeHtml(g.en)}, ${pct}% collected (${g.feePaid}/${g.activeMembers})">
+                <span class="ws-dash-bar-pct">${g.activeMembers ? pct + '%' : '—'}</span>
+                <div class="ws-dash-bar-track"><div class="ws-dash-bar-fill" style="height:${pct ? Math.max(pct, 4) : 0}%"></div></div>
+                <span class="ws-dash-bar-label">${escapeHtml(g.en)}</span>
+              </div>`;
+          }).join('')}
+        </div>
+      `;
+
+      els.ovBody.innerHTML = groups.map((g) => {
+        const rate = g.attTotal30 ? Math.round((g.attPresent30 / g.attTotal30) * 100) : null;
+        const share = totalActive ? Math.round((g.activeMembers / totalActive) * 100) : 0;
+        const feeRate = g.activeMembers ? Math.round((g.feePaid / g.activeMembers) * 100) : 0;
+        return `
+          <tr>
+            <td data-label="Group">${escapeHtml(g.en)}</td>
+            <td data-label="Active">${g.activeMembers}</td>
+            <td data-label="% of Troop">${share}%</td>
+            <td data-label="Attendance (30d)">${rate != null ? rate + '%' : '—'}</td>
+            <td data-label="Fees Collected">${feeRate}% · ${g.feeCollected.toFixed(0)}</td>
+            <td data-label="Net Income">${g.netThis >= 0 ? '+' : '−'}${Math.abs(g.netThis).toFixed(0)}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    // ---------- Finance: the accounting system (every group) ---------------
+    async function ensureOrgSettings() {
+      if (state.settings) return state.settings;
+      const { data, error } = await db.from('org_finance_settings').select('*').eq('id', 'org').maybeSingle();
+      if (error) { console.error(error); return null; }
+      state.settings = data;
+      return data;
+    }
+    async function loadFinanceKpis() {
+      await ensureOrgSettings();
+      const [entriesRes, lastRecRes] = await Promise.all([
+        db.from('finance_entries').select('entry_type, amount, entry_date'),
+        db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).limit(1).maybeSingle(),
+      ]);
+      if (entriesRes.error) { console.error(entriesRes.error); showToast('Could not load finance totals.'); return; }
+      const rows = entriesRes.data || [];
+      const opening = Number(state.settings?.opening_balance || 0);
+      const running = opening + rows.reduce((s: number, r: any) => s + signedAmount(r), 0);
+      const lastRec = lastRecRes.data;
+      // The confirmed bank balance from the last reconciliation, carried
+      // forward by everything logged since — grounded in a real bank
+      // check, unlike Running Balance above (which never anchors to the
+      // actual bank, just opening balance + every entry ever).
+      const actualBalance = lastRec
+        ? Number(lastRec.statement_balance) + rows.filter((r: any) => r.entry_date > lastRec.as_of_date).reduce((s: number, r: any) => s + signedAmount(r), 0)
+        : running;
+
+      const now = new Date();
+      const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const prevD = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const prevPeriod = `${prevD.getFullYear()}-${String(prevD.getMonth() + 1).padStart(2, '0')}`;
+      const thisMonthRows = rows.filter((r: any) => String(r.entry_date).startsWith(period));
+      const incomeThis = thisMonthRows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
+      const expenseThis = thisMonthRows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
+      const netThis = incomeThis - expenseThis;
+      const netPrev = rows.filter((r: any) => String(r.entry_date).startsWith(prevPeriod)).reduce((s: number, r: any) => s + signedAmount(r), 0);
+
+      els.finKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">${'\u{1F3E6}'}</span><span class="ws-dash-kpi-label">Running Balance</span></div>
+          <span class="ws-dash-kpi-num">${fmt(running)}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">Opening ${fmt(opening)} · every group</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">↑</span><span class="ws-dash-kpi-label">Income (mtd)</span></div>
+          <span class="ws-dash-kpi-num">${fmt(incomeThis)}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${MONTHS[now.getMonth()].en} ${now.getFullYear()}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">↓</span><span class="ws-dash-kpi-label">Expenses (mtd)</span></div>
+          <span class="ws-dash-kpi-num">${fmt(expenseThis)}</span>
+          ${dashDeltaBadge(Math.round(netThis - netPrev))}
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Actual Running Balance</span></div>
+          <span class="ws-dash-kpi-num">${fmt(actualBalance)}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${lastRec ? `Since ${lastRec.as_of_date}'s reconciliation` : 'Not reconciled yet, same as Running Balance'}</span>
+        </div>
+      `;
+      els.openAmount.value = state.settings?.opening_balance ?? 0;
+      els.openDate.value = state.settings?.opening_balance_date || todayStr();
+    }
+    function bindOpeningBalanceForm() {
+      els.openSave.addEventListener('click', async () => {
+        const opening_balance = Number(els.openAmount.value || 0);
+        const opening_balance_date = els.openDate.value || todayStr();
+        const { error } = await db.from('org_finance_settings').update({ opening_balance, opening_balance_date, updated_by: state.session.user.id }).eq('id', 'org');
+        if (error) { showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return; }
+        state.settings.opening_balance = opening_balance;
+        state.settings.opening_balance_date = opening_balance_date;
+        showToast('Opening balance saved.');
+        await loadFinanceKpis();
+      });
+    }
+
+    // Same starter lists as loadGroupSettings() in the Leaders Workspace —
+    // Music/General aren't scouting troops, so they need their own
+    // categories rather than an empty dropdown the first time anyone (here,
+    // possibly an admin before any leader has even opened that group's own
+    // Finance tab) tries to log something against them.
+    const GROUP_DEFAULT_CATEGORIES: Record<string, { expense: string[]; income: string[] }> = {
+      [MUSIC_GROUP_KEY]: {
+        expense: ['Band Payouts', 'Equipment', 'Transport', 'Repairs', 'Refreshments', 'Miscellaneous'],
+        income: ['Wedding', 'Event', 'Donation', 'Miscellaneous'],
+      },
+      [GENERAL_GROUP_KEY]: {
+        expense: ['Venue Maintenance', 'Furniture & Equipment', 'Utilities', 'Repairs', 'Supplies', 'Other'],
+        income: ['Donations', 'Fundraising', 'Other'],
+      },
+    };
+    async function updateTxCategoryOptions() {
+      const groupKey = els.txGroup.value;
+      const { data } = await db.from('group_settings').select('*').eq('group_key', groupKey).maybeSingle();
+      const type = els.txType.value === 'income' ? 'income' : 'expense';
+      const stored = data ? (type === 'income' ? data.income_categories : data.expense_categories) : null;
+      const list = stored?.length ? stored : (GROUP_DEFAULT_CATEGORIES[groupKey]?.[type] || []);
+      els.txCategory.innerHTML = list.length
+        ? list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
+        : `<option value="">No categories yet, add some in ${escapeHtml(GROUPS.find((g) => g.key === groupKey)?.en || groupKey)}'s Finance › Categories</option>`;
+    }
+    function bindTransactionForm() {
+      els.txGroup.innerHTML = GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
+      updateTxCategoryOptions();
+      els.txGroup.addEventListener('change', updateTxCategoryOptions);
+      els.txType.addEventListener('change', updateTxCategoryOptions);
+      els.txForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const payload = {
+          group_key: els.txGroup.value,
+          entry_type: els.txType.value,
+          category: els.txCategory.value.trim() || null,
+          amount: Number(els.txAmount.value),
+          entry_date: els.txDate.value,
+          description: els.txDescription.value.trim() || null,
+        };
+        if (!payload.amount || !payload.entry_date) { showToast('Amount and date are required.'); return; }
+        els.txSubmit.disabled = true;
+        const { error } = await db.from('finance_entries').insert({ ...payload, created_by: state.session.user.id });
+        els.txSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not add, ' + (error.message || 'unknown error') + '.'); return; }
+        showToast('Added.');
+        els.txAmount.value = '';
+        els.txDescription.value = '';
+        await loadFinancePeriod();
+        await loadFinanceKpis();
+      });
+    }
+
+    async function loadFinancePeriod() {
+      populatePeriodSelects(els.finMonth, els.finYear, true);
+      const { start, end } = periodRange(els.finMonth, els.finYear);
+      const { data, error } = await db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, description')
+        .gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: false });
+      if (error) { console.error(error); showToast('Could not load finance.'); return; }
+      renderFinancePeriod(data || []);
+    }
+    function renderFinancePeriod(rows: any[]) {
+      const income = rows.filter((r) => r.entry_type === 'income').reduce((s, r) => s + Number(r.amount), 0);
+      const expense = rows.filter((r) => r.entry_type === 'expense').reduce((s, r) => s + Number(r.amount), 0);
+      els.finStats.innerHTML = `
+        <div class="ws-stat ws-stat--accent"><span class="ws-stat-icon">↑</span><span class="ws-stat-text"><span class="ws-stat-num">${fmt(income)}</span><span class="ws-stat-label">Income</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">↓</span><span class="ws-stat-text"><span class="ws-stat-num">${fmt(expense)}</span><span class="ws-stat-label">Expenses</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">=</span><span class="ws-stat-text"><span class="ws-stat-num">${fmt(income - expense)}</span><span class="ws-stat-label">Net</span></span></div>
+      `;
+      const byGroup = new Map<string, { income: number; expense: number }>();
+      GROUPS.forEach((g) => byGroup.set(g.key, { income: 0, expense: 0 }));
+      rows.forEach((r) => {
+        const b = byGroup.get(r.group_key); if (!b) return;
+        if (r.entry_type === 'income') b.income += Number(r.amount); else b.expense += Number(r.amount);
+      });
+      els.finGroupBody.innerHTML = GROUPS.map((g) => {
+        const b = byGroup.get(g.key)!;
+        return `<tr><td data-label="Group">${escapeHtml(g.en)}</td><td data-label="Income">${fmt(b.income)}</td><td data-label="Expenses">${fmt(b.expense)}</td><td data-label="Net">${fmt(b.income - b.expense)}</td></tr>`;
+      }).join('');
+      els.finBody.innerHTML = rows.length
+        ? rows.map((r) => {
+            const g = GROUPS.find((x) => x.key === r.group_key);
+            return `
+              <tr>
+                <td data-label="Date">${r.entry_date}</td>
+                <td data-label="Group">${escapeHtml(g ? g.en : r.group_key)}</td>
+                <td data-label="Type">${r.entry_type === 'income' ? 'Income' : 'Expense'}</td>
+                <td data-label="Category">${escapeHtml(r.category || '—')}</td>
+                <td data-label="Description">${escapeHtml(r.description || '—')}</td>
+                <td data-label="Amount">${fmt(r.amount)}</td>
+              </tr>`;
+          }).join('')
+        : '<tr><td colspan="6" class="ws-empty">No entries this period.</td></tr>';
+    }
+
+    // ---------- Reconcile: compare the system's balance to the real bank
+    // balance as of a date, and — since not every entry is a bank
+    // transaction (cash, in-hand group funds, etc.) — true up any gap with
+    // a single adjustment entry rather than ticking off individual rows. --
+    async function compareReconcile() {
+      await ensureOrgSettings();
+      if (!els.recAsof.value) els.recAsof.value = todayStr();
+      const asOf = els.recAsof.value;
+      const { data, error } = await db.from('finance_entries').select('entry_type, amount, entry_date').lte('entry_date', asOf);
+      if (error) { console.error(error); showToast('Could not load finance totals.'); return; }
+      const opening = Number(state.settings?.opening_balance || 0);
+      const system = opening + (data || []).reduce((s: number, r: any) => s + signedAmount(r), 0);
+      state.recSystemBalance = system;
+
+      const bank = els.recBank.value === '' ? null : Number(els.recBank.value);
+      const diff = bank == null ? null : bank - system;
+      state.recDiff = diff;
+      els.recStats.innerHTML = `
+        <div class="ws-stat"><span class="ws-stat-icon">${'\u{1F3E6}'}</span><span class="ws-stat-text"><span class="ws-stat-num">${fmt(system)}</span><span class="ws-stat-label">System Balance (as of this date)</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">✓</span><span class="ws-stat-text"><span class="ws-stat-num">${bank == null ? '—' : fmt(bank)}</span><span class="ws-stat-label">Actual Bank Balance</span></span></div>
+        <div class="ws-stat ${diff != null && Math.abs(diff) < 0.005 ? 'ws-stat--accent' : ''}"><span class="ws-stat-icon">${diff == null ? '?' : (Math.abs(diff) < 0.005 ? '✓' : '⚠')}</span><span class="ws-stat-text"><span class="ws-stat-num">${diff == null ? '—' : fmt(diff)}</span><span class="ws-stat-label">Difference</span></span></div>
+      `;
+      const matches = diff != null && Math.abs(diff) < 0.005;
+      els.recAdjustBlock.toggleAttribute('hidden', diff == null || matches);
+      els.recMatchBlock.toggleAttribute('hidden', !matches);
+    }
+    async function saveReconciliation(adjustmentEntryId: string | null, note: string | null) {
+      const asOf = els.recAsof.value;
+      const bank = Number(els.recBank.value);
+      const { error } = await db.from('finance_reconciliations').insert({
+        as_of_date: asOf, statement_balance: bank, system_balance: state.recSystemBalance,
+        difference: state.recDiff, notes: note, adjustment_entry_id: adjustmentEntryId,
+        created_by: state.session.user.id,
+      });
+      if (error) { showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return false; }
+      return true;
+    }
+    function renderReconcileHistory(rows: any[]) {
+      if (!rows.length) { els.recHistoryBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No reconciliations saved yet.</td></tr>'; return; }
+      els.recHistoryBody.innerHTML = rows.map((r: any) => `
+        <tr>
+          <td data-label="As of">${r.as_of_date}</td>
+          <td data-label="Bank Balance">${fmt(r.statement_balance)}</td>
+          <td data-label="System Balance">${fmt(r.system_balance)}</td>
+          <td data-label="Adjustment">${r.adjustment_entry_id ? fmt(r.difference) : '—'}</td>
+          <td data-label="Saved">${new Date(r.created_at).toLocaleDateString()}</td>
+        </tr>
+      `).join('');
+    }
+    async function loadReconcileHistory() {
+      const { data, error } = await db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).limit(12);
+      if (error) { console.error(error); return; }
+      renderReconcileHistory(data || []);
+    }
+    async function loadAdjustmentEntries() {
+      const [entriesRes, profilesRes] = await Promise.all([
+        db.from('finance_entries').select('*').eq('is_adjustment', true).order('entry_date', { ascending: false }),
+        db.from('profiles').select('id, name'),
+      ]);
+      if (entriesRes.error) { console.error(entriesRes.error); return; }
+      const nameById: Map<string, string> = new Map((profilesRes.data || []).map((p: any) => [p.id, p.name]));
+      renderAdjustmentEntries(entriesRes.data || [], nameById);
+    }
+    function renderAdjustmentEntries(rows: any[], nameById: Map<string, string>) {
+      if (!rows.length) { els.adjBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No adjustments posted yet.</td></tr>'; return; }
+      els.adjBody.innerHTML = rows.map((r: any) => {
+        const g = GROUPS.find((x) => x.key === r.group_key);
+        return `
+          <tr>
+            <td data-label="Date">${r.entry_date}</td>
+            <td data-label="Group">${escapeHtml(g ? g.en : r.group_key)}</td>
+            <td data-label="Type">${r.entry_type === 'income' ? 'Income' : 'Expense'}</td>
+            <td data-label="Amount">${fmt(r.amount)}</td>
+            <td data-label="Note">${escapeHtml(r.description || '—')}</td>
+            <td data-label="Posted by">${escapeHtml(nameById.get(r.created_by) || '—')}</td>
+          </tr>`;
+      }).join('');
+    }
+    function bindReconcile() {
+      els.recAdjustGroup.innerHTML = GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
+      els.recLoad.addEventListener('click', compareReconcile);
+      els.recBank.addEventListener('input', compareReconcile);
+
+      els.recSave.addEventListener('click', async () => {
+        const diff = state.recDiff;
+        if (diff == null) return;
+        els.recSave.disabled = true;
+        const note = els.recAdjustNote.value.trim() || null;
+        const { data: inserted, error } = await db.from('finance_entries').insert({
+          group_key: els.recAdjustGroup.value,
+          entry_type: diff >= 0 ? 'income' : 'expense',
+          category: 'Reconciliation Adjustment',
+          is_adjustment: true,
+          amount: Math.abs(diff),
+          entry_date: els.recAsof.value,
+          description: note || `Reconciliation adjustment as of ${els.recAsof.value}`,
+          created_by: state.session.user.id,
+        }).select().single();
+        if (error) { showToast('Could not post the adjustment, ' + (error.message || 'unknown error') + '.'); els.recSave.disabled = false; return; }
+        const ok = await saveReconciliation(inserted?.id || null, note);
+        els.recSave.disabled = false;
+        if (!ok) return;
+        showToast(`Adjustment posted to ${GROUPS.find((g) => g.key === els.recAdjustGroup.value)?.en} and reconciliation saved.`);
+        els.recAdjustNote.value = '';
+        await compareReconcile();
+        await loadFinanceKpis();
+        await loadFinancePeriod();
+        await loadReconcileHistory();
+        await loadAdjustmentEntries();
+      });
+
+      els.recSaveMatch.addEventListener('click', async () => {
+        els.recSaveMatch.disabled = true;
+        const ok = await saveReconciliation(null, null);
+        els.recSaveMatch.disabled = false;
+        if (!ok) return;
+        showToast('Saved, balances match.');
+        await loadReconcileHistory();
+      });
+    }
+
+    // ---------- Reports (Income Statement includes Music; Fees/Attendance
+    // stay troop-only) --------------------------------------------------------
+    async function downloadFinanceReport() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const { data, error } = await db.from('finance_entries').select('group_key, entry_type, amount').gte('entry_date', start).lte('entry_date', end);
+        if (error) throw error;
+        const rows = data || [];
+        const byGroup = new Map<string, { income: number; expense: number }>();
+        GROUPS.forEach((g) => byGroup.set(g.key, { income: 0, expense: 0 }));
+        rows.forEach((r: any) => {
+          const b = byGroup.get(r.group_key); if (!b) return;
+          if (r.entry_type === 'income') b.income += Number(r.amount); else b.expense += Number(r.amount);
+        });
+        const totalIncome = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const totalExpense = rows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const bodyRows = GROUPS.map((g) => {
+          const b = byGroup.get(g.key)!;
+          return [g.en, b.income.toFixed(2), b.expense.toFixed(2), (b.income - b.expense).toFixed(2)];
+        });
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Income Statement', label);
+        autoTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+          footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
+          columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
+          head: [['Group', 'Income', 'Expenses', 'Net']],
+          body: rows.length ? bodyRows : [['No data available', '', '', '']],
+          foot: [['Org Total', totalIncome.toFixed(2), totalExpense.toFixed(2), (totalIncome - totalExpense).toFixed(2)]],
+        });
+        doc.save(pdfFilename('Income-Statement', label));
+      } catch (err) {
+        console.error('finance report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    async function downloadFeesReport() {
+      try {
+        const { period, label, isYear } = periodRange(els.reportMonth, els.reportYear);
+        const troopKeys = TROOP_GROUPS.map((g) => g.key);
+        const membersRes = await db.from('members').select('id, full_name, group_key').eq('active', true).in('group_key', troopKeys);
+        const members = membersRes.data || [];
+        const doc = new jsPDF();
+        if (!isYear) {
+          const { data } = await db.from('fee_payments').select('member_id, paid, amount').eq('period', period);
+          const map: Map<string, any> = new Map((data || []).map((r: any) => [r.member_id, r]));
+          let paidCount = 0, collected = 0;
+          const rows = members.map((m: any) => {
+            const rec = map.get(m.id);
+            const g = GROUPS.find((x) => x.key === m.group_key);
+            if (rec && rec.paid) { paidCount++; collected += Number(rec.amount || 0); }
+            return [m.full_name, g ? g.en : m.group_key, rec && rec.paid ? 'Paid' : 'Unpaid', rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'];
+          });
+          const y = pdfHeader(doc, 'Monthly Fees', `${label}, ${paidCount} of ${members.length} paid, ${collected.toFixed(2)} collected`);
+          autoTable(doc, {
+            startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+            head: [['Member', 'Group', 'Status', 'Amount']], body: rows.length ? rows : [['No data available', '', '', '']],
+          });
+          doc.save(pdfFilename('Monthly-Fees', label));
+        } else {
+          const year = els.reportYear.value;
+          const { data } = await db.from('fee_payments').select('member_id, paid, amount').like('period', `${year}-%`);
+          const byMember = new Map<string, { months: number; total: number }>();
+          (data || []).forEach((r: any) => {
+            if (!r.paid) return;
+            const cur = byMember.get(r.member_id) || { months: 0, total: 0 };
+            cur.months++; cur.total += Number(r.amount || 0);
+            byMember.set(r.member_id, cur);
+          });
+          const rows = members.map((m: any) => {
+            const g = GROUPS.find((x) => x.key === m.group_key);
+            const s = byMember.get(m.id) || { months: 0, total: 0 };
+            return [m.full_name, g ? g.en : m.group_key, `${s.months} / 12`, s.total.toFixed(2)];
+          });
+          const grandTotal = members.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
+          const y = pdfHeader(doc, 'Yearly Fees Summary', `${label}, ${grandTotal.toFixed(2)} collected total`);
+          autoTable(doc, {
+            startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+            head: [['Member', 'Group', 'Months Paid', 'Total']], body: rows.length ? rows : [['No data available', '', '', '']],
+          });
+          doc.save(pdfFilename('Yearly-Fees', label));
+        }
+      } catch (err) {
+        console.error('fees report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    async function downloadAttendanceReport() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const troopKeys = TROOP_GROUPS.map((g) => g.key);
+        const [membersRes, attRes] = await Promise.all([
+          db.from('members').select('id, full_name, group_key').eq('active', true).in('group_key', troopKeys),
+          db.from('attendance').select('member_id, group_key, present, date').in('group_key', troopKeys).gte('date', start).lte('date', end),
+        ]);
+        const members = membersRes.data || [];
+        const rows = attRes.data || [];
+        const byGroupSessions = new Map<string, Set<string>>();
+        TROOP_GROUPS.forEach((g) => byGroupSessions.set(g.key, new Set()));
+        const presentByMember = new Map<string, number>();
+        rows.forEach((r: any) => {
+          const set = byGroupSessions.get(r.group_key);
+          if (set) set.add(r.date);
+          if (r.present) presentByMember.set(r.member_id, (presentByMember.get(r.member_id) || 0) + 1);
+        });
+        const totalSessions = Array.from(byGroupSessions.values()).reduce((s, set) => s + set.size, 0);
+        const bodyRows = members.map((m: any) => {
+          const g = GROUPS.find((x) => x.key === m.group_key);
+          const sessions = byGroupSessions.get(m.group_key)?.size || 0;
+          const present = presentByMember.get(m.id) || 0;
+          const rate = sessions ? Math.round((present / sessions) * 100) : 0;
+          return [m.full_name, g ? g.en : m.group_key, `${present} / ${sessions}`, `${rate}%`];
+        });
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Attendance', `${label}, ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held across the 5 troops`);
+        autoTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+          head: [['Member', 'Group', 'Present', 'Rate']], body: bodyRows.length ? bodyRows : [['No data available', '', '', '']],
+        });
+        doc.save(pdfFilename('Attendance', label));
+      } catch (err) {
+        console.error('attendance report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    // The one report that ties everything together: opening balance,
+    // today's running balance, the latest reconciliation (bank vs. system,
+    // and when it was last done), net income for the selected period, and
+    // the full by-group breakdown — one document instead of piecing it
+    // together from the Finance tab.
+    async function downloadFullAccountingReport() {
+      try {
+        await ensureOrgSettings();
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const [allEntriesRes, periodEntriesRes, lastRecRes] = await Promise.all([
+          db.from('finance_entries').select('entry_type, amount, entry_date'),
+          db.from('finance_entries').select('group_key, entry_type, amount').gte('entry_date', start).lte('entry_date', end),
+          db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).limit(1).maybeSingle(),
+        ]);
+        if (allEntriesRes.error) throw allEntriesRes.error;
+        const opening = Number(state.settings?.opening_balance || 0);
+        const running = opening + (allEntriesRes.data || []).reduce((s: number, r: any) => s + signedAmount(r), 0);
+        const lastRec = lastRecRes.data;
+
+        const periodRows = periodEntriesRes.data || [];
+        const periodIncome = periodRows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const periodExpense = periodRows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const byGroup = new Map<string, { income: number; expense: number }>();
+        GROUPS.forEach((g) => byGroup.set(g.key, { income: 0, expense: 0 }));
+        periodRows.forEach((r: any) => {
+          const b = byGroup.get(r.group_key); if (!b) return;
+          if (r.entry_type === 'income') b.income += Number(r.amount); else b.expense += Number(r.amount);
+        });
+
+        const doc = new jsPDF();
+        let y = pdfHeader(doc, 'Full Accounting Report', `${label} · generated ${new Date().toLocaleString()}`);
+
+        autoTable(doc, {
+          startY: y, theme: 'grid', styles: { fontSize: 10 }, showHead: false,
+          columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } },
+          body: [
+            ['Opening balance', `${fmt(opening)}  (as of ${state.settings?.opening_balance_date || '—'})`],
+            ['Running balance (today, every group)', fmt(running)],
+            ['Last reconciled', lastRec ? lastRec.as_of_date : 'Never reconciled'],
+            ['Bank balance (per last reconciliation)', lastRec ? fmt(lastRec.statement_balance) : '—'],
+            ["System's balance (per last reconciliation)", lastRec ? fmt(lastRec.system_balance) : '—'],
+            ['Adjustment posted', lastRec && lastRec.adjustment_entry_id ? fmt(lastRec.difference) : (lastRec ? 'None needed, matched' : '—')],
+          ],
+        });
+
+        y = pdfNextY(doc, y);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...PDF_BRAND);
+        doc.text(`Net Income, ${label}`, 14, y);
+        autoTable(doc, {
+          startY: y + 4, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+          columnStyles: { 0: { halign: 'right' }, 1: { halign: 'right' }, 2: { halign: 'right' } },
+          head: [['Income', 'Expenses', 'Net']],
+          body: [[fmt(periodIncome), fmt(periodExpense), fmt(periodIncome - periodExpense)]],
+        });
+
+        y = pdfNextY(doc, y);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...PDF_BRAND);
+        doc.text(`By Group, ${label}`, 14, y);
+        const groupRows = GROUPS.map((g) => {
+          const b = byGroup.get(g.key)!;
+          return [g.en, fmt(b.income), fmt(b.expense), fmt(b.income - b.expense)];
+        });
+        autoTable(doc, {
+          startY: y + 4, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+          footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
+          columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
+          head: [['Group', 'Income', 'Expenses', 'Net']],
+          body: groupRows,
+          foot: [['Org Total', fmt(periodIncome), fmt(periodExpense), fmt(periodIncome - periodExpense)]],
+        });
+
+        doc.save(pdfFilename('Full-Accounting-Report', label));
+      } catch (err) {
+        console.error('full accounting report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    function bindReports() {
+      populatePeriodSelects(els.reportMonth, els.reportYear, true);
+      el('[data-report-full]').addEventListener('click', downloadFullAccountingReport);
+      el('[data-report-finance]').addEventListener('click', downloadFinanceReport);
+      el('[data-report-fees]').addEventListener('click', downloadFeesReport);
+      el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);
+    }
+
+    // ---------- Curriculum: next meeting per troop --------------------------
+    async function loadCurriculum() {
+      const troopKeys = TROOP_GROUPS.map((g) => g.key);
+      const { data, error } = await db.from('curriculum_meetings').select('group_key, date, theme, activities')
+        .in('group_key', troopKeys).gte('date', todayStr()).order('date', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load curriculum.'); return; }
+      const byGroup = new Map<string, any>();
+      (data || []).forEach((r: any) => { if (!byGroup.has(r.group_key)) byGroup.set(r.group_key, r); });
+      renderCurriculum(byGroup);
+    }
+    function renderCurriculum(byGroup: Map<string, any>) {
+      els.currBody.innerHTML = TROOP_GROUPS.map((g) => {
+        const m = byGroup.get(g.key);
+        if (!m) return `<tr><td colspan="4" class="ws-empty">${escapeHtml(g.en)}: nothing planned yet</td></tr>`;
+        const d = parseDateStr(m.date);
+        const dateLabel = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}`;
+        return `
+          <tr>
+            <td data-label="Group">${escapeHtml(g.en)}</td>
+            <td data-label="Next Meeting">${dateLabel}</td>
+            <td data-label="Theme">${escapeHtml(m.theme || '—')}</td>
+            <td data-label="Activities">${(m.activities || []).length}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    // ---------- Roster: the 5 troops' full roster, with filters -------------
+    async function loadRoster() {
+      const { data, error } = await db.from('members').select('*').order('full_name', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load the roster.'); return; }
+      state.ovMembers = data || [];
+      renderRoster();
+    }
+    function renderRoster() {
+      const groupFilter = els.rosterGroup.value;
+      const statusFilter = els.rosterStatus.value;
+      let rows = state.ovMembers;
+      if (groupFilter) rows = rows.filter((m: any) => m.group_key === groupFilter);
+      if (statusFilter === 'active') rows = rows.filter((m: any) => m.active);
+      else if (statusFilter === 'archived') rows = rows.filter((m: any) => !m.active);
+      if (!rows.length) { els.rosterBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No members match these filters.</td></tr>'; return; }
+      els.rosterBody.innerHTML = rows.map((m: any) => {
+        const g = GROUPS.find((x) => x.key === m.group_key);
+        return `
+          <tr>
+            <td data-label="Name">${escapeHtml(m.full_name)}</td>
+            <td data-label="Group">${escapeHtml(g ? g.en : m.group_key)}</td>
+            <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
+            <td data-label="Guardian 1">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
+            <td data-label="Allergies">${m.has_allergies
+                ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ', ' + escapeHtml(m.allergy_detail) : ''}</span>`
+                : '—'}</td>
+            <td data-label="Status">${m.active ? 'Active' : (m.archived_reason === 'inactive' ? 'Auto-archived' : 'Archived')}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    // ---------- People: approve leaders/admins, assign groups ---------------
+    async function loadPeople() {
+      const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load people.'); return; }
+      renderPeople(data || []);
+    }
+    function peopleGroupsCellHTML(groups: string[], isAdmin: boolean) {
+      if (isAdmin) return '<p class="ws-admin-note">All groups (admin)</p>';
+      return GROUPS.map((g) => `
+        <label class="ws-group-check">
+          <input type="checkbox" value="${g.key}" ${groups.includes(g.key) ? 'checked' : ''} />
+          ${escapeHtml(g.en)}
+        </label>
+      `).join('');
+    }
+    function renderPeople(profiles: any) {
+      els.peopleBody.innerHTML = profiles.map((p: any) => `
+        <tr data-profile-id="${p.id}" class="${p.role === 'pending' ? 'ws-row--pending' : ''}">
+          <td data-label="Name">${escapeHtml(p.name)}</td>
+          <td data-label="Role">
+            <select data-people-role>
+              <option value="pending" ${p.role === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="leader" ${p.role === 'leader' ? 'selected' : ''}>Leader</option>
+              <option value="admin" ${p.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+          </td>
+          <td class="ws-admin-groups" data-label="Groups" data-groups="${p.groups.join(',')}">
+            ${peopleGroupsCellHTML(p.groups, p.role === 'admin')}
+          </td>
+          <td class="ws-row-actions">
+            <button type="button" class="btn-primary" data-people-save>Save</button>
+            ${p.id !== state.session.user.id ? '<button type="button" class="ws-row-del" data-people-remove title="Remove access">×</button>' : ''}
+          </td>
+        </tr>
+      `).join('');
+
+      els.peopleBody.querySelectorAll('tr').forEach((row: any) => {
+        const id = row.dataset.profileId;
+        const name = row.querySelector('[data-label="Name"]').textContent;
+        const groupsCell = row.querySelector('.ws-admin-groups');
+        row.querySelector('[data-people-role]').addEventListener('change', (e: any) => {
+          const savedGroups = (groupsCell.dataset.groups || '').split(',').filter(Boolean);
+          groupsCell.innerHTML = peopleGroupsCellHTML(savedGroups, e.target.value === 'admin');
+        });
+        row.querySelector('[data-people-save]').addEventListener('click', async () => {
+          const role = row.querySelector('[data-people-role]').value;
+          const groups = role === 'admin'
+            ? []
+            : Array.from(row.querySelectorAll('.ws-group-check input:checked')).map((i: any) => i.value);
+          const { error } = await db.from('profiles').update({ role, groups }).eq('id', id);
+          if (error) { console.error(error); showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return; }
+          showToast('Saved.');
+          if (id === state.session.user.id && role !== 'admin') {
+            // Demoted themselves out of admin — this console isn't reachable
+            // any more, so land back on the Leaders Workspace instead of a
+            // page that will just show "Admin access only" on next load.
+            window.location.replace('/leaders');
+          }
+        });
+        row.querySelector('[data-people-remove]')?.addEventListener('click', async () => {
+          if (!confirm(`Remove ${name}'s access? They'll be signed out of every group and land back on the "waiting for approval" screen, you can re-approve them any time from here. This doesn't delete their account.`)) return;
+          const { error } = await db.from('profiles').update({ role: 'pending', groups: [] }).eq('id', id);
+          if (error) { console.error(error); showToast('Could not remove access, ' + (error.message || 'unknown error') + '.'); return; }
+          showToast(`${name}'s access removed.`);
+          await loadPeople();
+        });
+      });
+    }
+
+    // ---------- Tabs -------------------------------------------------------
+    function loadActiveTabData() {
+      const tab = state.activeTab;
+      if (tab === 'overview') loadOverview();
+      if (tab === 'finance') { loadFinanceKpis(); loadFinancePeriod(); compareReconcile(); loadReconcileHistory(); loadAdjustmentEntries(); }
+      if (tab === 'curriculum') loadCurriculum();
+      if (tab === 'roster') loadRoster();
+      if (tab === 'people') loadPeople();
+    }
+    function setTab(tab: string) {
+      state.activeTab = tab;
+      els.tabs.querySelectorAll('.ws-tab').forEach((b: any) => b.classList.toggle('ws-tab--active', b.dataset.tab === tab));
+      document.querySelectorAll('.ws-panel').forEach((p: any) => p.toggleAttribute('hidden', p.dataset.panel !== tab));
+      loadActiveTabData();
+    }
+    function bindTabs() {
+      els.tabs.querySelectorAll('.ws-tab').forEach((btn: any) => {
+        btn.addEventListener('click', () => setTab(btn.dataset.tab));
+      });
+    }
+
+    // ---------- Boot -------------------------------------------------------
+    let boundOnce = false;
+    async function init() {
+      cacheEls();
+      if (!supabaseConfigured) { showToast('Not connected to the database.'); return; }
+
+      const session = await getSession();
+      if (!session) { window.location.replace('/leaders'); return; }
+      if (isSessionExpired()) { await signOut(); window.location.replace('/leaders?expired=1'); return; }
+      state.session = session;
+      setTimeout(async () => {
+        await signOut();
+        window.location.replace('/leaders?expired=1');
+      }, msUntilSessionExpiry());
+
+      const { data: profile } = await db.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+      state.profile = profile;
+      state.isAdmin = profile?.role === 'admin';
+
+      els.shell.removeAttribute('hidden');
+
+      if (!state.isAdmin) {
+        els.denied.removeAttribute('hidden');
+        els.signoutDenied.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
+        return;
+      }
+
+      els.main.removeAttribute('hidden');
+      const initials = (profile.name || '?').trim().split(/\s+/).map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
+      els.accountBtn.textContent = initials || '?';
+      els.who.innerHTML = `<span class="ws-account-name">${escapeHtml(profile.name)}</span><span class="ws-account-role">admin</span>`;
+
+      if (!boundOnce) {
+        boundOnce = true;
+        els.accountBtn.addEventListener('click', () => els.accountMenu.toggleAttribute('hidden'));
+        document.addEventListener('click', (e: any) => {
+          if (els.accountMenu.hidden) return;
+          if (e.target.closest('.ws-account')) return;
+          els.accountMenu.setAttribute('hidden', '');
+        });
+        els.signout.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
+
+        bindTabs();
+        bindOpeningBalanceForm();
+        bindTransactionForm();
+        bindReconcile();
+        bindReports();
+        els.finMonth.addEventListener('change', loadFinancePeriod);
+        els.finYear.addEventListener('change', loadFinancePeriod);
+        els.rosterGroup.innerHTML = '<option value="">All Groups</option>' + GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
+        els.rosterGroup.addEventListener('change', renderRoster);
+        els.rosterStatus.addEventListener('change', renderRoster);
+        bindTableSearch(els.rosterSearch, els.rosterBody);
+      }
+
+      setTab('overview');
+    }
+
+    document.addEventListener('astro:page-load', init);
+  </script>
+</BaseLayout>

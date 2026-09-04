@@ -3,16 +3,19 @@
 // (not the old shared-password localStorage flag). Tabs: Dashboard,
 // Roster, Archive, Approvals, Attendance, Fees, Curriculum (embedded,
 // shared per group), Finance (Ledger/Categories), Library
-// (Documents/Lessons), Reports, and (admin only) Admin.
+// (Documents/Lessons), Reports. Two of the switchable groups aren't
+// scouting troops (see MUSIC_GROUP_KEY/GENERAL_GROUP_KEY in
+// curriculum/constants), so they only ever show Roster and Finance:
+// Music for band members and event/wedding income + payouts, General
+// for the board of directors/leadership and shared org-wide costs.
+// Org-wide oversight, the full accounting layer (opening balance,
+// reconciliation, every group combined), and access approval live in
+// the separate /admin console, not here — an admin gets a link to it
+// in the header.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
 import { loadPortalData, TOOL_LABELS } from '../../lib/leader-portal';
 import { workspaceMarqueePhotos } from '../../lib/scenic-photos';
-// The client <script> below imports its own copy of GROUPS (Astro's
-// frontmatter and its page script are separate execution contexts) —
-// this one is just for the Admin > Roster group-filter <option>s, built
-// at compile time same as everything else in this frontmatter.
-import { GROUPS } from '../../lib/curriculum/constants';
 
 // Lessons tab reads the same build-time markdown as the old portal did —
 // shared, troop-wide Drive links, not per-group data.
@@ -34,7 +37,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       <div class="ws-pending-card">
         <h2 class="section-h2">Waiting for approval</h2>
         <p class="ws-pending-text">
-          Your account is created — an admin needs to approve you and assign your group before you can get in.
+          Your account is created, an admin needs to approve you and assign your group before you can get in.
         </p>
         <div class="ws-pending-actions">
           <button type="button" class="btn-primary" data-ws-check-again>Check again</button>
@@ -51,6 +54,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </div>
         <div class="ws-header-right">
           <div class="ws-group-switch" data-ws-group-switch></div>
+          <a class="ws-guide-link" href="/admin" data-admin-only hidden title="Admin, access, org-wide reports, and the accounting system">
+            <Icon name="pin" size={14} strokeWidth={1.8} /> Admin
+          </a>
           <a class="ws-guide-link" href="/leaders/guide" target="_blank" rel="noopener" title="Leaders Workspace Guide">
             <Icon name="compass" size={14} strokeWidth={1.8} /> Guide
           </a>
@@ -75,7 +81,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="finance"><Icon name="bank" size={16} strokeWidth={1.8} /> Finance</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
-        <button type="button" class="ws-tab" data-tab="admin" data-admin-only hidden><Icon name="pin" size={16} strokeWidth={1.8} /> Admin</button>
       </nav>
 
       <!-- Shown above every tab's content (not just the header switcher up
@@ -151,6 +156,22 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </section>
 
         <section class="ws-panel" data-panel="roster" hidden>
+          <!-- Music and General only — most band members/board members are
+               already scouts or leaders in one of the 5 troops, so this
+               copies their name/phone across instead of retyping it.
+               Toggled by updateTabVisibility(). -->
+          <div class="ws-member-form" data-copy-member-block hidden>
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title">Add from another group's roster</p>
+            <p class="ws-att-hint">Many people here are already registered in one of the 5 troops, check off as many as you need instead of retyping their info, one at a time. Each still becomes its own entry here (no attendance/fee history carries over). Already-copied members drop off this list.</p>
+            <input type="search" class="ws-search" data-copy-member-search placeholder="Search members…" />
+            <div class="ws-pick-list" data-copy-member-list></div>
+            <div class="ws-form-actions">
+              <span class="ws-inline-summary" data-copy-member-count></span>
+              <button type="button" class="btn-primary" data-copy-member-btn disabled>Copy selected</button>
+            </div>
+          </div>
+
           <form class="ws-member-form" data-roster-form>
             <div class="ws-member-form-bar" aria-hidden="true"></div>
             <p class="ws-member-form-title" data-member-form-title>Add a member</p>
@@ -159,6 +180,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <label class="ws-field">
                 <span>Full name *</span>
                 <input type="text" data-m-name required />
+              </label>
+              <label class="ws-field">
+                <span>Phone</span>
+                <input type="tel" data-m-phone placeholder="Their own number" />
               </label>
               <label class="ws-field">
                 <span>Date of birth</span>
@@ -173,11 +198,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                   <option>Other</option>
                 </select>
               </label>
-              <label class="ws-field">
-                <span>Guardian 1 phone *</span>
-                <input type="tel" data-m-g1-phone required />
-              </label>
             </div>
+
+            <label class="ws-field ws-field--full">
+              <span>Guardian 1 phone *</span>
+              <input type="tel" data-m-g1-phone required />
+            </label>
 
             <div class="ws-form-grid">
               <div class="ws-optional-block" data-g2-block>
@@ -231,6 +257,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Phone</th>
                   <th>Guardian 1</th>
                   <th>Allergies</th>
                   <th></th>
@@ -244,7 +271,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <section class="ws-panel" data-panel="archive" hidden>
           <p class="ws-soon" data-archive-hint>
             Archived members are hidden from Attendance and Fees going forward, but every past record tied to
-            them (attendance history, fee payments) stays exactly as it was — nothing is deleted or recalculated.
+            them (attendance history, fee payments) stays exactly as it was, nothing is deleted or recalculated.
             Restore someone here any time to bring them back into the active roster. Anyone with no recorded
             attendance for 3+ months gets archived automatically (marked "Auto-archived" below).
           </p>
@@ -254,6 +281,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Phone</th>
                   <th>Guardian 1</th>
                   <th>Allergies</th>
                   <th></th>
@@ -267,7 +295,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <section class="ws-panel" data-panel="approvals" hidden>
           <p class="ws-soon">
             Anyone can submit a request at <strong>/join</strong> without an account. Approving one adds them
-            straight to this group's active roster; rejecting just declines it — nothing is created either way
+            straight to this group's active roster; rejecting just declines it, nothing is created either way
             until you act.
           </p>
           <input type="search" class="ws-search" data-approvals-search placeholder="Search requests…" />
@@ -308,7 +336,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <button type="button" class="ws-att-day-nav" data-att-day-next aria-label="Next day">›</button>
                 <span class="ws-inline-summary" data-att-summary></span>
               </div>
-              <p class="ws-att-hint">Click any date on the calendar — past or future — to view or edit it.</p>
+              <p class="ws-att-hint">Click any date on the calendar, past or future, to view or edit it.</p>
               <input type="search" class="ws-search" data-att-search placeholder="Search members…" />
               <div class="ws-table-wrap">
                 <table class="ws-table" data-att-table>
@@ -381,7 +409,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </div>
 
             <div data-curr-plan-view="list" hidden>
-              <p class="ws-att-hint">Every meeting planned in this month — the same thing Export PDF downloads, right here on the page.</p>
+              <p class="ws-att-hint">Every meeting planned in this month, the same thing Export PDF downloads, right here on the page.</p>
               <div class="ws-table-wrap">
                 <table class="ws-table">
                   <thead>
@@ -468,6 +496,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <span>Year</span>
                 <select data-fin-year></select>
               </label>
+              <!-- Also useful for every group, but the only export Music
+                   gets, its Reports tab is hidden (see updateTabVisibility
+                   in the script below), since Fees/Attendance don't apply. -->
+              <button type="button" class="btn-primary" data-fin-download>Download PDF</button>
             </div>
             <div class="ws-stat-row ws-stat-row--3" data-fin-stats></div>
 
@@ -485,8 +517,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
 
           <div data-subpanel="finance:categories" hidden>
-            <p class="ws-soon">
-              The default monthly fee lives on the Fees tab now (it can change month to month) — these lists are
+            <p class="ws-soon" data-fees-tab-hint>
+              The default monthly fee lives on the Fees tab now (it can change month to month), these lists are
               for things that apply to every month, shared across all groups.
             </p>
             <div class="ws-form-grid">
@@ -596,200 +628,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </div>
             <div class="ws-report-card">
               <h3 class="ws-admin-h3">Curriculum</h3>
-              <p class="ws-report-desc">The meeting plan — theme, notes, and activities for each date in the period.</p>
+              <p class="ws-report-desc">The meeting plan, theme, notes, and activities for each date in the period.</p>
               <button type="button" class="btn-primary" data-report-curriculum>Download PDF</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="ws-panel" data-panel="admin" hidden>
-          <div class="ws-subtabs">
-            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="admin" data-subtab="overview">Overview</button>
-            <button type="button" class="ws-subtab" data-subtabs="admin" data-subtab="finance">Finance</button>
-            <button type="button" class="ws-subtab" data-subtabs="admin" data-subtab="reports">Reports</button>
-            <button type="button" class="ws-subtab" data-subtabs="admin" data-subtab="curriculum">Curriculum</button>
-            <button type="button" class="ws-subtab" data-subtabs="admin" data-subtab="library">Library</button>
-            <button type="button" class="ws-subtab" data-subtabs="admin" data-subtab="roster">Roster</button>
-            <button type="button" class="ws-subtab" data-subtabs="admin" data-subtab="leaders">Leader Management</button>
-          </div>
-
-          <div class="ws-dash" data-subpanel="admin:overview">
-            <p class="ws-att-hint">Every group together — the same numbers each group's own Dashboard shows, rolled up troop-wide.</p>
-
-            <div class="band-marquee ws-dash-marquee" aria-label="Troop photos">
-              <div class="band-marquee-track" style={`--n: ${workspaceMarqueePhotos.length}`}>
-                {dashMarqueePhotos.map((src, i) => (
-                  <div class="band-marquee-slide">
-                    <img src={src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
-                  </div>
-                ))}
-              </div>
-              <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
-              <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
-            </div>
-
-            <div class="ws-dash-kpis" data-ov-kpis></div>
-
-            <div class="ws-stat-row ws-stat-row--3" data-ov-ratios></div>
-
-            <div class="ws-dash-grid ws-dash-grid--2">
-              <div class="ws-dash-card">
-                <div class="ws-dash-card-head"><h3>Active members by group</h3></div>
-                <div data-ov-members-chart></div>
-              </div>
-              <div class="ws-dash-card">
-                <div class="ws-dash-card-head"><h3>Fee collection by group</h3></div>
-                <div data-ov-fees-chart></div>
-              </div>
-            </div>
-
-            <div class="ws-dash-card ws-dash-card--full">
-              <div class="ws-dash-card-head"><h3>By group</h3></div>
-              <div class="ws-table-wrap">
-              <table class="ws-table" data-ov-table>
-                <thead>
-                  <tr><th>Group</th><th>Active</th><th>% of Troop</th><th>Attendance (30d)</th><th>Fees Collected</th><th>Net Income</th></tr>
-                </thead>
-                <tbody data-ov-body></tbody>
-              </table>
-              </div>
-            </div>
-          </div>
-
-          <div data-subpanel="admin:finance" hidden>
-            <p class="ws-att-hint">Every group's Finance ledger together, for one period.</p>
-            <div class="ws-toolbar-row">
-              <label class="ws-field ws-field--inline">
-                <span>Month</span>
-                <select data-ov-fin-month></select>
-              </label>
-              <label class="ws-field ws-field--inline">
-                <span>Year</span>
-                <select data-ov-fin-year></select>
-              </label>
-            </div>
-            <div class="ws-stat-row ws-stat-row--3" data-ov-fin-stats></div>
-
-            <h3 class="ws-admin-h3">By group</h3>
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-ov-fin-group-table>
-                <thead>
-                  <tr><th>Group</th><th>Income</th><th>Expenses</th><th>Net</th></tr>
-                </thead>
-                <tbody data-ov-fin-group-body></tbody>
-              </table>
-            </div>
-
-            <h3 class="ws-admin-h3">Every transaction</h3>
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-ov-fin-table>
-                <thead>
-                  <tr><th>Date</th><th>Group</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th></tr>
-                </thead>
-                <tbody data-ov-fin-body></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div data-subpanel="admin:reports" hidden>
-            <p class="ws-att-hint">Same reports as each group's own Reports tab, except every group is combined into one PDF.</p>
-            <div class="ws-toolbar-row">
-              <label class="ws-field ws-field--inline">
-                <span>Month</span>
-                <select data-ov-report-month></select>
-              </label>
-              <label class="ws-field ws-field--inline">
-                <span>Year</span>
-                <select data-ov-report-year></select>
-              </label>
-            </div>
-            <div class="ws-report-grid">
-              <div class="ws-report-card">
-                <h3 class="ws-admin-h3">Income Statement</h3>
-                <p class="ws-report-desc">Every group's income and expenses by category, plus a troop-wide total.</p>
-                <button type="button" class="btn-primary" data-ov-report-finance>Download PDF</button>
-              </div>
-              <div class="ws-report-card">
-                <h3 class="ws-admin-h3">Monthly Fees</h3>
-                <p class="ws-report-desc">Every active member across every group, with their group, paid status, and amount.</p>
-                <button type="button" class="btn-primary" data-ov-report-fees>Download PDF</button>
-              </div>
-              <div class="ws-report-card">
-                <h3 class="ws-admin-h3">Attendance</h3>
-                <p class="ws-report-desc">Every active member across every group, with their group, attendance count, and rate.</p>
-                <button type="button" class="btn-primary" data-ov-report-attendance>Download PDF</button>
-              </div>
-            </div>
-          </div>
-
-          <div data-subpanel="admin:curriculum" hidden>
-            <p class="ws-att-hint">Every group's next planned meeting, at a glance.</p>
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-ov-curr-table>
-                <thead>
-                  <tr><th>Group</th><th>Next Meeting</th><th>Theme</th><th>Activities</th></tr>
-                </thead>
-                <tbody data-ov-curr-body></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div data-subpanel="admin:library" hidden>
-            <p class="ws-att-hint">Every group's uploaded documents, for oversight — manage or delete a document from that group's own Library tab.</p>
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-ov-lib-table>
-                <thead>
-                  <tr><th>Title</th><th>Group</th><th>Type</th><th>Uploaded</th><th></th></tr>
-                </thead>
-                <tbody data-ov-lib-body></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div data-subpanel="admin:roster" hidden>
-            <p class="ws-att-hint">Every group's roster together — filter down to what you need.</p>
-            <div class="ws-toolbar-row">
-              <label class="ws-field ws-field--inline">
-                <span>Group</span>
-                <select data-ov-roster-group>
-                  <option value="">All Groups</option>
-                  {GROUPS.map((g) => <option value={g.key}>{g.en}</option>)}
-                </select>
-              </label>
-              <label class="ws-field ws-field--inline">
-                <span>Status</span>
-                <select data-ov-roster-status>
-                  <option value="active" selected>Active</option>
-                  <option value="archived">Archived</option>
-                  <option value="all">All</option>
-                </select>
-              </label>
-            </div>
-            <input type="search" class="ws-search" data-ov-roster-search placeholder="Search members…" />
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-ov-roster-table>
-                <thead>
-                  <tr><th>Name</th><th>Group</th><th>Guardian 1</th><th>Allergies</th><th>Status</th></tr>
-                </thead>
-                <tbody data-ov-roster-body></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div data-subpanel="admin:leaders" hidden>
-            <h3 class="ws-admin-h3">Leaders</h3>
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-admin-table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Role</th>
-                    <th>Groups</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody data-admin-body></tbody>
-              </table>
             </div>
           </div>
         </section>
@@ -856,7 +696,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import { supabase, supabaseConfigured, getSession, getProfile, signOut, isSessionExpired, msUntilSessionExpiry } from '../../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
-    import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK } from '../../lib/curriculum/constants';
+    import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY } from '../../lib/curriculum/constants';
 
     // Loose alias for actual query calls below — supabaseConfigured is
     // checked once in init() before any of this runs, so by the time these
@@ -949,30 +789,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.dashAttention = el('[data-dash-attention]');
       els.dashFinChart = el('[data-dash-fin-chart]');
       els.dashFinSub = el('[data-dash-fin-sub]');
-      els.ovKpis = el('[data-ov-kpis]');
-      els.ovMembersChart = el('[data-ov-members-chart]');
-      els.ovFeesChart = el('[data-ov-fees-chart]');
-      els.ovBody = el('[data-ov-body]');
-      els.ovFinMonth = el('[data-ov-fin-month]');
-      els.ovFinYear = el('[data-ov-fin-year]');
-      els.ovFinStats = el('[data-ov-fin-stats]');
-      els.ovFinGroupBody = el('[data-ov-fin-group-body]');
-      els.ovFinBody = el('[data-ov-fin-body]');
-      els.ovReportMonth = el('[data-ov-report-month]');
-      els.ovReportYear = el('[data-ov-report-year]');
-      els.ovRatios = el('[data-ov-ratios]');
-      els.ovCurrBody = el('[data-ov-curr-body]');
-      els.ovLibBody = el('[data-ov-lib-body]');
-      els.ovRosterGroup = el('[data-ov-roster-group]');
-      els.ovRosterStatus = el('[data-ov-roster-status]');
-      els.ovRosterSearch = el('[data-ov-roster-search]');
-      els.ovRosterBody = el('[data-ov-roster-body]');
+      els.copyMemberBlock = el('[data-copy-member-block]');
+      els.copyMemberSearch = el('[data-copy-member-search]');
+      els.copyMemberList = el('[data-copy-member-list]');
+      els.copyMemberCount = el('[data-copy-member-count]');
+      els.copyMemberBtn = el('[data-copy-member-btn]');
+      els.feesTabHint = el('[data-fees-tab-hint]');
       els.rosterForm = el('[data-roster-form]');
       els.rosterBody = el('[data-roster-body]');
       els.rosterSearch = el('[data-roster-search]');
       els.archiveBody = el('[data-archive-body]');
       els.archiveSearch = el('[data-archive-search]');
-      els.adminBody = el('[data-admin-body]');
       els.approvalsBody = el('[data-approvals-body]');
       els.approvalsSearch = el('[data-approvals-search]');
       els.approvalsBadge = el('[data-approvals-badge]');
@@ -1038,6 +865,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.finCategory = el('[data-fin-category]');
       els.finReceipt = el('[data-fin-receipt]');
       els.finSubmit = el('[data-fin-submit]');
+      els.finDownload = el('[data-fin-download]');
       els.finBody = el('[data-fin-body]');
       els.finStats = el('[data-fin-stats]');
       els.finStatement = el('[data-fin-statement]');
@@ -1046,6 +874,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.libUpload = el('[data-lib-upload]');
       els.libBody = el('[data-lib-body]');
       els.mName = el('[data-m-name]');
+      els.mPhone = el('[data-m-phone]');
       els.mDob = el('[data-m-dob]');
       els.mG1Rel = el('[data-m-g1-rel]');
       els.mG1Phone = el('[data-m-g1-phone]');
@@ -1076,6 +905,72 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       await autoArchiveInactive();
       renderRoster();
       renderArchive();
+      if (NON_TROOP_GROUP_KEYS.includes(state.activeGroup)) await loadCopyPicker();
+    }
+    // Music and General only — most of their people (band members, board
+    // members) are already scouts/leaders in one of the 5 troops, so offer
+    // to bulk-copy their name/phone across instead of retyping each one
+    // (see the ws-copy-member-block markup). Anyone already copied over
+    // into THIS group (tracked via members.source_member_id) drops off the
+    // list so there's no way to accidentally duplicate someone.
+    async function loadCopyPicker() {
+      const [troopRes, targetRes] = await Promise.all([
+        db.from('members').select('id, full_name, phone, group_key')
+          .neq('group_key', MUSIC_GROUP_KEY).neq('group_key', GENERAL_GROUP_KEY).eq('active', true)
+          .order('full_name', { ascending: true }),
+        db.from('members').select('source_member_id').eq('group_key', state.activeGroup).not('source_member_id', 'is', null),
+      ]);
+      if (troopRes.error) { console.error(troopRes.error); return; }
+      const alreadyCopied = new Set((targetRes.data || []).map((m: any) => m.source_member_id));
+      state.copyPickerMembers = (troopRes.data || []).filter((m: any) => !alreadyCopied.has(m.id));
+      state.copySelected = new Set<string>();
+      renderCopyPickerList();
+    }
+    function renderCopyPickerList() {
+      const term = (els.copyMemberSearch.value || '').trim().toLowerCase();
+      const rows = state.copyPickerMembers.filter((m: any) => !term || m.full_name.toLowerCase().includes(term));
+      if (!rows.length) {
+        els.copyMemberList.innerHTML = `<p class="ws-pick-empty">${state.copyPickerMembers.length ? 'No matches.' : 'Everyone active elsewhere is already on this roster.'}</p>`;
+      } else {
+        els.copyMemberList.innerHTML = rows.map((m: any) => {
+          const g = GROUPS.find((x) => x.key === m.group_key);
+          return `
+            <label class="ws-pick-row">
+              <input type="checkbox" value="${m.id}" ${state.copySelected.has(m.id) ? 'checked' : ''} />
+              <span class="ws-pick-row-name">${escapeHtml(m.full_name)}</span>
+              <span class="ws-pick-row-group">${escapeHtml(g ? g.en : m.group_key)}</span>
+            </label>`;
+        }).join('');
+        els.copyMemberList.querySelectorAll('input[type="checkbox"]').forEach((cb: any) => {
+          cb.addEventListener('change', () => {
+            if (cb.checked) state.copySelected.add(cb.value); else state.copySelected.delete(cb.value);
+            updateCopyPickerCount();
+          });
+        });
+      }
+      updateCopyPickerCount();
+    }
+    function updateCopyPickerCount() {
+      const n = state.copySelected.size;
+      els.copyMemberCount.textContent = n ? `${n} selected` : '';
+      els.copyMemberBtn.disabled = n === 0;
+    }
+    function bindCopyPicker() {
+      els.copyMemberSearch.addEventListener('input', renderCopyPickerList);
+      els.copyMemberBtn.addEventListener('click', async () => {
+        const sources = state.copyPickerMembers.filter((m: any) => state.copySelected.has(m.id));
+        if (!sources.length) return;
+        els.copyMemberBtn.disabled = true;
+        const { error } = await db.from('members').insert(sources.map((source: any) => ({
+          group_key: state.activeGroup, full_name: source.full_name, phone: source.phone || null,
+          source_member_id: source.id, created_by: state.session.user.id,
+        })));
+        if (error) { console.error(error); showToast('Could not add, ' + (error.message || 'unknown error') + '.'); els.copyMemberBtn.disabled = false; return; }
+        const g = GROUPS.find((x: any) => x.key === state.activeGroup);
+        showToast(`${sources.length} member${sources.length === 1 ? '' : 's'} added to the ${g ? g.en : ''} roster.`);
+        els.copyMemberSearch.value = '';
+        await loadRoster();
+      });
     }
     function memberRowHTML(m: any, actionsHTML: string) {
       // data-label feeds the phone card-view (::before shows it as the
@@ -1083,9 +978,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       return `
         <tr data-member-id="${m.id}">
           <td data-label="Name">${escapeHtml(m.full_name)}${m.archived_reason === 'inactive' ? ' <span class="ws-allergy-badge" title="Auto-archived: no attendance recorded in 3+ months">Auto-archived</span>' : ''}</td>
+          <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
           <td data-label="Guardian 1">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
           <td data-label="Allergies">${m.has_allergies
-              ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ' — ' + escapeHtml(m.allergy_detail) : ''}</span>`
+              ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ', ' + escapeHtml(m.allergy_detail) : ''}</span>`
               : '—'}</td>
           <td class="ws-row-actions">${actionsHTML}</td>
         </tr>`;
@@ -1121,10 +1017,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         db.from('members').update({ active: false, archived_reason: 'inactive' }).eq('id', m.id)
       ));
       toArchive.forEach((m: any) => { m.active = false; m.archived_reason = 'inactive'; });
-      showToast(`${toArchive.length} member${toArchive.length === 1 ? '' : 's'} auto-archived — no attendance in 3+ months.`);
+      showToast(`${toArchive.length} member${toArchive.length === 1 ? '' : 's'} auto-archived, no attendance in 3+ months.`);
     }
     async function deleteMemberForever(id: string) {
-      if (!confirm('Permanently delete this member? This also deletes their attendance/fee history — this cannot be undone. Archiving is usually what you want instead.')) return;
+      if (!confirm('Permanently delete this member? This also deletes their attendance/fee history, this cannot be undone. Archiving is usually what you want instead.')) return;
       const { error } = await db.from('members').delete().eq('id', id);
       if (error) { showToast('Could not delete.'); return; }
       if (state.editingMemberId === id) resetMemberForm();
@@ -1134,7 +1030,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderRoster() {
       const active = state.members.filter((m: any) => m.active);
       if (!active.length) {
-        els.rosterBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No members yet — add the first one below.</td></tr>';
+        els.rosterBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No members yet, add the first one below.</td></tr>';
         return;
       }
       els.rosterBody.innerHTML = active.map((m: any) => memberRowHTML(m, `
@@ -1209,7 +1105,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Name">${escapeHtml(r.full_name)}</td>
           <td data-label="Guardian 1">${r.guardian1_relation ? `${escapeHtml(r.guardian1_relation)}: ${escapeHtml(r.guardian1_phone || '—')}` : '—'}</td>
           <td data-label="Allergies">${r.has_allergies
-              ? `<span class="ws-allergy-badge" title="${escapeHtml(r.allergy_detail || '')}">Yes${r.allergy_detail ? ' — ' + escapeHtml(r.allergy_detail) : ''}</span>`
+              ? `<span class="ws-allergy-badge" title="${escapeHtml(r.allergy_detail || '')}">Yes${r.allergy_detail ? ', ' + escapeHtml(r.allergy_detail) : ''}</span>`
               : '—'}</td>
           <td data-label="Notes">${escapeHtml(r.notes || '—')}</td>
           <td class="ws-row-actions">
@@ -1231,6 +1127,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const { error: insertError } = await db.from('members').insert({
         group_key: r.group_key,
         full_name: r.full_name,
+        phone: r.phone,
         birth_date: r.birth_date,
         guardian1_relation: r.guardian1_relation,
         guardian1_phone: r.guardian1_phone,
@@ -1241,7 +1138,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         notes: r.notes,
         created_by: state.session.user.id,
       });
-      if (insertError) { console.error(insertError); showToast('Could not approve — member was not added.'); return; }
+      if (insertError) { console.error(insertError); showToast('Could not approve, member was not added.'); return; }
       const { error: updateError } = await db.from('join_requests')
         .update({ status: 'approved', reviewed_by: state.session.user.id, reviewed_at: new Date().toISOString() })
         .eq('id', id);
@@ -1478,17 +1375,31 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const DEFAULT_INCOME_CATEGORIES = [
       'Monthly Fees', 'Donations', 'Fundraising', 'Event Tickets', 'Sponsorships', 'Troop Store Sales', 'Other',
     ];
+    // Music and General aren't scouting troops, so the troop-flavored
+    // defaults above (Uniforms, Badges & Awards, Monthly Fees, …) don't
+    // fit — each gets its own starter list instead.
+    const GROUP_DEFAULT_CATEGORIES: Record<string, { expense: string[]; income: string[] }> = {
+      [MUSIC_GROUP_KEY]: {
+        expense: ['Band Payouts', 'Equipment', 'Transport', 'Repairs', 'Refreshments', 'Miscellaneous'],
+        income: ['Wedding', 'Event', 'Donation', 'Miscellaneous'],
+      },
+      [GENERAL_GROUP_KEY]: {
+        expense: ['Venue Maintenance', 'Furniture & Equipment', 'Utilities', 'Repairs', 'Supplies', 'Other'],
+        income: ['Donations', 'Fundraising', 'Other'],
+      },
+    };
     async function loadGroupSettings() {
       if (!state.activeGroup) return;
       const { data } = await db.from('group_settings').select('*').eq('group_key', state.activeGroup).maybeSingle();
       state.groupSettings = data || {
         group_key: state.activeGroup, monthly_fee_defaults: {}, expense_categories: [], income_categories: [], activity_bank: [],
       };
-      // Every group starts with the same sensible defaults — a leader
+      const defaults = GROUP_DEFAULT_CATEGORIES[state.activeGroup] || { expense: DEFAULT_EXPENSE_CATEGORIES, income: DEFAULT_INCOME_CATEGORIES };
+      // Every group starts with sensible defaults for its kind — a leader
       // editing the list (add/remove) is what actually persists a custom
-      // one; until then this just fills the dropdown/bank usefully.
-      if (!state.groupSettings.expense_categories?.length) state.groupSettings.expense_categories = [...DEFAULT_EXPENSE_CATEGORIES];
-      if (!state.groupSettings.income_categories?.length) state.groupSettings.income_categories = [...DEFAULT_INCOME_CATEGORIES];
+      // one; until then this just fills the dropdown usefully.
+      if (!state.groupSettings.expense_categories?.length) state.groupSettings.expense_categories = [...defaults.expense];
+      if (!state.groupSettings.income_categories?.length) state.groupSettings.income_categories = [...defaults.income];
       if (!state.groupSettings.activity_bank?.length) {
         state.groupSettings.activity_bank = ACTIVITY_BANK.map((a) => ({ id: a.type, en: a.en }));
       }
@@ -1528,7 +1439,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <td data-label="Paid on">${paidOn ? escapeHtml(paidOn) : '—'}</td>
           </tr>`;
       }).join('');
-      els.feeSummary.textContent = `${paidCount} of ${active.length} paid — ${collected.toFixed(2)} collected`;
+      els.feeSummary.textContent = `${paidCount} of ${active.length} paid, ${collected.toFixed(2)} collected`;
 
       // "Paid on" isn't an editable field — with a whole group usually
       // paying on the same day, picking a date per row was pure repetition.
@@ -1592,7 +1503,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const amt = Number(cb.closest('tr').querySelector('[data-fee-amount]').value || 0);
         collected += amt;
       });
-      els.feeSummary.textContent = `${paidCount} of ${total} paid — ${collected.toFixed(2)} collected`;
+      els.feeSummary.textContent = `${paidCount} of ${total} paid, ${collected.toFixed(2)} collected`;
     }
     // Keeps a fee payment mirrored into the Finance ledger as an income
     // line — created/updated while paid, removed the moment it's unmarked
@@ -1603,7 +1514,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const payload = {
           group_key: state.activeGroup, entry_type: 'income', category: 'Monthly Fees',
           amount: feeRow.amount, entry_date: feeRow.paid_on || (feeRow.period + '-01'),
-          description: `${member ? member.full_name : 'Member'} — ${feeRow.period}`,
+          description: `${member ? member.full_name : 'Member'}, ${feeRow.period}`,
           fee_payment_id: feeRow.id, created_by: state.session.user.id,
         };
         const { data: existing } = await db.from('finance_entries').select('id').eq('fee_payment_id', feeRow.id).maybeSingle();
@@ -1707,7 +1618,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         ? rows.map(([cat, amt]) => `<tr><td>${escapeHtml(cat)}</td><td>${amt.toFixed(2)}</td></tr>`).join('')
         : '<tr><td class="ws-empty" colspan="2">None</td></tr>';
       els.finStatement.innerHTML = `
-        <h3 class="ws-admin-h3">Income Statement — ${escapeHtml(state.finLabel)}</h3>
+        <h3 class="ws-admin-h3">Income Statement, ${escapeHtml(state.finLabel)}</h3>
         <table class="ws-statement-table">
           <tbody>
             <tr class="ws-statement-section"><td colspan="2">Income</td></tr>
@@ -1729,7 +1640,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <tr data-entry-id="${e.id}" data-receipt-path="${escapeHtml(e.receipt_path || '')}">
           <td data-label="Date">${e.entry_date}</td>
           <td data-label="Type">${e.entry_type === 'income' ? 'Income' : 'Expense'}</td>
-          <td data-label="Category">${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab — unmark it paid there to remove this">Auto</span>' : ''}</td>
+          <td data-label="Category">${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab, unmark it paid there to remove this">Auto</span>' : ''}</td>
           <td data-label="Description">${escapeHtml(e.description || '—')}</td>
           <td data-label="Amount">${Number(e.amount).toFixed(2)}</td>
           <td data-label="Receipt">${e.receipt_path ? '<button type="button" class="ws-edit-btn" data-fin-receipt-view>View</button>' : '—'}</td>
@@ -1761,9 +1672,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         : (state.groupSettings?.expense_categories || []);
       els.finCategory.innerHTML = list.length
         ? list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
-        : '<option value="">No categories yet — add some in the Categories tab</option>';
+        : '<option value="">No categories yet, add some in the Categories tab</option>';
     }
     function bindFinanceForm() {
+      els.finDownload.addEventListener('click', () => {
+        // downloadFinanceReport() reads the Reports tab's own period
+        // selects (always populated — see bindReports()) — sync them to
+        // Finance's current period first so the PDF matches what's on
+        // screen here, since Music's Reports tab (which normally owns
+        // that picker) is hidden — see updateTabVisibility().
+        els.reportMonth.value = els.finMonth.value;
+        els.reportYear.value = els.finYear.value;
+        downloadFinanceReport();
+      });
       els.finType.addEventListener('change', updateFinCategoryOptions);
       els.finForm.addEventListener('submit', async (e: Event) => {
         e.preventDefault();
@@ -1883,9 +1804,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(...PDF_BRAND);
-      doc.text('GREEK ORTHODOX SCOUTS & GUIDES — SWEFIEH', 14, 15);
+      doc.text('GREEK ORTHODOX SCOUTS & GUIDES, SWEFIEH', 14, 15);
       doc.setFontSize(17);
-      doc.text(`${groupName} — ${title}`, 14, 25);
+      doc.text(`${groupName}, ${title}`, 14, 25);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(90, 90, 90);
@@ -1947,7 +1868,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         doc.save(pdfFilename('Income-Statement', label));
       } catch (err) {
         console.error('finance report failed', err);
-        showToast('Could not generate the report — check your connection and try again.');
+        showToast('Could not generate the report, check your connection and try again.');
       }
     }
     async function downloadFeesReport() {
@@ -1966,7 +1887,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             if (rec && rec.paid) { collected += Number(rec.amount || 0); paidCount++; }
             return [m.full_name, rec && rec.paid ? 'Paid' : 'Unpaid', rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'];
           });
-          const y = pdfHeader(doc, 'Monthly Fees', `${label} — ${paidCount} of ${active.length} paid, ${collected.toFixed(2)} collected`);
+          const y = pdfHeader(doc, 'Monthly Fees', `${label}, ${paidCount} of ${active.length} paid, ${collected.toFixed(2)} collected`);
           autoTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
             head: [['Member', 'Status', 'Amount']], body: rows.length ? rows : [['No data available', '', '']] });
           doc.save(pdfFilename('Monthly-Fees', label));
@@ -1986,14 +1907,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             return [m.full_name, `${s.months} / 12`, s.total.toFixed(2)];
           });
           const grandTotal = active.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
-          const y = pdfHeader(doc, 'Yearly Fees Summary', `${label} — ${grandTotal.toFixed(2)} collected total`);
+          const y = pdfHeader(doc, 'Yearly Fees Summary', `${label}, ${grandTotal.toFixed(2)} collected total`);
           autoTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
             head: [['Member', 'Months Paid', 'Total']], body: rows.length ? rows : [['No data available', '', '']] });
           doc.save(pdfFilename('Yearly-Fees', label));
         }
       } catch (err) {
         console.error('fees report failed', err);
-        showToast('Could not generate the report — check your connection and try again.');
+        showToast('Could not generate the report, check your connection and try again.');
       }
     }
     async function downloadAttendanceReport() {
@@ -2013,13 +1934,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           return [m.full_name, `${present} / ${totalSessions}`, `${rate}%`];
         });
         const doc = new jsPDF();
-        const y = pdfHeader(doc, 'Attendance', `${label} — ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held`);
+        const y = pdfHeader(doc, 'Attendance', `${label}, ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held`);
         autoTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
           head: [['Member', 'Present', 'Rate']], body: bodyRows.length ? bodyRows : [['No data available', '', '']] });
         doc.save(pdfFilename('Attendance', label));
       } catch (err) {
         console.error('attendance report failed', err);
-        showToast('Could not generate the report — check your connection and try again.');
+        showToast('Could not generate the report, check your connection and try again.');
       }
     }
     async function downloadCurriculumReport() {
@@ -2048,7 +1969,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         doc.save(pdfFilename('Curriculum', label));
       } catch (err) {
         console.error('curriculum report failed', err);
-        showToast('Could not generate the report — check your connection and try again.');
+        showToast('Could not generate the report, check your connection and try again.');
       }
     }
     function bindReports() {
@@ -2103,7 +2024,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         flashSaved();
       } catch (err) {
         console.error('curriculum save failed', err);
-        showToast('Could not save — check your connection.');
+        showToast('Could not save, check your connection.');
       }
     }
     function currSubscribeRealtime(groupKey: string) {
@@ -2141,7 +2062,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const activities = m ? m.activities : [];
       container.innerHTML = activities.length
         ? activities.map(currActivityRowHTML).join('')
-        : '<p class="curr-empty">No activities yet — pick one from the bank or add a custom one below.</p>';
+        : '<p class="curr-empty">No activities yet, pick one from the bank or add a custom one below.</p>';
       container.querySelectorAll('[data-del]').forEach((btn: any) => {
         btn.addEventListener('click', () => {
           const mm = state.curr.meetings.get(dateStr);
@@ -2353,7 +2274,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function currRenderBankOptions() {
       const items = state.groupSettings?.activity_bank || [];
       if (!items.length) {
-        els.currBankSelect.innerHTML = '<option value="">No activities yet — add some in the Activity Bank tab</option>';
+        els.currBankSelect.innerHTML = '<option value="">No activities yet, add some in the Activity Bank tab</option>';
         els.currBankSelect.disabled = true;
         return;
       }
@@ -2367,7 +2288,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         ? items.map((a: any) => `
             <span class="curr-bank-item">${escapeHtml(a.en)}<button type="button" data-remove-bank="${escapeHtml(a.id)}" aria-label="Remove">×</button></span>
           `).join('')
-        : '<p class="ws-empty" style="padding:0.5rem 0">No activities in the bank yet — add one above.</p>';
+        : '<p class="ws-empty" style="padding:0.5rem 0">No activities in the bank yet, add one above.</p>';
       els.currBankList.querySelectorAll('[data-remove-bank]').forEach((btn: any) => {
         btn.addEventListener('click', () => currRemoveBankItem(btn.dataset.removeBank));
       });
@@ -2497,6 +2418,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       return {
         group_key: state.activeGroup,
         full_name: name,
+        phone: els.mPhone.value.trim() || null,
         birth_date: els.mDob.value || null,
         guardian1_relation: g1Rel,
         guardian1_phone: g1Phone,
@@ -2522,6 +2444,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (state.activeTab !== 'roster') setTab('roster');
       state.editingMemberId = id;
       els.mName.value = m.full_name || '';
+      els.mPhone.value = m.phone || '';
       els.mDob.value = m.birth_date || '';
       els.mG1Rel.value = m.guardian1_relation || '';
       els.mG1Phone.value = m.guardian1_phone || '';
@@ -2731,7 +2654,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             const d = parseDateStr(dateStr);
             const label = `${MONTHS[d.getMonth()].en.slice(0, 3)} ${d.getDate()}`;
             return `
-              <div class="ws-dash-bar-col" title="${label} — ${pct}% present (${e.present}/${e.total})">
+              <div class="ws-dash-bar-col" title="${label}, ${pct}% present (${e.present}/${e.total})">
                 <span class="ws-dash-bar-pct">${pct}%</span>
                 <div class="ws-dash-bar-track"><div class="ws-dash-bar-fill" style="height:${Math.max(pct, 4)}%"></div></div>
                 <span class="ws-dash-bar-label">${label}</span>
@@ -2759,7 +2682,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             const incPct = Math.round((b.income / maxVal) * 100);
             const expPct = Math.round((b.expense / maxVal) * 100);
             return `
-              <div class="ws-dash-fin-col" title="${MONTHS[d.getMonth()].en} ${d.getFullYear()} — Income ${b.income.toFixed(2)}, Expenses ${b.expense.toFixed(2)}">
+              <div class="ws-dash-fin-col" title="${MONTHS[d.getMonth()].en} ${d.getFullYear()}, Income ${b.income.toFixed(2)}, Expenses ${b.expense.toFixed(2)}">
                 <div class="ws-dash-fin-pair">
                   <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--income" style="height:${b.income ? Math.max(incPct, 3) : 0}%"></div></div>
                   <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--expense" style="height:${b.expense ? Math.max(expPct, 3) : 0}%"></div></div>
@@ -2837,496 +2760,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
-    // ---------- Overview (admin-only): every group rolled up together ------
-    // One query per table, unfiltered by group — admins already have
-    // has_group_access() on every group, so a single unscoped select pulls
-    // every group's rows in one round trip instead of five (one per
-    // group), then buckets them client-side by group_key.
-    async function loadOverview() {
-      const now = new Date();
-      const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      const monthEnd = `${period}-${String(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()).padStart(2, '0')}`;
-      const prevD = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const prevPeriod = `${prevD.getFullYear()}-${String(prevD.getMonth() + 1).padStart(2, '0')}`;
-      const day30 = toDateStr(addDays(now, -30));
-      const day60 = toDateStr(addDays(now, -60));
-
-      const [membersRes, attRes, feeRes, finRes, pendingRes] = await Promise.all([
-        db.from('members').select('group_key, active, has_allergies'),
-        db.from('attendance').select('group_key, present, date').gte('date', day60),
-        db.from('fee_payments').select('group_key, paid, amount').eq('period', period),
-        db.from('finance_entries').select('group_key, entry_type, amount, entry_date').gte('entry_date', `${prevPeriod}-01`).lte('entry_date', monthEnd),
-        db.from('join_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      ]);
-
-      const byGroup = new Map<string, any>();
-      GROUPS.forEach((g) => byGroup.set(g.key, {
-        activeMembers: 0, archivedMembers: 0, allergyMembers: 0,
-        attPresent30: 0, attTotal30: 0, attPresent3060: 0, attTotal3060: 0,
-        feePaid: 0, feeCollected: 0, netThis: 0, netPrev: 0,
-      }));
-      (membersRes.data || []).forEach((m: any) => {
-        const b = byGroup.get(m.group_key); if (!b) return;
-        if (m.active) { b.activeMembers++; if (m.has_allergies) b.allergyMembers++; }
-        else b.archivedMembers++;
-      });
-      (attRes.data || []).forEach((r: any) => {
-        const b = byGroup.get(r.group_key); if (!b) return;
-        if (r.date >= day30) { b.attTotal30++; if (r.present) b.attPresent30++; }
-        else { b.attTotal3060++; if (r.present) b.attPresent3060++; }
-      });
-      (feeRes.data || []).forEach((r: any) => {
-        const b = byGroup.get(r.group_key); if (!b) return;
-        if (r.paid) { b.feePaid++; b.feeCollected += Number(r.amount || 0); }
-      });
-      (finRes.data || []).forEach((r: any) => {
-        const b = byGroup.get(r.group_key); if (!b) return;
-        const amt = r.entry_type === 'income' ? Number(r.amount) : -Number(r.amount);
-        if (r.entry_date >= `${period}-01`) b.netThis += amt; else b.netPrev += amt;
-      });
-      renderOverview(byGroup, pendingRes.count || 0);
-    }
-    function renderOverview(byGroup: Map<string, any>, pendingApprovals: number) {
-      const groups = GROUPS.map((g) => ({ ...g, ...byGroup.get(g.key) }));
-      const totalActive = groups.reduce((s, g) => s + g.activeMembers, 0);
-      const totalArchived = groups.reduce((s, g) => s + g.archivedMembers, 0);
-      const totalAllergy = groups.reduce((s, g) => s + g.allergyMembers, 0);
-      const attPresent30 = groups.reduce((s, g) => s + g.attPresent30, 0);
-      const attTotal30 = groups.reduce((s, g) => s + g.attTotal30, 0);
-      const attPresent3060 = groups.reduce((s, g) => s + g.attPresent3060, 0);
-      const attTotal3060 = groups.reduce((s, g) => s + g.attTotal3060, 0);
-      const rate30 = attTotal30 ? Math.round((attPresent30 / attTotal30) * 100) : null;
-      const ratePrev30 = attTotal3060 ? Math.round((attPresent3060 / attTotal3060) * 100) : null;
-      const totalFeePaid = groups.reduce((s, g) => s + g.feePaid, 0);
-      const totalCollected = groups.reduce((s, g) => s + g.feeCollected, 0);
-      const feePct = totalActive ? Math.round((totalFeePaid / totalActive) * 100) : 0;
-      const netThis = groups.reduce((s, g) => s + g.netThis, 0);
-      const netPrev = groups.reduce((s, g) => s + g.netPrev, 0);
-      const retentionPct = (totalActive + totalArchived) ? Math.round((totalActive / (totalActive + totalArchived)) * 100) : null;
-      const allergyPct = totalActive ? Math.round((totalAllergy / totalActive) * 100) : 0;
-      const groupsFullyPaid = groups.filter((g) => g.activeMembers > 0 && g.feePaid === g.activeMembers).length;
-      const largestGroup = groups.reduce((max, g) => (g.activeMembers > max.activeMembers ? g : max), groups[0]);
-      const largestSharePct = totalActive ? Math.round((largestGroup.activeMembers / totalActive) * 100) : 0;
-      const avgPerGroup = (totalActive / GROUPS.length).toFixed(1);
-      const avgFeeAmount = totalFeePaid ? totalCollected / totalFeePaid : 0;
-
-      els.ovRatios.innerHTML = `
-        <div class="ws-stat"><span class="ws-stat-icon">#</span><span class="ws-stat-text"><span class="ws-stat-num">${avgPerGroup}</span><span class="ws-stat-label">Avg members / group</span></span></div>
-        <div class="ws-stat ws-stat--accent"><span class="ws-stat-icon">▲</span><span class="ws-stat-text"><span class="ws-stat-num">${largestSharePct}%</span><span class="ws-stat-label">Largest group: ${escapeHtml(largestGroup.en)}</span></span></div>
-        <div class="ws-stat"><span class="ws-stat-icon">$</span><span class="ws-stat-text"><span class="ws-stat-num">${avgFeeAmount.toFixed(2)}</span><span class="ws-stat-label">Avg fee collected / member</span></span></div>
-      `;
-
-      els.ovKpis.innerHTML = `
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active members</span></div>
-          <span class="ws-dash-kpi-num">${totalActive}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">${totalArchived} archived · across ${GROUPS.length} groups</span>
-        </div>
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Attendance (30d)</span></div>
-          <span class="ws-dash-kpi-num">${rate30 != null ? rate30 + '%' : '—'}</span>
-          ${rate30 != null ? dashDeltaBadge(ratePrev30 != null ? rate30 - ratePrev30 : null, 'pt') : '<span class="ws-dash-delta ws-dash-delta--flat">No sessions yet</span>'}
-        </div>
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Fees collected (mtd)</span></div>
-          <span class="ws-dash-kpi-num">${feePct}%</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">${totalFeePaid}/${totalActive} paid · ${totalCollected.toFixed(0)} in</span>
-        </div>
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">±</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
-          <span class="ws-dash-kpi-num">${netThis >= 0 ? '+' : '−'}${Math.abs(netThis).toFixed(0)}</span>
-          ${dashDeltaBadge(Math.round(netThis - netPrev))}
-        </div>
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⟳</span><span class="ws-dash-kpi-label">Retention rate</span></div>
-          <span class="ws-dash-kpi-num">${retentionPct != null ? retentionPct + '%' : '—'}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">${totalActive} active of ${totalActive + totalArchived} ever registered</span>
-        </div>
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⚑</span><span class="ws-dash-kpi-label">Allergy awareness</span></div>
-          <span class="ws-dash-kpi-num">${allergyPct}%</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">${totalAllergy} of ${totalActive} active members</span>
-        </div>
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">!</span><span class="ws-dash-kpi-label">Pending approvals</span></div>
-          <span class="ws-dash-kpi-num">${pendingApprovals}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">${pendingApprovals ? 'waiting for review' : 'all caught up'}</span>
-        </div>
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Groups fully paid</span></div>
-          <span class="ws-dash-kpi-num">${groupsFullyPaid} / ${GROUPS.length}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">100% collected this month</span>
-        </div>
-      `;
-
-      const maxActive = Math.max(1, ...groups.map((g) => g.activeMembers));
-      els.ovMembersChart.innerHTML = `
-        <div class="ws-dash-bars">
-          ${groups.map((g) => {
-            const pct = Math.round((g.activeMembers / maxActive) * 100);
-            const share = totalActive ? Math.round((g.activeMembers / totalActive) * 100) : 0;
-            return `
-              <div class="ws-dash-bar-col" title="${escapeHtml(g.en)} — ${g.activeMembers} active members (${share}% of troop)">
-                <span class="ws-dash-bar-pct">${g.activeMembers}</span>
-                <div class="ws-dash-bar-track"><div class="ws-dash-bar-fill" style="height:${g.activeMembers ? Math.max(pct, 4) : 0}%"></div></div>
-                <span class="ws-dash-bar-label">${escapeHtml(g.en)}</span>
-              </div>`;
-          }).join('')}
-        </div>
-      `;
-      els.ovFeesChart.innerHTML = `
-        <div class="ws-dash-bars">
-          ${groups.map((g) => {
-            const pct = g.activeMembers ? Math.round((g.feePaid / g.activeMembers) * 100) : 0;
-            return `
-              <div class="ws-dash-bar-col" title="${escapeHtml(g.en)} — ${pct}% collected (${g.feePaid}/${g.activeMembers})">
-                <span class="ws-dash-bar-pct">${g.activeMembers ? pct + '%' : '—'}</span>
-                <div class="ws-dash-bar-track"><div class="ws-dash-bar-fill" style="height:${pct ? Math.max(pct, 4) : 0}%"></div></div>
-                <span class="ws-dash-bar-label">${escapeHtml(g.en)}</span>
-              </div>`;
-          }).join('')}
-        </div>
-      `;
-
-      els.ovBody.innerHTML = groups.map((g) => {
-        const rate = g.attTotal30 ? Math.round((g.attPresent30 / g.attTotal30) * 100) : null;
-        const share = totalActive ? Math.round((g.activeMembers / totalActive) * 100) : 0;
-        const feeRate = g.activeMembers ? Math.round((g.feePaid / g.activeMembers) * 100) : 0;
-        return `
-          <tr>
-            <td data-label="Group">${escapeHtml(g.en)}</td>
-            <td data-label="Active">${g.activeMembers}</td>
-            <td data-label="% of Troop">${share}%</td>
-            <td data-label="Attendance (30d)">${rate != null ? rate + '%' : '—'}</td>
-            <td data-label="Fees Collected">${feeRate}% · ${g.feeCollected.toFixed(0)}</td>
-            <td data-label="Net Income">${g.netThis >= 0 ? '+' : '−'}${Math.abs(g.netThis).toFixed(0)}</td>
-          </tr>`;
-      }).join('');
-    }
-    // Every group's finance_entries for one period, in a single unfiltered
-    // query (same reasoning as loadOverview()) — grouped into a per-group
-    // summary table plus the full transaction list with a Group column.
-    async function loadOverviewFinance() {
-      populatePeriodSelects(els.ovFinMonth, els.ovFinYear, true);
-      const { start, end } = periodRange(els.ovFinMonth, els.ovFinYear);
-      const { data, error } = await db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, description')
-        .gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: false });
-      if (error) { console.error(error); showToast('Could not load finance.'); return; }
-      renderOverviewFinance(data || []);
-    }
-    function renderOverviewFinance(rows: any[]) {
-      const income = rows.filter((r) => r.entry_type === 'income').reduce((s, r) => s + Number(r.amount), 0);
-      const expense = rows.filter((r) => r.entry_type === 'expense').reduce((s, r) => s + Number(r.amount), 0);
-      els.ovFinStats.innerHTML = `
-        <div class="ws-stat ws-stat--accent"><span class="ws-stat-icon">↑</span><span class="ws-stat-text"><span class="ws-stat-num">${income.toFixed(2)}</span><span class="ws-stat-label">Income</span></span></div>
-        <div class="ws-stat"><span class="ws-stat-icon">↓</span><span class="ws-stat-text"><span class="ws-stat-num">${expense.toFixed(2)}</span><span class="ws-stat-label">Expenses</span></span></div>
-        <div class="ws-stat"><span class="ws-stat-icon">=</span><span class="ws-stat-text"><span class="ws-stat-num">${(income - expense).toFixed(2)}</span><span class="ws-stat-label">Net</span></span></div>
-      `;
-
-      const byGroup = new Map<string, { income: number; expense: number }>();
-      GROUPS.forEach((g) => byGroup.set(g.key, { income: 0, expense: 0 }));
-      rows.forEach((r) => {
-        const b = byGroup.get(r.group_key); if (!b) return;
-        if (r.entry_type === 'income') b.income += Number(r.amount); else b.expense += Number(r.amount);
-      });
-      els.ovFinGroupBody.innerHTML = GROUPS.map((g) => {
-        const b = byGroup.get(g.key)!;
-        return `
-          <tr>
-            <td data-label="Group">${escapeHtml(g.en)}</td>
-            <td data-label="Income">${b.income.toFixed(2)}</td>
-            <td data-label="Expenses">${b.expense.toFixed(2)}</td>
-            <td data-label="Net">${(b.income - b.expense).toFixed(2)}</td>
-          </tr>`;
-      }).join('');
-
-      els.ovFinBody.innerHTML = rows.length
-        ? rows.map((r) => {
-            const g = GROUPS.find((x) => x.key === r.group_key);
-            return `
-              <tr>
-                <td data-label="Date">${r.entry_date}</td>
-                <td data-label="Group">${escapeHtml(g ? g.en : r.group_key)}</td>
-                <td data-label="Type">${r.entry_type === 'income' ? 'Income' : 'Expense'}</td>
-                <td data-label="Category">${escapeHtml(r.category || '—')}</td>
-                <td data-label="Description">${escapeHtml(r.description || '—')}</td>
-                <td data-label="Amount">${Number(r.amount).toFixed(2)}</td>
-              </tr>`;
-          }).join('')
-        : '<tr><td colspan="6" class="ws-empty">No entries this period.</td></tr>';
-    }
-
-    // Same three reports as the per-group Reports tab, except every query
-    // drops the group_key filter and the PDFs get a Group column (Fees/
-    // Attendance) or a per-group breakdown (Income Statement) instead.
-    async function downloadOverviewFinanceReport() {
-      try {
-        const { start, end, label } = periodRange(els.ovReportMonth, els.ovReportYear);
-        const { data, error } = await db.from('finance_entries').select('group_key, entry_type, amount').gte('entry_date', start).lte('entry_date', end);
-        if (error) throw error;
-        const rows = data || [];
-        const byGroup = new Map<string, { income: number; expense: number }>();
-        GROUPS.forEach((g) => byGroup.set(g.key, { income: 0, expense: 0 }));
-        rows.forEach((r: any) => {
-          const b = byGroup.get(r.group_key); if (!b) return;
-          if (r.entry_type === 'income') b.income += Number(r.amount); else b.expense += Number(r.amount);
-        });
-        const totalIncome = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
-        const totalExpense = rows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
-        const bodyRows = GROUPS.map((g) => {
-          const b = byGroup.get(g.key)!;
-          return [g.en, b.income.toFixed(2), b.expense.toFixed(2), (b.income - b.expense).toFixed(2)];
-        });
-        const doc = new jsPDF();
-        const y = pdfHeader(doc, 'Income Statement', label, 'All Groups');
-        autoTable(doc, {
-          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
-          columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
-          head: [['Group', 'Income', 'Expenses', 'Net']],
-          body: rows.length ? bodyRows : [['No data available', '', '', '']],
-          foot: [['Troop Total', totalIncome.toFixed(2), totalExpense.toFixed(2), (totalIncome - totalExpense).toFixed(2)]],
-        });
-        doc.save(pdfFilename('Income-Statement', label, 'All-Groups'));
-      } catch (err) {
-        console.error('overview finance report failed', err);
-        showToast('Could not generate the report — check your connection and try again.');
-      }
-    }
-    async function downloadOverviewFeesReport() {
-      try {
-        const { period, label } = periodRange(els.ovReportMonth, els.ovReportYear);
-        const [membersRes, feeRes] = await Promise.all([
-          db.from('members').select('id, full_name, group_key').eq('active', true),
-          db.from('fee_payments').select('member_id, paid, amount').eq('period', period),
-        ]);
-        const members = membersRes.data || [];
-        const map: Map<string, any> = new Map((feeRes.data || []).map((r: any) => [r.member_id, r]));
-        let paidCount = 0, collected = 0;
-        const rows = members.map((m: any) => {
-          const rec = map.get(m.id);
-          const g = GROUPS.find((x) => x.key === m.group_key);
-          if (rec && rec.paid) { paidCount++; collected += Number(rec.amount || 0); }
-          return [m.full_name, g ? g.en : m.group_key, rec && rec.paid ? 'Paid' : 'Unpaid', rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'];
-        });
-        const doc = new jsPDF();
-        const y = pdfHeader(doc, 'Monthly Fees', `${label} — ${paidCount} of ${members.length} paid, ${collected.toFixed(2)} collected`, 'All Groups');
-        autoTable(doc, {
-          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          head: [['Member', 'Group', 'Status', 'Amount']], body: rows.length ? rows : [['No data available', '', '', '']],
-        });
-        doc.save(pdfFilename('Monthly-Fees', label, 'All-Groups'));
-      } catch (err) {
-        console.error('overview fees report failed', err);
-        showToast('Could not generate the report — check your connection and try again.');
-      }
-    }
-    async function downloadOverviewAttendanceReport() {
-      try {
-        const { start, end, label } = periodRange(els.ovReportMonth, els.ovReportYear);
-        const [membersRes, attRes] = await Promise.all([
-          db.from('members').select('id, full_name, group_key').eq('active', true),
-          db.from('attendance').select('member_id, group_key, present, date').gte('date', start).lte('date', end),
-        ]);
-        const members = membersRes.data || [];
-        const rows = attRes.data || [];
-        // Rate is against that member's own group's session count, not a
-        // global date count — two groups meeting on different days of the
-        // same week are separate sessions, not one.
-        const byGroupSessions = new Map<string, Set<string>>();
-        GROUPS.forEach((g) => byGroupSessions.set(g.key, new Set()));
-        const presentByMember = new Map<string, number>();
-        rows.forEach((r: any) => {
-          const set = byGroupSessions.get(r.group_key);
-          if (set) set.add(r.date);
-          if (r.present) presentByMember.set(r.member_id, (presentByMember.get(r.member_id) || 0) + 1);
-        });
-        const totalSessions = Array.from(byGroupSessions.values()).reduce((s, set) => s + set.size, 0);
-        const bodyRows = members.map((m: any) => {
-          const g = GROUPS.find((x) => x.key === m.group_key);
-          const sessions = byGroupSessions.get(m.group_key)?.size || 0;
-          const present = presentByMember.get(m.id) || 0;
-          const rate = sessions ? Math.round((present / sessions) * 100) : 0;
-          return [m.full_name, g ? g.en : m.group_key, `${present} / ${sessions}`, `${rate}%`];
-        });
-        const doc = new jsPDF();
-        const y = pdfHeader(doc, 'Attendance', `${label} — ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held across all groups`, 'All Groups');
-        autoTable(doc, {
-          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          head: [['Member', 'Group', 'Present', 'Rate']], body: bodyRows.length ? bodyRows : [['No data available', '', '', '']],
-        });
-        doc.save(pdfFilename('Attendance', label, 'All-Groups'));
-      } catch (err) {
-        console.error('overview attendance report failed', err);
-        showToast('Could not generate the report — check your connection and try again.');
-      }
-    }
-    function bindOverviewReports() {
-      populatePeriodSelects(els.ovReportMonth, els.ovReportYear);
-      el('[data-ov-report-finance]').addEventListener('click', downloadOverviewFinanceReport);
-      el('[data-ov-report-fees]').addEventListener('click', downloadOverviewFeesReport);
-      el('[data-ov-report-attendance]').addEventListener('click', downloadOverviewAttendanceReport);
-    }
-
-    // ---------- Overview: Curriculum status (next meeting per group) ------
-    async function loadOverviewCurriculum() {
-      const { data, error } = await db.from('curriculum_meetings').select('group_key, date, theme, activities')
-        .gte('date', todayStr()).order('date', { ascending: true });
-      if (error) { console.error(error); showToast('Could not load curriculum.'); return; }
-      const byGroup = new Map<string, any>();
-      (data || []).forEach((r: any) => { if (!byGroup.has(r.group_key)) byGroup.set(r.group_key, r); });
-      renderOverviewCurriculum(byGroup);
-    }
-    function renderOverviewCurriculum(byGroup: Map<string, any>) {
-      els.ovCurrBody.innerHTML = GROUPS.map((g) => {
-        const m = byGroup.get(g.key);
-        if (!m) return `<tr><td colspan="4" class="ws-empty">${escapeHtml(g.en)}: nothing planned yet</td></tr>`;
-        const d = parseDateStr(m.date);
-        const dateLabel = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}`;
-        return `
-          <tr>
-            <td data-label="Group">${escapeHtml(g.en)}</td>
-            <td data-label="Next Meeting">${dateLabel}</td>
-            <td data-label="Theme">${escapeHtml(m.theme || '—')}</td>
-            <td data-label="Activities">${(m.activities || []).length}</td>
-          </tr>`;
-      }).join('');
-    }
-
-    // ---------- Overview: Library (every group's documents) ---------------
-    async function loadOverviewLibrary() {
-      const { data, error } = await db.from('documents').select('*').order('uploaded_at', { ascending: false });
-      if (error) { console.error(error); showToast('Could not load documents.'); return; }
-      renderOverviewLibrary(data || []);
-    }
-    function renderOverviewLibrary(docs: any[]) {
-      if (!docs.length) { els.ovLibBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No documents yet.</td></tr>'; return; }
-      els.ovLibBody.innerHTML = docs.map((d: any) => {
-        const g = GROUPS.find((x) => x.key === d.group_key);
-        return `
-          <tr data-doc-path="${escapeHtml(d.file_path)}">
-            <td data-label="Title">${escapeHtml(d.title)}</td>
-            <td data-label="Group">${escapeHtml(g ? g.en : d.group_key)}</td>
-            <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
-            <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
-            <td class="ws-row-actions"><button type="button" class="ws-edit-btn" data-ov-doc-download>Download</button></td>
-          </tr>`;
-      }).join('');
-      els.ovLibBody.querySelectorAll('[data-ov-doc-download]').forEach((btn: any) => {
-        btn.addEventListener('click', async () => {
-          const path = btn.closest('tr').dataset.docPath;
-          const { data, error } = await db.storage.from('documents').createSignedUrl(path, 60);
-          if (error || !data) { showToast('Could not open file.'); return; }
-          window.open(data.signedUrl, '_blank');
-        });
-      });
-    }
-
-    // ---------- Overview: full roster, every group, with filters ----------
-    async function loadOverviewRoster() {
-      const { data, error } = await db.from('members').select('*').order('full_name', { ascending: true });
-      if (error) { console.error(error); showToast('Could not load the roster.'); return; }
-      state.ovMembers = data || [];
-      renderOverviewRoster();
-    }
-    function renderOverviewRoster() {
-      const groupFilter = els.ovRosterGroup.value;
-      const statusFilter = els.ovRosterStatus.value;
-      let rows = state.ovMembers;
-      if (groupFilter) rows = rows.filter((m: any) => m.group_key === groupFilter);
-      if (statusFilter === 'active') rows = rows.filter((m: any) => m.active);
-      else if (statusFilter === 'archived') rows = rows.filter((m: any) => !m.active);
-      if (!rows.length) { els.ovRosterBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No members match these filters.</td></tr>'; return; }
-      els.ovRosterBody.innerHTML = rows.map((m: any) => {
-        const g = GROUPS.find((x) => x.key === m.group_key);
-        return `
-          <tr>
-            <td data-label="Name">${escapeHtml(m.full_name)}</td>
-            <td data-label="Group">${escapeHtml(g ? g.en : m.group_key)}</td>
-            <td data-label="Guardian 1">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
-            <td data-label="Allergies">${m.has_allergies
-                ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ' — ' + escapeHtml(m.allergy_detail) : ''}</span>`
-                : '—'}</td>
-            <td data-label="Status">${m.active ? 'Active' : (m.archived_reason === 'inactive' ? 'Auto-archived' : 'Archived')}</td>
-          </tr>`;
-      }).join('');
-    }
-
-    // ---------- Admin: approve leaders, assign groups --------------------
-    async function loadAdmin() {
-      const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
-      if (error) { console.error(error); showToast('Could not load leaders.'); return; }
-      renderAdmin(data || []);
-    }
-    // Admins have access to every group by definition (see setupGroups())
-    // — a per-admin group checklist would just be dead, confusing UI, so
-    // it's swapped for a plain note whenever the selected role is Admin,
-    // live as the dropdown changes and not only after a save.
-    function adminGroupsCellHTML(groups: string[], isAdmin: boolean) {
-      if (isAdmin) return '<p class="ws-admin-note">All groups (admin)</p>';
-      return GROUPS.map((g) => `
-        <label class="ws-group-check">
-          <input type="checkbox" value="${g.key}" ${groups.includes(g.key) ? 'checked' : ''} />
-          ${escapeHtml(g.en)}
-        </label>
-      `).join('');
-    }
-    function renderAdmin(profiles: any) {
-      els.adminBody.innerHTML = profiles.map((p: any) => `
-        <tr data-profile-id="${p.id}" class="${p.role === 'pending' ? 'ws-row--pending' : ''}">
-          <td data-label="Name">${escapeHtml(p.name)}</td>
-          <td data-label="Role">
-            <select data-admin-role>
-              <option value="pending" ${p.role === 'pending' ? 'selected' : ''}>Pending</option>
-              <option value="leader" ${p.role === 'leader' ? 'selected' : ''}>Leader</option>
-              <option value="admin" ${p.role === 'admin' ? 'selected' : ''}>Admin</option>
-            </select>
-          </td>
-          <td class="ws-admin-groups" data-label="Groups" data-groups="${p.groups.join(',')}">
-            ${adminGroupsCellHTML(p.groups, p.role === 'admin')}
-          </td>
-          <td class="ws-row-actions">
-            <button type="button" class="btn-primary ws-admin-save" data-admin-save>Save</button>
-            ${p.id !== state.session.user.id ? '<button type="button" class="ws-row-del" data-admin-remove title="Remove access">×</button>' : ''}
-          </td>
-        </tr>
-      `).join('');
-
-      els.adminBody.querySelectorAll('tr').forEach((row: any) => {
-        const id = row.dataset.profileId;
-        const name = row.querySelector('[data-label="Name"]').textContent;
-        const groupsCell = row.querySelector('.ws-admin-groups');
-        row.querySelector('[data-admin-role]').addEventListener('change', (e: any) => {
-          const savedGroups = (groupsCell.dataset.groups || '').split(',').filter(Boolean);
-          groupsCell.innerHTML = adminGroupsCellHTML(savedGroups, e.target.value === 'admin');
-        });
-        row.querySelector('[data-admin-save]').addEventListener('click', async () => {
-          const role = row.querySelector('[data-admin-role]').value;
-          const groups = role === 'admin'
-            ? []
-            : Array.from(row.querySelectorAll('.ws-group-check input:checked')).map((i: any) => i.value);
-          const { error } = await db.from('profiles').update({ role, groups }).eq('id', id);
-          if (error) { console.error(error); showToast('Could not save — ' + (error.message || 'unknown error') + '.'); return; }
-          showToast('Saved.');
-          if (id === state.session.user.id) { state.profile.role = role; state.profile.groups = groups; setupGroups(); }
-        });
-        // Soft-revoke: back to pending with no groups, so they lose all
-        // access immediately (enforced by RLS, not just this screen) but
-        // stay in the list — an admin can re-approve them later if this
-        // was a mistake. This can't delete their actual login (that needs
-        // the service-role key, which nothing in this app ever holds) —
-        // for that, remove them from Supabase Dashboard → Authentication →
-        // Users directly.
-        row.querySelector('[data-admin-remove]')?.addEventListener('click', async () => {
-          if (!confirm(`Remove ${name}'s access? They'll be signed out of every group and land back on the "waiting for approval" screen — you can re-approve them any time from here. This doesn't delete their account.`)) return;
-          const { error } = await db.from('profiles').update({ role: 'pending', groups: [] }).eq('id', id);
-          if (error) { console.error(error); showToast('Could not remove access — ' + (error.message || 'unknown error') + '.'); return; }
-          showToast(`${name}'s access removed.`);
-          await loadAdmin();
-        });
-      });
-    }
-
     // ---------- Groups + tabs ---------------------------------------------
     function setupGroups() {
       state.availableGroups = state.profile.role === 'admin'
@@ -3343,6 +2776,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderGroupSwitch() {
       renderGroupBanner();
+      updateTabVisibility();
       if (state.availableGroups.length <= 1) {
         const g = GROUPS.find((x) => x.key === state.availableGroups[0]);
         els.groupSwitch.innerHTML = g ? `<span class="ws-single-group">${escapeHtml(g.en)}</span>` : '';
@@ -3366,16 +2800,50 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           if (state.editingMemberId) resetMemberForm();
           renderGroupSwitch();
           refreshApprovalsBadge();
-          loadActiveTabData();
+          // Music/General only show a cut-down tab set —
+          // updateTabVisibility() (called from renderGroupSwitch()) already
+          // hid the rest, so a switch that leaves an invalid tab active
+          // needs to land somewhere visible instead of just reloading a
+          // now-hidden panel.
+          const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
+          if (visible && !visible.includes(state.activeTab)) {
+            setTab('finance');
+          } else {
+            loadActiveTabData();
+          }
         });
       });
+    }
+    // Music and General (see MUSIC_GROUP_KEY/GENERAL_GROUP_KEY) aren't
+    // scouting troops — Archive/Approvals/Attendance/Fees/Curriculum/
+    // Library/Reports don't apply to them. Both still get Roster: Music's
+    // is band members, General's is the board of directors/leadership.
+    // Runs on every group switch, not just once, so leaving one restores
+    // every other tab.
+    const NON_TROOP_GROUP_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY];
+    const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
+      [MUSIC_GROUP_KEY]: ['roster', 'finance'],
+      [GENERAL_GROUP_KEY]: ['roster', 'finance'],
+    };
+    function updateTabVisibility() {
+      const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
+      els.tabs.querySelectorAll('.ws-tab:not([data-admin-only])').forEach((btn: any) => {
+        btn.toggleAttribute('hidden', !!visible && !visible.includes(btn.dataset.tab));
+      });
+      els.copyMemberBlock.toggleAttribute('hidden', !NON_TROOP_GROUP_KEYS.includes(state.activeGroup));
+      const g = GROUPS.find((x: any) => x.key === state.activeGroup);
+      els.copyMemberBtn.textContent = `Copy selected into ${g ? g.en : 'the'} roster`;
+      // The Fees tab (and its per-month default fee) doesn't exist for
+      // Music/General — this categories hint references it by name, so it
+      // only makes sense for a troop.
+      els.feesTabHint.toggleAttribute('hidden', NON_TROOP_GROUP_KEYS.includes(state.activeGroup));
+      balanceTabs();
     }
 
     function loadActiveTabData() {
       const tab = state.activeTab;
       if (tab === 'dashboard') loadDashboard();
       if (tab === 'roster' || tab === 'archive') loadRoster();
-      if (tab === 'admin') { loadOverview(); loadOverviewFinance(); loadOverviewCurriculum(); loadOverviewLibrary(); loadOverviewRoster(); loadAdmin(); }
       if (tab === 'approvals') loadApprovals();
       if (tab === 'attendance') loadAttendance();
       if (tab === 'fees') loadFees();
@@ -3493,7 +2961,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             }
             checkBtn.disabled = false;
             checkBtn.textContent = 'Check again';
-            showToast('Still pending — ask an admin to approve you.');
+            showToast('Still pending, ask an admin to approve you.');
           });
         }
         return;
@@ -3533,6 +3001,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindSubtabs();
         bindDashboard();
         bindRosterForm();
+        bindCopyPicker();
         bindFinanceForm();
         bindLibraryUpload();
         bindReports();
@@ -3549,16 +3018,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindSettings();
         els.finMonth.addEventListener('change', loadFinance);
         els.finYear.addEventListener('change', loadFinance);
-        els.ovFinMonth.addEventListener('change', loadOverviewFinance);
-        els.ovFinYear.addEventListener('change', loadOverviewFinance);
-        bindOverviewReports();
-        els.ovRosterGroup.addEventListener('change', renderOverviewRoster);
-        els.ovRosterStatus.addEventListener('change', renderOverviewRoster);
-        bindTableSearch(els.ovRosterSearch, els.ovRosterBody);
       }
 
       refreshApprovalsBadge();
-      setTab('dashboard');
+      {
+        const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
+        setTab(visible && !visible.includes('dashboard') ? visible[0] : 'dashboard');
+      }
     }
 
     document.addEventListener('astro:page-load', init);

@@ -2,7 +2,18 @@
 // imports (no `node:fs`, unlike leader-portal.ts) because this module is
 // imported by client-side script as well as the Astro frontmatter.
 
-export type GroupKey = 'Jawalah' | 'Mutaqaddim' | 'Mubtadi' | 'Ashbal-Zahrat' | 'Baraem';
+// 'Music' and 'General' are 2 extra "groups" alongside the 5 troops —
+// same finance machinery (Music also gets a Roster), but the Leaders
+// Workspace only ever shows either of them a cut-down set of tabs (see
+// NON_TROOP_TAB_VISIBILITY in leaders/app.astro): neither has scouts,
+// attendance, or curriculum. Music logs event/wedding income and band
+// payouts; General is for shared org-wide costs that aren't any single
+// troop's or Music's — venue maintenance, new chairs, that kind of
+// thing — logged the same way any group logs its own Finance entries.
+export type GroupKey = 'Jawalah' | 'Mutaqaddim' | 'Mubtadi' | 'Ashbal-Zahrat' | 'Baraem' | 'Music' | 'General';
+
+export const MUSIC_GROUP_KEY: GroupKey = 'Music';
+export const GENERAL_GROUP_KEY: GroupKey = 'General';
 
 export const GROUPS: { key: GroupKey; en: string; ar: string }[] = [
   { key: 'Baraem',        en: 'Baraem',          ar: 'براعم' },
@@ -10,7 +21,18 @@ export const GROUPS: { key: GroupKey; en: string; ar: string }[] = [
   { key: 'Mubtadi',       en: 'Mubtadi',          ar: 'مبتدى' },
   { key: 'Mutaqaddim',    en: 'Mutaqaddim',       ar: 'متقدم' },
   { key: 'Jawalah',       en: 'Jawalah',          ar: 'جوالة' },
+  { key: 'Music',         en: 'Music',           ar: 'الفرقة الموسيقية' },
+  { key: 'General',       en: 'General',         ar: 'عام' },
 ];
+
+// The 5 scouting troops only — for member/attendance/fee/curriculum
+// views where a group with no roster (Music, General) wouldn't make sense.
+export const TROOP_GROUPS = GROUPS.filter((g) => g.key !== MUSIC_GROUP_KEY && g.key !== GENERAL_GROUP_KEY);
+
+// Everything the public /join form can offer — General has no roster at
+// all (nobody "joins" shared org expenses), so it's excluded; Music stays
+// since someone could genuinely sign up to join the band.
+export const JOINABLE_GROUPS = GROUPS.filter((g) => g.key !== GENERAL_GROUP_KEY);
 
 export type ActivityType =
   | 'opening' | 'game' | 'craft' | 'badge' | 'orthodox' | 'scout'
