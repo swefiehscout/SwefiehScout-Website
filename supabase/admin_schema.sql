@@ -130,6 +130,14 @@ alter table documents add column if not exists uploaded_by_name text;
 -- (has_group_access() returns true for an admin regardless of the
 -- group), so no new storage policies are needed.
 -- ============================================================
+-- shared_documents is created (with no policies yet) before
+-- shared_document_groups since the latter references it by foreign key;
+-- shared_document_groups' own table + RLS then comes fully before
+-- shared_documents' policies, since one of those policies references
+-- shared_document_groups — a policy's using clause is validated against
+-- the schema at creation time (same reason schema.sql creates profiles
+-- before the functions that reference it), so the referenced table has
+-- to exist first.
 create table if not exists shared_documents (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -140,19 +148,6 @@ create table if not exists shared_documents (
   uploaded_by_name text,
   uploaded_at timestamptz not null default now()
 );
-
-alter table shared_documents enable row level security;
-drop policy if exists "admin manage" on shared_documents;
-create policy "admin manage" on shared_documents
-  for all using (is_admin()) with check (is_admin());
-drop policy if exists "group access read" on shared_documents;
-create policy "group access read" on shared_documents
-  for select using (
-    exists (
-      select 1 from shared_document_groups sdg
-      where sdg.shared_document_id = shared_documents.id and has_group_access(sdg.group_key)
-    )
-  );
 
 create table if not exists shared_document_groups (
   shared_document_id uuid not null references shared_documents(id) on delete cascade,
@@ -167,3 +162,16 @@ create policy "admin manage" on shared_document_groups
 drop policy if exists "group access read" on shared_document_groups;
 create policy "group access read" on shared_document_groups
   for select using (has_group_access(group_key));
+
+alter table shared_documents enable row level security;
+drop policy if exists "admin manage" on shared_documents;
+create policy "admin manage" on shared_documents
+  for all using (is_admin()) with check (is_admin());
+drop policy if exists "group access read" on shared_documents;
+create policy "group access read" on shared_documents
+  for select using (
+    exists (
+      select 1 from shared_document_groups sdg
+      where sdg.shared_document_id = shared_documents.id and has_group_access(sdg.group_key)
+    )
+  );
