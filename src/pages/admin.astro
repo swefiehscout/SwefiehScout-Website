@@ -134,12 +134,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                     <option value="income">Income</option>
                   </select>
                 </label>
-                <label class="ws-field"><span>Category</span><select data-tx-category></select></label>
+                <label class="ws-field"><span>Category *</span><select data-tx-category required></select></label>
                 <label class="ws-field"><span>Amount *</span><input type="number" step="0.01" min="0" data-tx-amount required /></label>
               </div>
               <div class="ws-form-grid">
                 <label class="ws-field"><span>Date *</span><input type="date" data-tx-date required /></label>
-                <label class="ws-field ws-field--full"><span>Description</span><input type="text" data-tx-description /></label>
+                <label class="ws-field ws-field--full"><span>Description *</span><input type="text" data-tx-description required /></label>
               </div>
               <div class="ws-form-actions"><button type="submit" class="btn-primary" data-tx-submit>Add entry</button></div>
             </form>
@@ -272,7 +272,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <input type="search" class="ws-search" data-roster-search placeholder="Search members…" />
           <div class="ws-table-wrap">
             <table class="ws-table" data-roster-table>
-              <thead><tr><th>Name</th><th>Group</th><th>Phone</th><th>Guardian 1</th><th>Allergies</th><th>Status</th></tr></thead>
+              <thead><tr><th>Name</th><th>Group</th><th>Phone</th><th>Emergency Contact</th><th>Allergies</th><th>Status</th></tr></thead>
               <tbody data-roster-body></tbody>
             </table>
           </div>
@@ -752,7 +752,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           entry_date: els.txDate.value,
           description: els.txDescription.value.trim() || null,
         };
-        if (!payload.amount || !payload.entry_date) { showToast('Amount and date are required.'); return; }
+        if (!payload.group_key || !payload.category || !payload.amount || !payload.entry_date || !payload.description) {
+          showToast('Everything is required.');
+          return;
+        }
         els.txSubmit.disabled = true;
         const { error } = await db.from('finance_entries').insert({ ...payload, created_by: state.session.user.id });
         els.txSubmit.disabled = false;
@@ -893,8 +896,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.recSave.addEventListener('click', async () => {
         const diff = state.recDiff;
         if (diff == null) return;
-        els.recSave.disabled = true;
         const note = els.recAdjustNote.value.trim() || null;
+        if (!els.recAdjustGroup.value) { showToast('Pick which group this belongs to.'); return; }
+        els.recSave.disabled = true;
         const { data: inserted, error } = await db.from('finance_entries').insert({
           group_key: els.recAdjustGroup.value,
           entry_type: diff >= 0 ? 'income' : 'expense',
@@ -1186,7 +1190,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <td data-label="Name">${escapeHtml(m.full_name)}</td>
             <td data-label="Group">${escapeHtml(g ? g.en : m.group_key)}</td>
             <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
-            <td data-label="Guardian 1">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
+            <td data-label="Emergency Contact">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
             <td data-label="Allergies">${m.has_allergies
                 ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ', ' + escapeHtml(m.allergy_detail) : ''}</span>`
                 : '—'}</td>

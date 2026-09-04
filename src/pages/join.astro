@@ -63,8 +63,8 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
             <input type="date" data-j-dob />
           </label>
           <label class="ws-field">
-            <span>Guardian 1 relation · صلة القرابة *</span>
-            <select data-j-g1-rel required>
+            <span>Emergency Contact Relationship 1 · صلة القرابة 1</span>
+            <select data-j-g1-rel>
               <option value="">Select… · اختر</option>
               <option>Mother</option>
               <option>Father</option>
@@ -74,17 +74,17 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
         </div>
 
         <label class="ws-field ws-field--full">
-          <span>Guardian 1 phone · هاتف ولي الأمر *</span>
-          <input type="tel" data-j-g1-phone required />
+          <span>Emergency Contact Phone 1 · هاتف الطوارئ 1</span>
+          <input type="tel" data-j-g1-phone />
         </label>
 
         <div class="ws-form-grid">
           <div class="ws-optional-block" data-j-g2-block>
-            <button type="button" class="ws-add-link" data-j-g2-add>+ Add second guardian · إضافة ولي أمر ثانٍ</button>
+            <button type="button" class="ws-add-link" data-j-g2-add>+ Add second emergency contact · إضافة جهة اتصال طوارئ ثانية</button>
             <div class="ws-optional-fields" data-j-g2-fields hidden>
               <div class="ws-form-grid">
                 <label class="ws-field">
-                  <span>Guardian 2 relation · صلة القرابة</span>
+                  <span>Emergency Contact Relationship 2 · صلة القرابة 2</span>
                   <select data-j-g2-rel>
                     <option value="">Select… · اختر</option>
                     <option>Mother</option>
@@ -93,7 +93,7 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
                   </select>
                 </label>
                 <label class="ws-field">
-                  <span>Guardian 2 phone · الهاتف</span>
+                  <span>Emergency Contact Phone 2 · هاتف الطوارئ 2</span>
                   <input type="tel" data-j-g2-phone />
                 </label>
               </div>
@@ -211,10 +211,8 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
         if (!selectedGroup) { showError('Pick a group first. · اختر مجموعة أولاً.'); return; }
 
         const name = el('[data-j-name]').value.trim();
-        const g1Rel = el('[data-j-g1-rel]').value;
-        const g1Phone = el('[data-j-g1-phone]').value.trim();
-        if (!name || !g1Rel || !g1Phone) {
-          showError('Full name, Guardian 1 relation, and Guardian 1 phone are required. · الاسم الكامل وصلة القرابة وهاتف ولي الأمر الأول مطلوبة.');
+        if (!name) {
+          showError('Full name is required. · الاسم الكامل مطلوب.');
           return;
         }
         const hasAllergies = !el('[data-j-allergy-fields]').hidden;
@@ -226,8 +224,8 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
           full_name: name,
           phone: el('[data-j-phone]').value.trim() || null,
           birth_date: el('[data-j-dob]').value || null,
-          guardian1_relation: g1Rel,
-          guardian1_phone: g1Phone,
+          guardian1_relation: el('[data-j-g1-rel]').value || null,
+          guardian1_phone: el('[data-j-g1-phone]').value.trim() || null,
           guardian2_relation: !el('[data-j-g2-fields]').hidden ? (el('[data-j-g2-rel]').value || null) : null,
           guardian2_phone: !el('[data-j-g2-fields]').hidden ? (el('[data-j-g2-phone]').value.trim() || null) : null,
           has_allergies: hasAllergies,

@@ -37,6 +37,12 @@ alter table members add column if not exists source_member_id uuid references me
 -- across into the new members row, same as every other field.
 alter table join_requests add column if not exists phone text;
 
+-- Only Full name is mandatory on the Roster/Join forms now — everything
+-- else, including the emergency contact's phone, is optional. That
+-- needed a real schema change here: join_requests.guardian1_phone was
+-- created not-null back when it was a required field.
+alter table join_requests alter column guardian1_phone drop not null;
+
 -- ============================================================
 -- finance_entries: flag a row as a reconciliation adjustment (posted
 -- from /admin's Reconcile section — see finance_reconciliations above)

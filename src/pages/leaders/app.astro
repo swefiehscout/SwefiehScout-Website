@@ -190,8 +190,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <input type="date" data-m-dob />
               </label>
               <label class="ws-field">
-                <span>Guardian 1 relation *</span>
-                <select data-m-g1-rel required>
+                <span>Emergency Contact Relationship 1</span>
+                <select data-m-g1-rel>
                   <option value="">Select…</option>
                   <option>Mother</option>
                   <option>Father</option>
@@ -201,17 +201,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </div>
 
             <label class="ws-field ws-field--full">
-              <span>Guardian 1 phone *</span>
-              <input type="tel" data-m-g1-phone required />
+              <span>Emergency Contact Phone 1</span>
+              <input type="tel" data-m-g1-phone />
             </label>
 
             <div class="ws-form-grid">
               <div class="ws-optional-block" data-g2-block>
-                <button type="button" class="ws-add-link" data-g2-add>+ Add second guardian</button>
+                <button type="button" class="ws-add-link" data-g2-add>+ Add second emergency contact</button>
                 <div class="ws-optional-fields" data-g2-fields hidden>
                   <div class="ws-form-grid">
                     <label class="ws-field">
-                      <span>Guardian 2 relation</span>
+                      <span>Emergency Contact Relationship 2</span>
                       <select data-m-g2-rel>
                         <option value="">Select…</option>
                         <option>Mother</option>
@@ -220,7 +220,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                       </select>
                     </label>
                     <label class="ws-field">
-                      <span>Guardian 2 phone</span>
+                      <span>Emergency Contact Phone 2</span>
                       <input type="tel" data-m-g2-phone />
                     </label>
                   </div>
@@ -258,7 +258,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <tr>
                   <th>Name</th>
                   <th>Phone</th>
-                  <th>Guardian 1</th>
+                  <th>Emergency Contact</th>
                   <th>Allergies</th>
                   <th></th>
                 </tr>
@@ -282,7 +282,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <tr>
                   <th>Name</th>
                   <th>Phone</th>
-                  <th>Guardian 1</th>
+                  <th>Emergency Contact</th>
                   <th>Allergies</th>
                   <th></th>
                 </tr>
@@ -304,7 +304,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Guardian 1</th>
+                  <th>Emergency Contact</th>
                   <th>Allergies</th>
                   <th>Notes</th>
                   <th></th>
@@ -460,8 +460,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                   </select>
                 </label>
                 <label class="ws-field">
-                  <span>Category</span>
-                  <select data-fin-category></select>
+                  <span>Category *</span>
+                  <select data-fin-category required></select>
                 </label>
                 <label class="ws-field">
                   <span>Amount *</span>
@@ -474,8 +474,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               </div>
               <div class="ws-form-grid">
                 <label class="ws-field ws-field--full">
-                  <span>Description</span>
-                  <input type="text" data-fin-description />
+                  <span>Description *</span>
+                  <input type="text" data-fin-description required />
                 </label>
                 <label class="ws-field">
                   <span>Receipt (optional)</span>
@@ -979,7 +979,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <tr data-member-id="${m.id}">
           <td data-label="Name">${escapeHtml(m.full_name)}${m.archived_reason === 'inactive' ? ' <span class="ws-allergy-badge" title="Auto-archived: no attendance recorded in 3+ months">Auto-archived</span>' : ''}</td>
           <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
-          <td data-label="Guardian 1">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
+          <td data-label="Emergency Contact">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
           <td data-label="Allergies">${m.has_allergies
               ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ', ' + escapeHtml(m.allergy_detail) : ''}</span>`
               : '—'}</td>
@@ -1103,7 +1103,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.approvalsBody.innerHTML = state.approvals.map((r: any) => `
         <tr data-request-id="${r.id}">
           <td data-label="Name">${escapeHtml(r.full_name)}</td>
-          <td data-label="Guardian 1">${r.guardian1_relation ? `${escapeHtml(r.guardian1_relation)}: ${escapeHtml(r.guardian1_phone || '—')}` : '—'}</td>
+          <td data-label="Emergency Contact">${r.guardian1_relation ? `${escapeHtml(r.guardian1_relation)}: ${escapeHtml(r.guardian1_phone || '—')}` : '—'}</td>
           <td data-label="Allergies">${r.has_allergies
               ? `<span class="ws-allergy-badge" title="${escapeHtml(r.allergy_detail || '')}">Yes${r.allergy_detail ? ', ' + escapeHtml(r.allergy_detail) : ''}</span>`
               : '—'}</td>
@@ -1693,7 +1693,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const amount = el('[data-fin-amount]').value;
         const date = el('[data-fin-date]').value;
         const description = el('[data-fin-description]').value.trim();
-        if (!amount || !date) { showToast('Amount and date are required.'); return; }
+        if (!category || !amount || !date || !description) { showToast('Everything except the receipt is required.'); return; }
         els.finSubmit.disabled = true;
 
         let receiptPath: string | null = null;
@@ -2411,17 +2411,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function readMemberForm() {
       const name = els.mName.value.trim();
-      const g1Rel = els.mG1Rel.value;
-      const g1Phone = els.mG1Phone.value.trim();
-      if (!name || !g1Rel || !g1Phone) return null;
+      if (!name) return null;
       const hasAllergies = !els.allergyFields.hidden;
       return {
         group_key: state.activeGroup,
         full_name: name,
         phone: els.mPhone.value.trim() || null,
         birth_date: els.mDob.value || null,
-        guardian1_relation: g1Rel,
-        guardian1_phone: g1Phone,
+        guardian1_relation: els.mG1Rel.value || null,
+        guardian1_phone: els.mG1Phone.value.trim() || null,
         guardian2_relation: !els.g2Fields.hidden ? (els.mG2Rel.value || null) : null,
         guardian2_phone: !els.g2Fields.hidden ? (els.mG2Phone.value.trim() || null) : null,
         has_allergies: hasAllergies,
@@ -2477,7 +2475,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.rosterForm.addEventListener('submit', async (e: Event) => {
         e.preventDefault();
         const payload = readMemberForm();
-        if (!payload) { showToast('Full name, Guardian 1 relation, and Guardian 1 phone are required.'); return; }
+        if (!payload) { showToast('Full name is required.'); return; }
         if (state.editingMemberId) {
           const { error } = await db.from('members').update(payload).eq('id', state.editingMemberId);
           if (error) { console.error(error); showToast('Could not save member.'); return; }
