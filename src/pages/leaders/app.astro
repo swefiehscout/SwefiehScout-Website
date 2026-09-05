@@ -1308,10 +1308,20 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </label>
           </div>
           <div class="ws-report-grid">
-            <div class="ws-report-card">
+            <div class="ws-report-card" data-generic-finance>
               <h3 class="ws-admin-h3">Income Statement</h3>
               <p class="ws-report-desc">Income and expenses by category, with totals and net income.</p>
               <button type="button" class="btn-primary" data-report-finance>Download PDF</button>
+            </div>
+            <div class="ws-report-card" data-music-only hidden>
+              <h3 class="ws-admin-h3">Music Finance Report</h3>
+              <p class="ws-report-desc">Music's own income/expense ledger for the period, income vs. Band Payouts, Transport, and every other category.</p>
+              <button type="button" class="btn-primary" data-report-music-finance>Download PDF</button>
+            </div>
+            <div class="ws-report-card" data-social-only hidden>
+              <h3 class="ws-admin-h3">Social Media Finance Report</h3>
+              <p class="ws-report-desc">Social Media's own income/expense ledger for the period, by category, with totals and net income.</p>
+              <button type="button" class="btn-primary" data-report-sm-finance>Download PDF</button>
             </div>
             <div class="ws-report-card" data-troop-only>
               <h3 class="ws-admin-h3">Monthly Fees</h3>
@@ -1344,7 +1354,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <button type="button" class="btn-primary" data-report-inventory>Download PDF</button>
             </div>
             <div class="ws-report-card" data-music-only hidden>
-              <h3 class="ws-admin-h3">Event Calendar</h3>
+              <h3 class="ws-admin-h3">Music Event Report</h3>
               <p class="ws-report-desc">Every booking in the period — client, type, attendees, amount received, payouts, and net.</p>
               <button type="button" class="btn-primary" data-report-events>Download PDF</button>
             </div>
@@ -5619,6 +5629,54 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
+    // Music-only — a flat dated ledger (not grouped by category like the
+    // generic Income Statement) since Band Payouts/Transport read better
+    // as line items than a category summary. Mirrors Admin's own Music
+    // Finance Report.
+    async function downloadMusicFinanceReportCard() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const { data, error } = await db.from('finance_entries').select('*').eq('group_key', state.activeGroup).gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const income = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const expense = rows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Music Finance Report', `${label}, Income ${income.toFixed(2)}, Expenses ${expense.toFixed(2)}, Net ${(income - expense).toFixed(2)}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
+          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), r.created_by_name || '—']) : [['No entries this period', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Music-Finance', label));
+      } catch (err) {
+        console.error('music finance report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    // Social Media-only — same flat-ledger shape as Music's, mirroring
+    // Admin's own Social Media Finance Report.
+    async function downloadSocialMediaFinanceReportCard() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const { data, error } = await db.from('finance_entries').select('*').eq('group_key', state.activeGroup).gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const income = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const expense = rows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Social Media Finance Report', `${label}, Income ${income.toFixed(2)}, Expenses ${expense.toFixed(2)}, Net ${(income - expense).toFixed(2)}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
+          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), r.created_by_name || '—']) : [['No entries this period', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Social-Media-Finance', label));
+      } catch (err) {
+        console.error('social media finance report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
     function bindReports() {
       populatePeriodSelects(els.reportMonth, els.reportYear, true);
       el('[data-report-finance]').addEventListener('click', downloadFinanceReport);
@@ -5630,6 +5688,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       el('[data-report-inventory]').addEventListener('click', downloadInventoryReport);
       el('[data-report-events]').addEventListener('click', downloadEventCalendarReport);
       el('[data-report-maintenance]').addEventListener('click', downloadMaintenanceReportCard);
+      el('[data-report-music-finance]').addEventListener('click', downloadMusicFinanceReportCard);
+      el('[data-report-sm-finance]').addEventListener('click', downloadSocialMediaFinanceReportCard);
       el('[data-report-content]').addEventListener('click', downloadContentReport);
       el('[data-report-credentials]').addEventListener('click', downloadCredentialsReport);
       el('[data-report-sponsors]').addEventListener('click', downloadSponsorsReport);
@@ -6594,6 +6654,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
       document.querySelectorAll('[data-general-only]').forEach((el: any) => {
         el.toggleAttribute('hidden', state.activeGroup !== GENERAL_GROUP_KEY);
+      });
+      // Music and Social Media get their own custom-named finance report
+      // instead of the generic Income Statement (Troops/General keep it).
+      document.querySelectorAll('[data-generic-finance]').forEach((el: any) => {
+        el.toggleAttribute('hidden', state.activeGroup === MUSIC_GROUP_KEY || state.activeGroup === SOCIAL_MEDIA_GROUP_KEY);
       });
       balanceTabs();
     }

@@ -320,14 +320,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= Music (dashboard + its own reports) ================= -->
         <section class="ws-panel" data-panel="music" hidden>
-          <p class="ws-att-hint">Music isn't a scouting troop, so it's not part of the Overview rollup above — this is its own equivalent, plus the reports specific to its Inventory and Event Calendar tabs.</p>
-          <div class="ws-subtabs">
-            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="music" data-subtab="dashboard">Dashboard</button>
-            <button type="button" class="ws-subtab" data-subtabs="music" data-subtab="reports">Reports</button>
-          </div>
-
-          <div data-subpanel="music:dashboard">
-            <div class="ws-dash">
+          <p class="ws-att-hint">Music isn't a scouting troop, so it's not part of the Overview rollup above — this is its own equivalent. Its reports live in the main Reports tab, alongside everyone else's.</p>
+          <div class="ws-dash">
             <div class="ws-dash-kpis" data-music-kpis></div>
 
             <div class="ws-dash-card ws-dash-card--full">
@@ -367,31 +361,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                     <tbody data-music-upcoming-body></tbody>
                   </table>
                 </div>
-              </div>
-            </div>
-            </div>
-          </div>
-
-          <div data-subpanel="music:reports" hidden>
-            <div class="ws-toolbar-row">
-              <label class="ws-field ws-field--inline"><span>Month</span><select data-music-report-month></select></label>
-              <label class="ws-field ws-field--inline"><span>Year</span><select data-music-report-year></select></label>
-            </div>
-            <div class="ws-report-grid">
-              <div class="ws-report-card">
-                <h3 class="ws-admin-h3">Music Finance Report</h3>
-                <p class="ws-report-desc">Music's own income/expense ledger for the period, income vs. Band Payouts, Transport, and every other category.</p>
-                <button type="button" class="btn-primary" data-report-music-finance>Download PDF</button>
-              </div>
-              <div class="ws-report-card">
-                <h3 class="ws-admin-h3">Music Event Report</h3>
-                <p class="ws-report-desc">Every booking in the period — client, type, attendees, amount received, payouts, and net.</p>
-                <button type="button" class="btn-primary" data-report-music-events>Download PDF</button>
-              </div>
-              <div class="ws-report-card">
-                <h3 class="ws-admin-h3">Maintenance Report</h3>
-                <p class="ws-report-desc">Every maintenance record logged in the period — item, vendor, cost, and who logged it.</p>
-                <button type="button" class="btn-primary" data-report-music-maintenance>Download PDF</button>
               </div>
             </div>
           </div>
@@ -457,89 +426,58 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= Social Media ================= -->
         <section class="ws-panel" data-panel="socialmedia" hidden>
-          <p class="ws-att-hint">Social Media isn't a scouting troop either, so it's not part of the Overview rollup above — its own dashboard and Content Calendar report live here instead.</p>
-          <div class="ws-subtabs">
-            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="socialmedia" data-subtab="dashboard">Dashboard</button>
-            <button type="button" class="ws-subtab" data-subtabs="socialmedia" data-subtab="reports">Reports</button>
-          </div>
+          <p class="ws-att-hint">Social Media isn't a scouting troop either, so it's not part of the Overview rollup above — this is its own equivalent. Its reports live in the main Reports tab, alongside everyone else's.</p>
+          <div class="ws-dash">
+            <div class="ws-dash-kpis" data-sm-kpis></div>
 
-          <div data-subpanel="socialmedia:dashboard">
-            <div class="ws-dash">
-              <div class="ws-dash-kpis" data-sm-kpis></div>
-
-              <div class="ws-dash-card ws-dash-card--full">
-                <div class="ws-dash-card-head">
-                  <h3>Income vs. expenses</h3>
-                  <span class="ws-dash-card-sub">Last 6 months</span>
-                </div>
-                <div data-sm-chart></div>
+            <div class="ws-dash-card ws-dash-card--full">
+              <div class="ws-dash-card-head">
+                <h3>Income vs. expenses</h3>
+                <span class="ws-dash-card-sub">Last 6 months</span>
               </div>
+              <div data-sm-chart></div>
+            </div>
 
-              <div class="ws-dash-grid ws-dash-grid--2">
-                <div class="ws-dash-card">
-                  <div class="ws-dash-card-head"><h3>Content by status</h3></div>
-                  <div data-sm-status-breakdown></div>
-                </div>
-                <div class="ws-dash-card">
-                  <div class="ws-dash-card-head"><h3>Content by platform</h3></div>
-                  <div data-sm-platform-breakdown></div>
-                </div>
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Content by status</h3></div>
+                <div data-sm-status-breakdown></div>
               </div>
-
-              <div class="ws-dash-grid ws-dash-grid--2">
-                <div class="ws-dash-card">
-                  <div class="ws-dash-card-head"><h3>Content by assignee</h3></div>
-                  <div data-sm-assignee-breakdown></div>
-                </div>
-                <div class="ws-dash-card">
-                  <div class="ws-dash-card-head"><h3>Credentials vault</h3></div>
-                  <div data-sm-cred-summary></div>
-                </div>
-              </div>
-
-              <div class="ws-dash-grid ws-dash-grid--2">
-                <div class="ws-dash-card">
-                  <div class="ws-dash-card-head"><h3>Needs posting</h3></div>
-                  <div class="ws-table-wrap">
-                    <table class="ws-table" data-sm-todo-table>
-                      <thead><tr><th>Date</th><th>Title</th><th>Status</th></tr></thead>
-                      <tbody data-sm-todo-body></tbody>
-                    </table>
-                  </div>
-                </div>
-                <div class="ws-dash-card">
-                  <div class="ws-dash-card-head"><h3>Upcoming content</h3></div>
-                  <div class="ws-table-wrap">
-                    <table class="ws-table" data-sm-upcoming-table>
-                      <thead><tr><th>Date</th><th>Title</th><th>Platform</th></tr></thead>
-                      <tbody data-sm-upcoming-body></tbody>
-                    </table>
-                  </div>
-                </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Content by platform</h3></div>
+                <div data-sm-platform-breakdown></div>
               </div>
             </div>
-          </div>
 
-          <div data-subpanel="socialmedia:reports" hidden>
-            <div class="ws-toolbar-row">
-              <label class="ws-field ws-field--inline"><span>Month</span><select data-sm-report-month></select></label>
-              <label class="ws-field ws-field--inline"><span>Year</span><select data-sm-report-year></select></label>
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Content by assignee</h3></div>
+                <div data-sm-assignee-breakdown></div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Credentials vault</h3></div>
+                <div data-sm-cred-summary></div>
+              </div>
             </div>
-            <div class="ws-report-grid">
-              <div class="ws-report-card">
-                <h3 class="ws-admin-h3">Content Calendar Report</h3>
-                <p class="ws-report-desc">Every piece of content scheduled or posted in the period — title, platform, type, status, and who it's assigned to.</p>
-                <button type="button" class="btn-primary" data-report-sm-content>Download PDF</button>
+
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Needs posting</h3></div>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-sm-todo-table>
+                    <thead><tr><th>Date</th><th>Title</th><th>Status</th></tr></thead>
+                    <tbody data-sm-todo-body></tbody>
+                  </table>
+                </div>
               </div>
-              <div class="ws-report-card">
-                <h3 class="ws-admin-h3">Social Media Finance Report</h3>
-                <p class="ws-report-desc">Social Media's own income/expense ledger for the period, by category, with totals and net income.</p>
-                <button type="button" class="btn-primary" data-report-sm-finance>Download PDF</button>
-              </div>
-              <div class="ws-report-card">
-                <h3 class="ws-admin-h3">Credentials Report</h3>
-                <p class="ws-report-desc">Every login stored in the Credentials tab, in full. Not period-dependent.</p>
-                <button type="button" class="btn-primary" data-report-sm-credentials>Download PDF</button>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Upcoming content</h3></div>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-sm-upcoming-table>
+                    <thead><tr><th>Date</th><th>Title</th><th>Platform</th></tr></thead>
+                    <tbody data-sm-upcoming-body></tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -844,8 +782,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.musicTypeBreakdown = el('[data-music-type-breakdown]');
       els.musicTodoBody = el('[data-music-todo-body]');
       els.musicUpcomingBody = el('[data-music-upcoming-body]');
-      els.musicReportMonth = el('[data-music-report-month]');
-      els.musicReportYear = el('[data-music-report-year]');
 
       els.smKpis = el('[data-sm-kpis]');
       els.smChart = el('[data-sm-chart]');
@@ -855,8 +791,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.smCredSummary = el('[data-sm-cred-summary]');
       els.smTodoBody = el('[data-sm-todo-body]');
       els.smUpcomingBody = el('[data-sm-upcoming-body]');
-      els.smReportMonth = el('[data-sm-report-month]');
-      els.smReportYear = el('[data-sm-report-year]');
 
       els.currBody = el('[data-curr-body]');
 
@@ -2009,13 +1943,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    function bindMusicReports() {
-      populatePeriodSelects(els.musicReportMonth, els.musicReportYear, true);
-      el('[data-report-music-finance]').addEventListener('click', downloadMusicFinanceReport);
-      el('[data-report-music-events]').addEventListener('click', downloadMusicEventReport);
-      el('[data-report-music-maintenance]').addEventListener('click', downloadMusicMaintenanceReport);
-    }
-
     // ---------- Social Media: its own dashboard + Content Calendar report --
     function smContentStatusLabel(s: string): string {
       return ({ idea: 'Idea', drafting: 'Drafting', scheduled: 'Scheduled', posted: 'Posted' } as any)[s] || s;
@@ -2224,13 +2151,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    function bindSocialMediaReports() {
-      populatePeriodSelects(els.smReportMonth, els.smReportYear, true);
-      el('[data-report-sm-content]').addEventListener('click', downloadContentCalendarReport);
-      el('[data-report-sm-finance]').addEventListener('click', downloadSocialMediaFinanceReport);
-      el('[data-report-sm-credentials]').addEventListener('click', downloadSocialMediaCredentialsReport);
-    }
-
     // ---------- Roster: the 5 troops' full roster, with filters -------------
     async function loadRoster() {
       const { data, error } = await db.from('members').select('*').order('full_name', { ascending: true });
@@ -2635,8 +2555,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindReports();
         bindLibraryUpload();
         bindSharedVendorForm();
-        bindMusicReports();
-        bindSocialMediaReports();
         els.finMonth.addEventListener('change', loadFinancePeriod);
         els.finYear.addEventListener('change', loadFinancePeriod);
         els.rosterGroup.innerHTML = '<option value="">All Groups</option>' + GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
