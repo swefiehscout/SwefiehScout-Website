@@ -228,7 +228,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= Reports ================= -->
         <section class="ws-panel" data-panel="reports" hidden>
-          <p class="ws-att-hint">Same reports as each group's own Reports tab, except every group is combined into one PDF. The Full Accounting Report already covers income and expenses in full detail; Fees and Attendance stay troop-only (Music and General have neither).</p>
+          <p class="ws-att-hint">Same reports as each group's own Reports tab, except every group is combined into one PDF. The Full Accounting Report already covers income and expenses in full detail; Fees and Attendance stay troop-only (Music and General have neither). Music, Social Media, and General's own Public Relations reports are here too, alongside their own Music/Social Media tabs.</p>
           <div class="ws-toolbar-row">
             <label class="ws-field ws-field--inline"><span>Month</span><select data-report-month></select></label>
             <label class="ws-field ws-field--inline"><span>Year</span><select data-report-year></select></label>
@@ -263,6 +263,46 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <h3 class="ws-admin-h3">Vendor Directory</h3>
               <p class="ws-report-desc">Every group's own vendors, plus every shared vendor and which groups it's shared into. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-vendors>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Music Finance Report</h3>
+              <p class="ws-report-desc">Music's own income/expense ledger for the period, income vs. Band Payouts, Transport, and every other category.</p>
+              <button type="button" class="btn-primary" data-report-main-music-finance>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Music Event Report</h3>
+              <p class="ws-report-desc">Every booking in the period — client, type, attendees, amount received, payouts, and net.</p>
+              <button type="button" class="btn-primary" data-report-main-music-events>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Maintenance Report</h3>
+              <p class="ws-report-desc">Every maintenance record Music logged in the period — item, vendor, cost, and who logged it.</p>
+              <button type="button" class="btn-primary" data-report-main-music-maintenance>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Content Calendar Report</h3>
+              <p class="ws-report-desc">Every piece of Social Media content scheduled or posted in the period — title, platform, type, status, and who it's assigned to.</p>
+              <button type="button" class="btn-primary" data-report-main-sm-content>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Social Media Finance Report</h3>
+              <p class="ws-report-desc">Social Media's own income/expense ledger for the period, by category, with totals and net income.</p>
+              <button type="button" class="btn-primary" data-report-main-sm-finance>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Credentials Report</h3>
+              <p class="ws-report-desc">Every login Social Media has stored, in full. Not period-dependent.</p>
+              <button type="button" class="btn-primary" data-report-main-sm-credentials>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Sponsors Report</h3>
+              <p class="ws-report-desc">Every sponsor and prospective sponsor General has on file, with contact info, type, and status. Not period-dependent.</p>
+              <button type="button" class="btn-primary" data-report-main-sponsors>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Community &amp; Church Contacts Report</h3>
+              <p class="ws-report-desc">Every clergy, organization, school, media, and government contact General has on file. Not period-dependent.</p>
+              <button type="button" class="btn-primary" data-report-main-prcontacts>Download PDF</button>
             </div>
           </div>
         </section>
@@ -448,6 +488,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
               <div class="ws-dash-grid ws-dash-grid--2">
                 <div class="ws-dash-card">
+                  <div class="ws-dash-card-head"><h3>Content by assignee</h3></div>
+                  <div data-sm-assignee-breakdown></div>
+                </div>
+                <div class="ws-dash-card">
+                  <div class="ws-dash-card-head"><h3>Credentials vault</h3></div>
+                  <div data-sm-cred-summary></div>
+                </div>
+              </div>
+
+              <div class="ws-dash-grid ws-dash-grid--2">
+                <div class="ws-dash-card">
                   <div class="ws-dash-card-head"><h3>Needs posting</h3></div>
                   <div class="ws-table-wrap">
                     <table class="ws-table" data-sm-todo-table>
@@ -479,6 +530,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <h3 class="ws-admin-h3">Content Calendar Report</h3>
                 <p class="ws-report-desc">Every piece of content scheduled or posted in the period — title, platform, type, status, and who it's assigned to.</p>
                 <button type="button" class="btn-primary" data-report-sm-content>Download PDF</button>
+              </div>
+              <div class="ws-report-card">
+                <h3 class="ws-admin-h3">Social Media Finance Report</h3>
+                <p class="ws-report-desc">Social Media's own income/expense ledger for the period, by category, with totals and net income.</p>
+                <button type="button" class="btn-primary" data-report-sm-finance>Download PDF</button>
+              </div>
+              <div class="ws-report-card">
+                <h3 class="ws-admin-h3">Credentials Report</h3>
+                <p class="ws-report-desc">Every login stored in the Credentials tab, in full. Not period-dependent.</p>
+                <button type="button" class="btn-primary" data-report-sm-credentials>Download PDF</button>
               </div>
             </div>
           </div>
@@ -790,6 +851,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.smChart = el('[data-sm-chart]');
       els.smStatusBreakdown = el('[data-sm-status-breakdown]');
       els.smPlatformBreakdown = el('[data-sm-platform-breakdown]');
+      els.smAssigneeBreakdown = el('[data-sm-assignee-breakdown]');
+      els.smCredSummary = el('[data-sm-cred-summary]');
       els.smTodoBody = el('[data-sm-todo-body]');
       els.smUpcomingBody = el('[data-sm-upcoming-body]');
       els.smReportMonth = el('[data-sm-report-month]');
@@ -1593,6 +1656,49 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
+    const SPONSOR_STATUS_LABELS: Record<string, string> = { active: 'Active', past: 'Past', prospective: 'Prospective' };
+    // Not period-dependent — every sponsor/prospective sponsor General has on file.
+    async function downloadSponsorsReportMain() {
+      try {
+        const { data, error } = await db.from('sponsors').select('*').eq('group_key', GENERAL_GROUP_KEY).order('name', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Sponsors', `${rows.length} sponsor${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Name', 'Contact person', 'Phone', 'Email', 'Type', 'Status', 'Notes']],
+          body: rows.length ? rows.map((s: any) => [
+            s.name, s.contact_person || '—', s.phone, s.email || '—', s.type || '—', SPONSOR_STATUS_LABELS[s.status] || s.status, s.notes || '—',
+          ]) : [['No sponsors yet', '', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Sponsors', new Date().toISOString().slice(0, 10)));
+      } catch (err) {
+        console.error('sponsors report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    // Not period-dependent — every community/church contact General has on file.
+    async function downloadPrContactsReportMain() {
+      try {
+        const { data, error } = await db.from('pr_contacts').select('*').eq('group_key', GENERAL_GROUP_KEY).order('name', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Community & Church Contacts', `${rows.length} contact${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Name', 'Role', 'Organization', 'Category', 'Phone', 'Email', 'Notes']],
+          body: rows.length ? rows.map((c: any) => [
+            c.name, c.role || '—', c.organization || '—', c.category || '—', c.phone, c.email || '—', c.notes || '—',
+          ]) : [['No contacts yet', '', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Community-Church-Contacts', new Date().toISOString().slice(0, 10)));
+      } catch (err) {
+        console.error('contacts report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
     // Not period-dependent — every group's own vendors, plus every
     // shared vendor (labeled with which group(s) it's shared into).
     async function downloadVendorReport() {
@@ -1635,6 +1741,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       el('[data-report-curriculum]').addEventListener('click', downloadCurriculumReport);
       el('[data-report-roster]').addEventListener('click', downloadRosterReport);
       el('[data-report-vendors]').addEventListener('click', downloadVendorReport);
+      // Same per-group reports as Music/Social Media's own tabs, offered
+      // here too so nobody has to hop tabs to find them — using THIS
+      // tab's own month/year selects, not Music/Social Media's (which
+      // may be sitting on a different, hidden period).
+      el('[data-report-main-music-finance]').addEventListener('click', () => downloadMusicFinanceReport(els.reportMonth, els.reportYear));
+      el('[data-report-main-music-events]').addEventListener('click', () => downloadMusicEventReport(els.reportMonth, els.reportYear));
+      el('[data-report-main-music-maintenance]').addEventListener('click', () => downloadMusicMaintenanceReport(els.reportMonth, els.reportYear));
+      el('[data-report-main-sm-content]').addEventListener('click', () => downloadContentCalendarReport(els.reportMonth, els.reportYear));
+      el('[data-report-main-sm-finance]').addEventListener('click', () => downloadSocialMediaFinanceReport(els.reportMonth, els.reportYear));
+      el('[data-report-main-sm-credentials]').addEventListener('click', downloadSocialMediaCredentialsReport);
+      el('[data-report-main-sponsors]').addEventListener('click', downloadSponsorsReportMain);
+      el('[data-report-main-prcontacts]').addEventListener('click', downloadPrContactsReportMain);
     }
 
     // ---------- Curriculum: next meeting per troop --------------------------
@@ -1829,9 +1947,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.musicTodoBody.innerHTML = todo.length ? todo.map(rowHtml).join('') : '<tr><td colspan="3" class="ws-empty">Nothing pending.</td></tr>';
       els.musicUpcomingBody.innerHTML = upcoming.length ? upcoming.map(rowHtml).join('') : '<tr><td colspan="3" class="ws-empty">Nothing booked yet.</td></tr>';
     }
-    async function downloadMusicFinanceReport() {
+    async function downloadMusicFinanceReport(monthEl?: any, yearEl?: any) {
       try {
-        const { start, end, label } = periodRange(els.musicReportMonth, els.musicReportYear);
+        const { start, end, label } = periodRange(monthEl || els.musicReportMonth, yearEl || els.musicReportYear);
         const { data } = await db.from('finance_entries').select('*').eq('group_key', MUSIC_GROUP_KEY).gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: true });
         const rows = data || [];
         const income = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
@@ -1849,9 +1967,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    async function downloadMusicEventReport() {
+    async function downloadMusicEventReport(monthEl?: any, yearEl?: any) {
       try {
-        const { start, end, label } = periodRange(els.musicReportMonth, els.musicReportYear);
+        const { start, end, label } = periodRange(monthEl || els.musicReportMonth, yearEl || els.musicReportYear);
         const { data } = await db.from('event_bookings').select('*').eq('group_key', MUSIC_GROUP_KEY).gte('event_date', start).lte('event_date', end).order('event_date', { ascending: true });
         const rows = data || [];
         const doc = new jsPDF();
@@ -1872,9 +1990,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    async function downloadMusicMaintenanceReport() {
+    async function downloadMusicMaintenanceReport(monthEl?: any, yearEl?: any) {
       try {
-        const { start, end, label } = periodRange(els.musicReportMonth, els.musicReportYear);
+        const { start, end, label } = periodRange(monthEl || els.musicReportMonth, yearEl || els.musicReportYear);
         const { data } = await db.from('inventory_maintenance').select('*, inventory_items(name)').eq('group_key', MUSIC_GROUP_KEY).gte('performed_on', start).lte('performed_on', end).order('performed_on', { ascending: true });
         const rows = data || [];
         const totalCost = rows.reduce((s: number, r: any) => s + Number(r.cost || 0), 0);
@@ -1907,10 +2025,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       const sixAgoD = new Date(now.getFullYear(), now.getMonth() - 5, 1);
       const sixStart = `${sixAgoD.getFullYear()}-${String(sixAgoD.getMonth() + 1).padStart(2, '0')}-01`;
-      const [membersRes, contentRes, finRes] = await Promise.all([
-        db.from('members').select('id', { count: 'exact', head: true }).eq('group_key', SOCIAL_MEDIA_GROUP_KEY).eq('active', true),
-        db.from('content_items').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('scheduled_date', { ascending: true }),
+      const [membersRes, contentRes, finRes, credRes] = await Promise.all([
+        db.from('members').select('id, full_name', { count: 'exact' }).eq('group_key', SOCIAL_MEDIA_GROUP_KEY).eq('active', true),
+        db.from('content_items').select('*, members(full_name)').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('scheduled_date', { ascending: true }),
         db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).gte('entry_date', sixStart),
+        db.from('credentials').select('service_name, created_at, created_by_name', { count: 'exact' }).eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('created_at', { ascending: false }),
       ]);
       const content = contentRes.data || [];
       const fin = finRes.data || [];
@@ -1921,6 +2040,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const todo = content.filter((c: any) => c.scheduled_date && c.scheduled_date < today && c.status !== 'posted');
       const upcoming = content.filter((c: any) => c.scheduled_date && c.scheduled_date >= today);
       const thisMonthContent = content.filter((c: any) => c.scheduled_date && c.scheduled_date.startsWith(period));
+      const postedThisMonth = thisMonthContent.filter((c: any) => c.status === 'posted');
+      const ideaBacklog = content.filter((c: any) => c.status === 'idea');
       els.smKpis.innerHTML = `
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active team members</span></div>
@@ -1931,12 +2052,20 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <span class="ws-dash-kpi-num">${thisMonthContent.length}</span>
         </div>
         <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Posted this month</span></div>
+          <span class="ws-dash-kpi-num">${postedThisMonth.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">↑</span><span class="ws-dash-kpi-label">Upcoming</span></div>
           <span class="ws-dash-kpi-num">${upcoming.length}</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">!</span><span class="ws-dash-kpi-label">Needs posting</span></div>
           <span class="ws-dash-kpi-num">${todo.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">◔</span><span class="ws-dash-kpi-label">Idea backlog</span></div>
+          <span class="ws-dash-kpi-num">${ideaBacklog.length}</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
@@ -2007,6 +2136,27 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <span class="ws-dash-feed-amount">${count}</span>
         </div>
       `).join('') : '<p class="ws-dash-empty-mini">No content logged yet.</p>';
+      const assigneeCounts = new Map<string, number>();
+      content.forEach((c: any) => {
+        const name = c.members?.full_name || 'Unassigned';
+        assigneeCounts.set(name, (assigneeCounts.get(name) || 0) + 1);
+      });
+      els.smAssigneeBreakdown.innerHTML = assigneeCounts.size ? Array.from(assigneeCounts.entries()).sort((a, b) => b[1] - a[1]).map(([name, count]) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${escapeHtml(name)}</span></span>
+          <span class="ws-dash-feed-amount">${count} item${count === 1 ? '' : 's'}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No content logged yet.</p>';
+      const recentCreds = credRes.data || [];
+      els.smCredSummary.innerHTML = `
+        <p class="ws-dash-sub" style="margin:0 0 0.6rem">${credRes.count || 0} login${(credRes.count || 0) === 1 ? '' : 's'} stored</p>
+        ${recentCreds.length ? recentCreds.slice(0, 5).map((c: any) => `
+          <div class="ws-dash-feed-row">
+            <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${escapeHtml(c.service_name)}</span></span>
+            <span class="ws-dash-feed-amount">${new Date(c.created_at).toLocaleDateString()}</span>
+          </div>
+        `).join('') : '<p class="ws-dash-empty-mini">Nothing saved yet.</p>'}
+      `;
       els.smTodoBody.innerHTML = todo.length
         ? todo.map((c: any) => `<tr><td data-label="Date">${c.scheduled_date}</td><td data-label="Title">${escapeHtml(c.title)}</td><td data-label="Status">${smContentStatusLabel(c.status)}</td></tr>`).join('')
         : '<tr><td colspan="3" class="ws-empty">Nothing pending.</td></tr>';
@@ -2014,9 +2164,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         ? upcoming.slice(0, 8).map((c: any) => `<tr><td data-label="Date">${c.scheduled_date}</td><td data-label="Title">${escapeHtml(c.title)}</td><td data-label="Platform">${escapeHtml(c.platform || '—')}</td></tr>`).join('')
         : '<tr><td colspan="3" class="ws-empty">Nothing scheduled yet.</td></tr>';
     }
-    async function downloadContentCalendarReport() {
+    async function downloadContentCalendarReport(monthEl?: any, yearEl?: any) {
       try {
-        const { start, end, label } = periodRange(els.smReportMonth, els.smReportYear);
+        const { start, end, label } = periodRange(monthEl || els.smReportMonth, yearEl || els.smReportYear);
         const { data } = await db.from('content_items').select('*, members(full_name)').eq('group_key', SOCIAL_MEDIA_GROUP_KEY)
           .gte('scheduled_date', start).lte('scheduled_date', end).order('scheduled_date', { ascending: true });
         const rows = data || [];
@@ -2036,9 +2186,49 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
+    async function downloadSocialMediaFinanceReport(monthEl?: any, yearEl?: any) {
+      try {
+        const { start, end, label } = periodRange(monthEl || els.smReportMonth, yearEl || els.smReportYear);
+        const { data } = await db.from('finance_entries').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: true });
+        const rows = data || [];
+        const income = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const expense = rows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Social Media Finance Report', `${label}, Income ${income.toFixed(2)}, Expenses ${expense.toFixed(2)}, Net ${(income - expense).toFixed(2)}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
+          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), r.created_by_name || '—']) : [['No entries this period', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Social-Media-Finance', label));
+      } catch (err) {
+        console.error('social media finance report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    async function downloadSocialMediaCredentialsReport() {
+      try {
+        const { data, error } = await db.from('credentials').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('service_name', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Credentials', `${rows.length} login${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Service', 'Username', 'Password', 'URL', 'Notes', 'Added']],
+          body: rows.length ? rows.map((c: any) => [c.service_name, c.username || '—', c.password || '—', c.url || '—', c.notes || '—', c.created_at ? new Date(c.created_at).toLocaleDateString() : '—']) : [['No credentials saved yet', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Credentials', new Date().toISOString().slice(0, 10)));
+      } catch (err) {
+        console.error('credentials report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
     function bindSocialMediaReports() {
       populatePeriodSelects(els.smReportMonth, els.smReportYear, true);
       el('[data-report-sm-content]').addEventListener('click', downloadContentCalendarReport);
+      el('[data-report-sm-finance]').addEventListener('click', downloadSocialMediaFinanceReport);
+      el('[data-report-sm-credentials]').addEventListener('click', downloadSocialMediaCredentialsReport);
     }
 
     // ---------- Roster: the 5 troops' full roster, with filters -------------

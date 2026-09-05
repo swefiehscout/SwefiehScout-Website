@@ -996,7 +996,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-table-wrap">
               <table class="ws-table" data-sponsor-table>
                 <thead>
-                  <tr><th>Name</th><th>Contact person</th><th>Phone</th><th>Email</th><th>Type</th><th>Status</th><th>Notes</th><th>Added by</th><th></th></tr>
+                  <tr><th>Name</th><th>Contact person</th><th>Phone</th><th>Email</th><th>Type</th><th>Status</th><th>Notes</th><th>Added</th><th>Added by</th><th></th></tr>
                 </thead>
                 <tbody data-sponsor-body></tbody>
               </table>
@@ -1051,7 +1051,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-table-wrap">
               <table class="ws-table" data-prc-table>
                 <thead>
-                  <tr><th>Name</th><th>Role</th><th>Organization</th><th>Category</th><th>Phone</th><th>Email</th><th>Notes</th><th>Added by</th><th></th></tr>
+                  <tr><th>Name</th><th>Role</th><th>Organization</th><th>Category</th><th>Phone</th><th>Email</th><th>Notes</th><th>Added</th><th>Added by</th><th></th></tr>
                 </thead>
                 <tbody data-prc-body></tbody>
               </table>
@@ -1221,7 +1221,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <div class="ws-table-wrap">
             <table class="ws-table" data-cred-table>
               <thead>
-                <tr><th>Service</th><th>Username</th><th>Password</th><th>URL</th><th>Notes</th><th>Updated by</th><th></th></tr>
+                <tr><th>Service</th><th>Username</th><th>Password</th><th>URL</th><th>Notes</th><th>Added</th><th>Updated by</th><th></th></tr>
               </thead>
               <tbody data-cred-body></tbody>
             </table>
@@ -1313,17 +1313,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <p class="ws-report-desc">Income and expenses by category, with totals and net income.</p>
               <button type="button" class="btn-primary" data-report-finance>Download PDF</button>
             </div>
-            <div class="ws-report-card">
+            <div class="ws-report-card" data-troop-only>
               <h3 class="ws-admin-h3">Monthly Fees</h3>
               <p class="ws-report-desc">Every active member's paid status and amount for the period.</p>
               <button type="button" class="btn-primary" data-report-fees>Download PDF</button>
             </div>
-            <div class="ws-report-card">
+            <div class="ws-report-card" data-troop-only>
               <h3 class="ws-admin-h3">Attendance</h3>
               <p class="ws-report-desc">Every active member's attendance count and rate for the period.</p>
               <button type="button" class="btn-primary" data-report-attendance>Download PDF</button>
             </div>
-            <div class="ws-report-card">
+            <div class="ws-report-card" data-troop-only>
               <h3 class="ws-admin-h3">Curriculum</h3>
               <p class="ws-report-desc">The meeting plan, theme, notes, and activities for each date in the period.</p>
               <button type="button" class="btn-primary" data-report-curriculum>Download PDF</button>
@@ -1337,6 +1337,26 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <h3 class="ws-admin-h3">Vendors</h3>
               <p class="ws-report-desc">This group's own vendors, plus any shared vendors visible to it. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-vendors>Download PDF</button>
+            </div>
+            <div class="ws-report-card" data-social-only hidden>
+              <h3 class="ws-admin-h3">Content Calendar</h3>
+              <p class="ws-report-desc">Every content item scheduled for the period, with platform, type, status, and who it's assigned to.</p>
+              <button type="button" class="btn-primary" data-report-content>Download PDF</button>
+            </div>
+            <div class="ws-report-card" data-social-only hidden>
+              <h3 class="ws-admin-h3">Credentials</h3>
+              <p class="ws-report-desc">Every login stored in the Credentials tab, in full. Not period-dependent.</p>
+              <button type="button" class="btn-primary" data-report-credentials>Download PDF</button>
+            </div>
+            <div class="ws-report-card" data-general-only hidden>
+              <h3 class="ws-admin-h3">Sponsors</h3>
+              <p class="ws-report-desc">Every sponsor and prospective sponsor, with contact info, type, and status. Not period-dependent.</p>
+              <button type="button" class="btn-primary" data-report-sponsors>Download PDF</button>
+            </div>
+            <div class="ws-report-card" data-general-only hidden>
+              <h3 class="ws-admin-h3">Community &amp; Church Contacts</h3>
+              <p class="ws-report-desc">Every clergy, organization, school, media, and government contact on file. Not period-dependent.</p>
+              <button type="button" class="btn-primary" data-report-prcontacts>Download PDF</button>
             </div>
           </div>
         </section>
@@ -4328,7 +4348,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const SPONSOR_STATUS_BADGE_CLASS: Record<string, string> = { active: 'ws-badge--good', past: 'ws-badge--fair', prospective: 'ws-badge--fair' };
     function renderSponsors() {
       if (!state.sponsors.length) {
-        els.sponsorBody.innerHTML = '<tr><td colspan="9" class="ws-empty">No sponsors yet.</td></tr>';
+        els.sponsorBody.innerHTML = '<tr><td colspan="10" class="ws-empty">No sponsors yet.</td></tr>';
         return;
       }
       els.sponsorBody.innerHTML = state.sponsors.map((s: any) => `
@@ -4340,6 +4360,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Type">${escapeHtml(s.type || '—')}</td>
           <td data-label="Status"><span class="ws-badge ${SPONSOR_STATUS_BADGE_CLASS[s.status]}">${SPONSOR_STATUS_LABELS[s.status]}</span></td>
           <td data-label="Notes">${escapeHtml(s.notes || '—')}</td>
+          <td data-label="Added">${s.created_at ? new Date(s.created_at).toLocaleDateString() : '—'}</td>
           <td data-label="Added by">${escapeHtml(s.created_by_name || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-sponsor-edit>Edit</button>
@@ -4417,7 +4438,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderPrContacts() {
       if (!state.prContacts.length) {
-        els.prcBody.innerHTML = '<tr><td colspan="9" class="ws-empty">No contacts yet.</td></tr>';
+        els.prcBody.innerHTML = '<tr><td colspan="10" class="ws-empty">No contacts yet.</td></tr>';
         return;
       }
       els.prcBody.innerHTML = state.prContacts.map((c: any) => `
@@ -4429,6 +4450,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Phone">${escapeHtml(c.phone)}</td>
           <td data-label="Email">${escapeHtml(c.email || '—')}</td>
           <td data-label="Notes">${escapeHtml(c.notes || '—')}</td>
+          <td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td>
           <td data-label="Added by">${escapeHtml(c.created_by_name || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-prc-edit>Edit</button>
@@ -4695,6 +4717,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <div class="ws-content-card-meta">
                   ${c.platform ? `<span>${escapeHtml(c.platform)}</span>` : ''}
                   ${c.scheduled_date ? `<span>${c.scheduled_date}</span>` : ''}
+                  ${c.created_by_name ? `<span>Added by ${escapeHtml(c.created_by_name)}</span>` : ''}
                 </div>
                 <div class="ws-content-card-move">
                   <select data-content-move-select data-content-move-id="${c.id}">
@@ -4759,7 +4782,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <div class="ws-evt-day-item" data-content-id="${c.id}">
           <div class="ws-evt-day-item-main">
             <span class="ws-evt-day-item-title">${escapeHtml(c.title)}</span>
-            <span class="ws-evt-day-item-sub">${escapeHtml(c.platform || '—')}${c.content_type ? ' · ' + escapeHtml(c.content_type) : ''}</span>
+            <span class="ws-evt-day-item-sub">${escapeHtml(c.platform || '—')}${c.content_type ? ' · ' + escapeHtml(c.content_type) : ''}${c.created_by_name ? ' · Added by ' + escapeHtml(c.created_by_name) : ''}</span>
           </div>
           ${contentStatusBadge(c)}
           <div class="ws-evt-day-item-actions">
@@ -4928,7 +4951,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderCredentials() {
       if (!state.credentials.length) {
-        els.credBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No logins saved yet.</td></tr>';
+        els.credBody.innerHTML = '<tr><td colspan="8" class="ws-empty">No logins saved yet.</td></tr>';
         return;
       }
       els.credBody.innerHTML = state.credentials.map((c: any) => `
@@ -4942,6 +4965,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           ` : '—'}</td>
           <td data-label="URL">${c.url ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${escapeHtml(c.url)}</a>` : '—'}</td>
           <td data-label="Notes">${escapeHtml(c.notes || '—')}</td>
+          <td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td>
           <td data-label="Updated by">${escapeHtml(c.updated_by_name || c.created_by_name || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-cred-edit>Edit</button>
@@ -5424,6 +5448,91 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
+    // Not period-dependent — every login stored in the Credentials tab,
+    // in full (same plaintext values Reveal already shows on-screen).
+    async function downloadCredentialsReport() {
+      try {
+        const { data, error } = await db.from('credentials').select('*').eq('group_key', state.activeGroup).order('service_name', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Credentials', `${rows.length} login${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Service', 'Username', 'Password', 'URL', 'Notes']],
+          body: rows.length ? rows.map((c: any) => [c.service_name, c.username || '—', c.password || '—', c.url || '—', c.notes || '—']) : [['No credentials saved yet', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Credentials', new Date().toISOString().slice(0, 10)));
+      } catch (err) {
+        console.error('credentials report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    async function downloadContentReport() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const { data, error } = await db.from('content_items').select('*, members(full_name)').eq('group_key', state.activeGroup)
+          .gte('scheduled_date', start).lte('scheduled_date', end).order('scheduled_date', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Content Calendar', `${label}, ${rows.length} item${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
+          head: [['Date', 'Title', 'Platform', 'Type', 'Status', 'Assigned to']],
+          body: rows.length ? rows.map((c: any) => [
+            c.scheduled_date || '—', c.title, c.platform || '—', c.content_type || '—',
+            CONTENT_STATUS_LABELS[c.status] || c.status, c.members?.full_name || '—',
+          ]) : [['No content this period', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Content-Calendar', label));
+      } catch (err) {
+        console.error('content calendar report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    // Not period-dependent — every sponsor/prospective sponsor on file.
+    async function downloadSponsorsReport() {
+      try {
+        const { data, error } = await db.from('sponsors').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Sponsors', `${rows.length} sponsor${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Name', 'Contact person', 'Phone', 'Email', 'Type', 'Status', 'Notes']],
+          body: rows.length ? rows.map((s: any) => [
+            s.name, s.contact_person || '—', s.phone, s.email || '—', s.type || '—', SPONSOR_STATUS_LABELS[s.status] || s.status, s.notes || '—',
+          ]) : [['No sponsors yet', '', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Sponsors', new Date().toISOString().slice(0, 10)));
+      } catch (err) {
+        console.error('sponsors report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    // Not period-dependent — every community/church contact on file.
+    async function downloadPrContactsReport() {
+      try {
+        const { data, error } = await db.from('pr_contacts').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Community & Church Contacts', `${rows.length} contact${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Name', 'Role', 'Organization', 'Category', 'Phone', 'Email', 'Notes']],
+          body: rows.length ? rows.map((c: any) => [
+            c.name, c.role || '—', c.organization || '—', c.category || '—', c.phone, c.email || '—', c.notes || '—',
+          ]) : [['No contacts yet', '', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Community-Church-Contacts', new Date().toISOString().slice(0, 10)));
+      } catch (err) {
+        console.error('contacts report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
     function bindReports() {
       populatePeriodSelects(els.reportMonth, els.reportYear, true);
       el('[data-report-finance]').addEventListener('click', downloadFinanceReport);
@@ -5432,6 +5541,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       el('[data-report-curriculum]').addEventListener('click', downloadCurriculumReport);
       el('[data-report-roster]').addEventListener('click', downloadRosterReport);
       el('[data-report-vendors]').addEventListener('click', downloadVendorReport);
+      el('[data-report-content]').addEventListener('click', downloadContentReport);
+      el('[data-report-credentials]').addEventListener('click', downloadCredentialsReport);
+      el('[data-report-sponsors]').addEventListener('click', downloadSponsorsReport);
+      el('[data-report-prcontacts]').addEventListener('click', downloadPrContactsReport);
     }
 
     // ---------- Curriculum (embedded, shared per group; month view only,
@@ -6379,6 +6492,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       // Library (Documents/Shared Library) but not this.
       document.querySelectorAll('[data-troop-only]').forEach((el: any) => {
         el.toggleAttribute('hidden', NON_TROOP_GROUP_KEYS.includes(state.activeGroup));
+      });
+      // The Content Calendar/Credentials report cards only make sense
+      // for Social Media itself, not the other non-troop groups either.
+      document.querySelectorAll('[data-social-only]').forEach((el: any) => {
+        el.toggleAttribute('hidden', state.activeGroup !== SOCIAL_MEDIA_GROUP_KEY);
+      });
+      // Sponsors/Community & Church Contacts reports only make sense for
+      // General, whose Public Relations tab is the only place those two
+      // tables exist.
+      document.querySelectorAll('[data-general-only]').forEach((el: any) => {
+        el.toggleAttribute('hidden', state.activeGroup !== GENERAL_GROUP_KEY);
       });
       balanceTabs();
     }
