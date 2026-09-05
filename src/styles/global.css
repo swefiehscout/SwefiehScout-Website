@@ -4776,6 +4776,10 @@ main.wide {
   color: var(--color-text);
 }
 .ws-search:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(20, 56, 34, 0.1); }
+/* Credentials pairs its search box with a Download PDF button in the
+   same row — let the search grow to fill the row instead of the block
+   width:100% above fighting the flex layout. */
+.ws-toolbar-row .ws-search { flex: 1 1 16rem; width: auto; margin-bottom: 0; }
 
 .ws-save-indicator[hidden] { display: none !important; }
 .ws-save-indicator {
