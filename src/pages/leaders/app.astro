@@ -81,6 +81,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="finance"><Icon name="bank" size={16} strokeWidth={1.8} /> Finance</button>
         <button type="button" class="ws-tab" data-tab="inventory"><Icon name="box" size={16} strokeWidth={1.8} /> Inventory</button>
         <button type="button" class="ws-tab" data-tab="events"><Icon name="heart" size={16} strokeWidth={1.8} /> Event Calendar<span class="ws-tab-badge" data-events-badge hidden></span></button>
+        <button type="button" class="ws-tab" data-tab="vendors"><Icon name="phone" size={16} strokeWidth={1.8} /> Vendors</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
       </nav>
@@ -240,6 +241,28 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                   <button type="button" class="ws-remove-link" data-allergy-remove>Remove</button>
                 </div>
               </div>
+
+              <div class="ws-optional-block" data-email-block>
+                <button type="button" class="ws-add-link" data-email-add>+ Add email</button>
+                <div class="ws-optional-fields" data-email-fields hidden>
+                  <label class="ws-field">
+                    <span>Email</span>
+                    <input type="email" data-m-email />
+                  </label>
+                  <button type="button" class="ws-remove-link" data-email-remove>Remove</button>
+                </div>
+              </div>
+
+              <div class="ws-optional-block" data-nid-block>
+                <button type="button" class="ws-add-link" data-nid-add>+ Add National ID</button>
+                <div class="ws-optional-fields" data-nid-fields hidden>
+                  <label class="ws-field">
+                    <span>National ID (theirs or a parent's)</span>
+                    <input type="text" data-m-national-id />
+                  </label>
+                  <button type="button" class="ws-remove-link" data-nid-remove>Remove</button>
+                </div>
+              </div>
             </div>
 
             <label class="ws-field ws-field--full">
@@ -260,6 +283,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <tr>
                   <th>Name</th>
                   <th>Phone</th>
+                  <th>Email</th>
                   <th>Emergency Contact</th>
                   <th>Allergies</th>
                   <th></th>
@@ -284,6 +308,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <tr>
                   <th>Name</th>
                   <th>Phone</th>
+                  <th>Email</th>
                   <th>Emergency Contact</th>
                   <th>Allergies</th>
                   <th></th>
@@ -307,6 +332,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <tr>
                   <th>Name</th>
                   <th>Phone</th>
+                  <th>Email</th>
                   <th>Emergency Contact</th>
                   <th>Allergies</th>
                   <th>Notes</th>
@@ -636,6 +662,33 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 </label>
               </div>
               <div class="ws-form-grid">
+                <div class="ws-optional-block" data-inv-maint-vendor-block>
+                  <label class="ws-field">
+                    <span>Vendor (optional)</span>
+                    <select data-inv-maint-vendor>
+                      <option value="">— None / self —</option>
+                    </select>
+                  </label>
+                  <button type="button" class="ws-add-link" data-inv-maint-vendor-add>+ New vendor</button>
+                  <div class="ws-optional-fields" data-inv-maint-vendor-new hidden>
+                    <div class="ws-form-grid">
+                      <label class="ws-field">
+                        <span>Vendor name *</span>
+                        <input type="text" data-inv-maint-vendor-name />
+                      </label>
+                      <label class="ws-field">
+                        <span>Vendor phone *</span>
+                        <input type="tel" data-inv-maint-vendor-phone />
+                      </label>
+                    </div>
+                    <div class="ws-form-actions">
+                      <button type="button" class="btn-primary" data-inv-maint-vendor-save>Save vendor</button>
+                      <button type="button" class="ws-remove-link" data-inv-maint-vendor-cancel>Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ws-form-grid">
                 <label class="ws-field ws-field--full">
                   <span>Description *</span>
                   <input type="text" data-inv-maint-desc required />
@@ -791,6 +844,84 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         </section>
 
+        <section class="ws-panel" data-panel="vendors" hidden>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="vendors" data-subtab="own">Vendors</button>
+            <button type="button" class="ws-subtab" data-subtabs="vendors" data-subtab="shared">Shared Vendors</button>
+          </div>
+
+          <div data-subpanel="vendors:own">
+            <p class="ws-att-hint">Anyone this group buys from or hires — repair shops, suppliers, transport, venues.</p>
+            <form class="ws-member-form" data-vendor-form>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title" data-vendor-form-title>Add a vendor</p>
+              <div class="ws-form-grid ws-form-grid--4">
+                <label class="ws-field">
+                  <span>Name *</span>
+                  <input type="text" data-vendor-name required />
+                </label>
+                <label class="ws-field">
+                  <span>Category</span>
+                  <select data-vendor-category>
+                    <option value="">— None —</option>
+                    <option>Supplier</option>
+                    <option>Repair Shop</option>
+                    <option>Venue</option>
+                    <option>Transportation</option>
+                    <option>Service Provider</option>
+                    <option>Other</option>
+                  </select>
+                </label>
+                <label class="ws-field">
+                  <span>Phone *</span>
+                  <input type="tel" data-vendor-phone required />
+                </label>
+                <label class="ws-field">
+                  <span>Email (optional)</span>
+                  <input type="email" data-vendor-email />
+                </label>
+              </div>
+              <div class="ws-form-grid">
+                <label class="ws-field">
+                  <span>Location (optional)</span>
+                  <input type="text" data-vendor-location />
+                </label>
+                <label class="ws-field ws-field--full">
+                  <span>Notes</span>
+                  <input type="text" data-vendor-notes />
+                </label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary" data-vendor-submit>Add vendor</button>
+                <button type="button" class="ws-form-cancel" data-vendor-cancel hidden>Cancel edit</button>
+              </div>
+            </form>
+
+            <input type="search" class="ws-search" data-vendor-search placeholder="Search vendors…" />
+
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-vendor-table>
+                <thead>
+                  <tr><th>Name</th><th>Category</th><th>Phone</th><th>Email</th><th>Location</th><th>Notes</th><th>Added by</th><th></th></tr>
+                </thead>
+                <tbody data-vendor-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="vendors:shared" hidden>
+            <p class="ws-att-hint">Added once by an admin, for one or more groups at once — manage these from the Admin console's own Vendors tab.</p>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-vendor-shared-table>
+                <thead>
+                  <tr><th>Name</th><th>Category</th><th>Phone</th><th>Email</th><th>Location</th><th>Notes</th><th>Added by</th></tr>
+                </thead>
+                <tbody data-vendor-shared-body></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         <section class="ws-panel" data-panel="library" hidden>
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="library" data-subtab="documents">Documents</button>
@@ -920,6 +1051,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </label>
       </div>
 
+      <label class="curr-day-field">
+        <span>Materials needed</span>
+        <textarea data-day-materials rows="2" placeholder="e.g. rope, first aid kit, cones…"></textarea>
+      </label>
+
       <p class="curr-day-section-label">Attachment</p>
       <div class="curr-day-attachment" data-curr-attachment-current hidden>
         <a class="ws-edit-btn" data-curr-attachment-link target="_blank" rel="noopener">View attachment →</a>
@@ -1038,6 +1174,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <input type="number" step="0.01" min="0" data-evt-amount />
           </label>
           <label class="curr-day-field">
+            <span>Received via</span>
+            <select data-evt-payment-method>
+              <option value="">— Select —</option>
+              <option>Cliq</option>
+              <option>Cash</option>
+              <option>Check</option>
+              <option>Other</option>
+            </select>
+          </label>
+        </div>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
             <span>Pay per member</span>
             <input type="number" step="0.01" min="0" data-evt-pay-rate />
           </label>
@@ -1108,6 +1256,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       inventoryItems: [], maintenanceLog: [], editingInventoryItemId: null,
       editingFinEntryId: null, editingMaintenanceLogId: null,
       events: [], eventCosts: [], editingEventId: null, editingEventCostId: null,
+      vendors: [], sharedVendors: [], editingVendorId: null,
       evt: { anchor: new Date(), currentDay: null },
       attAnchor: new Date(), attSelected: todayStr(), attDatesWithRecords: null,
       curr: { anchor: new Date(), meetings: new Map(), currentDay: null, channel: null },
@@ -1239,6 +1388,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.currDayHeader = el('[data-curr-day-header]');
       els.currDayTheme = el('[data-day-theme]');
       els.currDayNotes = el('[data-day-notes]');
+      els.currDayMaterials = el('[data-day-materials]');
       els.currDayList = el('[data-curr-day-list]');
       els.currAttachmentCurrent = el('[data-curr-attachment-current]');
       els.currAttachmentLink = el('[data-curr-attachment-link]');
@@ -1295,12 +1445,32 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.invMaintItem = el('[data-inv-maint-item]');
       els.invMaintDate = el('[data-inv-maint-date]');
       els.invMaintBy = el('[data-inv-maint-by]');
+      els.invMaintVendor = el('[data-inv-maint-vendor]');
+      els.invMaintVendorAdd = el('[data-inv-maint-vendor-add]');
+      els.invMaintVendorNew = el('[data-inv-maint-vendor-new]');
+      els.invMaintVendorName = el('[data-inv-maint-vendor-name]');
+      els.invMaintVendorPhone = el('[data-inv-maint-vendor-phone]');
+      els.invMaintVendorSave = el('[data-inv-maint-vendor-save]');
+      els.invMaintVendorCancel = el('[data-inv-maint-vendor-cancel]');
       els.invMaintCost = el('[data-inv-maint-cost]');
       els.invMaintDesc = el('[data-inv-maint-desc]');
       els.invMaintNotes = el('[data-inv-maint-notes]');
       els.invMaintSubmit = el('[data-inv-maint-submit]');
       els.invMaintFilter = el('[data-inv-maint-filter]');
       els.invMaintBody = el('[data-inv-maint-body]');
+      els.vendorForm = el('[data-vendor-form]');
+      els.vendorFormTitle = el('[data-vendor-form-title]');
+      els.vendorName = el('[data-vendor-name]');
+      els.vendorCategory = el('[data-vendor-category]');
+      els.vendorPhone = el('[data-vendor-phone]');
+      els.vendorEmail = el('[data-vendor-email]');
+      els.vendorLocation = el('[data-vendor-location]');
+      els.vendorNotes = el('[data-vendor-notes]');
+      els.vendorSubmit = el('[data-vendor-submit]');
+      els.vendorCancel = el('[data-vendor-cancel]');
+      els.vendorSearch = el('[data-vendor-search]');
+      els.vendorBody = el('[data-vendor-body]');
+      els.vendorSharedBody = el('[data-vendor-shared-body]');
       els.eventsBadge = el('[data-events-badge]');
       els.evtDashStats = el('[data-evt-dash-stats]');
       els.evtTopMembers = el('[data-evt-top-members]');
@@ -1344,6 +1514,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.evtNotes = el('[data-evt-notes]');
       els.evtAttendees = el('[data-evt-attendees]');
       els.evtAmount = el('[data-evt-amount]');
+      els.evtPaymentMethod = el('[data-evt-payment-method]');
       els.evtPayRate = el('[data-evt-pay-rate]');
       els.evtTransportRow = el('[data-evt-transport-row]');
       els.evtTransportRate = el('[data-evt-transport-rate]');
@@ -1377,6 +1548,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.allergyAdd = el('[data-allergy-add]');
       els.allergyFields = el('[data-allergy-fields]');
       els.allergyRemove = el('[data-allergy-remove]');
+      els.emailAdd = el('[data-email-add]');
+      els.emailFields = el('[data-email-fields]');
+      els.emailRemove = el('[data-email-remove]');
+      els.mEmail = el('[data-m-email]');
+      els.nidAdd = el('[data-nid-add]');
+      els.nidFields = el('[data-nid-fields]');
+      els.nidRemove = el('[data-nid-remove]');
+      els.mNationalId = el('[data-m-national-id]');
       els.formTitle = el('[data-member-form-title]');
       els.formSubmit = el('[data-member-form-submit]');
       els.formCancel = el('[data-member-form-cancel]');
@@ -1452,7 +1631,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         els.copyMemberBtn.disabled = true;
         const { error } = await db.from('members').insert(sources.map((source: any) => ({
           group_key: state.activeGroup, full_name: source.full_name, phone: source.phone || null,
-          source_member_id: source.id, created_by: state.session.user.id,
+          email: source.email || null, source_member_id: source.id, created_by: state.session.user.id,
         })));
         if (error) { console.error(error); showToast('Could not add, ' + (error.message || 'unknown error') + '.'); els.copyMemberBtn.disabled = false; return; }
         const g = GROUPS.find((x: any) => x.key === state.activeGroup);
@@ -1468,6 +1647,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <tr data-member-id="${m.id}">
           <td data-label="Name">${escapeHtml(m.full_name)}${m.archived_reason === 'inactive' ? ' <span class="ws-allergy-badge" title="Auto-archived: no attendance recorded in 3+ months">Auto-archived</span>' : ''}</td>
           <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
+          <td data-label="Email">${escapeHtml(m.email || '—')}</td>
           <td data-label="Emergency Contact">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
           <td data-label="Allergies">${m.has_allergies
               ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ', ' + escapeHtml(m.allergy_detail) : ''}</span>`
@@ -1519,7 +1699,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderRoster() {
       const active = state.members.filter((m: any) => m.active);
       if (!active.length) {
-        els.rosterBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No members yet, add the first one below.</td></tr>';
+        els.rosterBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No members yet, add the first one below.</td></tr>';
         return;
       }
       els.rosterBody.innerHTML = active.map((m: any) => memberRowHTML(m, `
@@ -1539,7 +1719,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderArchive() {
       const archived = state.members.filter((m: any) => !m.active);
       if (!archived.length) {
-        els.archiveBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No archived members.</td></tr>';
+        els.archiveBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No archived members.</td></tr>';
         return;
       }
       els.archiveBody.innerHTML = archived.map((m: any) => memberRowHTML(m, `
@@ -1586,13 +1766,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderApprovals() {
       if (!state.approvals.length) {
-        els.approvalsBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No pending requests.</td></tr>';
+        els.approvalsBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No pending requests.</td></tr>';
         return;
       }
       els.approvalsBody.innerHTML = state.approvals.map((r: any) => `
         <tr data-request-id="${r.id}">
           <td data-label="Name">${escapeHtml(r.full_name)}</td>
           <td data-label="Phone">${escapeHtml(r.phone || '—')}</td>
+          <td data-label="Email">${escapeHtml(r.email || '—')}</td>
           <td data-label="Emergency Contact">${r.guardian1_relation ? `${escapeHtml(r.guardian1_relation)}: ${escapeHtml(r.guardian1_phone || '—')}` : '—'}</td>
           <td data-label="Allergies">${r.has_allergies
               ? `<span class="ws-allergy-badge" title="${escapeHtml(r.allergy_detail || '')}">Yes${r.allergy_detail ? ', ' + escapeHtml(r.allergy_detail) : ''}</span>`
@@ -1625,6 +1806,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         guardian2_phone: r.guardian2_phone,
         has_allergies: r.has_allergies,
         allergy_detail: r.allergy_detail,
+        email: r.email,
+        national_id: r.national_id,
         notes: r.notes,
         created_by: state.session.user.id,
       });
@@ -2281,7 +2464,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       await loadGroupSettings();
       await loadInventoryCategories();
       await ensureMembersLoaded();
+      await ensureVendorsLoaded();
       updateInvAssignedOptions();
+      updateInvVendorOptions();
       const [itemsRes, logsRes] = await Promise.all([
         db.from('inventory_items').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true }),
         db.from('inventory_maintenance').select('*').eq('group_key', state.activeGroup).order('performed_on', { ascending: false }),
@@ -2297,6 +2482,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const active = state.members.filter((m: any) => m.active);
       els.invAssigned.innerHTML = '<option value="">Unassigned</option>'
         + active.map((m: any) => `<option value="${m.id}">${escapeHtml(m.full_name)}</option>`).join('');
+    }
+    // Own vendors (linkable via vendor_id) plus shared ones visible to
+    // this group (name-autofill only — see the schema note on
+    // inventory_maintenance.vendor_id for why those aren't linked).
+    function updateInvVendorOptions() {
+      if (!els.invMaintVendor) return;
+      const ownOpts = state.vendors.map((v: any) => `<option value="${v.id}">${escapeHtml(v.name)}</option>`).join('');
+      const sharedOpts = state.sharedVendors.map((v: any) => `<option value="shared:${v.id}">${escapeHtml(v.name)} (shared)</option>`).join('');
+      els.invMaintVendor.innerHTML = '<option value="">— None / self —</option>' + ownOpts + sharedOpts;
     }
     // "Last Maintenance" is never stored on the item itself — it's just
     // the newest performed_on across that item's own log rows, so it can
@@ -2492,6 +2686,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.invMaintFormTitle.textContent = 'Log maintenance';
       els.invMaintSubmit.textContent = 'Log maintenance';
       els.invMaintCancel.hidden = true;
+      hideMaintVendorNew();
+    }
+    function hideMaintVendorNew() {
+      els.invMaintVendorNew.hidden = true;
+      els.invMaintVendorAdd.hidden = false;
+      els.invMaintVendorName.value = '';
+      els.invMaintVendorPhone.value = '';
     }
     // Same reusable-form edit pattern as Finance/Inventory Items.
     function startEditMaintenanceLog(id: string) {
@@ -2500,6 +2701,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       state.editingMaintenanceLogId = id;
       els.invMaintItem.value = log.item_id;
       els.invMaintDate.value = log.performed_on;
+      els.invMaintVendor.value = log.vendor_id || '';
       els.invMaintBy.value = log.performed_by;
       els.invMaintCost.value = log.cost != null ? log.cost : '';
       els.invMaintDesc.value = log.description;
@@ -2537,17 +2739,58 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function bindMaintenanceForm() {
       els.invMaintFilter.addEventListener('change', renderMaintenanceLog);
       els.invMaintCancel.addEventListener('click', resetMaintenanceForm);
+      // Picking a vendor is just a convenience autofill for "Performed
+      // by" — still a plain editable text field afterward, so a one-off
+      // person not worth adding as a vendor still works fine.
+      els.invMaintVendor.addEventListener('change', () => {
+        const val = els.invMaintVendor.value;
+        const vendor = val.startsWith('shared:')
+          ? state.sharedVendors.find((v: any) => v.id === val.slice(7))
+          : state.vendors.find((v: any) => v.id === val);
+        if (vendor) els.invMaintBy.value = vendor.name;
+      });
+      // Quick-add a vendor right here — any leader can add one (though
+      // only General can edit/remove one afterward, from its own
+      // Vendors tab) — so Music never has to leave Maintenance for a
+      // vendor that isn't on file yet.
+      els.invMaintVendorAdd.addEventListener('click', () => {
+        els.invMaintVendorNew.hidden = false;
+        els.invMaintVendorAdd.hidden = true;
+        els.invMaintVendorName.focus();
+      });
+      els.invMaintVendorCancel.addEventListener('click', hideMaintVendorNew);
+      els.invMaintVendorSave.addEventListener('click', async () => {
+        const name = els.invMaintVendorName.value.trim();
+        const phone = els.invMaintVendorPhone.value.trim();
+        if (!name || !phone) { showToast('Vendor name and phone are required.'); return; }
+        els.invMaintVendorSave.disabled = true;
+        const { data: vendor, error } = await db.from('vendors').insert({
+          group_key: state.activeGroup, name, phone,
+          created_by: state.session.user.id, created_by_name: state.profile?.name || null,
+        }).select().single();
+        els.invMaintVendorSave.disabled = false;
+        if (error) { console.error(error); showToast('Could not add vendor.'); return; }
+        state.vendors.push(vendor);
+        state.vendors.sort((a: any, b: any) => a.name.localeCompare(b.name));
+        updateInvVendorOptions();
+        els.invMaintVendor.value = vendor.id;
+        els.invMaintBy.value = vendor.name;
+        hideMaintVendorNew();
+        showToast(`${vendor.name} added to Vendors.`);
+      });
       els.invMaintForm.addEventListener('submit', async (e: Event) => {
         e.preventDefault();
         const itemId = els.invMaintItem.value;
         const date = els.invMaintDate.value;
+        const vendorSel = els.invMaintVendor.value;
+        const vendorId = vendorSel && !vendorSel.startsWith('shared:') ? vendorSel : null;
         const performedBy = els.invMaintBy.value.trim();
         const description = els.invMaintDesc.value.trim();
         const costRaw = els.invMaintCost.value;
         const notes = els.invMaintNotes.value.trim();
         if (!itemId || !date || !performedBy || !description) { showToast('Item, date, performed by, and description are required.'); return; }
         els.invMaintSubmit.disabled = true;
-        const payload: any = { item_id: itemId, performed_on: date, performed_by: performedBy, description, cost: costRaw ? Number(costRaw) : null, notes: notes || null };
+        const payload: any = { item_id: itemId, performed_on: date, vendor_id: vendorId, performed_by: performedBy, description, cost: costRaw ? Number(costRaw) : null, notes: notes || null };
         let logRow, error;
         if (state.editingMaintenanceLogId) {
           ({ data: logRow, error } = await db.from('inventory_maintenance').update(payload).eq('id', state.editingMaintenanceLogId).select().single());
@@ -3027,6 +3270,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.evtNotes.value = ev.notes || '';
       evtRenderAttendeePicker(ev.attendees || []);
       els.evtAmount.value = ev.amount_received != null ? ev.amount_received : '';
+      els.evtPaymentMethod.value = ev.payment_method || '';
       els.evtPayRate.value = ev.pay_rate_per_member != null ? ev.pay_rate_per_member : '';
       els.evtTransportRate.value = ev.transport_rate_per_member != null ? ev.transport_rate_per_member : '';
       evtUpdateTransportVisibility();
@@ -3166,7 +3410,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const { wages, transport } = eventPayoutTotals(ev);
       const client = eventClientName(ev);
       const kinds: { kind: string; type: string; category: string; amount: number; description: string }[] = [];
-      if (ev.amount_received) kinds.push({ kind: 'income', type: 'income', category: ev.event_type, amount: Number(ev.amount_received), description: `${client}, ${ev.event_date}` });
+      if (ev.amount_received) kinds.push({ kind: 'income', type: 'income', category: ev.event_type, amount: Number(ev.amount_received), description: `${client}, ${ev.event_date}${ev.payment_method ? ` (${ev.payment_method})` : ''}` });
       if (wages) kinds.push({ kind: 'wages', type: 'expense', category: 'Band Payouts', amount: wages, description: `Band payouts — ${client}, ${ev.event_date}` });
       if (transport) kinds.push({ kind: 'transport', type: 'expense', category: 'Transport', amount: transport, description: `Transport — ${client}, ${ev.event_date}` });
       const activeKinds = new Set(kinds.map((k) => k.kind));
@@ -3259,6 +3503,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           event_type: type, first_name: firstName, last_name: lastName, phone, email: email || null,
           event_date: date, event_time: time || null, location: location || null, notes: notes || null,
           attendees, amount_received: amountRaw ? Number(amountRaw) : null,
+          payment_method: els.evtPaymentMethod.value || null,
           pay_rate_per_member: payRateRaw ? Number(payRateRaw) : null,
           transport_rate_per_member: transportRateRaw ? Number(transportRateRaw) : null,
         };
@@ -3289,6 +3534,134 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         await loadEvents();
         evtRenderDayList(savedEvent.event_date);
         evtShowList();
+      });
+    }
+
+    // ---------- Vendors (every group has its own, plus a read-only
+    // Shared Vendors list — same shape as the Library tab's own
+    // Documents/Shared Library split).
+    async function loadVendors() {
+      if (!state.activeGroup) return;
+      const { data, error } = await db.from('vendors').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load vendors.'); return; }
+      state.vendors = data || [];
+      renderVendors();
+      loadSharedVendors();
+    }
+    // Shared Vendors: added once by an admin and ticked into one or more
+    // groups (see shared_vendor_groups) — read-only here, managed from
+    // the Admin console's own Vendors tab. Exact same shape as the
+    // Library tab's own Documents/Shared Library split.
+    async function loadSharedVendors() {
+      if (!state.activeGroup) return;
+      const { data, error } = await db.from('shared_vendor_groups').select('shared_vendors(*)').eq('group_key', state.activeGroup);
+      if (error) { console.error(error); return; }
+      state.sharedVendors = (data || []).map((r: any) => r.shared_vendors).filter(Boolean)
+        .sort((a: any, b: any) => a.name.localeCompare(b.name));
+      renderSharedVendors();
+      updateInvVendorOptions();
+    }
+    function renderSharedVendors() {
+      if (!els.vendorSharedBody) return;
+      if (!state.sharedVendors.length) {
+        els.vendorSharedBody.innerHTML = '<tr><td colspan="7" class="ws-empty">Nothing shared into this group yet.</td></tr>';
+        return;
+      }
+      els.vendorSharedBody.innerHTML = state.sharedVendors.map((v: any) => `
+        <tr>
+          <td data-label="Name">${escapeHtml(v.name)}</td>
+          <td data-label="Category">${escapeHtml(v.category || '—')}</td>
+          <td data-label="Phone">${escapeHtml(v.phone)}</td>
+          <td data-label="Email">${escapeHtml(v.email || '—')}</td>
+          <td data-label="Location">${escapeHtml(v.location || '—')}</td>
+          <td data-label="Notes">${escapeHtml(v.notes || '—')}</td>
+          <td data-label="Added by">${escapeHtml(v.created_by_name || '—')}</td>
+        </tr>
+      `).join('');
+    }
+    function resetVendorForm() {
+      state.editingVendorId = null;
+      els.vendorForm.reset();
+      els.vendorFormTitle.textContent = 'Add a vendor';
+      els.vendorSubmit.textContent = 'Add vendor';
+      els.vendorCancel.hidden = true;
+    }
+    function startEditVendor(id: string) {
+      const v = state.vendors.find((x: any) => x.id === id);
+      if (!v) return;
+      state.editingVendorId = id;
+      els.vendorName.value = v.name;
+      els.vendorCategory.value = v.category || '';
+      els.vendorPhone.value = v.phone;
+      els.vendorEmail.value = v.email || '';
+      els.vendorLocation.value = v.location || '';
+      els.vendorNotes.value = v.notes || '';
+      els.vendorFormTitle.textContent = `Editing ${v.name}`;
+      els.vendorSubmit.textContent = 'Save changes';
+      els.vendorCancel.hidden = false;
+      els.vendorForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function renderVendors() {
+      if (!state.vendors.length) {
+        els.vendorBody.innerHTML = '<tr><td colspan="8" class="ws-empty">No vendors yet.</td></tr>';
+        return;
+      }
+      els.vendorBody.innerHTML = state.vendors.map((v: any) => `
+        <tr data-vendor-id="${v.id}">
+          <td data-label="Name">${escapeHtml(v.name)}</td>
+          <td data-label="Category">${escapeHtml(v.category || '—')}</td>
+          <td data-label="Phone">${escapeHtml(v.phone)}</td>
+          <td data-label="Email">${escapeHtml(v.email || '—')}</td>
+          <td data-label="Location">${escapeHtml(v.location || '—')}</td>
+          <td data-label="Notes">${escapeHtml(v.notes || '—')}</td>
+          <td data-label="Added by">${escapeHtml(v.created_by_name || '—')}</td>
+          <td class="ws-row-actions">
+            <button type="button" class="ws-edit-btn" data-vendor-edit>Edit</button>
+            <button type="button" class="ws-row-del" data-vendor-del>×</button>
+          </td>
+        </tr>
+      `).join('');
+      els.vendorBody.querySelectorAll('[data-vendor-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => startEditVendor(btn.closest('tr').dataset.vendorId));
+      });
+      els.vendorBody.querySelectorAll('[data-vendor-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.closest('tr').dataset.vendorId;
+          if (!confirm('Delete this vendor?')) return;
+          const { error } = await db.from('vendors').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          if (state.editingVendorId === id) resetVendorForm();
+          await loadVendors();
+        });
+      });
+    }
+    function bindVendorForm() {
+      els.vendorCancel.addEventListener('click', resetVendorForm);
+      els.vendorForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const name = els.vendorName.value.trim();
+        const phone = els.vendorPhone.value.trim();
+        if (!name || !phone) { showToast('Name and phone are required.'); return; }
+        els.vendorSubmit.disabled = true;
+        const payload: any = {
+          name, category: els.vendorCategory.value || null, phone,
+          email: els.vendorEmail.value.trim() || null, location: els.vendorLocation.value.trim() || null,
+          notes: els.vendorNotes.value.trim() || null,
+        };
+        let error;
+        if (state.editingVendorId) {
+          payload.updated_at = new Date().toISOString();
+          ({ error } = await db.from('vendors').update(payload).eq('id', state.editingVendorId));
+        } else {
+          payload.group_key = state.activeGroup;
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ error } = await db.from('vendors').insert(payload));
+        }
+        els.vendorSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not save vendor.'); return; }
+        resetVendorForm();
+        await loadVendors();
       });
     }
 
@@ -3425,6 +3798,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (state.members.length || !state.activeGroup) return;
       const { data } = await db.from('members').select('*').eq('group_key', state.activeGroup).order('full_name', { ascending: true });
       state.members = data || [];
+    }
+    // Not group-scoped (see loadVendors()) — cached the same lazy way,
+    // for the Maintenance Log's vendor picker.
+    async function ensureVendorsLoaded() {
+      if (state.vendors.length || state.sharedVendors.length || !state.activeGroup) return;
+      const { data } = await db.from('vendors').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true });
+      state.vendors = data || [];
+      await loadSharedVendors();
     }
     // Real PDF generation (not the browser print dialog) — Reports and
     // Curriculum are English-only now, so jsPDF's limited RTL support is
@@ -3585,20 +3966,20 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           .order('date', { ascending: true });
         if (error) throw error;
         const rows = (data || [])
-          .filter((m: any) => (m.activities && m.activities.length) || m.theme || m.notes)
+          .filter((m: any) => (m.activities && m.activities.length) || m.theme || m.notes || m.materials_needed)
           .map((m: any) => {
             const d = new Date(m.date + 'T00:00:00');
             const dateLabel = `${WEEKDAYS[d.getDay()].en} ${d.getDate()} ${MONTHS[d.getMonth()].en}`;
             const activitiesText = (m.activities || []).map((a: any) => a.en + (a.duration ? ` (${a.duration} min)` : '')).join('\n');
-            return [dateLabel, m.theme || '—', activitiesText || '—', m.notes || '—'];
+            return [dateLabel, m.theme || '—', activitiesText || '—', m.materials_needed || '—', m.notes || '—'];
           });
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Curriculum', label);
         autoTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9, valign: 'top' },
           columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 32 } },
-          head: [['Date', 'Theme', 'Activities', 'Notes']],
-          body: rows.length ? rows : [['No meetings planned in this range yet.', '', '', '']],
+          head: [['Date', 'Theme', 'Activities', 'Materials Needed', 'Notes']],
+          body: rows.length ? rows : [['No meetings planned in this range yet.', '', '', '', '']],
         });
         doc.save(pdfFilename('Curriculum', label));
       } catch (err) {
@@ -3631,7 +4012,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function currGetOrCreateMeeting(dateStr: string) {
       let m = state.curr.meetings.get(dateStr);
       if (!m) {
-        m = { group_key: state.activeGroup, date: dateStr, theme: null, notes: null, activities: [], created_by: state.profile?.name || null };
+        m = { group_key: state.activeGroup, date: dateStr, theme: null, notes: null, materials_needed: null, activities: [], created_by: state.profile?.name || null };
         state.curr.meetings.set(dateStr, m);
       }
       return m;
@@ -3639,7 +4020,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function currPersistMeeting(dateStr: string) {
       const m = state.curr.meetings.get(dateStr);
       if (!m) return;
-      const isEmpty = (!m.activities || m.activities.length === 0) && !m.theme && !m.notes && !m.attachment_path;
+      const isEmpty = (!m.activities || m.activities.length === 0) && !m.theme && !m.notes && !m.materials_needed && !m.attachment_path;
       try {
         if (isEmpty) {
           if (m.id) await db.from('curriculum_meetings').delete().eq('id', m.id);
@@ -3649,6 +4030,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         }
         const payload: any = {
           group_key: m.group_key, date: m.date, theme: m.theme || null, notes: m.notes || null,
+          materials_needed: m.materials_needed || null,
           activities: m.activities, attachment_path: m.attachment_path || null, updated_by: state.profile?.name || null,
         };
         if (!m.id) payload.created_by = m.created_by || state.profile?.name || null;
@@ -3778,6 +4160,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.currDayHeader.textContent = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}, ${d.getFullYear()}`;
       els.currDayTheme.value = (m && m.theme) || '';
       els.currDayNotes.value = (m && m.notes) || '';
+      els.currDayMaterials.value = (m && m.materials_needed) || '';
       currRenderActivityList(els.currDayList, dateStr);
       currRenderAttachment(m);
       els.currDayOverlay.removeAttribute('hidden');
@@ -3799,6 +4182,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const m = currGetOrCreateMeeting(state.curr.currentDay);
       m.theme = els.currDayTheme.value.trim() || null;
       m.notes = els.currDayNotes.value.trim() || null;
+      m.materials_needed = els.currDayMaterials.value.trim() || null;
       currPersistMeeting(state.curr.currentDay);
       currRenderMonth();
       currCloseDayPanel();
@@ -3817,7 +4201,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!m) { currCloseDayPanel(); return; }
       if (!confirm('Clear this day’s plan? Its theme, activities, and attachment are all removed.')) return;
       const oldAttachment = m.attachment_path;
-      m.theme = null; m.notes = null; m.activities = []; m.attachment_path = null;
+      m.theme = null; m.notes = null; m.materials_needed = null; m.activities = []; m.attachment_path = null;
       currPersistMeeting(dateStr).then(() => {
         if (oldAttachment) db.storage.from('documents').remove([oldAttachment]);
       });
@@ -4057,6 +4441,26 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.allergyAdd.hidden = true;
       if (focus) els.mAllergyDetail.focus();
     }
+    function showEmail(focus = true) {
+      els.emailFields.hidden = false;
+      els.emailAdd.hidden = true;
+      if (focus) els.mEmail.focus();
+    }
+    function hideEmail() {
+      els.emailFields.hidden = true;
+      els.emailAdd.hidden = false;
+      els.mEmail.value = '';
+    }
+    function showNid(focus = true) {
+      els.nidFields.hidden = false;
+      els.nidAdd.hidden = true;
+      if (focus) els.mNationalId.focus();
+    }
+    function hideNid() {
+      els.nidFields.hidden = true;
+      els.nidAdd.hidden = false;
+      els.mNationalId.value = '';
+    }
     function hideAllergy() {
       els.allergyFields.hidden = true;
       els.allergyAdd.hidden = false;
@@ -4077,6 +4481,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         guardian2_phone: !els.g2Fields.hidden ? (els.mG2Phone.value.trim() || null) : null,
         has_allergies: hasAllergies,
         allergy_detail: hasAllergies ? els.mAllergyDetail.value.trim() || null : null,
+        email: !els.emailFields.hidden ? (els.mEmail.value.trim() || null) : null,
+        national_id: !els.nidFields.hidden ? (els.mNationalId.value.trim() || null) : null,
         notes: els.mNotes.value.trim() || null,
       };
     }
@@ -4084,6 +4490,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.rosterForm.reset();
       hideG2();
       hideAllergy();
+      hideEmail();
+      hideNid();
       state.editingMemberId = null;
       els.formTitle.textContent = 'Add a member';
       els.formSubmit.textContent = 'Add member';
@@ -4112,6 +4520,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       } else {
         hideAllergy();
       }
+      if (m.email) {
+        showEmail(false);
+        els.mEmail.value = m.email;
+      } else {
+        hideEmail();
+      }
+      if (m.national_id) {
+        showNid(false);
+        els.mNationalId.value = m.national_id;
+      } else {
+        hideNid();
+      }
       els.mNotes.value = m.notes || '';
       els.formTitle.textContent = `Editing ${m.full_name}`;
       els.formSubmit.textContent = 'Save changes';
@@ -4124,6 +4544,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.g2Remove.addEventListener('click', () => hideG2());
       els.allergyAdd.addEventListener('click', () => showAllergy());
       els.allergyRemove.addEventListener('click', () => hideAllergy());
+      els.emailAdd.addEventListener('click', () => showEmail());
+      els.emailRemove.addEventListener('click', () => hideEmail());
+      els.nidAdd.addEventListener('click', () => showNid());
+      els.nidRemove.addEventListener('click', () => hideNid());
       els.formCancel.addEventListener('click', resetMemberForm);
       els.rosterForm.addEventListener('submit', async (e: Event) => {
         e.preventDefault();
@@ -4476,12 +4900,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // every other tab.
     const NON_TROOP_GROUP_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY];
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
-      [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events'],
-      [GENERAL_GROUP_KEY]: ['roster', 'finance'],
+      [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors'],
+      [GENERAL_GROUP_KEY]: ['roster', 'finance', 'vendors'],
     };
-    // Inventory/Event Calendar only make sense for Music — troops aren't
-    // in NON_TROOP_TAB_VISIBILITY at all, so its inclusion list above
-    // doesn't hide anything for them; this covers that case.
+    // Inventory/Event Calendar are Music-only — troops aren't in
+    // NON_TROOP_TAB_VISIBILITY at all, so Music's own inclusion list
+    // above doesn't hide anything for them; this covers that case.
+    // Vendors, unlike those two, is universal — every troop gets it too,
+    // same as Roster/Finance, so it isn't in this list at all.
     const MUSIC_ONLY_TABS = ['inventory', 'events'];
     function isTabHidden(tab: string) {
       const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
@@ -4512,6 +4938,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'finance') loadFinance();
       if (tab === 'inventory') loadInventory();
       if (tab === 'events') loadEvents();
+      if (tab === 'vendors') loadVendors();
       if (tab === 'library') loadLibrary();
       if (tab === 'curriculum') currStart();
     }
@@ -4672,6 +5099,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindMaintenanceForm();
         bindEventForm();
         bindEventCategories();
+        bindVendorForm();
         bindLibraryUpload();
         bindReports();
         bindTableSearch(els.rosterSearch, els.rosterBody);
@@ -4680,6 +5108,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindTableSearch(els.attSearch, els.attBody);
         bindTableSearch(els.feeSearch, els.feeBody);
         bindTableSearch(els.invSearch, els.invBody);
+        bindTableSearch(els.vendorSearch, els.vendorBody);
         currBindStatics();
         bindAttendance();
         els.feeMonth.addEventListener('change', loadFees);

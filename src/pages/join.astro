@@ -111,6 +111,28 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
               <button type="button" class="ws-remove-link" data-j-allergy-remove>Remove · إزالة</button>
             </div>
           </div>
+
+          <div class="ws-optional-block" data-j-email-block>
+            <button type="button" class="ws-add-link" data-j-email-add>+ Add email · إضافة بريد إلكتروني</button>
+            <div class="ws-optional-fields" data-j-email-fields hidden>
+              <label class="ws-field">
+                <span>Email · البريد الإلكتروني</span>
+                <input type="email" data-j-email />
+              </label>
+              <button type="button" class="ws-remove-link" data-j-email-remove>Remove · إزالة</button>
+            </div>
+          </div>
+
+          <div class="ws-optional-block" data-j-nid-block>
+            <button type="button" class="ws-add-link" data-j-nid-add>+ Add National ID · إضافة الرقم الوطني</button>
+            <div class="ws-optional-fields" data-j-nid-fields hidden>
+              <label class="ws-field">
+                <span>National ID (yours or a parent's) · الرقم الوطني (لك أو لأحد الوالدين)</span>
+                <input type="text" data-j-national-id />
+              </label>
+              <button type="button" class="ws-remove-link" data-j-nid-remove>Remove · إزالة</button>
+            </div>
+          </div>
         </div>
 
         <label class="ws-field ws-field--full">
@@ -171,6 +193,26 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
       el('[data-j-allergy-add]').hidden = false;
       el('[data-j-allergy-detail]').value = '';
     }
+    function showEmail(focus = true) {
+      el('[data-j-email-fields]').hidden = false;
+      el('[data-j-email-add]').hidden = true;
+      if (focus) el('[data-j-email]').focus();
+    }
+    function hideEmail() {
+      el('[data-j-email-fields]').hidden = true;
+      el('[data-j-email-add]').hidden = false;
+      el('[data-j-email]').value = '';
+    }
+    function showNid(focus = true) {
+      el('[data-j-nid-fields]').hidden = false;
+      el('[data-j-nid-add]').hidden = true;
+      if (focus) el('[data-j-national-id]').focus();
+    }
+    function hideNid() {
+      el('[data-j-nid-fields]').hidden = true;
+      el('[data-j-nid-add]').hidden = false;
+      el('[data-j-national-id]').value = '';
+    }
     function showError(msg: string) {
       const e = el('[data-join-error]');
       e.textContent = msg;
@@ -203,6 +245,10 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
       el('[data-j-g2-remove]').addEventListener('click', () => hideG2());
       el('[data-j-allergy-add]').addEventListener('click', () => showAllergy());
       el('[data-j-allergy-remove]').addEventListener('click', () => hideAllergy());
+      el('[data-j-email-add]').addEventListener('click', () => showEmail());
+      el('[data-j-email-remove]').addEventListener('click', () => hideEmail());
+      el('[data-j-nid-add]').addEventListener('click', () => showNid());
+      el('[data-j-nid-remove]').addEventListener('click', () => hideNid());
 
       form.addEventListener('submit', async (e: Event) => {
         e.preventDefault();
@@ -230,6 +276,8 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
           guardian2_phone: !el('[data-j-g2-fields]').hidden ? (el('[data-j-g2-phone]').value.trim() || null) : null,
           has_allergies: hasAllergies,
           allergy_detail: hasAllergies ? (el('[data-j-allergy-detail]').value.trim() || null) : null,
+          email: !el('[data-j-email-fields]').hidden ? (el('[data-j-email]').value.trim() || null) : null,
+          national_id: !el('[data-j-nid-fields]').hidden ? (el('[data-j-national-id]').value.trim() || null) : null,
           notes: el('[data-j-notes]').value.trim() || null,
         });
 

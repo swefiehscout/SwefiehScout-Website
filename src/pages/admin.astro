@@ -57,8 +57,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="finance"><Icon name="bank" size={16} strokeWidth={1.8} /> Finance</button>
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
         <button type="button" class="ws-tab" data-tab="curriculum"><Icon name="flag" size={16} strokeWidth={1.8} /> Curriculum</button>
+        <button type="button" class="ws-tab" data-tab="music"><Icon name="music" size={16} strokeWidth={1.8} /> Music</button>
         <button type="button" class="ws-tab" data-tab="roster"><Icon name="star" size={16} strokeWidth={1.8} /> Roster</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
+        <button type="button" class="ws-tab" data-tab="vendors"><Icon name="phone" size={16} strokeWidth={1.8} /> Vendors</button>
         <button type="button" class="ws-tab" data-tab="people"><Icon name="pin" size={16} strokeWidth={1.8} /> People</button>
       </nav>
 
@@ -251,6 +253,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <p class="ws-report-desc">Every troop's meeting plan for the period, one page per group.</p>
               <button type="button" class="btn-primary" data-report-curriculum>Download PDF</button>
             </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Full Roster</h3>
+              <p class="ws-report-desc">Every active member across every group (troops, Music, and General), with full contact and emergency-contact info. Not period-dependent.</p>
+              <button type="button" class="btn-primary" data-report-roster>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Vendor Directory</h3>
+              <p class="ws-report-desc">Every group's own vendors, plus every shared vendor and which groups it's shared into. Not period-dependent.</p>
+              <button type="button" class="btn-primary" data-report-vendors>Download PDF</button>
+            </div>
           </div>
         </section>
 
@@ -262,6 +274,85 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <thead><tr><th>Group</th><th>Next Meeting</th><th>Theme</th><th>Activities</th></tr></thead>
               <tbody data-curr-body></tbody>
             </table>
+          </div>
+        </section>
+
+        <!-- ================= Music (dashboard + its own reports) ================= -->
+        <section class="ws-panel" data-panel="music" hidden>
+          <p class="ws-att-hint">Music isn't a scouting troop, so it's not part of the Overview rollup above — this is its own equivalent, plus the reports specific to its Inventory and Event Calendar tabs.</p>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="music" data-subtab="dashboard">Dashboard</button>
+            <button type="button" class="ws-subtab" data-subtabs="music" data-subtab="reports">Reports</button>
+          </div>
+
+          <div data-subpanel="music:dashboard">
+            <div class="ws-dash">
+            <div class="ws-dash-kpis" data-music-kpis></div>
+
+            <div class="ws-dash-card ws-dash-card--full">
+              <div class="ws-dash-card-head">
+                <h3>Income vs. payouts</h3>
+                <span class="ws-dash-card-sub">Last 6 months, completed events</span>
+              </div>
+              <div data-music-chart></div>
+            </div>
+
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Top band members</h3></div>
+                <div data-music-top-members></div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Bookings by type</h3></div>
+                <div data-music-type-breakdown></div>
+              </div>
+            </div>
+
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Needs completion</h3></div>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-music-todo-table>
+                    <thead><tr><th>Date</th><th>Client</th><th>Type</th></tr></thead>
+                    <tbody data-music-todo-body></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Upcoming events</h3></div>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-music-upcoming-table>
+                    <thead><tr><th>Date</th><th>Client</th><th>Type</th></tr></thead>
+                    <tbody data-music-upcoming-body></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+
+          <div data-subpanel="music:reports" hidden>
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline"><span>Month</span><select data-music-report-month></select></label>
+              <label class="ws-field ws-field--inline"><span>Year</span><select data-music-report-year></select></label>
+            </div>
+            <div class="ws-report-grid">
+              <div class="ws-report-card">
+                <h3 class="ws-admin-h3">Music Finance Report</h3>
+                <p class="ws-report-desc">Music's own income/expense ledger for the period, income vs. Band Payouts, Transport, and every other category.</p>
+                <button type="button" class="btn-primary" data-report-music-finance>Download PDF</button>
+              </div>
+              <div class="ws-report-card">
+                <h3 class="ws-admin-h3">Music Event Report</h3>
+                <p class="ws-report-desc">Every booking in the period — client, type, attendees, amount received, payouts, and net.</p>
+                <button type="button" class="btn-primary" data-report-music-events>Download PDF</button>
+              </div>
+              <div class="ws-report-card">
+                <h3 class="ws-admin-h3">Maintenance Report</h3>
+                <p class="ws-report-desc">Every maintenance record logged in the period — item, vendor, cost, and who logged it.</p>
+                <button type="button" class="btn-primary" data-report-music-maintenance>Download PDF</button>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -285,7 +376,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <input type="search" class="ws-search" data-roster-search placeholder="Search members…" />
           <div class="ws-table-wrap">
             <table class="ws-table" data-roster-table>
-              <thead><tr><th>Name</th><th>Group</th><th>Phone</th><th>Emergency Contact</th><th>Allergies</th><th>Status</th></tr></thead>
+              <thead><tr><th>Name</th><th>Group</th><th>Phone</th><th>Email</th><th>Emergency Contact</th><th>Allergies</th><th>Status</th></tr></thead>
               <tbody data-roster-body></tbody>
             </table>
           </div>
@@ -319,6 +410,65 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <table class="ws-table" data-lib-table>
               <thead><tr><th>Title</th><th>Groups</th><th>Type</th><th>Uploaded</th><th>Uploaded by</th><th></th></tr></thead>
               <tbody data-lib-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= Vendors (Shared) ================= -->
+        <section class="ws-panel" data-panel="vendors" hidden>
+          <p class="ws-att-hint">Add a vendor once and tick which group(s) it should show up for, instead of typing it separately into each group's own Vendors tab. Each still sees it there, under Shared Vendors — Music's Inventory Maintenance Log can pick it too.</p>
+
+          <form class="ws-member-form" data-svendor-form>
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title" data-svendor-form-title>Add a shared vendor</p>
+            <div class="ws-form-grid ws-form-grid--4">
+              <label class="ws-field">
+                <span>Name *</span>
+                <input type="text" data-svendor-name required />
+              </label>
+              <label class="ws-field">
+                <span>Category</span>
+                <select data-svendor-category>
+                  <option value="">— None —</option>
+                  <option>Supplier</option>
+                  <option>Repair Shop</option>
+                  <option>Venue</option>
+                  <option>Transportation</option>
+                  <option>Service Provider</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label class="ws-field">
+                <span>Phone *</span>
+                <input type="tel" data-svendor-phone required />
+              </label>
+              <label class="ws-field">
+                <span>Email (optional)</span>
+                <input type="email" data-svendor-email />
+              </label>
+            </div>
+            <div class="ws-form-grid">
+              <label class="ws-field">
+                <span>Location (optional)</span>
+                <input type="text" data-svendor-location />
+              </label>
+              <label class="ws-field ws-field--full">
+                <span>Notes</span>
+                <input type="text" data-svendor-notes />
+              </label>
+            </div>
+            <label class="ws-field ws-field--full"><span>Groups *</span></label>
+            <div class="ws-admin-groups" data-svendor-groups></div>
+            <div class="ws-form-actions">
+              <button type="submit" class="btn-primary" data-svendor-submit>Add vendor</button>
+              <button type="button" class="ws-form-cancel" data-svendor-cancel hidden>Cancel edit</button>
+            </div>
+          </form>
+
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-svendor-table>
+              <thead><tr><th>Name</th><th>Category</th><th>Phone</th><th>Groups</th><th>Added by</th><th></th></tr></thead>
+              <tbody data-svendor-body></tbody>
             </table>
           </div>
         </section>
@@ -357,6 +507,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       ovMembers: [],
       recSystemBalance: 0,
       recDiff: null,
+      editingSharedVendorId: null,
     };
     const els: any = {};
 
@@ -507,6 +658,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.reportMonth = el('[data-report-month]');
       els.reportYear = el('[data-report-year]');
 
+      els.musicKpis = el('[data-music-kpis]');
+      els.musicChart = el('[data-music-chart]');
+      els.musicTopMembers = el('[data-music-top-members]');
+      els.musicTypeBreakdown = el('[data-music-type-breakdown]');
+      els.musicTodoBody = el('[data-music-todo-body]');
+      els.musicUpcomingBody = el('[data-music-upcoming-body]');
+      els.musicReportMonth = el('[data-music-report-month]');
+      els.musicReportYear = el('[data-music-report-year]');
+
       els.currBody = el('[data-curr-body]');
 
       els.rosterGroup = el('[data-roster-group]');
@@ -519,6 +679,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.libGroups = el('[data-lib-groups]');
       els.libUpload = el('[data-lib-upload]');
       els.libBody = el('[data-lib-body]');
+
+      els.svendorForm = el('[data-svendor-form]');
+      els.svendorFormTitle = el('[data-svendor-form-title]');
+      els.svendorName = el('[data-svendor-name]');
+      els.svendorCategory = el('[data-svendor-category]');
+      els.svendorPhone = el('[data-svendor-phone]');
+      els.svendorEmail = el('[data-svendor-email]');
+      els.svendorLocation = el('[data-svendor-location]');
+      els.svendorNotes = el('[data-svendor-notes]');
+      els.svendorGroups = el('[data-svendor-groups]');
+      els.svendorSubmit = el('[data-svendor-submit]');
+      els.svendorCancel = el('[data-svendor-cancel]');
+      els.svendorBody = el('[data-svendor-body]');
 
       els.peopleBody = el('[data-people-body]');
     }
@@ -1216,22 +1389,22 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       try {
         const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
         const troopKeys = TROOP_GROUPS.map((g) => g.key);
-        const { data, error } = await db.from('curriculum_meetings').select('group_key, date, theme, notes, activities')
+        const { data, error } = await db.from('curriculum_meetings').select('group_key, date, theme, notes, materials_needed, activities')
           .in('group_key', troopKeys).gte('date', start).lte('date', end).order('date', { ascending: true });
         if (error) throw error;
         const rows = data || [];
         const meetingRows = (groupRows: any[]) => groupRows
-          .filter((m: any) => (m.activities && m.activities.length) || m.theme || m.notes)
+          .filter((m: any) => (m.activities && m.activities.length) || m.theme || m.notes || m.materials_needed)
           .map((m: any) => {
             const d = new Date(m.date + 'T00:00:00');
             const dateLabel = `${WEEKDAYS[d.getDay()].en} ${d.getDate()} ${MONTHS[d.getMonth()].en}`;
             const activitiesText = (m.activities || []).map((a: any) => a.en + (a.duration ? ` (${a.duration} min)` : '')).join('\n');
-            return [dateLabel, m.theme || '—', activitiesText || '—', m.notes || '—'];
+            return [dateLabel, m.theme || '—', activitiesText || '—', m.materials_needed || '—', m.notes || '—'];
           });
         const tableOpts = {
           theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9, valign: 'top' },
           columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 32 } },
-          head: [['Date', 'Theme', 'Activities', 'Notes']],
+          head: [['Date', 'Theme', 'Activities', 'Materials Needed', 'Notes']],
         };
 
         const doc = new jsPDF();
@@ -1251,11 +1424,76 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             y = 31;
           }
           const body = meetingRows(rows.filter((r: any) => r.group_key === g.key));
-          autoTable(doc, { ...tableOpts, startY: y, body: body.length ? body : [['No data', '', '', '']] });
+          autoTable(doc, { ...tableOpts, startY: y, body: body.length ? body : [['No data', '', '', '', '']] });
         });
         doc.save(pdfFilename('Curriculum', label));
       } catch (err) {
         console.error('curriculum report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    // Not period-dependent — every active member, across every group
+    // (troops, Music, and General alike), one page. Landscape, since
+    // "all their info" is enough columns that portrait would cramp it;
+    // National ID is deliberately left off even here — sensitive enough
+    // that it stays an edit-form-only detail, not a bulk export.
+    async function downloadRosterReport() {
+      try {
+        const { data, error } = await db.from('members').select('*').eq('active', true).order('group_key', { ascending: true }).order('full_name', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF({ orientation: 'landscape' });
+        const y = pdfHeader(doc, 'Full Roster', `${rows.length} active member${rows.length === 1 ? '' : 's'}, every group`);
+        autoTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
+          head: [['Name', 'Group', 'Phone', 'Email', 'DOB', 'Emergency Contact 1', 'Emergency Contact 2', 'Allergy', 'Notes']],
+          body: rows.length ? rows.map((m: any) => {
+            const g = GROUPS.find((x) => x.key === m.group_key);
+            return [
+              m.full_name, g ? g.en : m.group_key, m.phone || '—', m.email || '—', m.birth_date || '—',
+              m.guardian1_relation ? `${m.guardian1_relation}: ${m.guardian1_phone || '—'}` : '—',
+              m.guardian2_relation ? `${m.guardian2_relation}: ${m.guardian2_phone || '—'}` : '—',
+              m.has_allergies ? (m.allergy_detail || 'Yes') : '—', m.notes || '—',
+            ];
+          }) : [['No members found', '', '', '', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Full-Roster', new Date().toISOString().slice(0, 10)));
+      } catch (err) {
+        console.error('roster report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    // Not period-dependent — every group's own vendors, plus every
+    // shared vendor (labeled with which group(s) it's shared into).
+    async function downloadVendorReport() {
+      try {
+        const [ownRes, sharedRes] = await Promise.all([
+          db.from('vendors').select('*').order('group_key', { ascending: true }).order('name', { ascending: true }),
+          db.from('shared_vendors').select('*, shared_vendor_groups(group_key)').order('name', { ascending: true }),
+        ]);
+        if (ownRes.error) throw ownRes.error;
+        if (sharedRes.error) throw sharedRes.error;
+        const own = ownRes.data || [];
+        const shared = sharedRes.data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Vendor Directory', `${own.length} group vendor${own.length === 1 ? '' : 's'}, ${shared.length} shared`);
+        const ownRows = own.map((v: any) => {
+          const g = GROUPS.find((x) => x.key === v.group_key);
+          return [g ? g.en : v.group_key, v.name, v.category || '—', v.phone, v.email || '—', v.location || '—'];
+        });
+        const sharedRows = shared.map((v: any) => {
+          const groupNames = (v.shared_vendor_groups || []).map((r: any) => GROUPS.find((x) => x.key === r.group_key)?.en || r.group_key);
+          return [`Shared: ${groupNames.join(', ') || '—'}`, v.name, v.category || '—', v.phone, v.email || '—', v.location || '—'];
+        });
+        const body = [...ownRows, ...sharedRows];
+        autoTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Group', 'Name', 'Category', 'Phone', 'Email', 'Location']],
+          body: body.length ? body : [['No vendors found', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Vendor-Directory', new Date().toISOString().slice(0, 10)));
+      } catch (err) {
+        console.error('vendor report failed', err);
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
@@ -1265,6 +1503,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       el('[data-report-fees]').addEventListener('click', downloadFeesReport);
       el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);
       el('[data-report-curriculum]').addEventListener('click', downloadCurriculumReport);
+      el('[data-report-roster]').addEventListener('click', downloadRosterReport);
+      el('[data-report-vendors]').addEventListener('click', downloadVendorReport);
     }
 
     // ---------- Curriculum: next meeting per troop --------------------------
@@ -1293,6 +1533,240 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }).join('');
     }
 
+    // ---------- Music: its own dashboard + reports (not a troop, so it
+    // sits outside the Overview rollup and its own Reports section) ------
+    function musicEventDateTimeHasPassed(dateStr: string, timeStr: string | null) {
+      const eventDT = timeStr ? new Date(`${dateStr}T${timeStr}`) : new Date(`${dateStr}T23:59:59`);
+      return eventDT.getTime() < Date.now();
+    }
+    function musicEventStatus(ev: any) {
+      if (ev.amount_received != null) return 'completed';
+      if (musicEventDateTimeHasPassed(ev.event_date, ev.event_time)) return 'pending';
+      return 'upcoming';
+    }
+    // Same 3 helpers as app.astro's own Event Calendar dashboard — kept
+    // here too so this admin view can be a byte-for-byte match of it,
+    // not just a summary. See that file's comments for the full
+    // reasoning (status derived rather than stored, etc.).
+    function musicEventPayoutTotals(ev: any) {
+      const attendees = ev.attendees || [];
+      const carCount = attendees.filter((a: any) => a.took_car).length;
+      const wages = Number(ev.pay_rate_per_member || 0) * attendees.length;
+      const transport = Number(ev.transport_rate_per_member || 0) * carCount;
+      return { attendees, carCount, wages, transport };
+    }
+    function musicEventCostsTotal(costs: any[], eventId: string) {
+      return costs.filter((c: any) => c.event_id === eventId).reduce((s: number, c: any) => s + Number(c.amount), 0);
+    }
+    function musicEventNetIncome(ev: any, costs: any[]) {
+      const { wages, transport } = musicEventPayoutTotals(ev);
+      return Number(ev.amount_received || 0) - wages - transport - musicEventCostsTotal(costs, ev.id);
+    }
+    function musicComputeTopMembers(events: any[], members: any[], limit = 5) {
+      const counts = new Map<string, number>();
+      events.forEach((e: any) => (e.attendees || []).forEach((a: any) => counts.set(a.member_id, (counts.get(a.member_id) || 0) + 1)));
+      return Array.from(counts.entries())
+        .map(([memberId, count]) => ({ member: members.find((m: any) => m.id === memberId), count }))
+        .filter((x) => x.member)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+    }
+    function musicComputeTypeBreakdown(events: any[]) {
+      const counts = new Map<string, number>();
+      events.forEach((e: any) => counts.set(e.event_type, (counts.get(e.event_type) || 0) + 1));
+      return Array.from(counts.entries()).sort((a: any, b: any) => b[1] - a[1]);
+    }
+    function renderMusicChart(completed: any[], costs: any[]) {
+      const now = new Date();
+      const monthKeys: string[] = [];
+      const byMonth = new Map<string, { income: number; expense: number }>();
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        monthKeys.push(key);
+        byMonth.set(key, { income: 0, expense: 0 });
+      }
+      completed.forEach((e: any) => {
+        const key = e.event_date.slice(0, 7);
+        const b = byMonth.get(key);
+        if (!b) return;
+        const { wages, transport } = musicEventPayoutTotals(e);
+        b.income += Number(e.amount_received || 0);
+        b.expense += wages + transport + musicEventCostsTotal(costs, e.id);
+      });
+      const totalIncome = monthKeys.reduce((s, k) => s + byMonth.get(k)!.income, 0);
+      const totalExpense = monthKeys.reduce((s, k) => s + byMonth.get(k)!.expense, 0);
+      if (!totalIncome && !totalExpense) {
+        els.musicChart.innerHTML = '<p class="ws-dash-empty-mini">No completed events in the last 6 months.</p>';
+        return;
+      }
+      const maxVal = Math.max(1, ...monthKeys.map((k) => Math.max(byMonth.get(k)!.income, byMonth.get(k)!.expense)));
+      els.musicChart.innerHTML = `
+        <div class="ws-dash-fin-bars">
+          ${monthKeys.map((k) => {
+            const b = byMonth.get(k)!;
+            const d = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1);
+            const label = MONTHS[d.getMonth()].en.slice(0, 3);
+            const incPct = Math.round((b.income / maxVal) * 100);
+            const expPct = Math.round((b.expense / maxVal) * 100);
+            return `
+              <div class="ws-dash-fin-col" title="${MONTHS[d.getMonth()].en} ${d.getFullYear()}, Income ${b.income.toFixed(2)}, Payouts+costs ${b.expense.toFixed(2)}">
+                <div class="ws-dash-fin-pair">
+                  <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--income" style="height:${b.income ? Math.max(incPct, 3) : 0}%"></div></div>
+                  <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--expense" style="height:${b.expense ? Math.max(expPct, 3) : 0}%"></div></div>
+                </div>
+                <span class="ws-dash-fin-label">${label}</span>
+              </div>`;
+          }).join('')}
+        </div>
+        <div class="ws-dash-fin-legend">
+          <span><i class="ws-dash-fin-swatch ws-dash-fin-swatch--income"></i>Income</span>
+          <span><i class="ws-dash-fin-swatch ws-dash-fin-swatch--expense"></i>Payouts + costs</span>
+        </div>
+      `;
+    }
+    async function loadMusicDashboard() {
+      const [membersRes, eventsRes, costsRes] = await Promise.all([
+        db.from('members').select('*').eq('group_key', MUSIC_GROUP_KEY),
+        db.from('event_bookings').select('*').eq('group_key', MUSIC_GROUP_KEY).order('event_date', { ascending: true }),
+        db.from('event_costs').select('*').eq('group_key', MUSIC_GROUP_KEY),
+      ]);
+      const members = membersRes.data || [];
+      const events = eventsRes.data || [];
+      const costs = costsRes.data || [];
+      const todo = events.filter((e: any) => musicEventStatus(e) === 'pending');
+      const upcoming = events.filter((e: any) => musicEventStatus(e) === 'upcoming');
+      const completed = events.filter((e: any) => musicEventStatus(e) === 'completed');
+      const grossIncome = completed.reduce((s: number, e: any) => s + Number(e.amount_received || 0), 0);
+      const totalPayouts = completed.reduce((s: number, e: any) => {
+        const { wages, transport } = musicEventPayoutTotals(e);
+        return s + wages + transport;
+      }, 0);
+      const netIncome = completed.reduce((sum: number, e: any) => sum + musicEventNetIncome(e, costs), 0);
+      const thisYear = events.filter((e: any) => e.event_date.slice(0, 4) === String(new Date().getFullYear()));
+      const avgNet = completed.length ? netIncome / completed.length : 0;
+      els.musicKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">↑</span><span class="ws-dash-kpi-label">Upcoming</span></div>
+          <span class="ws-dash-kpi-num">${upcoming.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">!</span><span class="ws-dash-kpi-label">Needs completion</span></div>
+          <span class="ws-dash-kpi-num">${todo.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Completed (all-time)</span></div>
+          <span class="ws-dash-kpi-num">${completed.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Bookings this year</span></div>
+          <span class="ws-dash-kpi-num">${thisYear.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Gross income</span></div>
+          <span class="ws-dash-kpi-num">${grossIncome.toFixed(2)}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">↓</span><span class="ws-dash-kpi-label">Member payouts</span></div>
+          <span class="ws-dash-kpi-num">${totalPayouts.toFixed(2)}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">=</span><span class="ws-dash-kpi-label">Net income</span></div>
+          <span class="ws-dash-kpi-num">${netIncome.toFixed(2)}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">≈</span><span class="ws-dash-kpi-label">Avg net / event</span></div>
+          <span class="ws-dash-kpi-num">${avgNet.toFixed(2)}</span>
+        </div>
+      `;
+      renderMusicChart(completed, costs);
+      const topMembers = musicComputeTopMembers(events, members);
+      els.musicTopMembers.innerHTML = topMembers.length ? topMembers.map((x: any, i: number) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${i + 1}. ${escapeHtml(x.member.full_name)}</span></span>
+          <span class="ws-dash-feed-amount">${x.count} event${x.count === 1 ? '' : 's'}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No bookings with band members assigned yet.</p>';
+      const typeBreakdown = musicComputeTypeBreakdown(events);
+      els.musicTypeBreakdown.innerHTML = typeBreakdown.length ? typeBreakdown.map(([type, count]: [string, number]) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${escapeHtml(type)}</span></span>
+          <span class="ws-dash-feed-amount">${count} booking${count === 1 ? '' : 's'}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No events booked yet.</p>';
+      const rowHtml = (e: any) => `<tr><td data-label="Date">${e.event_date}</td><td data-label="Client">${escapeHtml(e.first_name)} ${escapeHtml(e.last_name)}</td><td data-label="Type">${escapeHtml(e.event_type)}</td></tr>`;
+      els.musicTodoBody.innerHTML = todo.length ? todo.map(rowHtml).join('') : '<tr><td colspan="3" class="ws-empty">Nothing pending.</td></tr>';
+      els.musicUpcomingBody.innerHTML = upcoming.length ? upcoming.map(rowHtml).join('') : '<tr><td colspan="3" class="ws-empty">Nothing booked yet.</td></tr>';
+    }
+    async function downloadMusicFinanceReport() {
+      try {
+        const { start, end, label } = periodRange(els.musicReportMonth, els.musicReportYear);
+        const { data } = await db.from('finance_entries').select('*').eq('group_key', MUSIC_GROUP_KEY).gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: true });
+        const rows = data || [];
+        const income = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const expense = rows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Music Finance Report', `${label}, Income ${income.toFixed(2)}, Expenses ${expense.toFixed(2)}, Net ${(income - expense).toFixed(2)}`);
+        autoTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
+          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), r.created_by_name || '—']) : [['No entries this period', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Music-Finance', label));
+      } catch (err) {
+        console.error('music finance report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    async function downloadMusicEventReport() {
+      try {
+        const { start, end, label } = periodRange(els.musicReportMonth, els.musicReportYear);
+        const { data } = await db.from('event_bookings').select('*').eq('group_key', MUSIC_GROUP_KEY).gte('event_date', start).lte('event_date', end).order('event_date', { ascending: true });
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Music Event Report', `${label}, ${rows.length} booking${rows.length === 1 ? '' : 's'}`);
+        autoTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
+          head: [['Date', 'Client', 'Type', 'Players', 'Received', 'Via', 'Payouts', 'Net', 'Status']],
+          body: rows.length ? rows.map((r: any) => {
+            const { wages, transport } = musicEventPayoutTotals(r);
+            const payout = wages + transport;
+            const received = Number(r.amount_received || 0);
+            return [r.event_date, `${r.first_name} ${r.last_name}`, r.event_type, String((r.attendees || []).length), r.amount_received != null ? received.toFixed(2) : '—', r.payment_method || '—', payout.toFixed(2), r.amount_received != null ? (received - payout).toFixed(2) : '—', musicEventStatus(r)];
+          }) : [['No bookings this period', '', '', '', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Music-Events', label));
+      } catch (err) {
+        console.error('music event report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    async function downloadMusicMaintenanceReport() {
+      try {
+        const { start, end, label } = periodRange(els.musicReportMonth, els.musicReportYear);
+        const { data } = await db.from('inventory_maintenance').select('*, inventory_items(name)').eq('group_key', MUSIC_GROUP_KEY).gte('performed_on', start).lte('performed_on', end).order('performed_on', { ascending: true });
+        const rows = data || [];
+        const totalCost = rows.reduce((s: number, r: any) => s + Number(r.cost || 0), 0);
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Maintenance Report', `${label}, ${rows.length} record${rows.length === 1 ? '' : 's'}, ${totalCost.toFixed(2)} total cost`);
+        autoTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Date', 'Item', 'Performed by', 'Description', 'Cost', 'Added by']],
+          body: rows.length ? rows.map((r: any) => [r.performed_on, r.inventory_items?.name || '—', r.performed_by, r.description, r.cost != null ? Number(r.cost).toFixed(2) : '—', r.created_by_name || '—']) : [['No records this period', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Maintenance', label));
+      } catch (err) {
+        console.error('maintenance report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    function bindMusicReports() {
+      populatePeriodSelects(els.musicReportMonth, els.musicReportYear, true);
+      el('[data-report-music-finance]').addEventListener('click', downloadMusicFinanceReport);
+      el('[data-report-music-events]').addEventListener('click', downloadMusicEventReport);
+      el('[data-report-music-maintenance]').addEventListener('click', downloadMusicMaintenanceReport);
+    }
+
     // ---------- Roster: the 5 troops' full roster, with filters -------------
     async function loadRoster() {
       const { data, error } = await db.from('members').select('*').order('full_name', { ascending: true });
@@ -1307,7 +1781,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (groupFilter) rows = rows.filter((m: any) => m.group_key === groupFilter);
       if (statusFilter === 'active') rows = rows.filter((m: any) => m.active);
       else if (statusFilter === 'archived') rows = rows.filter((m: any) => !m.active);
-      if (!rows.length) { els.rosterBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No members match these filters.</td></tr>'; return; }
+      if (!rows.length) { els.rosterBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No members match these filters.</td></tr>'; return; }
       els.rosterBody.innerHTML = rows.map((m: any) => {
         const g = GROUPS.find((x) => x.key === m.group_key);
         return `
@@ -1315,6 +1789,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <td data-label="Name">${escapeHtml(m.full_name)}</td>
             <td data-label="Group">${escapeHtml(g ? g.en : m.group_key)}</td>
             <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
+            <td data-label="Email">${escapeHtml(m.email || '—')}</td>
             <td data-label="Emergency Contact">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
             <td data-label="Allergies">${m.has_allergies
                 ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ', ' + escapeHtml(m.allergy_detail) : ''}</span>`
@@ -1414,6 +1889,128 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
+    // ---------- Vendors (Shared): one vendor, ticked into any group(s) -----
+    async function loadSharedVendorsAdmin() {
+      const { data, error } = await db.from('shared_vendors')
+        .select('*, shared_vendor_groups(group_key)')
+        .order('name', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load vendors.'); return; }
+      renderSharedVendorsAdmin(data || []);
+    }
+    function resetSharedVendorForm() {
+      state.editingSharedVendorId = null;
+      els.svendorForm.reset();
+      els.svendorGroups.querySelectorAll('[data-svendor-group]').forEach((cb: any) => { cb.checked = false; });
+      els.svendorFormTitle.textContent = 'Add a shared vendor';
+      els.svendorSubmit.textContent = 'Add vendor';
+      els.svendorCancel.hidden = true;
+    }
+    function startEditSharedVendor(v: any) {
+      state.editingSharedVendorId = v.id;
+      els.svendorName.value = v.name;
+      els.svendorCategory.value = v.category || '';
+      els.svendorPhone.value = v.phone;
+      els.svendorEmail.value = v.email || '';
+      els.svendorLocation.value = v.location || '';
+      els.svendorNotes.value = v.notes || '';
+      const checked = new Set((v.shared_vendor_groups || []).map((r: any) => r.group_key));
+      els.svendorGroups.querySelectorAll('[data-svendor-group]').forEach((cb: any) => { cb.checked = checked.has(cb.value); });
+      els.svendorFormTitle.textContent = `Editing ${v.name}`;
+      els.svendorSubmit.textContent = 'Save changes';
+      els.svendorCancel.hidden = false;
+      els.svendorForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function renderSharedVendorsAdmin(vendors: any[]) {
+      if (!vendors.length) { els.svendorBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No shared vendors yet.</td></tr>'; return; }
+      els.svendorBody.innerHTML = vendors.map((v: any) => {
+        const checked = new Set((v.shared_vendor_groups || []).map((r: any) => r.group_key));
+        const groupChecks = GROUPS.map((g) => `
+          <label class="ws-group-check">
+            <input type="checkbox" data-svendor-row-group value="${g.key}" ${checked.has(g.key) ? 'checked' : ''} />
+            ${escapeHtml(g.en)}
+          </label>
+        `).join('');
+        return `
+          <tr data-vendor-id="${v.id}">
+            <td data-label="Name">${escapeHtml(v.name)}</td>
+            <td data-label="Category">${escapeHtml(v.category || '—')}</td>
+            <td data-label="Phone">${escapeHtml(v.phone)}</td>
+            <td class="ws-admin-groups" data-label="Groups">${groupChecks}</td>
+            <td data-label="Added by">${escapeHtml(v.created_by_name || '—')}</td>
+            <td class="ws-row-actions">
+              <button type="button" class="ws-edit-btn" data-svendor-edit>Edit</button>
+              <button type="button" class="ws-row-del" data-svendor-del>×</button>
+            </td>
+          </tr>`;
+      }).join('');
+      els.svendorBody.querySelectorAll('tr').forEach((row: any) => {
+        const id = row.dataset.vendorId;
+        const vendor = vendors.find((v: any) => v.id === id);
+        row.querySelector('[data-svendor-edit]').addEventListener('click', () => startEditSharedVendor(vendor));
+        row.querySelector('[data-svendor-del]').addEventListener('click', async () => {
+          if (!confirm('Delete this vendor? It disappears from every group it was shared into.')) return;
+          const { error } = await db.from('shared_vendors').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          if (state.editingSharedVendorId === id) resetSharedVendorForm();
+          await loadSharedVendorsAdmin();
+        });
+        row.querySelectorAll('[data-svendor-row-group]').forEach((cb: any) => {
+          cb.addEventListener('change', async () => {
+            cb.disabled = true;
+            const { error } = cb.checked
+              ? await db.from('shared_vendor_groups').upsert({ shared_vendor_id: id, group_key: cb.value }, { onConflict: 'shared_vendor_id,group_key' })
+              : await db.from('shared_vendor_groups').delete().eq('shared_vendor_id', id).eq('group_key', cb.value);
+            cb.disabled = false;
+            if (error) { showToast('Could not update, ' + (error.message || 'unknown error') + '.'); cb.checked = !cb.checked; }
+          });
+        });
+      });
+    }
+    function bindSharedVendorForm() {
+      els.svendorGroups.innerHTML = GROUPS.map((g) => `
+        <label class="ws-group-check"><input type="checkbox" data-svendor-group value="${g.key}" /> ${escapeHtml(g.en)}</label>
+      `).join('');
+      els.svendorCancel.addEventListener('click', resetSharedVendorForm);
+      els.svendorForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const name = els.svendorName.value.trim();
+        const phone = els.svendorPhone.value.trim();
+        const groupKeys = Array.from(els.svendorGroups.querySelectorAll('[data-svendor-group]:checked')).map((i: any) => i.value);
+        if (!name || !phone) { showToast('Name and phone are required.'); return; }
+        if (!groupKeys.length) { showToast('Tick at least one group.'); return; }
+        els.svendorSubmit.disabled = true;
+        const payload: any = {
+          name, category: els.svendorCategory.value || null, phone,
+          email: els.svendorEmail.value.trim() || null, location: els.svendorLocation.value.trim() || null,
+          notes: els.svendorNotes.value.trim() || null,
+        };
+        let vendorId = state.editingSharedVendorId;
+        let error;
+        if (vendorId) {
+          ({ error } = await db.from('shared_vendors').update(payload).eq('id', vendorId));
+        } else {
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          const { data: inserted, error: insertErr } = await db.from('shared_vendors').insert(payload).select().single();
+          error = insertErr;
+          vendorId = inserted?.id;
+        }
+        if (error) { console.error(error); showToast('Could not save vendor.'); els.svendorSubmit.disabled = false; return; }
+        // Simplest correct way to sync the group list on every save
+        // (add or edit) is to just replace it outright, same idea as
+        // Inventory's category lists — far less code than diffing.
+        await db.from('shared_vendor_groups').delete().eq('shared_vendor_id', vendorId);
+        const { error: groupsError } = await db.from('shared_vendor_groups').insert(
+          groupKeys.map((group_key: string) => ({ shared_vendor_id: vendorId, group_key })),
+        );
+        els.svendorSubmit.disabled = false;
+        if (groupsError) { console.error(groupsError); showToast('Saved, but could not save which groups.'); return; }
+        resetSharedVendorForm();
+        showToast('Saved.');
+        await loadSharedVendorsAdmin();
+      });
+    }
+
     // ---------- People: approve leaders/admins, assign groups ---------------
     async function loadPeople() {
       const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
@@ -1489,8 +2086,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'overview') loadOverview();
       if (tab === 'finance') { loadFinanceKpis(); loadFinancePeriod(); compareReconcile(); loadReconcileHistory(); loadAdjustmentEntries(); }
       if (tab === 'curriculum') loadCurriculum();
+      if (tab === 'music') loadMusicDashboard();
       if (tab === 'roster') loadRoster();
       if (tab === 'library') loadSharedDocs();
+      if (tab === 'vendors') loadSharedVendorsAdmin();
       if (tab === 'people') loadPeople();
     }
     function setTab(tab: string) {
@@ -1565,6 +2164,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindReconcile();
         bindReports();
         bindLibraryUpload();
+        bindSharedVendorForm();
+        bindMusicReports();
         els.finMonth.addEventListener('change', loadFinancePeriod);
         els.finYear.addEventListener('change', loadFinancePeriod);
         els.rosterGroup.innerHTML = '<option value="">All Groups</option>' + GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
