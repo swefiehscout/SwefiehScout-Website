@@ -79,6 +79,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="fees"><Icon name="cash" size={16} strokeWidth={1.8} /> Fees</button>
         <button type="button" class="ws-tab" data-tab="curriculum"><Icon name="flag" size={16} strokeWidth={1.8} /> Curriculum</button>
         <button type="button" class="ws-tab" data-tab="finance"><Icon name="bank" size={16} strokeWidth={1.8} /> Finance</button>
+        <button type="button" class="ws-tab" data-tab="inventory"><Icon name="box" size={16} strokeWidth={1.8} /> Inventory</button>
+        <button type="button" class="ws-tab" data-tab="events"><Icon name="heart" size={16} strokeWidth={1.8} /> Event Calendar<span class="ws-tab-badge" data-events-badge hidden></span></button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
       </nav>
@@ -451,7 +453,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <div data-subpanel="finance:ledger">
             <form class="ws-member-form" data-fin-form>
               <div class="ws-member-form-bar" aria-hidden="true"></div>
-              <p class="ws-member-form-title">Add an entry</p>
+              <p class="ws-member-form-title" data-fin-form-title>Add an entry</p>
               <div class="ws-form-grid ws-form-grid--4">
                 <label class="ws-field">
                   <span>Type *</span>
@@ -485,6 +487,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               </div>
               <div class="ws-form-actions">
                 <button type="submit" class="btn-primary" data-fin-submit>Add entry</button>
+                <button type="button" class="ws-form-cancel" data-fin-cancel hidden>Cancel edit</button>
               </div>
             </form>
 
@@ -540,6 +543,249 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                   <button type="button" class="btn-primary" data-settings-income-add>Add</button>
                 </div>
                 <div class="ws-category-list" data-settings-income-list></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="inventory" hidden>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="inventory" data-subtab="items">Items</button>
+            <button type="button" class="ws-subtab" data-subtabs="inventory" data-subtab="maintenance">Maintenance Log</button>
+            <button type="button" class="ws-subtab" data-subtabs="inventory" data-subtab="categories">Categories</button>
+          </div>
+
+          <div data-subpanel="inventory:items">
+            <form class="ws-member-form" data-inv-form>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title" data-inv-form-title>Add an item</p>
+              <div class="ws-form-grid ws-form-grid--4">
+                <label class="ws-field">
+                  <span>Name *</span>
+                  <input type="text" data-inv-name required />
+                </label>
+                <label class="ws-field">
+                  <span>Category *</span>
+                  <select data-inv-category required></select>
+                </label>
+                <label class="ws-field">
+                  <span>Quantity *</span>
+                  <input type="number" step="1" min="0" data-inv-quantity required />
+                </label>
+                <label class="ws-field">
+                  <span>Condition *</span>
+                  <select data-inv-condition required>
+                    <option value="excellent">Excellent</option>
+                    <option value="good" selected>Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                    <option value="needs_repair">Needs Repair</option>
+                  </select>
+                </label>
+              </div>
+              <div class="ws-form-grid">
+                <label class="ws-field">
+                  <span>Assigned to</span>
+                  <select data-inv-assigned>
+                    <option value="">Unassigned</option>
+                  </select>
+                </label>
+                <label class="ws-field ws-field--full">
+                  <span>Notes</span>
+                  <input type="text" data-inv-notes />
+                </label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary" data-inv-submit>Add item</button>
+                <button type="button" class="ws-form-cancel" data-inv-cancel hidden>Cancel edit</button>
+              </div>
+            </form>
+
+            <input type="search" class="ws-search" data-inv-search placeholder="Search items…" />
+
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-inv-table>
+                <thead>
+                  <tr><th>Name</th><th>Category</th><th>Qty</th><th>Condition</th><th>Assigned to</th><th>Last Maintenance</th><th>Notes</th><th>Added by</th><th></th></tr>
+                </thead>
+                <tbody data-inv-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="inventory:maintenance" hidden>
+            <form class="ws-member-form" data-inv-maint-form>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title" data-inv-maint-form-title>Log maintenance</p>
+              <div class="ws-form-grid ws-form-grid--4">
+                <label class="ws-field">
+                  <span>Item *</span>
+                  <select data-inv-maint-item required></select>
+                </label>
+                <label class="ws-field">
+                  <span>Date *</span>
+                  <input type="date" data-inv-maint-date required />
+                </label>
+                <label class="ws-field">
+                  <span>Performed by *</span>
+                  <input type="text" data-inv-maint-by required />
+                </label>
+                <label class="ws-field">
+                  <span>Cost (optional)</span>
+                  <input type="number" step="0.01" min="0" data-inv-maint-cost />
+                </label>
+              </div>
+              <div class="ws-form-grid">
+                <label class="ws-field ws-field--full">
+                  <span>Description *</span>
+                  <input type="text" data-inv-maint-desc required />
+                </label>
+                <label class="ws-field ws-field--full">
+                  <span>Notes</span>
+                  <input type="text" data-inv-maint-notes />
+                </label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary" data-inv-maint-submit>Log maintenance</button>
+                <button type="button" class="ws-form-cancel" data-inv-maint-cancel hidden>Cancel edit</button>
+              </div>
+            </form>
+            <p class="ws-soon">A cost logged here posts automatically to the Finance tab as a Repairs expense — delete the log entry to remove it there too.</p>
+
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline">
+                <span>Item</span>
+                <select data-inv-maint-filter>
+                  <option value="">All items</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-inv-maint-table>
+                <thead>
+                  <tr><th>Date</th><th>Item</th><th>Performed by</th><th>Description</th><th>Cost</th><th>Notes</th><th>Added by</th><th></th></tr>
+                </thead>
+                <tbody data-inv-maint-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="inventory:categories" hidden>
+            <div class="ws-member-form">
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Inventory categories</p>
+              <div class="ws-category-add">
+                <input type="text" data-inv-cat-input placeholder="e.g. Bagpipes" />
+                <button type="button" class="btn-primary" data-inv-cat-add>Add</button>
+              </div>
+              <div class="ws-category-list" data-inv-cat-list></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="events" hidden>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="events" data-subtab="dashboard">Dashboard</button>
+            <button type="button" class="ws-subtab" data-subtabs="events" data-subtab="calendar">Calendar</button>
+            <button type="button" class="ws-subtab" data-subtabs="events" data-subtab="settings">Settings</button>
+          </div>
+
+          <div data-subpanel="events:dashboard">
+            <div class="ws-dash">
+              <div class="ws-dash-kpis" data-evt-dash-stats></div>
+
+              <div class="ws-dash-card ws-dash-card--full">
+                <div class="ws-dash-card-head">
+                  <h3>Income vs. payouts</h3>
+                  <span class="ws-dash-card-sub">Last 6 months, completed events</span>
+                </div>
+                <div data-evt-chart></div>
+              </div>
+
+              <div class="ws-dash-grid ws-dash-grid--2">
+                <div class="ws-dash-card">
+                  <div class="ws-dash-card-head"><h3>Top band members</h3></div>
+                  <div data-evt-top-members></div>
+                </div>
+                <div class="ws-dash-card">
+                  <div class="ws-dash-card-head"><h3>Bookings by type</h3></div>
+                  <div data-evt-type-breakdown></div>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="ws-admin-h3">Needs completion</h3>
+                <p class="ws-att-hint">Past events still waiting on an amount received before they're done.</p>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-evt-todo-table>
+                    <thead><tr><th>Date</th><th>Client</th><th>Type</th><th>Location</th><th></th></tr></thead>
+                    <tbody data-evt-todo-body></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="ws-admin-h3">Upcoming</h3>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-evt-upcoming-table>
+                    <thead><tr><th>Date</th><th>Client</th><th>Type</th><th>Location</th><th></th></tr></thead>
+                    <tbody data-evt-upcoming-body></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div data-subpanel="events:calendar" hidden>
+            <div class="curr-toolbar">
+              <div class="curr-toolbar-row">
+                <div class="curr-nav">
+                  <button type="button" class="curr-nav-btn" data-evt-prev aria-label="Previous month">‹</button>
+                  <button type="button" class="curr-nav-today" data-evt-today>Today</button>
+                  <button type="button" class="curr-nav-btn" data-evt-next aria-label="Next month">›</button>
+                </div>
+                <span class="curr-nav-label" data-evt-nav-label></span>
+                <button type="button" class="btn-primary" data-evt-add-btn>+ Add event</button>
+              </div>
+            </div>
+            <p class="ws-att-hint">Click any date to see or add its bookings.</p>
+            <div class="curr-view curr-view--month">
+              <div class="curr-month-grid" data-evt-month-grid></div>
+            </div>
+          </div>
+
+          <div data-subpanel="events:settings" hidden>
+            <div class="ws-form-grid ws-form-grid--3">
+              <div class="ws-member-form">
+                <div class="ws-member-form-bar" aria-hidden="true"></div>
+                <p class="ws-member-form-title">Event types</p>
+                <p class="ws-admin-note">Also doubles as the Finance income category a booking's amount received posts under.</p>
+                <div class="ws-category-add">
+                  <input type="text" data-evt-type-cat-input placeholder="e.g. Wedding" />
+                  <button type="button" class="btn-primary" data-evt-type-cat-add>Add</button>
+                </div>
+                <div class="ws-category-list" data-evt-type-cat-list></div>
+              </div>
+              <div class="ws-member-form">
+                <div class="ws-member-form-bar" aria-hidden="true"></div>
+                <p class="ws-member-form-title">Locations</p>
+                <p class="ws-admin-note">Shown as a dropdown on the booking form — "Custom…" is always available too, for one-off venues.</p>
+                <div class="ws-category-add">
+                  <input type="text" data-evt-location-cat-input placeholder="e.g. Presentation of the Lord Cathedral" />
+                  <button type="button" class="btn-primary" data-evt-location-cat-add>Add</button>
+                </div>
+                <div class="ws-category-list" data-evt-location-cat-list></div>
+              </div>
+              <div class="ws-member-form">
+                <div class="ws-member-form-bar" aria-hidden="true"></div>
+                <p class="ws-member-form-title">Extra-cost categories</p>
+                <p class="ws-admin-note">Used for one-off costs logged against a booking (transportation, water, ...).</p>
+                <div class="ws-category-add">
+                  <input type="text" data-evt-cost-cat-input placeholder="e.g. Transportation" />
+                  <button type="button" class="btn-primary" data-evt-cost-cat-add>Add</button>
+                </div>
+                <div class="ws-category-list" data-evt-cost-cat-list></div>
               </div>
             </div>
           </div>
@@ -700,9 +946,147 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       <div class="curr-day-list" data-curr-day-list></div>
 
       <div class="curr-day-actions">
+        <button type="button" class="ws-edit-btn" data-curr-day-clear>Clear day</button>
         <button type="button" class="ws-form-cancel" data-curr-day-close-cancel>Cancel</button>
         <button type="button" class="btn-primary" data-curr-day-save>Save &amp; close</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Event Calendar's day view — an agenda of that day's bookings, and
+       the add/edit form for one of them at a time (never both shown at
+       once). Reuses Curriculum's curr-day-overlay/curr-day-panel shell
+       for a consistent look, but is otherwise its own component since a
+       day can hold several bookings instead of Curriculum's one. -->
+  <div class="curr-day-overlay" data-evt-day-overlay hidden>
+    <div class="curr-day-panel" data-evt-day-panel>
+      <div class="curr-day-banner">
+        <span class="curr-day-banner-text">
+          <span class="curr-day-banner-label">Events for</span>
+          <p class="curr-day-banner-value" data-evt-day-header></p>
+        </span>
+      </div>
+
+      <div data-evt-day-list-view>
+        <div class="curr-day-list" data-evt-day-list></div>
+        <div class="curr-day-actions">
+          <button type="button" class="ws-form-cancel" data-evt-day-close>Close</button>
+          <button type="button" class="btn-primary" data-evt-day-add>+ Add event</button>
+        </div>
+      </div>
+
+      <form data-evt-form-view hidden>
+        <p class="curr-day-section-label" data-evt-form-title>New event</p>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
+            <span>First name *</span>
+            <input type="text" data-evt-first-name required />
+          </label>
+          <label class="curr-day-field">
+            <span>Last name *</span>
+            <input type="text" data-evt-last-name required />
+          </label>
+        </div>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
+            <span>Phone *</span>
+            <input type="tel" data-evt-phone required />
+          </label>
+          <label class="curr-day-field">
+            <span>Email (optional)</span>
+            <input type="email" data-evt-email />
+          </label>
+        </div>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
+            <span>Date *</span>
+            <input type="date" data-evt-date required />
+          </label>
+          <label class="curr-day-field">
+            <span>Time</span>
+            <input type="time" data-evt-time />
+          </label>
+        </div>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
+            <span>Event type *</span>
+            <select data-evt-type required></select>
+          </label>
+          <label class="curr-day-field">
+            <span>Location</span>
+            <select data-evt-location></select>
+          </label>
+        </div>
+        <div class="curr-day-field-row" data-evt-location-custom-row hidden>
+          <label class="curr-day-field">
+            <span>Custom location</span>
+            <input type="text" data-evt-location-custom placeholder="Enter a location" />
+          </label>
+        </div>
+        <label class="curr-day-field">
+          <span>Notes</span>
+          <textarea data-evt-notes rows="2"></textarea>
+        </label>
+
+        <p class="curr-day-section-label">Band members playing</p>
+        <div class="ws-evt-attendees" data-evt-attendees></div>
+
+        <p class="curr-day-section-label">Financial completion — fill in once the event has happened</p>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
+            <span>Amount received</span>
+            <input type="number" step="0.01" min="0" data-evt-amount />
+          </label>
+          <label class="curr-day-field">
+            <span>Pay per member</span>
+            <input type="number" step="0.01" min="0" data-evt-pay-rate />
+          </label>
+        </div>
+        <div class="curr-day-field-row" data-evt-transport-row hidden>
+          <label class="curr-day-field">
+            <span>Transport pay per member</span>
+            <input type="number" step="0.01" min="0" data-evt-transport-rate />
+          </label>
+          <p class="curr-day-field" data-evt-payout-summary></p>
+        </div>
+
+        <div data-evt-costs-section hidden>
+          <p class="curr-day-section-label">Extra costs</p>
+          <div class="ws-form-grid ws-form-grid--4">
+            <label class="ws-field">
+              <span>Category</span>
+              <select data-evt-cost-category></select>
+            </label>
+            <label class="ws-field">
+              <span>Amount</span>
+              <input type="number" step="0.01" min="0" data-evt-cost-amount />
+            </label>
+            <label class="ws-field">
+              <span>Description</span>
+              <input type="text" data-evt-cost-desc />
+            </label>
+            <label class="ws-field">
+              <span>Date</span>
+              <input type="date" data-evt-cost-date />
+            </label>
+          </div>
+          <div class="ws-form-actions">
+            <button type="button" class="btn-primary" data-evt-cost-add>Add cost</button>
+          </div>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-evt-cost-table>
+              <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Added by</th><th></th></tr></thead>
+              <tbody data-evt-cost-body></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="curr-day-actions">
+          <button type="button" class="ws-edit-btn" data-evt-delete hidden>Delete event</button>
+          <button type="button" class="ws-form-cancel" data-evt-form-back>Back to list</button>
+          <button type="submit" class="btn-primary" data-evt-save>Save event</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -721,6 +1105,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const state: any = {
       session: null, profile: null, availableGroups: [], activeGroup: null, activeTab: 'dashboard',
       members: [], approvals: [], finEntries: [], docs: [], ovMembers: [], editingMemberId: null,
+      inventoryItems: [], maintenanceLog: [], editingInventoryItemId: null,
+      editingFinEntryId: null, editingMaintenanceLogId: null,
+      events: [], eventCosts: [], editingEventId: null, editingEventCostId: null,
+      evt: { anchor: new Date(), currentDay: null },
       attAnchor: new Date(), attSelected: todayStr(), attDatesWithRecords: null,
       curr: { anchor: new Date(), meetings: new Map(), currentDay: null, channel: null },
     };
@@ -861,6 +1249,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.currDayPrev = el('[data-curr-day-prev]');
       els.currDayNext = el('[data-curr-day-next]');
       els.currDaySave = el('[data-curr-day-save]');
+      els.currDayClear = el('[data-curr-day-clear]');
       els.currDayCancel = el('[data-curr-day-close-cancel]');
       els.currBankSelectForm = el('[data-curr-bank-select-form]');
       els.currBankSelect = el('[data-curr-bank-select]');
@@ -873,6 +1262,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.feeSearch = el('[data-fee-search]');
       els.feeSummary = el('[data-fee-summary]');
       els.finForm = el('[data-fin-form]');
+      els.finFormTitle = el('[data-fin-form-title]');
+      els.finCancel = el('[data-fin-cancel]');
       els.finMonth = el('[data-fin-month]');
       els.finYear = el('[data-fin-year]');
       els.finType = el('[data-fin-type]');
@@ -883,6 +1274,89 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.finBody = el('[data-fin-body]');
       els.finStats = el('[data-fin-stats]');
       els.finStatement = el('[data-fin-statement]');
+      els.invForm = el('[data-inv-form]');
+      els.invFormTitle = el('[data-inv-form-title]');
+      els.invName = el('[data-inv-name]');
+      els.invCategory = el('[data-inv-category]');
+      els.invQuantity = el('[data-inv-quantity]');
+      els.invCondition = el('[data-inv-condition]');
+      els.invAssigned = el('[data-inv-assigned]');
+      els.invNotes = el('[data-inv-notes]');
+      els.invSubmit = el('[data-inv-submit]');
+      els.invCancel = el('[data-inv-cancel]');
+      els.invSearch = el('[data-inv-search]');
+      els.invBody = el('[data-inv-body]');
+      els.invCatInput = el('[data-inv-cat-input]');
+      els.invCatAdd = el('[data-inv-cat-add]');
+      els.invCatList = el('[data-inv-cat-list]');
+      els.invMaintForm = el('[data-inv-maint-form]');
+      els.invMaintFormTitle = el('[data-inv-maint-form-title]');
+      els.invMaintCancel = el('[data-inv-maint-cancel]');
+      els.invMaintItem = el('[data-inv-maint-item]');
+      els.invMaintDate = el('[data-inv-maint-date]');
+      els.invMaintBy = el('[data-inv-maint-by]');
+      els.invMaintCost = el('[data-inv-maint-cost]');
+      els.invMaintDesc = el('[data-inv-maint-desc]');
+      els.invMaintNotes = el('[data-inv-maint-notes]');
+      els.invMaintSubmit = el('[data-inv-maint-submit]');
+      els.invMaintFilter = el('[data-inv-maint-filter]');
+      els.invMaintBody = el('[data-inv-maint-body]');
+      els.eventsBadge = el('[data-events-badge]');
+      els.evtDashStats = el('[data-evt-dash-stats]');
+      els.evtTopMembers = el('[data-evt-top-members]');
+      els.evtTypeBreakdown = el('[data-evt-type-breakdown]');
+      els.evtTodoBody = el('[data-evt-todo-body]');
+      els.evtUpcomingBody = el('[data-evt-upcoming-body]');
+      els.evtPrev = el('[data-evt-prev]');
+      els.evtNext = el('[data-evt-next]');
+      els.evtToday = el('[data-evt-today]');
+      els.evtNavLabel = el('[data-evt-nav-label]');
+      els.evtAddBtn = el('[data-evt-add-btn]');
+      els.evtMonthGrid = el('[data-evt-month-grid]');
+      els.evtTypeCatInput = el('[data-evt-type-cat-input]');
+      els.evtTypeCatAdd = el('[data-evt-type-cat-add]');
+      els.evtTypeCatList = el('[data-evt-type-cat-list]');
+      els.evtCostCatInput = el('[data-evt-cost-cat-input]');
+      els.evtCostCatAdd = el('[data-evt-cost-cat-add]');
+      els.evtCostCatList = el('[data-evt-cost-cat-list]');
+      els.evtDayOverlay = el('[data-evt-day-overlay]');
+      els.evtDayHeader = el('[data-evt-day-header]');
+      els.evtDayListView = el('[data-evt-day-list-view]');
+      els.evtDayList = el('[data-evt-day-list]');
+      els.evtDayClose = el('[data-evt-day-close]');
+      els.evtDayAdd = el('[data-evt-day-add]');
+      els.evtFormView = el('[data-evt-form-view]');
+      els.evtFormTitle = el('[data-evt-form-title]');
+      els.evtFirstName = el('[data-evt-first-name]');
+      els.evtLastName = el('[data-evt-last-name]');
+      els.evtPhone = el('[data-evt-phone]');
+      els.evtEmail = el('[data-evt-email]');
+      els.evtDate = el('[data-evt-date]');
+      els.evtTime = el('[data-evt-time]');
+      els.evtType = el('[data-evt-type]');
+      els.evtLocation = el('[data-evt-location]');
+      els.evtLocationCustomRow = el('[data-evt-location-custom-row]');
+      els.evtLocationCustom = el('[data-evt-location-custom]');
+      els.evtLocationCatInput = el('[data-evt-location-cat-input]');
+      els.evtLocationCatAdd = el('[data-evt-location-cat-add]');
+      els.evtLocationCatList = el('[data-evt-location-cat-list]');
+      els.evtChart = el('[data-evt-chart]');
+      els.evtNotes = el('[data-evt-notes]');
+      els.evtAttendees = el('[data-evt-attendees]');
+      els.evtAmount = el('[data-evt-amount]');
+      els.evtPayRate = el('[data-evt-pay-rate]');
+      els.evtTransportRow = el('[data-evt-transport-row]');
+      els.evtTransportRate = el('[data-evt-transport-rate]');
+      els.evtPayoutSummary = el('[data-evt-payout-summary]');
+      els.evtCostsSection = el('[data-evt-costs-section]');
+      els.evtCostCategory = el('[data-evt-cost-category]');
+      els.evtCostAmount = el('[data-evt-cost-amount]');
+      els.evtCostDesc = el('[data-evt-cost-desc]');
+      els.evtCostDate = el('[data-evt-cost-date]');
+      els.evtCostAdd = el('[data-evt-cost-add]');
+      els.evtCostBody = el('[data-evt-cost-body]');
+      els.evtDelete = el('[data-evt-delete]');
+      els.evtFormBack = el('[data-evt-form-back]');
       els.libFile = el('[data-lib-file]');
       els.libTitle = el('[data-lib-title]');
       els.libUpload = el('[data-lib-upload]');
@@ -1394,6 +1868,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Music and General aren't scouting troops, so the troop-flavored
     // defaults above (Uniforms, Badges & Awards, Monthly Fees, …) don't
     // fit — each gets its own starter list instead.
+    // Inventory's own editable category list (Items subtab dropdown +
+    // its own Categories subtab) — Music-only, so there's just one
+    // starter list rather than a per-group map like expense/income above.
+    const DEFAULT_INVENTORY_CATEGORIES = ['Bagpipes', 'Drums', 'Uniforms', 'Sound Equipment', 'Sheet Music', 'Other'];
     const GROUP_DEFAULT_CATEGORIES: Record<string, { expense: string[]; income: string[] }> = {
       [MUSIC_GROUP_KEY]: {
         expense: ['Band Payouts', 'Equipment', 'Transport', 'Repairs', 'Refreshments', 'Miscellaneous'],
@@ -1408,7 +1886,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!state.activeGroup) return;
       const { data } = await db.from('group_settings').select('*').eq('group_key', state.activeGroup).maybeSingle();
       state.groupSettings = data || {
-        group_key: state.activeGroup, monthly_fee_defaults: {}, expense_categories: [], income_categories: [], activity_bank: [],
+        group_key: state.activeGroup, monthly_fee_defaults: {}, expense_categories: [], income_categories: [],
+        inventory_categories: [], event_type_categories: [], event_cost_categories: [], event_location_categories: [], activity_bank: [],
       };
       const defaults = GROUP_DEFAULT_CATEGORIES[state.activeGroup] || { expense: DEFAULT_EXPENSE_CATEGORIES, income: DEFAULT_INCOME_CATEGORIES };
       // Every group starts with sensible defaults for its kind — a leader
@@ -1416,6 +1895,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       // one; until then this just fills the dropdown usefully.
       if (!state.groupSettings.expense_categories?.length) state.groupSettings.expense_categories = [...defaults.expense];
       if (!state.groupSettings.income_categories?.length) state.groupSettings.income_categories = [...defaults.income];
+      if (!state.groupSettings.inventory_categories?.length) state.groupSettings.inventory_categories = [...DEFAULT_INVENTORY_CATEGORIES];
+      if (!state.groupSettings.event_type_categories?.length) state.groupSettings.event_type_categories = [...DEFAULT_EVENT_TYPE_CATEGORIES];
+      if (!state.groupSettings.event_cost_categories?.length) state.groupSettings.event_cost_categories = [...DEFAULT_EVENT_COST_CATEGORIES];
+      if (!state.groupSettings.event_location_categories?.length) state.groupSettings.event_location_categories = [...DEFAULT_EVENT_LOCATION_CATEGORIES];
       if (!state.groupSettings.activity_bank?.length) {
         state.groupSettings.activity_bank = ACTIVITY_BANK.map((a) => ({ id: a.type, en: a.en }));
       }
@@ -1563,12 +2046,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       renderCategoryList(els.settingsExpenseList, state.groupSettings.expense_categories || [], 'expense_categories');
       renderCategoryList(els.settingsIncomeList, state.groupSettings.income_categories || [], 'income_categories');
     }
-    function renderCategoryList(container: any, list: string[], field: string) {
+    // saveFn defaults to Finance's own group_settings upsert (saveCategoryList
+    // below) — Inventory's Categories subtab passes its own instead, so a
+    // chip's × still writes to (and reloads) the right list.
+    function renderCategoryList(container: any, list: string[], field: string, saveFn: (field: string, updated: string[]) => Promise<void> = saveCategoryList) {
       container.innerHTML = list.length
         ? list.map((c) => `<span class="ws-category-chip">${escapeHtml(c)}<button type="button" data-remove-cat="${escapeHtml(c)}">×</button></span>`).join('')
         : '<p class="ws-empty" style="padding:0.5rem 0">None yet</p>';
       container.querySelectorAll('[data-remove-cat]').forEach((btn: any) => {
-        btn.addEventListener('click', () => saveCategoryList(field, list.filter((c) => c !== btn.dataset.removeCat)));
+        btn.addEventListener('click', () => saveFn(field, list.filter((c) => c !== btn.dataset.removeCat)));
       });
     }
     async function saveCategoryList(field: string, updated: string[]) {
@@ -1657,12 +2143,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <tr data-entry-id="${e.id}" data-receipt-path="${escapeHtml(e.receipt_path || '')}">
           <td data-label="Date">${e.entry_date}</td>
           <td data-label="Type">${e.entry_type === 'income' ? 'Income' : 'Expense'}</td>
-          <td data-label="Category">${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab, unmark it paid there to remove this">Auto</span>' : ''}</td>
+          <td data-label="Category">${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab, unmark it paid there to remove this">Auto</span>' : ''}${e.maintenance_log_id ? ' <span class="ws-allergy-badge" title="Synced from the Inventory tab\'s Maintenance Log, delete it there to remove this">Auto</span>' : ''}</td>
           <td data-label="Description">${escapeHtml(e.description || '—')}</td>
           <td data-label="Amount">${Number(e.amount).toFixed(2)}</td>
           <td data-label="Added by">${escapeHtml(e.created_by_name || '—')}</td>
           <td data-label="Receipt">${e.receipt_path ? '<button type="button" class="ws-edit-btn" data-fin-receipt-view>View</button>' : '—'}</td>
-          <td class="ws-row-actions">${e.fee_payment_id ? '' : '<button type="button" class="ws-row-del" data-fin-del>×</button>'}</td>
+          <td class="ws-row-actions">${(e.fee_payment_id || e.maintenance_log_id) ? '' : '<button type="button" class="ws-edit-btn" data-fin-edit>Edit</button> <button type="button" class="ws-row-del" data-fin-del>×</button>'}</td>
         </tr>
       `).join('');
       els.finBody.querySelectorAll('[data-fin-receipt-view]').forEach((btn: any) => {
@@ -1673,6 +2159,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           window.open(data.signedUrl, '_blank');
         });
       });
+      els.finBody.querySelectorAll('[data-fin-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => startEditFinEntry(btn.closest('tr').dataset.entryId));
+      });
       els.finBody.querySelectorAll('[data-fin-del]').forEach((btn: any) => {
         btn.addEventListener('click', async () => {
           const row = btn.closest('tr');
@@ -1680,9 +2169,38 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           if (!confirm('Delete this entry?')) return;
           const { error } = await db.from('finance_entries').delete().eq('id', id);
           if (error) { showToast('Could not delete.'); return; }
+          if (state.editingFinEntryId === id) resetFinanceForm();
           await loadFinance();
         });
       });
+    }
+    function resetFinanceForm() {
+      state.editingFinEntryId = null;
+      els.finForm.reset();
+      updateFinCategoryOptions();
+      els.finFormTitle.textContent = 'Add an entry';
+      els.finSubmit.textContent = 'Add entry';
+      els.finCancel.hidden = true;
+    }
+    // Same reusable-form pattern as Roster/Inventory's edit — repopulate
+    // the add-entry form rather than a separate dialog. Auto-synced rows
+    // (fee_payment_id/maintenance_log_id) never reach here since their
+    // Edit button is never rendered in the first place.
+    function startEditFinEntry(id: string) {
+      const entry = state.finEntries.find((x: any) => x.id === id);
+      if (!entry) return;
+      state.editingFinEntryId = id;
+      els.finType.value = entry.entry_type;
+      updateFinCategoryOptions();
+      els.finCategory.value = entry.category || '';
+      el('[data-fin-amount]').value = entry.amount;
+      el('[data-fin-date]').value = entry.entry_date;
+      el('[data-fin-description]').value = entry.description || '';
+      els.finReceipt.value = '';
+      els.finFormTitle.textContent = 'Editing entry';
+      els.finSubmit.textContent = 'Save changes';
+      els.finCancel.hidden = false;
+      els.finForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     function updateFinCategoryOptions() {
       const list = els.finType.value === 'income'
@@ -1704,6 +2222,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         downloadFinanceReport();
       });
       els.finType.addEventListener('change', updateFinCategoryOptions);
+      els.finCancel.addEventListener('click', resetFinanceForm);
       els.finForm.addEventListener('submit', async (e: Event) => {
         e.preventDefault();
         const type = els.finType.value;
@@ -1714,7 +2233,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         if (!category || !amount || !date || !description) { showToast('Everything except the receipt is required.'); return; }
         els.finSubmit.disabled = true;
 
-        let receiptPath: string | null = null;
+        // undefined (rather than null) on an edit with no new file chosen
+        // means the receipt_path key is left out of the payload entirely,
+        // below, so an update keeps whatever receipt the entry already had
+        // instead of wiping it out.
+        let receiptPath: string | null | undefined = state.editingFinEntryId ? undefined : null;
         const file = els.finReceipt.files[0];
         if (file) {
           const path = `${state.activeGroup}/receipts/${Date.now()}-${file.name}`;
@@ -1723,17 +2246,1049 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           receiptPath = path;
         }
 
-        const { error } = await db.from('finance_entries').insert({
-          group_key: state.activeGroup, entry_type: type, category: category || null,
-          amount: Number(amount), entry_date: date, description: description || null,
-          receipt_path: receiptPath, created_by: state.session.user.id,
-          created_by_name: state.profile?.name || null,
-        });
+        const payload: any = { entry_type: type, category: category || null, amount: Number(amount), entry_date: date, description: description || null };
+        if (receiptPath !== undefined) payload.receipt_path = receiptPath;
+
+        let error;
+        if (state.editingFinEntryId) {
+          ({ error } = await db.from('finance_entries').update(payload).eq('id', state.editingFinEntryId));
+        } else {
+          payload.group_key = state.activeGroup;
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ error } = await db.from('finance_entries').insert(payload));
+        }
         els.finSubmit.disabled = false;
-        if (error) { console.error(error); showToast('Could not add entry.'); return; }
-        els.finForm.reset();
-        updateFinCategoryOptions();
+        if (error) { console.error(error); showToast('Could not save entry.'); return; }
+        resetFinanceForm();
         await loadFinance();
+      });
+    }
+
+    // ---------- Inventory (Music only: instruments/equipment + upkeep) ----
+    const CONDITION_LABELS: Record<string, string> = {
+      excellent: 'Excellent', good: 'Good', fair: 'Fair', poor: 'Poor', needs_repair: 'Needs Repair',
+    };
+    const CONDITION_BADGE_CLASS: Record<string, string> = {
+      excellent: 'ws-badge--good', good: 'ws-badge--good', fair: 'ws-badge--fair', poor: 'ws-badge--poor', needs_repair: 'ws-badge--poor',
+    };
+    function conditionBadge(condition: string) {
+      const cls = CONDITION_BADGE_CLASS[condition] || 'ws-badge--fair';
+      return `<span class="ws-badge ${cls}">${escapeHtml(CONDITION_LABELS[condition] || condition)}</span>`;
+    }
+    async function loadInventory() {
+      if (!state.activeGroup) return;
+      await loadGroupSettings();
+      await loadInventoryCategories();
+      await ensureMembersLoaded();
+      updateInvAssignedOptions();
+      const [itemsRes, logsRes] = await Promise.all([
+        db.from('inventory_items').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true }),
+        db.from('inventory_maintenance').select('*').eq('group_key', state.activeGroup).order('performed_on', { ascending: false }),
+      ]);
+      if (itemsRes.error || logsRes.error) { console.error(itemsRes.error || logsRes.error); showToast('Could not load inventory.'); return; }
+      state.inventoryItems = itemsRes.data || [];
+      state.maintenanceLog = logsRes.data || [];
+      updateInvItemOptions();
+      renderInventoryItems();
+      renderMaintenanceLog();
+    }
+    function updateInvAssignedOptions() {
+      const active = state.members.filter((m: any) => m.active);
+      els.invAssigned.innerHTML = '<option value="">Unassigned</option>'
+        + active.map((m: any) => `<option value="${m.id}">${escapeHtml(m.full_name)}</option>`).join('');
+    }
+    // "Last Maintenance" is never stored on the item itself — it's just
+    // the newest performed_on across that item's own log rows, so it can
+    // never drift out of sync with the log the way a cached column could.
+    function lastMaintenanceByItem() {
+      const map = new Map<string, string>();
+      state.maintenanceLog.forEach((log: any) => {
+        const cur = map.get(log.item_id);
+        if (!cur || log.performed_on > cur) map.set(log.item_id, log.performed_on);
+      });
+      return map;
+    }
+    function renderInventoryItems() {
+      if (!state.inventoryItems.length) {
+        els.invBody.innerHTML = '<tr><td colspan="9" class="ws-empty">No items yet.</td></tr>';
+        return;
+      }
+      const lastMaint = lastMaintenanceByItem();
+      els.invBody.innerHTML = state.inventoryItems.map((item: any) => {
+        const assigned = item.assigned_to ? state.members.find((m: any) => m.id === item.assigned_to) : null;
+        const last = lastMaint.get(item.id);
+        return `
+          <tr data-item-id="${item.id}">
+            <td data-label="Name">${escapeHtml(item.name)}</td>
+            <td data-label="Category">${escapeHtml(item.category || '—')}</td>
+            <td data-label="Qty">${item.quantity}</td>
+            <td data-label="Condition">${conditionBadge(item.condition)}</td>
+            <td data-label="Assigned to">${assigned ? escapeHtml(assigned.full_name) : '<span class="ws-empty" style="padding:0">Unassigned</span>'}</td>
+            <td data-label="Last Maintenance">${last ? escapeHtml(last) : '—'}</td>
+            <td data-label="Notes">${escapeHtml(item.notes || '—')}</td>
+            <td data-label="Added by">${escapeHtml(item.created_by_name || '—')}</td>
+            <td class="ws-row-actions">
+              <button type="button" class="ws-edit-btn" data-inv-edit>Edit</button>
+              <button type="button" class="ws-row-del" data-inv-del>×</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      els.invBody.querySelectorAll('[data-inv-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => startEditInventoryItem(btn.closest('tr').dataset.itemId));
+      });
+      els.invBody.querySelectorAll('[data-inv-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.closest('tr').dataset.itemId;
+          if (!confirm('Delete this item? Its maintenance history goes with it.')) return;
+          const { error } = await db.from('inventory_items').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          if (state.editingInventoryItemId === id) resetInventoryForm();
+          await loadInventory();
+        });
+      });
+    }
+    function resetInventoryForm() {
+      state.editingInventoryItemId = null;
+      els.invForm.reset();
+      els.invFormTitle.textContent = 'Add an item';
+      els.invSubmit.textContent = 'Add item';
+      els.invCancel.hidden = true;
+    }
+    // Same pattern as startEditMember() on the Roster tab — repopulate the
+    // add-item form in place rather than a separate edit dialog, so
+    // updating a quantity or reassigning an item doesn't mean deleting
+    // and recreating the row (which would also orphan its maintenance log).
+    function startEditInventoryItem(id: string) {
+      const item = state.inventoryItems.find((i: any) => i.id === id);
+      if (!item) return;
+      state.editingInventoryItemId = id;
+      els.invName.value = item.name;
+      els.invCategory.value = item.category || '';
+      els.invQuantity.value = item.quantity;
+      els.invCondition.value = item.condition;
+      els.invAssigned.value = item.assigned_to || '';
+      els.invNotes.value = item.notes || '';
+      els.invFormTitle.textContent = `Editing ${item.name}`;
+      els.invSubmit.textContent = 'Save changes';
+      els.invCancel.hidden = false;
+      els.invForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function bindInventoryForm() {
+      els.invCancel.addEventListener('click', resetInventoryForm);
+      els.invForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const name = els.invName.value.trim();
+        const category = els.invCategory.value;
+        const quantity = els.invQuantity.value;
+        const condition = els.invCondition.value;
+        const assignedTo = els.invAssigned.value || null;
+        const notes = els.invNotes.value.trim();
+        if (!name || !category || quantity === '' || !condition) { showToast('Name, category, quantity, and condition are required.'); return; }
+        els.invSubmit.disabled = true;
+        const payload: any = {
+          group_key: state.activeGroup, name, category, quantity: Number(quantity), condition,
+          assigned_to: assignedTo, notes: notes || null,
+        };
+        let error;
+        if (state.editingInventoryItemId) {
+          payload.updated_at = new Date().toISOString();
+          ({ error } = await db.from('inventory_items').update(payload).eq('id', state.editingInventoryItemId));
+        } else {
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ error } = await db.from('inventory_items').insert(payload));
+        }
+        els.invSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not save item.'); return; }
+        resetInventoryForm();
+        await loadInventory();
+      });
+    }
+    // Inventory's own category list — same idea as Finance's expense/income
+    // ones (an editable group_settings array), just a 3rd field on the same
+    // table. renderCategoryList()'s chip-remove wiring is shared; only the
+    // save+reload step below is Inventory-specific.
+    async function loadInventoryCategories() {
+      renderInventoryCategories();
+      updateInvCategoryOptions();
+    }
+    function renderInventoryCategories() {
+      renderCategoryList(els.invCatList, state.groupSettings.inventory_categories || [], 'inventory_categories', saveInventoryCategoryList);
+    }
+    async function saveInventoryCategoryList(field: string, updated: string[]) {
+      const { error } = await db.from('group_settings').upsert({ group_key: state.activeGroup, [field]: updated }, { onConflict: 'group_key' });
+      if (error) { console.error(error); showToast('Could not save.'); return; }
+      state.groupSettings[field] = updated;
+      await loadInventoryCategories();
+    }
+    function updateInvCategoryOptions() {
+      const list = state.groupSettings?.inventory_categories || [];
+      els.invCategory.innerHTML = list.length
+        ? list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
+        : '<option value="">No categories yet, add some below</option>';
+    }
+    function bindInventoryCategories() {
+      els.invCatAdd.addEventListener('click', () => {
+        const val = els.invCatInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.inventory_categories || [];
+        if (current.includes(val)) { els.invCatInput.value = ''; return; }
+        saveInventoryCategoryList('inventory_categories', [...current, val]);
+        els.invCatInput.value = '';
+      });
+    }
+    function updateInvItemOptions() {
+      const opts = state.inventoryItems.map((i: any) => `<option value="${i.id}">${escapeHtml(i.name)}</option>`).join('');
+      els.invMaintItem.innerHTML = opts || '<option value="">Add an item first</option>';
+      const filterVal = els.invMaintFilter.value;
+      els.invMaintFilter.innerHTML = '<option value="">All items</option>' + opts;
+      els.invMaintFilter.value = filterVal;
+    }
+    function renderMaintenanceLog() {
+      const filterId = els.invMaintFilter.value;
+      const rows = filterId ? state.maintenanceLog.filter((l: any) => l.item_id === filterId) : state.maintenanceLog;
+      if (!rows.length) {
+        els.invMaintBody.innerHTML = '<tr><td colspan="8" class="ws-empty">No maintenance logged yet.</td></tr>';
+        return;
+      }
+      els.invMaintBody.innerHTML = rows.map((log: any) => {
+        const item = state.inventoryItems.find((i: any) => i.id === log.item_id);
+        return `
+          <tr data-log-id="${log.id}">
+            <td data-label="Date">${log.performed_on}</td>
+            <td data-label="Item">${escapeHtml(item ? item.name : 'Deleted item')}</td>
+            <td data-label="Performed by">${escapeHtml(log.performed_by)}</td>
+            <td data-label="Description">${escapeHtml(log.description)}</td>
+            <td data-label="Cost">${log.cost != null ? Number(log.cost).toFixed(2) : '—'}</td>
+            <td data-label="Notes">${escapeHtml(log.notes || '—')}</td>
+            <td data-label="Added by">${escapeHtml(log.created_by_name || '—')}</td>
+            <td class="ws-row-actions">
+              <button type="button" class="ws-edit-btn" data-inv-maint-edit>Edit</button>
+              <button type="button" class="ws-row-del" data-inv-maint-del>×</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      els.invMaintBody.querySelectorAll('[data-inv-maint-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => startEditMaintenanceLog(btn.closest('tr').dataset.logId));
+      });
+      els.invMaintBody.querySelectorAll('[data-inv-maint-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.closest('tr').dataset.logId;
+          if (!confirm('Delete this maintenance record? Any cost it posted to Finance is removed with it.')) return;
+          const { error } = await db.from('inventory_maintenance').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          if (state.editingMaintenanceLogId === id) resetMaintenanceForm();
+          await loadInventory();
+          if (state.activeTab === 'finance') await loadFinance();
+        });
+      });
+    }
+    function resetMaintenanceForm() {
+      state.editingMaintenanceLogId = null;
+      els.invMaintForm.reset();
+      els.invMaintFormTitle.textContent = 'Log maintenance';
+      els.invMaintSubmit.textContent = 'Log maintenance';
+      els.invMaintCancel.hidden = true;
+    }
+    // Same reusable-form edit pattern as Finance/Inventory Items.
+    function startEditMaintenanceLog(id: string) {
+      const log = state.maintenanceLog.find((l: any) => l.id === id);
+      if (!log) return;
+      state.editingMaintenanceLogId = id;
+      els.invMaintItem.value = log.item_id;
+      els.invMaintDate.value = log.performed_on;
+      els.invMaintBy.value = log.performed_by;
+      els.invMaintCost.value = log.cost != null ? log.cost : '';
+      els.invMaintDesc.value = log.description;
+      els.invMaintNotes.value = log.notes || '';
+      els.invMaintFormTitle.textContent = 'Editing maintenance record';
+      els.invMaintSubmit.textContent = 'Save changes';
+      els.invMaintCancel.hidden = false;
+      els.invMaintForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    // Mirrors syncFeeToFinance() on the Fees tab: a logged cost posts as a
+    // normal expense (category "Repairs", already Music's own
+    // expense-category default) tagged with maintenance_log_id — created,
+    // updated in place, or removed here as the cost is added, changed, or
+    // cleared. Deleting the maintenance row itself instead cascades the
+    // delete to this entry at the database level, so no matching cleanup
+    // code is needed for that path.
+    async function syncMaintenanceToFinance(logRow: any) {
+      if (logRow.cost) {
+        const item = state.inventoryItems.find((i: any) => i.id === logRow.item_id);
+        const payload = {
+          group_key: state.activeGroup, entry_type: 'expense', category: 'Repairs',
+          amount: logRow.cost, entry_date: logRow.performed_on,
+          description: `${item ? item.name : 'Item'} — ${logRow.description}`,
+          maintenance_log_id: logRow.id, created_by: state.session.user.id,
+          created_by_name: state.profile?.name || null,
+        };
+        const { data: existing } = await db.from('finance_entries').select('id').eq('maintenance_log_id', logRow.id).maybeSingle();
+        if (existing) await db.from('finance_entries').update(payload).eq('id', existing.id);
+        else await db.from('finance_entries').insert(payload);
+      } else {
+        await db.from('finance_entries').delete().eq('maintenance_log_id', logRow.id);
+      }
+      if (state.activeTab === 'finance') await loadFinance();
+    }
+    function bindMaintenanceForm() {
+      els.invMaintFilter.addEventListener('change', renderMaintenanceLog);
+      els.invMaintCancel.addEventListener('click', resetMaintenanceForm);
+      els.invMaintForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const itemId = els.invMaintItem.value;
+        const date = els.invMaintDate.value;
+        const performedBy = els.invMaintBy.value.trim();
+        const description = els.invMaintDesc.value.trim();
+        const costRaw = els.invMaintCost.value;
+        const notes = els.invMaintNotes.value.trim();
+        if (!itemId || !date || !performedBy || !description) { showToast('Item, date, performed by, and description are required.'); return; }
+        els.invMaintSubmit.disabled = true;
+        const payload: any = { item_id: itemId, performed_on: date, performed_by: performedBy, description, cost: costRaw ? Number(costRaw) : null, notes: notes || null };
+        let logRow, error;
+        if (state.editingMaintenanceLogId) {
+          ({ data: logRow, error } = await db.from('inventory_maintenance').update(payload).eq('id', state.editingMaintenanceLogId).select().single());
+        } else {
+          payload.group_key = state.activeGroup;
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ data: logRow, error } = await db.from('inventory_maintenance').insert(payload).select().single());
+        }
+        if (error) { console.error(error); showToast('Could not save maintenance record.'); els.invMaintSubmit.disabled = false; return; }
+        await syncMaintenanceToFinance(logRow);
+        els.invMaintSubmit.disabled = false;
+        resetMaintenanceForm();
+        await loadInventory();
+      });
+    }
+
+    // ---------- Event Calendar (Music only: bookings, payouts, Finance sync)
+    const DEFAULT_EVENT_TYPE_CATEGORIES = ['Wedding', 'Engagement', 'Baptism', 'Church Event', 'Private Event', 'Other'];
+    const DEFAULT_EVENT_COST_CATEGORIES = ['Transportation', 'Water & Refreshments', 'Decorations', 'Miscellaneous'];
+    const DEFAULT_EVENT_LOCATION_CATEGORIES = ['Presentation of the Lord Cathedral'];
+    // The dropdown always carries this option on top of whatever
+    // Settings has configured — picking it reveals a free-text field
+    // instead, for a one-off venue that's not worth adding permanently.
+    const EVENT_LOCATION_CUSTOM = '__custom__';
+    const EVENT_STATUS_LABELS: Record<string, string> = { completed: 'Completed', pending: 'Needs completion', upcoming: 'Upcoming' };
+    const EVENT_STATUS_BADGE_CLASS: Record<string, string> = { completed: 'ws-badge--good', pending: 'ws-badge--poor', upcoming: 'ws-badge--fair' };
+    // Status is never stored — always derived from amount_received/date,
+    // same reasoning as Inventory's "Last Maintenance": one less thing
+    // that can drift out of sync with the data it's summarizing.
+    // No time on file means "sometime that day" — treated as passed only
+    // once the whole day is over, so a same-day booking doesn't flip to
+    // "pending" while it's still hours away.
+    function eventDateTimeHasPassed(dateStr: string, timeStr: string | null) {
+      const eventDT = timeStr ? new Date(`${dateStr}T${timeStr}`) : new Date(`${dateStr}T23:59:59`);
+      return eventDT.getTime() < Date.now();
+    }
+    function eventStatus(ev: any) {
+      if (ev.amount_received != null) return 'completed';
+      if (eventDateTimeHasPassed(ev.event_date, ev.event_time)) return 'pending';
+      return 'upcoming';
+    }
+    function eventStatusBadge(ev: any) {
+      const s = eventStatus(ev);
+      return `<span class="ws-badge ${EVENT_STATUS_BADGE_CLASS[s]}">${EVENT_STATUS_LABELS[s]}</span>`;
+    }
+    function eventClientName(ev: any) { return `${ev.first_name} ${ev.last_name}`; }
+    function formatTimeStr(t: string) {
+      if (!t) return '';
+      const [h, m] = t.split(':').map(Number);
+      const period = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 || 12;
+      return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+    }
+    function eventDateTimeLabel(ev: any) {
+      const d = parseDateStr(ev.event_date);
+      const label = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}, ${d.getFullYear()}`;
+      return ev.event_time ? `${label} · ${formatTimeStr(ev.event_time)}` : label;
+    }
+    // Base pay (rate × everyone who played) plus transport pay (a 2nd
+    // rate × only the members who took a car) — the two components the
+    // Members question asked for, kept separate since they post to
+    // Finance as 2 different expense categories (Band Payouts/Transport).
+    function eventPayoutTotals(ev: any) {
+      const attendees = ev.attendees || [];
+      const carCount = attendees.filter((a: any) => a.took_car).length;
+      const wages = Number(ev.pay_rate_per_member || 0) * attendees.length;
+      const transport = Number(ev.transport_rate_per_member || 0) * carCount;
+      return { attendees, carCount, wages, transport };
+    }
+    function eventCostsTotal(eventId: string) {
+      return state.eventCosts.filter((c: any) => c.event_id === eventId).reduce((s: number, c: any) => s + Number(c.amount), 0);
+    }
+    function eventNetIncome(ev: any) {
+      const { wages, transport } = eventPayoutTotals(ev);
+      return Number(ev.amount_received || 0) - wages - transport - eventCostsTotal(ev.id);
+    }
+    async function loadEvents() {
+      if (!state.activeGroup) return;
+      await loadGroupSettings();
+      await ensureMembersLoaded();
+      renderEventCategories();
+      const [bookingsRes, costsRes] = await Promise.all([
+        db.from('event_bookings').select('*').eq('group_key', state.activeGroup).order('event_date', { ascending: true }),
+        db.from('event_costs').select('*').eq('group_key', state.activeGroup).order('cost_date', { ascending: false }),
+      ]);
+      if (bookingsRes.error || costsRes.error) { console.error(bookingsRes.error || costsRes.error); showToast('Could not load events.'); return; }
+      state.events = bookingsRes.data || [];
+      state.eventCosts = costsRes.data || [];
+      await refreshEventsBadge();
+      renderEventsDashboard();
+      evtRenderMonth();
+    }
+    // Its own lightweight head-count query (same idea as
+    // refreshApprovalsBadge) — called at group-switch/init too, so the
+    // "needs completion" alert shows up on the tab itself without
+    // requiring the Events tab to have ever been opened this session.
+    async function refreshEventsBadge() {
+      if (!state.activeGroup) return;
+      const { count, error } = await db.from('event_bookings')
+        .select('id', { count: 'exact', head: true })
+        .eq('group_key', state.activeGroup).lt('event_date', todayStr()).is('amount_received', null);
+      if (error) { console.error(error); return; }
+      if (count && count > 0) {
+        els.eventsBadge.textContent = String(count);
+        els.eventsBadge.removeAttribute('hidden');
+      } else {
+        els.eventsBadge.setAttribute('hidden', '');
+      }
+    }
+
+    // ---- Settings subtab: event types + extra-cost categories ----
+    function renderEventCategories() {
+      renderCategoryList(els.evtTypeCatList, state.groupSettings.event_type_categories || [], 'event_type_categories', saveEventCategoryList);
+      renderCategoryList(els.evtLocationCatList, state.groupSettings.event_location_categories || [], 'event_location_categories', saveEventCategoryList);
+      renderCategoryList(els.evtCostCatList, state.groupSettings.event_cost_categories || [], 'event_cost_categories', saveEventCategoryList);
+      updateEvtTypeOptions();
+      updateEvtLocationOptions();
+      updateEvtCostCategoryOptions();
+    }
+    async function saveEventCategoryList(field: string, updated: string[]) {
+      const { error } = await db.from('group_settings').upsert({ group_key: state.activeGroup, [field]: updated }, { onConflict: 'group_key' });
+      if (error) { console.error(error); showToast('Could not save.'); return; }
+      state.groupSettings[field] = updated;
+      renderEventCategories();
+    }
+    // No option is ever pre-selected — the leader has to actively pick a
+    // type (or a location) rather than the form silently defaulting to
+    // whatever happens to be first in Settings.
+    function updateEvtTypeOptions() {
+      const list = state.groupSettings?.event_type_categories || [];
+      const current = els.evtType.value;
+      const placeholder = '<option value="" disabled selected>Select a type…</option>';
+      els.evtType.innerHTML = list.length
+        ? placeholder + list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
+        : '<option value="">No event types yet, add some in Settings</option>';
+      if (list.includes(current)) els.evtType.value = current;
+    }
+    function updateEvtLocationOptions() {
+      const list = state.groupSettings?.event_location_categories || [];
+      const current = els.evtLocation.value;
+      const placeholder = '<option value="" disabled selected>Select a location…</option>';
+      const customOpt = `<option value="${EVENT_LOCATION_CUSTOM}">Custom…</option>`;
+      els.evtLocation.innerHTML = placeholder + list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('') + customOpt;
+      if (list.includes(current) || current === EVENT_LOCATION_CUSTOM) els.evtLocation.value = current;
+    }
+    function evtToggleLocationCustom() {
+      const isCustom = els.evtLocation.value === EVENT_LOCATION_CUSTOM;
+      els.evtLocationCustomRow.toggleAttribute('hidden', !isCustom);
+      if (!isCustom) els.evtLocationCustom.value = '';
+    }
+    function updateEvtCostCategoryOptions() {
+      const list = state.groupSettings?.event_cost_categories || [];
+      els.evtCostCategory.innerHTML = list.length
+        ? list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
+        : '<option value="">No cost categories yet, add some in Settings</option>';
+    }
+    function bindEventCategories() {
+      els.evtTypeCatAdd.addEventListener('click', () => {
+        const val = els.evtTypeCatInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.event_type_categories || [];
+        if (current.includes(val)) { els.evtTypeCatInput.value = ''; return; }
+        saveEventCategoryList('event_type_categories', [...current, val]);
+        els.evtTypeCatInput.value = '';
+      });
+      els.evtLocationCatAdd.addEventListener('click', () => {
+        const val = els.evtLocationCatInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.event_location_categories || [];
+        if (current.includes(val)) { els.evtLocationCatInput.value = ''; return; }
+        saveEventCategoryList('event_location_categories', [...current, val]);
+        els.evtLocationCatInput.value = '';
+      });
+      els.evtCostCatAdd.addEventListener('click', () => {
+        const val = els.evtCostCatInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.event_cost_categories || [];
+        if (current.includes(val)) { els.evtCostCatInput.value = ''; return; }
+        saveEventCategoryList('event_cost_categories', [...current, val]);
+        els.evtCostCatInput.value = '';
+      });
+    }
+
+    // ---- Dashboard subtab ----
+    // Ranked by how many bookings each member's attendees list appears
+    // in, across every event regardless of status — reflects overall
+    // participation, not just paid gigs.
+    function computeTopMembers(limit = 5) {
+      const counts = new Map<string, number>();
+      state.events.forEach((e: any) => {
+        (e.attendees || []).forEach((a: any) => counts.set(a.member_id, (counts.get(a.member_id) || 0) + 1));
+      });
+      return Array.from(counts.entries())
+        .map(([memberId, count]) => ({ member: state.members.find((m: any) => m.id === memberId), count }))
+        .filter((x) => x.member)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+    }
+    function computeTypeBreakdown() {
+      const counts = new Map<string, number>();
+      state.events.forEach((e: any) => counts.set(e.event_type, (counts.get(e.event_type) || 0) + 1));
+      return Array.from(counts.entries()).sort((a: any, b: any) => b[1] - a[1]);
+    }
+    // Same bar-chart shape as the main Dashboard's Income vs. Expenses
+    // (reuses its ws-dash-fin-* CSS) — income (gross) vs. everything
+    // deducted from it (payouts + extra costs), by month, completed
+    // events only since that's the only side with real numbers.
+    function renderEventsChart(completed: any[]) {
+      const now = new Date();
+      const monthKeys: string[] = [];
+      const byMonth = new Map<string, { income: number; expense: number }>();
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        monthKeys.push(key);
+        byMonth.set(key, { income: 0, expense: 0 });
+      }
+      completed.forEach((e: any) => {
+        const key = e.event_date.slice(0, 7);
+        const b = byMonth.get(key);
+        if (!b) return;
+        const { wages, transport } = eventPayoutTotals(e);
+        b.income += Number(e.amount_received || 0);
+        b.expense += wages + transport + eventCostsTotal(e.id);
+      });
+      const totalIncome = monthKeys.reduce((s, k) => s + byMonth.get(k)!.income, 0);
+      const totalExpense = monthKeys.reduce((s, k) => s + byMonth.get(k)!.expense, 0);
+      if (!totalIncome && !totalExpense) {
+        els.evtChart.innerHTML = '<p class="ws-dash-empty-mini">No completed events in the last 6 months.</p>';
+        return;
+      }
+      const maxVal = Math.max(1, ...monthKeys.map((k) => Math.max(byMonth.get(k)!.income, byMonth.get(k)!.expense)));
+      els.evtChart.innerHTML = `
+        <div class="ws-dash-fin-bars">
+          ${monthKeys.map((k) => {
+            const b = byMonth.get(k)!;
+            const d = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1);
+            const label = MONTHS[d.getMonth()].en.slice(0, 3);
+            const incPct = Math.round((b.income / maxVal) * 100);
+            const expPct = Math.round((b.expense / maxVal) * 100);
+            return `
+              <div class="ws-dash-fin-col" title="${MONTHS[d.getMonth()].en} ${d.getFullYear()}, Income ${b.income.toFixed(2)}, Payouts+costs ${b.expense.toFixed(2)}">
+                <div class="ws-dash-fin-pair">
+                  <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--income" style="height:${b.income ? Math.max(incPct, 3) : 0}%"></div></div>
+                  <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--expense" style="height:${b.expense ? Math.max(expPct, 3) : 0}%"></div></div>
+                </div>
+                <span class="ws-dash-fin-label">${label}</span>
+              </div>`;
+          }).join('')}
+        </div>
+        <div class="ws-dash-fin-legend">
+          <span><i class="ws-dash-fin-swatch ws-dash-fin-swatch--income"></i>Income</span>
+          <span><i class="ws-dash-fin-swatch ws-dash-fin-swatch--expense"></i>Payouts + costs</span>
+        </div>
+      `;
+    }
+    function renderEventsDashboard() {
+      const todo = state.events.filter((e: any) => eventStatus(e) === 'pending');
+      const upcoming = state.events.filter((e: any) => eventStatus(e) === 'upcoming');
+      const completed = state.events.filter((e: any) => eventStatus(e) === 'completed');
+      const grossIncome = completed.reduce((s: number, e: any) => s + Number(e.amount_received || 0), 0);
+      const totalPayouts = completed.reduce((s: number, e: any) => {
+        const { wages, transport } = eventPayoutTotals(e);
+        return s + wages + transport;
+      }, 0);
+      const netIncome = completed.reduce((sum: number, e: any) => sum + eventNetIncome(e), 0);
+      const thisYear = state.events.filter((e: any) => e.event_date.slice(0, 4) === String(new Date().getFullYear()));
+      const avgNet = completed.length ? netIncome / completed.length : 0;
+      els.evtDashStats.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">↑</span><span class="ws-dash-kpi-label">Upcoming</span></div>
+          <span class="ws-dash-kpi-num">${upcoming.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">!</span><span class="ws-dash-kpi-label">Needs completion</span></div>
+          <span class="ws-dash-kpi-num">${todo.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Completed (all-time)</span></div>
+          <span class="ws-dash-kpi-num">${completed.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Bookings this year</span></div>
+          <span class="ws-dash-kpi-num">${thisYear.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Gross income</span></div>
+          <span class="ws-dash-kpi-num">${grossIncome.toFixed(2)}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">↓</span><span class="ws-dash-kpi-label">Member payouts</span></div>
+          <span class="ws-dash-kpi-num">${totalPayouts.toFixed(2)}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">=</span><span class="ws-dash-kpi-label">Net income</span></div>
+          <span class="ws-dash-kpi-num">${netIncome.toFixed(2)}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">≈</span><span class="ws-dash-kpi-label">Avg net / event</span></div>
+          <span class="ws-dash-kpi-num">${avgNet.toFixed(2)}</span>
+        </div>
+      `;
+      renderEventsChart(completed);
+      const topMembers = computeTopMembers();
+      els.evtTopMembers.innerHTML = topMembers.length ? topMembers.map((x: any, i: number) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${i + 1}. ${escapeHtml(x.member.full_name)}</span></span>
+          <span class="ws-dash-feed-amount">${x.count} event${x.count === 1 ? '' : 's'}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No bookings with band members assigned yet.</p>';
+      const typeBreakdown = computeTypeBreakdown();
+      els.evtTypeBreakdown.innerHTML = typeBreakdown.length ? typeBreakdown.map(([type, count]: [string, number]) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${escapeHtml(type)}</span></span>
+          <span class="ws-dash-feed-amount">${count} booking${count === 1 ? '' : 's'}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No events booked yet.</p>';
+      const rowHtml = (e: any) => `
+        <tr data-event-id="${e.id}">
+          <td data-label="Date">${escapeHtml(eventDateTimeLabel(e))}</td>
+          <td data-label="Client">${escapeHtml(eventClientName(e))}</td>
+          <td data-label="Type">${escapeHtml(e.event_type)}</td>
+          <td data-label="Location">${escapeHtml(e.location || '—')}</td>
+          <td class="ws-row-actions"><button type="button" class="ws-edit-btn" data-evt-dash-open>Open</button></td>
+        </tr>
+      `;
+      els.evtTodoBody.innerHTML = todo.length ? todo.map(rowHtml).join('') : '<tr><td colspan="5" class="ws-empty">Nothing pending.</td></tr>';
+      els.evtUpcomingBody.innerHTML = upcoming.length ? upcoming.map(rowHtml).join('') : '<tr><td colspan="5" class="ws-empty">Nothing booked yet.</td></tr>';
+      [els.evtTodoBody, els.evtUpcomingBody].forEach((body: any) => {
+        body.querySelectorAll('[data-evt-dash-open]').forEach((btn: any) => {
+          btn.addEventListener('click', () => {
+            const id = btn.closest('tr').dataset.eventId;
+            const ev = state.events.find((x: any) => x.id === id);
+            if (!ev) return;
+            setSubtab('events', 'calendar');
+            evtGoToDate(ev.event_date);
+            evtOpenDay(ev.event_date, id);
+          });
+        });
+      });
+    }
+
+    // ---- Calendar subtab: month grid, same shape as Curriculum's own
+    // (reuses its curr-weekday-row/curr-month-cells/curr-day-cell CSS),
+    // except a day can hold several bookings instead of just one meeting.
+    function evtGoToDate(dateStr: string) {
+      const d = parseDateStr(dateStr);
+      state.evt.anchor = new Date(d.getFullYear(), d.getMonth(), 1);
+      evtRenderMonth();
+    }
+    function evtStepMonth(delta: number) {
+      state.evt.anchor = new Date(state.evt.anchor.getFullYear(), state.evt.anchor.getMonth() + delta, 1);
+      evtRenderMonth();
+    }
+    function evtRenderMonth() {
+      const anchor = state.evt.anchor;
+      const y = anchor.getFullYear(), mo = anchor.getMonth();
+      els.evtNavLabel.textContent = `${MONTHS[mo].en} ${y}`;
+      const first = new Date(y, mo, 1);
+      const last = new Date(y, mo + 1, 0);
+      const start = startOfWeek(first);
+      const end = addDays(startOfWeek(last), 6);
+      const today = todayStr();
+      let html = '<div class="curr-weekday-row">' + WEEKDAYS.map((w) => `<div class="curr-weekday">${w.en}</div>`).join('') + '</div><div class="curr-month-cells">';
+      let d = new Date(start);
+      while (d <= end) {
+        const dateStr = toDateStr(d);
+        const inMonth = d.getMonth() === mo;
+        const dayEvents = state.events.filter((e: any) => e.event_date === dateStr)
+          .sort((a: any, b: any) => (a.event_time || '') < (b.event_time || '') ? -1 : 1);
+        const shown = dayEvents.slice(0, 3);
+        const extra = dayEvents.length - shown.length;
+        html += `<div class="curr-day-cell${inMonth ? '' : ' curr-day-cell--out'}${dateStr === today ? ' curr-day-cell--today' : ''}${dayEvents.length ? ' curr-day-cell--has' : ''}" data-date="${dateStr}">
+          <span class="curr-day-num">${d.getDate()}</span>
+          <div class="curr-day-mini">
+            ${shown.map((e: any) => `<span class="curr-mini-chip curr-mini-chip--${eventStatus(e)}">${escapeHtml((e.event_time ? formatTimeStr(e.event_time) + ' ' : '') + e.last_name)}</span>`).join('')}
+            ${extra > 0 ? `<span class="curr-mini-more">+${extra}</span>` : ''}
+          </div>
+        </div>`;
+        d = addDays(d, 1);
+      }
+      html += '</div>';
+      els.evtMonthGrid.innerHTML = html;
+      els.evtMonthGrid.querySelectorAll('.curr-day-cell').forEach((cell: any) => {
+        cell.addEventListener('click', () => evtOpenDay(cell.dataset.date));
+      });
+    }
+
+    // ---- Day overlay: that day's agenda, plus the add/edit form for one
+    // booking at a time (never both views shown together).
+    function evtOpenDay(dateStr: string, focusEventId?: string) {
+      state.evt.currentDay = dateStr;
+      const d = parseDateStr(dateStr);
+      els.evtDayHeader.textContent = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}, ${d.getFullYear()}`;
+      evtRenderDayList(dateStr);
+      els.evtDayOverlay.removeAttribute('hidden');
+      document.documentElement.style.overflow = 'hidden';
+      if (focusEventId) evtStartEdit(focusEventId);
+      else evtShowList();
+    }
+    function evtCloseDay() {
+      els.evtDayOverlay.setAttribute('hidden', '');
+      state.evt.currentDay = null;
+      document.documentElement.style.overflow = '';
+    }
+    function evtShowList() {
+      els.evtDayListView.removeAttribute('hidden');
+      els.evtFormView.setAttribute('hidden', '');
+    }
+    function evtShowForm() {
+      els.evtDayListView.setAttribute('hidden', '');
+      els.evtFormView.removeAttribute('hidden');
+    }
+    function evtRenderDayList(dateStr: string) {
+      const dayEvents = state.events.filter((e: any) => e.event_date === dateStr)
+        .sort((a: any, b: any) => (a.event_time || '') < (b.event_time || '') ? -1 : 1);
+      els.evtDayList.innerHTML = dayEvents.length ? dayEvents.map((e: any) => `
+        <div class="ws-evt-day-item" data-event-id="${e.id}">
+          <div class="ws-evt-day-item-main">
+            <span class="ws-evt-day-item-title">${escapeHtml(eventClientName(e))}${e.event_time ? ' · ' + escapeHtml(formatTimeStr(e.event_time)) : ''}</span>
+            <span class="ws-evt-day-item-sub">${escapeHtml(e.event_type)}${e.location ? ' · ' + escapeHtml(e.location) : ''}</span>
+          </div>
+          ${eventStatusBadge(e)}
+          <div class="ws-evt-day-item-actions">
+            <button type="button" class="ws-edit-btn" data-evt-day-edit>Edit</button>
+          </div>
+        </div>
+      `).join('') : '<p class="ws-empty" style="padding:1rem 0">Nothing booked this day yet.</p>';
+      els.evtDayList.querySelectorAll('[data-evt-day-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => evtStartEdit(btn.closest('[data-event-id]').dataset.eventId));
+      });
+    }
+    function evtResetForm() {
+      state.editingEventId = null;
+      els.evtFormView.reset();
+      updateEvtTypeOptions();
+      els.evtType.value = '';
+      els.evtDate.value = state.evt.currentDay || todayStr();
+      updateEvtLocationOptions();
+      els.evtLocation.value = '';
+      evtToggleLocationCustom();
+      els.evtFormTitle.textContent = 'New event';
+      els.evtDelete.hidden = true;
+      els.evtCostsSection.hidden = true;
+      els.evtTransportRow.hidden = true;
+      evtRenderAttendeePicker([]);
+      resetEventCostForm();
+    }
+    function evtStartNew() {
+      evtResetForm();
+      evtShowForm();
+    }
+    function evtStartEdit(id: string) {
+      const ev = state.events.find((x: any) => x.id === id);
+      if (!ev) return;
+      state.editingEventId = id;
+      els.evtFirstName.value = ev.first_name;
+      els.evtLastName.value = ev.last_name;
+      els.evtPhone.value = ev.phone;
+      els.evtEmail.value = ev.email || '';
+      els.evtDate.value = ev.event_date;
+      els.evtTime.value = ev.event_time || '';
+      updateEvtTypeOptions();
+      els.evtType.value = ev.event_type;
+      updateEvtLocationOptions();
+      const locationList = state.groupSettings?.event_location_categories || [];
+      if (ev.location && locationList.includes(ev.location)) {
+        els.evtLocation.value = ev.location;
+      } else if (ev.location) {
+        els.evtLocation.value = EVENT_LOCATION_CUSTOM;
+        els.evtLocationCustom.value = ev.location;
+      } else {
+        els.evtLocation.value = '';
+      }
+      evtToggleLocationCustom();
+      els.evtNotes.value = ev.notes || '';
+      evtRenderAttendeePicker(ev.attendees || []);
+      els.evtAmount.value = ev.amount_received != null ? ev.amount_received : '';
+      els.evtPayRate.value = ev.pay_rate_per_member != null ? ev.pay_rate_per_member : '';
+      els.evtTransportRate.value = ev.transport_rate_per_member != null ? ev.transport_rate_per_member : '';
+      evtUpdateTransportVisibility();
+      els.evtFormTitle.textContent = `Editing ${eventClientName(ev)}`;
+      els.evtDelete.hidden = false;
+      els.evtCostsSection.hidden = false;
+      resetEventCostForm();
+      evtRenderCosts(id);
+      evtShowForm();
+    }
+    // A previously-checked member who's since been archived still shows
+    // up (so re-saving the event doesn't silently drop them) — everyone
+    // else is the group's currently active roster.
+    function evtRenderAttendeePicker(attendees: any[]) {
+      const checkedIds = new Set(attendees.map((a: any) => a.member_id));
+      const carIds = new Set(attendees.filter((a: any) => a.took_car).map((a: any) => a.member_id));
+      const pool = state.members.filter((m: any) => m.active || checkedIds.has(m.id));
+      els.evtAttendees.innerHTML = pool.length ? pool.map((m: any) => `
+        <div class="ws-evt-attendee-row" data-member-id="${m.id}">
+          <label>
+            <input type="checkbox" data-evt-attendee-check ${checkedIds.has(m.id) ? 'checked' : ''} />
+            <span>${escapeHtml(m.full_name)}</span>
+          </label>
+          <label class="ws-evt-attendee-car">
+            <input type="checkbox" data-evt-attendee-car ${carIds.has(m.id) ? 'checked' : ''} ${checkedIds.has(m.id) ? '' : 'disabled'} />
+            Took a car
+          </label>
+        </div>
+      `).join('') : '<p class="ws-empty" style="padding:0.5rem 0">No band members in the roster yet.</p>';
+      els.evtAttendees.querySelectorAll('[data-evt-attendee-check]').forEach((cb: any) => {
+        cb.addEventListener('change', () => {
+          const row = cb.closest('.ws-evt-attendee-row');
+          const carCb = row.querySelector('[data-evt-attendee-car]');
+          carCb.disabled = !cb.checked;
+          if (!cb.checked) carCb.checked = false;
+          evtUpdateTransportVisibility();
+        });
+      });
+      els.evtAttendees.querySelectorAll('[data-evt-attendee-car]').forEach((cb: any) => {
+        cb.addEventListener('change', evtUpdateTransportVisibility);
+      });
+    }
+    function evtGetAttendeesFromForm(): { member_id: string; took_car: boolean }[] {
+      return Array.from(els.evtAttendees.querySelectorAll('.ws-evt-attendee-row')).flatMap((row: any) => {
+        if (!row.querySelector('[data-evt-attendee-check]').checked) return [];
+        return [{ member_id: row.dataset.memberId, took_car: row.querySelector('[data-evt-attendee-car]').checked }];
+      });
+    }
+    // Transport pay only ever applies to members who took a car — the
+    // rate field (and this live total) only surface once at least one
+    // attendee is marked as having taken one.
+    function evtUpdateTransportVisibility() {
+      const attendees = evtGetAttendeesFromForm();
+      const carCount = attendees.filter((a) => a.took_car).length;
+      els.evtTransportRow.toggleAttribute('hidden', carCount === 0);
+      const payRate = Number(els.evtPayRate.value) || 0;
+      const transportRate = Number(els.evtTransportRate.value) || 0;
+      const wages = payRate * attendees.length;
+      const transport = transportRate * carCount;
+      els.evtPayoutSummary.textContent = carCount
+        ? `${attendees.length} member(s) × ${payRate.toFixed(2)} + ${carCount} car(s) × ${transportRate.toFixed(2)} = ${(wages + transport).toFixed(2)} total payout`
+        : '';
+    }
+
+    // ---- Extra costs (repeatable line items per event) ----
+    function resetEventCostForm() {
+      state.editingEventCostId = null;
+      if (state.groupSettings?.event_cost_categories?.length) els.evtCostCategory.selectedIndex = 0;
+      els.evtCostAmount.value = '';
+      els.evtCostDesc.value = '';
+      els.evtCostDate.value = state.evt.currentDay || todayStr();
+      els.evtCostAdd.textContent = 'Add cost';
+    }
+    function startEditEventCost(id: string) {
+      const cost = state.eventCosts.find((c: any) => c.id === id);
+      if (!cost) return;
+      state.editingEventCostId = id;
+      els.evtCostCategory.value = cost.category;
+      els.evtCostAmount.value = cost.amount;
+      els.evtCostDesc.value = cost.description || '';
+      els.evtCostDate.value = cost.cost_date;
+      els.evtCostAdd.textContent = 'Save changes';
+    }
+    function evtRenderCosts(eventId: string) {
+      const costs = state.eventCosts.filter((c: any) => c.event_id === eventId);
+      els.evtCostBody.innerHTML = costs.length ? costs.map((c: any) => `
+        <tr data-cost-id="${c.id}">
+          <td data-label="Date">${c.cost_date}</td>
+          <td data-label="Category">${escapeHtml(c.category)}</td>
+          <td data-label="Description">${escapeHtml(c.description || '—')}</td>
+          <td data-label="Amount">${Number(c.amount).toFixed(2)}</td>
+          <td data-label="Added by">${escapeHtml(c.created_by_name || '—')}</td>
+          <td class="ws-row-actions">
+            <button type="button" class="ws-edit-btn" data-evt-cost-edit>Edit</button>
+            <button type="button" class="ws-row-del" data-evt-cost-del>×</button>
+          </td>
+        </tr>
+      `).join('') : '<tr><td colspan="6" class="ws-empty">No extra costs logged.</td></tr>';
+      els.evtCostBody.querySelectorAll('[data-evt-cost-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => startEditEventCost(btn.closest('tr').dataset.costId));
+      });
+      els.evtCostBody.querySelectorAll('[data-evt-cost-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.closest('tr').dataset.costId;
+          if (!confirm('Delete this cost? It’s removed from Finance too.')) return;
+          const { error } = await db.from('event_costs').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          if (state.editingEventCostId === id) resetEventCostForm();
+          await loadEvents();
+          evtRenderCosts(eventId);
+          if (state.activeTab === 'finance') await loadFinance();
+        });
+      });
+    }
+    // One event_costs row always mirrors exactly one finance_entries row
+    // (event_cost_id is 1:1, same as maintenance_log_id) — created here,
+    // kept in sync on edit, removed by the database cascade on delete.
+    async function syncEventCostToFinance(cost: any) {
+      const ev = state.events.find((e: any) => e.id === cost.event_id);
+      const payload = {
+        group_key: state.activeGroup, entry_type: 'expense', category: cost.category,
+        amount: Number(cost.amount), entry_date: cost.cost_date,
+        description: `${ev ? eventClientName(ev) : 'Event'} — ${cost.description || cost.category}`,
+        event_cost_id: cost.id, created_by: state.session.user.id, created_by_name: state.profile?.name || null,
+      };
+      const { data: existing } = await db.from('finance_entries').select('id').eq('event_cost_id', cost.id).maybeSingle();
+      if (existing) await db.from('finance_entries').update(payload).eq('id', existing.id);
+      else await db.from('finance_entries').insert(payload);
+    }
+
+    // Up to 3 rows per event (income / wages / transport), told apart by
+    // event_entry_kind since — unlike fee_payment_id/maintenance_log_id/
+    // event_cost_id — event_id alone isn't a 1:1 key here. Whichever of
+    // the 3 no longer applies (e.g. amount cleared, or no one took a
+    // car anymore) gets its row removed; the rest are upserted in place.
+    async function syncEventToFinance(ev: any) {
+      const { wages, transport } = eventPayoutTotals(ev);
+      const client = eventClientName(ev);
+      const kinds: { kind: string; type: string; category: string; amount: number; description: string }[] = [];
+      if (ev.amount_received) kinds.push({ kind: 'income', type: 'income', category: ev.event_type, amount: Number(ev.amount_received), description: `${client}, ${ev.event_date}` });
+      if (wages) kinds.push({ kind: 'wages', type: 'expense', category: 'Band Payouts', amount: wages, description: `Band payouts — ${client}, ${ev.event_date}` });
+      if (transport) kinds.push({ kind: 'transport', type: 'expense', category: 'Transport', amount: transport, description: `Transport — ${client}, ${ev.event_date}` });
+      const activeKinds = new Set(kinds.map((k) => k.kind));
+      for (const kind of ['income', 'wages', 'transport']) {
+        if (!activeKinds.has(kind)) await db.from('finance_entries').delete().eq('event_id', ev.id).eq('event_entry_kind', kind);
+      }
+      for (const k of kinds) {
+        const payload = {
+          group_key: state.activeGroup, entry_type: k.type, category: k.category, amount: k.amount,
+          entry_date: ev.event_date, description: k.description, event_id: ev.id, event_entry_kind: k.kind,
+          created_by: state.session.user.id, created_by_name: state.profile?.name || null,
+        };
+        const { data: existing } = await db.from('finance_entries').select('id').eq('event_id', ev.id).eq('event_entry_kind', k.kind).maybeSingle();
+        if (existing) await db.from('finance_entries').update(payload).eq('id', existing.id);
+        else await db.from('finance_entries').insert(payload);
+      }
+      if (state.activeTab === 'finance') await loadFinance();
+    }
+    function bindEventForm() {
+      els.evtPrev.addEventListener('click', () => evtStepMonth(-1));
+      els.evtNext.addEventListener('click', () => evtStepMonth(1));
+      els.evtToday.addEventListener('click', () => { state.evt.anchor = new Date(); evtRenderMonth(); });
+      els.evtAddBtn.addEventListener('click', () => evtOpenDay(todayStr()));
+      els.evtDayClose.addEventListener('click', evtCloseDay);
+      els.evtDayAdd.addEventListener('click', evtStartNew);
+      els.evtFormBack.addEventListener('click', evtShowList);
+      els.evtLocation.addEventListener('change', evtToggleLocationCustom);
+      els.evtPayRate.addEventListener('input', evtUpdateTransportVisibility);
+      els.evtTransportRate.addEventListener('input', evtUpdateTransportVisibility);
+      els.evtDelete.addEventListener('click', async () => {
+        if (!state.editingEventId) return;
+        if (!confirm('Delete this event? Its costs and everything it posted to Finance are removed too.')) return;
+        const { error } = await db.from('event_bookings').delete().eq('id', state.editingEventId);
+        if (error) { showToast('Could not delete.'); return; }
+        const dateStr = state.evt.currentDay;
+        await loadEvents();
+        evtRenderDayList(dateStr);
+        evtShowList();
+        if (state.activeTab === 'finance') await loadFinance();
+      });
+      els.evtCostAdd.addEventListener('click', async () => {
+        if (!state.editingEventId) return;
+        const category = els.evtCostCategory.value;
+        const amount = els.evtCostAmount.value;
+        const description = els.evtCostDesc.value.trim();
+        const costDate = els.evtCostDate.value || state.evt.currentDay;
+        if (!category || !amount) { showToast('Category and amount are required.'); return; }
+        const payload: any = { category, amount: Number(amount), description: description || null, cost_date: costDate };
+        let cost, error;
+        if (state.editingEventCostId) {
+          ({ data: cost, error } = await db.from('event_costs').update(payload).eq('id', state.editingEventCostId).select().single());
+        } else {
+          payload.group_key = state.activeGroup;
+          payload.event_id = state.editingEventId;
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ data: cost, error } = await db.from('event_costs').insert(payload).select().single());
+        }
+        if (error) { console.error(error); showToast('Could not save cost.'); return; }
+        await syncEventCostToFinance(cost);
+        resetEventCostForm();
+        await loadEvents();
+        evtRenderCosts(state.editingEventId);
+        if (state.activeTab === 'finance') await loadFinance();
+      });
+      els.evtFormView.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const firstName = els.evtFirstName.value.trim();
+        const lastName = els.evtLastName.value.trim();
+        const phone = els.evtPhone.value.trim();
+        const email = els.evtEmail.value.trim();
+        const date = els.evtDate.value;
+        const time = els.evtTime.value;
+        const type = els.evtType.value;
+        const location = els.evtLocation.value === EVENT_LOCATION_CUSTOM ? els.evtLocationCustom.value.trim() : els.evtLocation.value;
+        const notes = els.evtNotes.value.trim();
+        const attendees = evtGetAttendeesFromForm();
+        if (!firstName || !lastName || !phone || !date || !type) { showToast('First/last name, phone, date, and event type are required.'); return; }
+        const amountRaw = els.evtAmount.value;
+        const payRateRaw = els.evtPayRate.value;
+        const transportRateRaw = els.evtTransportRate.value;
+        // Once the event's own date/time is behind us, it can't be saved
+        // in limbo any longer — the amount received has to be filled in
+        // (closing it out) before any other change to it is accepted.
+        if (!amountRaw && eventDateTimeHasPassed(date, time)) {
+          showToast('This event has already happened — enter the amount received to close it out before saving.');
+          return;
+        }
+        const payload: any = {
+          event_type: type, first_name: firstName, last_name: lastName, phone, email: email || null,
+          event_date: date, event_time: time || null, location: location || null, notes: notes || null,
+          attendees, amount_received: amountRaw ? Number(amountRaw) : null,
+          pay_rate_per_member: payRateRaw ? Number(payRateRaw) : null,
+          transport_rate_per_member: transportRateRaw ? Number(transportRateRaw) : null,
+        };
+        // "Completed by/at" is only ever stamped the moment an amount is
+        // actually entered for the first time — editing booking details
+        // alone shouldn't claim credit for completing it, and clearing
+        // the amount back out un-stamps it.
+        const priorEvent = state.editingEventId ? state.events.find((x: any) => x.id === state.editingEventId) : null;
+        if (payload.amount_received != null && !priorEvent?.amount_received) {
+          payload.completed_by = state.session.user.id;
+          payload.completed_by_name = state.profile?.name || null;
+          payload.completed_at = new Date().toISOString();
+        } else if (payload.amount_received == null) {
+          payload.completed_by = null; payload.completed_by_name = null; payload.completed_at = null;
+        }
+        let savedEvent: any, error;
+        if (state.editingEventId) {
+          payload.updated_at = new Date().toISOString();
+          ({ data: savedEvent, error } = await db.from('event_bookings').update(payload).eq('id', state.editingEventId).select().single());
+        } else {
+          payload.group_key = state.activeGroup;
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ data: savedEvent, error } = await db.from('event_bookings').insert(payload).select().single());
+        }
+        if (error) { console.error(error); showToast('Could not save event.'); return; }
+        await syncEventToFinance(savedEvent);
+        await loadEvents();
+        evtRenderDayList(savedEvent.event_date);
+        evtShowList();
       });
     }
 
@@ -1760,6 +3315,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
           <td data-label="Uploaded by">${escapeHtml(d.uploaded_by_name || '—')}</td>
           <td class="ws-row-actions">
+            <button type="button" class="ws-edit-btn" data-doc-rename>Rename</button>
             <button type="button" class="ws-edit-btn" data-doc-download>Download</button>
             <button type="button" class="ws-row-del" data-doc-del>×</button>
           </td>
@@ -1780,6 +3336,32 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           if (error) { showToast('Could not delete.'); return; }
           await loadLibrary();
         });
+        row.querySelector('[data-doc-rename]').addEventListener('click', () => startRenameDoc(row, id));
+      });
+    }
+    // Only the title is ever user-editable (file_type/size are read off
+    // the upload itself, and category isn't exposed in this UI at all
+    // yet) — an inline swap in place, same idea as Fees' inline amount
+    // input, rather than a whole separate edit form for one field.
+    function startRenameDoc(row: any, id: string) {
+      const titleCell = row.querySelector('[data-label="Title"]');
+      const current = titleCell.textContent;
+      titleCell.innerHTML = `<input type="text" class="ws-inline-amount" value="${escapeHtml(current)}" data-doc-rename-input />`;
+      const input = titleCell.querySelector('[data-doc-rename-input]');
+      input.focus();
+      input.select();
+      const actionsCell = row.querySelector('.ws-row-actions');
+      actionsCell.innerHTML = `
+        <button type="button" class="ws-edit-btn" data-doc-rename-save>Save</button>
+        <button type="button" class="ws-edit-btn" data-doc-rename-cancel>Cancel</button>
+      `;
+      actionsCell.querySelector('[data-doc-rename-cancel]').addEventListener('click', renderLibrary);
+      actionsCell.querySelector('[data-doc-rename-save]').addEventListener('click', async () => {
+        const title = input.value.trim();
+        if (!title) { showToast('Title is required.'); return; }
+        const { error } = await db.from('documents').update({ title }).eq('id', id);
+        if (error) { console.error(error); showToast('Could not rename.'); return; }
+        await loadLibrary();
       });
     }
     // Shared Library: documents an admin uploaded once and ticked this
@@ -2224,6 +3806,24 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function currCancelDay() {
       currCloseDayPanel();
     }
+    // Emptying theme/notes/activities/attachment is already what makes
+    // currPersistMeeting() delete the row instead of upserting an
+    // effectively-blank one (see its isEmpty check) — this button just
+    // does that in one click instead of clearing every field by hand.
+    function currClearDay() {
+      const dateStr = state.curr.currentDay;
+      if (!dateStr) return;
+      const m = state.curr.meetings.get(dateStr);
+      if (!m) { currCloseDayPanel(); return; }
+      if (!confirm('Clear this day’s plan? Its theme, activities, and attachment are all removed.')) return;
+      const oldAttachment = m.attachment_path;
+      m.theme = null; m.notes = null; m.activities = []; m.attachment_path = null;
+      currPersistMeeting(dateStr).then(() => {
+        if (oldAttachment) db.storage.from('documents').remove([oldAttachment]);
+      });
+      currRenderMonth();
+      currCloseDayPanel();
+    }
     // Steps to the next/previous day, pulling in a different month's data
     // first if that date falls outside what's currently loaded.
     async function currStepDay(n: number) {
@@ -2375,6 +3975,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         btn.addEventListener('click', () => currSetPlanView(btn.dataset.planView));
       });
       els.currDaySave.addEventListener('click', currSaveDay);
+      els.currDayClear.addEventListener('click', currClearDay);
       els.currDayCancel.addEventListener('click', currCancelDay);
       els.currAttachmentUploadBtn.addEventListener('click', async () => {
         const dateStr = state.curr.currentDay;
@@ -2850,13 +4451,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           if (state.editingMemberId) resetMemberForm();
           renderGroupSwitch();
           refreshApprovalsBadge();
+          refreshEventsBadge();
           // Music/General only show a cut-down tab set —
           // updateTabVisibility() (called from renderGroupSwitch()) already
           // hid the rest, so a switch that leaves an invalid tab active
           // needs to land somewhere visible instead of just reloading a
           // now-hidden panel.
-          const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
-          if (visible && !visible.includes(state.activeTab)) {
+          // Inventory is Music-only (see MUSIC_ONLY_TABS below) on top of
+          // the NON_TROOP_TAB_VISIBILITY inclusion list, since troops
+          // aren't in that map at all — isTabHidden() covers both.
+          if (isTabHidden(state.activeTab)) {
             setTab('finance');
           } else {
             loadActiveTabData();
@@ -2872,13 +4476,21 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // every other tab.
     const NON_TROOP_GROUP_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY];
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
-      [MUSIC_GROUP_KEY]: ['roster', 'finance'],
+      [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events'],
       [GENERAL_GROUP_KEY]: ['roster', 'finance'],
     };
-    function updateTabVisibility() {
+    // Inventory/Event Calendar only make sense for Music — troops aren't
+    // in NON_TROOP_TAB_VISIBILITY at all, so its inclusion list above
+    // doesn't hide anything for them; this covers that case.
+    const MUSIC_ONLY_TABS = ['inventory', 'events'];
+    function isTabHidden(tab: string) {
       const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
+      if (visible) return !visible.includes(tab);
+      return MUSIC_ONLY_TABS.includes(tab);
+    }
+    function updateTabVisibility() {
       els.tabs.querySelectorAll('.ws-tab:not([data-admin-only])').forEach((btn: any) => {
-        btn.toggleAttribute('hidden', !!visible && !visible.includes(btn.dataset.tab));
+        btn.toggleAttribute('hidden', isTabHidden(btn.dataset.tab));
       });
       els.copyMemberBlock.toggleAttribute('hidden', !NON_TROOP_GROUP_KEYS.includes(state.activeGroup));
       const g = GROUPS.find((x: any) => x.key === state.activeGroup);
@@ -2898,6 +4510,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'attendance') loadAttendance();
       if (tab === 'fees') loadFees();
       if (tab === 'finance') loadFinance();
+      if (tab === 'inventory') loadInventory();
+      if (tab === 'events') loadEvents();
       if (tab === 'library') loadLibrary();
       if (tab === 'curriculum') currStart();
     }
@@ -3053,6 +4667,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindRosterForm();
         bindCopyPicker();
         bindFinanceForm();
+        bindInventoryForm();
+        bindInventoryCategories();
+        bindMaintenanceForm();
+        bindEventForm();
+        bindEventCategories();
         bindLibraryUpload();
         bindReports();
         bindTableSearch(els.rosterSearch, els.rosterBody);
@@ -3060,6 +4679,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindTableSearch(els.approvalsSearch, els.approvalsBody);
         bindTableSearch(els.attSearch, els.attBody);
         bindTableSearch(els.feeSearch, els.feeBody);
+        bindTableSearch(els.invSearch, els.invBody);
         currBindStatics();
         bindAttendance();
         els.feeMonth.addEventListener('change', loadFees);
@@ -3071,6 +4691,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }
 
       refreshApprovalsBadge();
+      refreshEventsBadge();
       {
         const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
         setTab(visible && !visible.includes('dashboard') ? visible[0] : 'dashboard');

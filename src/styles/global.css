@@ -3475,6 +3475,13 @@ main.wide {
   color: var(--color-muted);
 }
 .curr-mini-more { font-size: 0.64rem; color: var(--color-muted); }
+/* Event Calendar's own chip coloring — same palette as .ws-badge, so a
+   glance at the month grid already shows which days still need a
+   financial follow-up (pending, red) vs. are just booked (amber) or
+   done (green). */
+.curr-mini-chip--pending { background: #fdecea; color: #b3261e; }
+.curr-mini-chip--upcoming { background: #fff4dd; color: #8a5a00; }
+.curr-mini-chip--completed { background: #e7f3ec; color: var(--color-accent); }
 .curr-list--over { outline: 2px dashed var(--color-accent); outline-offset: -3px; }
 
 .curr-week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; align-items: start; }
@@ -3623,8 +3630,9 @@ main.wide {
 }
 .curr-day-field { display: block; margin-bottom: 0.75rem; font-size: 0.82rem; color: var(--color-muted); }
 .curr-day-field span { display: block; margin-bottom: 0.25rem; font-weight: 600; }
-.curr-day-field input, .curr-day-field textarea {
+.curr-day-field input, .curr-day-field textarea, .curr-day-field select {
   width: 100%;
+  box-sizing: border-box;
   padding: 0.5rem 0.65rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -3632,6 +3640,17 @@ main.wide {
   background: var(--color-bg);
   color: var(--color-text);
   resize: vertical;
+}
+/* Same native-<select> box-model quirk as .ws-field select — see its own
+   comment for the full explanation. */
+.curr-day-field select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b5048' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 0.6rem;
+  padding-right: 1.9rem;
 }
 .curr-day-section-label {
   margin: 1rem 0 0.5rem;
@@ -3664,6 +3683,26 @@ main.wide {
    remove (×) button, shown instead of the upload form (never both). */
 .curr-day-attachment { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
 .curr-day-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 2.5rem; margin-bottom: 0.5rem; }
+/* Event Calendar's own additions to the shared curr-day-* overlay: the
+   band-member attendee checklist (with an inline "took a car" checkbox
+   per member) and the day-agenda cards listing that day's bookings. */
+.ws-evt-attendees {
+  display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.9rem;
+  max-height: 14rem; overflow-y: auto; padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg);
+}
+.ws-evt-attendee-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; }
+.ws-evt-attendee-row > label { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; flex: 1; min-width: 0; }
+.ws-evt-attendee-car { display: flex; align-items: center; gap: 0.35rem; font-size: 0.76rem; color: var(--color-muted); flex-shrink: 0; }
+.ws-evt-day-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0.65rem 0.85rem; border: 1px solid var(--color-border); border-radius: var(--radius);
+  background: var(--color-surface);
+}
+.ws-evt-day-item-main { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.ws-evt-day-item-title { font-weight: 700; color: var(--color-brand-dark); }
+.ws-evt-day-item-sub { font-size: 0.78rem; color: var(--color-muted); }
+.ws-evt-day-item-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
 .curr-day-actions {
   position: sticky;
   inset-block-end: -1.5rem;
@@ -3676,6 +3715,10 @@ main.wide {
   border-top: 1px solid var(--color-border);
   box-shadow: 0 -6px 12px -8px rgba(0, 0, 0, 0.12);
 }
+/* Destructive action pinned to the opposite end from Cancel/Save, same
+   convention as most dialogs — keeps it reachable without sitting next
+   to (and inviting mis-clicks with) the primary Save action. */
+.curr-day-actions [data-curr-day-clear], .curr-day-actions [data-evt-delete] { margin-right: auto; }
 
 /* ----- Toast ----- */
 .curr-toast {
@@ -4335,6 +4378,7 @@ main.wide {
 .ws-member-form-title { margin: 0 0 1rem; font-family: var(--font-display); color: var(--color-brand); font-size: 1.1rem; }
 
 .ws-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1.1rem; margin-bottom: 0.9rem; }
+.ws-form-grid--3 { grid-template-columns: repeat(3, 1fr); }
 .ws-form-grid--4 { grid-template-columns: repeat(4, 1fr); }
 /* Tablet gap: the 720px query below collapses this straight to 1
    column, but nothing covered the space between that and full desktop
@@ -4348,7 +4392,7 @@ main.wide {
    kept as a full 1-column stack (the layout already proven safe on
    phones) rather than guess at a second column count. */
 @media (min-width: 721px) and (max-width: 1440px) {
-  .ws-form-grid--4 { grid-template-columns: 1fr; }
+  .ws-form-grid--3, .ws-form-grid--4 { grid-template-columns: 1fr; }
 }
 .ws-field { display: block; margin-bottom: 0.9rem; font-size: 0.78rem; color: var(--color-muted); font-weight: 600; }
 .ws-form-grid .ws-field { margin-bottom: 0; }
@@ -4386,6 +4430,21 @@ main.wide {
 }
 .ws-field input:focus, .ws-field select:focus, .ws-field textarea:focus {
   outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(20, 56, 34, 0.1);
+}
+/* A <select>'s native chrome (the dropdown arrow's own reserved space)
+   isn't fully controlled by padding alone — left as-is, it can render at
+   a visibly different box height/width than a sibling <input> sharing
+   the identical CSS above, same class of issue as the date-input fix
+   below. Reset appearance and draw our own arrow so every field type in
+   a form — text, number, date, select — is genuinely the same size. */
+.ws-field select, .ws-field--inline select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b5048' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.65rem;
+  padding-right: 2.1rem;
 }
 
 /* Guardian 2 / Allergies: collapsed by default behind a "+ Add" link,
@@ -4487,6 +4546,17 @@ main.wide {
   font-weight: 700;
   cursor: help;
 }
+
+.ws-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.ws-badge--good { background: #e7f3ec; color: var(--color-accent); }
+.ws-badge--fair { background: #fff4dd; color: #8a5a00; }
+.ws-badge--poor { background: #fdecea; color: #b3261e; }
 
 .ws-admin-h3 { font-family: var(--font-display); color: var(--color-brand); margin: 0 0 1rem; font-size: 1.3rem; }
 .ws-row--pending td { background: #fff9ec; }
