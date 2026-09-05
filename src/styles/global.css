@@ -5272,9 +5272,18 @@ main.wide {
      comes first in the markup, so this reads Guide, then the avatar,
      both pushed to the row's end by the margin-auto on the first of
      the pair. */
-  .ws-guide-link { order: 1; margin-inline-start: auto; padding: 0 0.7rem; }
-  .ws-account { order: 1; }
-  .ws-group-switch { order: 2; flex-basis: 100%; width: 100%; }
+  /* Only the account avatar stays on the logo's row — Admin/Guide drop
+     down to their own full-width row, styled and sized to match the
+     group-switch pills below them, just in red so they read as
+     actions rather than one more group to pick. */
+  .ws-account { order: 1; margin-inline-start: auto; }
+  .ws-guide-link {
+    order: 2; flex-basis: 100%; width: 100%; justify-content: center;
+    padding: 0.5rem 0.95rem; font-size: 0.85rem;
+    border-color: var(--color-brand-light); color: var(--color-brand-light);
+  }
+  .ws-guide-link:hover { background: var(--color-brand-light); border-color: var(--color-brand-light); }
+  .ws-group-switch { order: 3; flex-basis: 100%; width: 100%; }
 
   /* ----- Group banner ----- */
   .ws-group-banner { padding: 0.55rem 0.85rem; }
