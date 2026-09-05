@@ -3612,6 +3612,30 @@ main.wide {
 .curr-day-banner-text { flex: 1; }
 .curr-day-banner-label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
 .curr-day-banner-value { margin: 0; font-family: var(--font-display); font-size: 1.1rem; }
+/* Content Calendar's own accent — a plum gradient distinct from the
+   brand maroon every other day-overlay uses, so it reads as its own
+   thing rather than a reskinned Event Calendar. */
+.curr-day-panel--content .curr-day-banner { background: linear-gradient(135deg, #6b2d5c 0%, #3d1a38 100%); }
+
+/* ---- Content Calendar's Kanban board (Idea/Drafting/Scheduled/Posted) ---- */
+.ws-content-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; align-items: start; }
+@media (max-width: 900px) { .ws-content-board { grid-template-columns: 1fr; } }
+.ws-content-column { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 0.85rem; min-height: 8rem; }
+.ws-content-column-head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;
+  font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-muted);
+}
+.ws-content-column-count { background: var(--color-surface); border-radius: 999px; padding: 0.1rem 0.55rem; font-size: 0.7rem; }
+.ws-content-card {
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius);
+  padding: 0.65rem 0.75rem; margin-bottom: 0.6rem; cursor: pointer; box-shadow: var(--shadow-sm);
+  transition: transform 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+}
+.ws-content-card:last-child { margin-bottom: 0; }
+.ws-content-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.ws-content-card-title { font-weight: 700; color: var(--color-brand-dark); margin-bottom: 0.3rem; font-size: 0.85rem; }
+.ws-content-card-meta { font-size: 0.72rem; color: var(--color-muted); display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-bottom: 0.5rem; }
+.ws-content-card-move select { width: 100%; font-size: 0.72rem; padding: 0.3rem 0.5rem; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); font: inherit; }
 .curr-day-nav-btn {
   width: 2rem; height: 2rem;
   border-radius: 50%;

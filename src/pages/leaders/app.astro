@@ -83,6 +83,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="events"><Icon name="heart" size={16} strokeWidth={1.8} /> Event Calendar<span class="ws-tab-badge" data-events-badge hidden></span></button>
         <button type="button" class="ws-tab" data-tab="vendors"><Icon name="phone" size={16} strokeWidth={1.8} /> Vendors</button>
         <button type="button" class="ws-tab" data-tab="pr"><Icon name="megaphone" size={16} strokeWidth={1.8} /> Public Relations</button>
+        <button type="button" class="ws-tab" data-tab="content"><Icon name="sparkle" size={16} strokeWidth={1.8} /> Content Calendar</button>
+        <button type="button" class="ws-tab" data-tab="credentials"><Icon name="lock" size={16} strokeWidth={1.8} /> Credentials</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
       </nav>
@@ -1122,11 +1124,115 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         </section>
 
+        <section class="ws-panel" data-panel="content" hidden>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="content" data-subtab="items">Content</button>
+            <button type="button" class="ws-subtab" data-subtabs="content" data-subtab="settings">Settings</button>
+          </div>
+
+          <div data-subpanel="content:items">
+            <div class="curr-toolbar">
+              <div class="curr-toolbar-row">
+                <div class="curr-nav">
+                  <button type="button" class="curr-nav-btn" data-content-prev aria-label="Previous month">‹</button>
+                  <button type="button" class="curr-nav-today" data-content-today>Today</button>
+                  <button type="button" class="curr-nav-btn" data-content-next aria-label="Next month">›</button>
+                </div>
+                <span class="curr-nav-label" data-content-nav-label></span>
+                <div class="curr-view-toggle" data-content-view-toggle>
+                  <button type="button" class="curr-view-btn--active" data-content-view="calendar">Calendar</button>
+                  <button type="button" data-content-view="board">Board</button>
+                </div>
+                <button type="button" class="btn-primary" data-content-add-btn>+ Add content</button>
+              </div>
+            </div>
+
+            <div data-content-view-pane="calendar">
+              <p class="ws-att-hint">Click any date to see or add that day's content.</p>
+              <div class="curr-view curr-view--month">
+                <div class="curr-month-grid" data-content-month-grid></div>
+              </div>
+            </div>
+
+            <div data-content-view-pane="board" hidden>
+              <div class="ws-content-board" data-content-board></div>
+            </div>
+          </div>
+
+          <div data-subpanel="content:settings" hidden>
+            <div class="ws-form-grid">
+              <div class="ws-member-form">
+                <div class="ws-member-form-bar" aria-hidden="true"></div>
+                <p class="ws-member-form-title">Platforms</p>
+                <div class="ws-category-add">
+                  <input type="text" data-content-platform-cat-input placeholder="e.g. Instagram" />
+                  <button type="button" class="btn-primary" data-content-platform-cat-add>Add</button>
+                </div>
+                <div class="ws-category-list" data-content-platform-cat-list></div>
+              </div>
+              <div class="ws-member-form">
+                <div class="ws-member-form-bar" aria-hidden="true"></div>
+                <p class="ws-member-form-title">Content types</p>
+                <div class="ws-category-add">
+                  <input type="text" data-content-type-cat-input placeholder="e.g. Reel" />
+                  <button type="button" class="btn-primary" data-content-type-cat-add>Add</button>
+                </div>
+                <div class="ws-category-list" data-content-type-cat-list></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="credentials" hidden>
+          <p class="ws-att-hint">Login info for the org's own social media accounts. Visible in plain text to anyone with access to this group — passwords are masked by default, click Reveal to view one.</p>
+          <form class="ws-member-form" data-cred-form>
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title" data-cred-form-title>Add a login</p>
+            <div class="ws-form-grid ws-form-grid--4">
+              <label class="ws-field">
+                <span>Service *</span>
+                <input type="text" data-cred-service placeholder="e.g. Instagram" required />
+              </label>
+              <label class="ws-field">
+                <span>Username / Email</span>
+                <input type="text" data-cred-username />
+              </label>
+              <label class="ws-field">
+                <span>Password</span>
+                <input type="text" data-cred-password />
+              </label>
+              <label class="ws-field">
+                <span>Login URL</span>
+                <input type="text" data-cred-url placeholder="https://…" />
+              </label>
+            </div>
+            <label class="ws-field ws-field--full">
+              <span>Notes</span>
+              <input type="text" data-cred-notes />
+            </label>
+            <div class="ws-form-actions">
+              <button type="submit" class="btn-primary" data-cred-submit>Add login</button>
+              <button type="button" class="ws-form-cancel" data-cred-cancel hidden>Cancel edit</button>
+            </div>
+          </form>
+
+          <input type="search" class="ws-search" data-cred-search placeholder="Search logins…" />
+
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-cred-table>
+              <thead>
+                <tr><th>Service</th><th>Username</th><th>Password</th><th>URL</th><th>Notes</th><th>Updated by</th><th></th></tr>
+              </thead>
+              <tbody data-cred-body></tbody>
+            </table>
+          </div>
+        </section>
+
         <section class="ws-panel" data-panel="library" hidden>
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="library" data-subtab="documents">Documents</button>
             <button type="button" class="ws-subtab" data-subtabs="library" data-subtab="shared">Shared Library</button>
-            <button type="button" class="ws-subtab" data-subtabs="library" data-subtab="lessons">Lessons</button>
+            <button type="button" class="ws-subtab" data-subtabs="library" data-subtab="lessons" data-troop-only>Lessons</button>
           </div>
 
           <div data-subpanel="library:documents">
@@ -1448,11 +1554,108 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     </div>
   </div>
 
+  <!-- Content Calendar's day view — same list+form shell as Event
+       Calendar's own overlay, with its own accent (curr-day-panel--content
+       in global.css) so it doesn't just look like a reskinned booking form. -->
+  <div class="curr-day-overlay" data-content-day-overlay hidden>
+    <div class="curr-day-panel curr-day-panel--content" data-content-day-panel>
+      <div class="curr-day-banner">
+        <span class="curr-day-banner-text">
+          <span class="curr-day-banner-label">Content for</span>
+          <p class="curr-day-banner-value" data-content-day-header></p>
+        </span>
+      </div>
+
+      <div data-content-day-list-view>
+        <div class="curr-day-list" data-content-day-list></div>
+        <div class="curr-day-actions">
+          <button type="button" class="ws-form-cancel" data-content-day-close>Close</button>
+          <button type="button" class="btn-primary" data-content-day-add>+ Add content</button>
+        </div>
+      </div>
+
+      <form data-content-form-view hidden>
+        <p class="curr-day-section-label" data-content-form-title>New content</p>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
+            <span>Title *</span>
+            <input type="text" data-content-title required />
+          </label>
+          <label class="curr-day-field">
+            <span>Status</span>
+            <select data-content-status>
+              <option value="idea">Idea</option>
+              <option value="drafting">Drafting</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="posted">Posted</option>
+            </select>
+          </label>
+        </div>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
+            <span>Date *</span>
+            <input type="date" data-content-date required />
+          </label>
+          <label class="curr-day-field">
+            <span>Time</span>
+            <input type="time" data-content-time />
+          </label>
+        </div>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
+            <span>Platform</span>
+            <select data-content-platform></select>
+          </label>
+          <label class="curr-day-field">
+            <span>Content type</span>
+            <select data-content-type></select>
+          </label>
+        </div>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
+            <span>Assigned to</span>
+            <select data-content-assigned>
+              <option value="">Unassigned</option>
+            </select>
+          </label>
+          <label class="curr-day-field">
+            <span>Live link (once posted)</span>
+            <input type="text" data-content-link placeholder="https://…" />
+          </label>
+        </div>
+        <label class="curr-day-field">
+          <span>Caption</span>
+          <textarea data-content-caption rows="3"></textarea>
+        </label>
+        <label class="curr-day-field">
+          <span>Notes</span>
+          <textarea data-content-notes rows="2"></textarea>
+        </label>
+
+        <p class="curr-day-section-label">Attachment</p>
+        <div class="curr-day-attachment" data-content-attachment-current hidden>
+          <a class="ws-edit-btn" data-content-attachment-link target="_blank" rel="noopener">View attachment →</a>
+          <button type="button" class="ws-row-del" data-content-attachment-remove title="Remove">×</button>
+        </div>
+        <div class="curr-day-custom-add curr-day-custom-add--tight" data-content-attachment-upload>
+          <input type="file" accept="image/*,video/*,.pdf,.doc,.docx" data-content-attachment-file />
+          <button type="button" class="btn-primary" data-content-attachment-upload-btn>Upload</button>
+        </div>
+
+        <div class="curr-day-actions">
+          <button type="button" class="ws-edit-btn" data-content-delete hidden>Delete</button>
+          <button type="button" class="ws-form-cancel" data-content-form-back>Back to list</button>
+          <button type="submit" class="btn-primary" data-content-save>Save content</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     import { supabase, supabaseConfigured, getSession, getProfile, signOut, isSessionExpired, msUntilSessionExpiry } from '../../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
-    import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY } from '../../lib/curriculum/constants';
+    import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY } from '../../lib/curriculum/constants';
 
     // Loose alias for actual query calls below — supabaseConfigured is
     // checked once in init() before any of this runs, so by the time these
@@ -1468,7 +1671,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       events: [], eventCosts: [], editingEventId: null, editingEventCostId: null,
       vendors: [], sharedVendors: [], editingVendorId: null,
       sponsors: [], editingSponsorId: null, prContacts: [], editingPrContactId: null, prDocs: [],
+      contentItems: [], editingContentId: null, credentials: [], editingCredentialId: null,
       evt: { anchor: new Date(), currentDay: null },
+      content: { anchor: new Date(), currentDay: null, view: 'calendar' },
       attAnchor: new Date(), attSelected: todayStr(), attDatesWithRecords: null,
       curr: { anchor: new Date(), meetings: new Map(), currentDay: null, channel: null },
     };
@@ -1743,6 +1948,56 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.prlibCatInput = el('[data-prlib-cat-input]');
       els.prlibCatAdd = el('[data-prlib-cat-add]');
       els.prlibCatList = el('[data-prlib-cat-list]');
+      els.contentPrev = el('[data-content-prev]');
+      els.contentNext = el('[data-content-next]');
+      els.contentToday = el('[data-content-today]');
+      els.contentNavLabel = el('[data-content-nav-label]');
+      els.contentAddBtn = el('[data-content-add-btn]');
+      els.contentMonthGrid = el('[data-content-month-grid]');
+      els.contentBoard = el('[data-content-board]');
+      els.contentPlatformCatInput = el('[data-content-platform-cat-input]');
+      els.contentPlatformCatAdd = el('[data-content-platform-cat-add]');
+      els.contentPlatformCatList = el('[data-content-platform-cat-list]');
+      els.contentTypeCatInput = el('[data-content-type-cat-input]');
+      els.contentTypeCatAdd = el('[data-content-type-cat-add]');
+      els.contentTypeCatList = el('[data-content-type-cat-list]');
+      els.contentDayOverlay = el('[data-content-day-overlay]');
+      els.contentDayHeader = el('[data-content-day-header]');
+      els.contentDayListView = el('[data-content-day-list-view]');
+      els.contentDayList = el('[data-content-day-list]');
+      els.contentDayClose = el('[data-content-day-close]');
+      els.contentDayAdd = el('[data-content-day-add]');
+      els.contentFormView = el('[data-content-form-view]');
+      els.contentFormTitle = el('[data-content-form-title]');
+      els.contentTitle = el('[data-content-title]');
+      els.contentStatus = el('[data-content-status]');
+      els.contentDate = el('[data-content-date]');
+      els.contentTime = el('[data-content-time]');
+      els.contentPlatform = el('[data-content-platform]');
+      els.contentType = el('[data-content-type]');
+      els.contentAssigned = el('[data-content-assigned]');
+      els.contentLink = el('[data-content-link]');
+      els.contentCaption = el('[data-content-caption]');
+      els.contentNotes = el('[data-content-notes]');
+      els.contentAttachmentCurrent = el('[data-content-attachment-current]');
+      els.contentAttachmentLink = el('[data-content-attachment-link]');
+      els.contentAttachmentRemove = el('[data-content-attachment-remove]');
+      els.contentAttachmentUpload = el('[data-content-attachment-upload]');
+      els.contentAttachmentFile = el('[data-content-attachment-file]');
+      els.contentAttachmentUploadBtn = el('[data-content-attachment-upload-btn]');
+      els.contentDelete = el('[data-content-delete]');
+      els.contentFormBack = el('[data-content-form-back]');
+      els.credForm = el('[data-cred-form]');
+      els.credFormTitle = el('[data-cred-form-title]');
+      els.credService = el('[data-cred-service]');
+      els.credUsername = el('[data-cred-username]');
+      els.credPassword = el('[data-cred-password]');
+      els.credUrl = el('[data-cred-url]');
+      els.credNotes = el('[data-cred-notes]');
+      els.credSubmit = el('[data-cred-submit]');
+      els.credCancel = el('[data-cred-cancel]');
+      els.credSearch = el('[data-cred-search]');
+      els.credBody = el('[data-cred-body]');
       els.eventsBadge = el('[data-events-badge]');
       els.evtDashStats = el('[data-evt-dash-stats]');
       els.evtTopMembers = el('[data-evt-top-members]');
@@ -1856,7 +2111,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function loadCopyPicker() {
       const [troopRes, targetRes] = await Promise.all([
         db.from('members').select('id, full_name, phone, group_key')
-          .neq('group_key', MUSIC_GROUP_KEY).neq('group_key', GENERAL_GROUP_KEY).eq('active', true)
+          .neq('group_key', MUSIC_GROUP_KEY).neq('group_key', GENERAL_GROUP_KEY).neq('group_key', SOCIAL_MEDIA_GROUP_KEY).eq('active', true)
           .order('full_name', { ascending: true }),
         db.from('members').select('source_member_id').eq('group_key', state.activeGroup).not('source_member_id', 'is', null),
       ]);
@@ -2343,6 +2598,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         expense: ['Venue Maintenance', 'Furniture & Equipment', 'Utilities', 'Repairs', 'Supplies', 'Other'],
         income: ['Donations', 'Fundraising', 'Other'],
       },
+      [SOCIAL_MEDIA_GROUP_KEY]: {
+        expense: ['Content Production', 'Advertising & Boosting', 'Software & Subscriptions', 'Equipment', 'Miscellaneous'],
+        income: ['Sponsored Content', 'Donations', 'Miscellaneous'],
+      },
     };
     async function loadGroupSettings() {
       if (!state.activeGroup) return;
@@ -2350,7 +2609,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       state.groupSettings = data || {
         group_key: state.activeGroup, monthly_fee_defaults: {}, expense_categories: [], income_categories: [],
         inventory_categories: [], event_type_categories: [], event_cost_categories: [], event_location_categories: [],
-        sponsor_type_categories: [], pr_contact_categories: [], pr_library_categories: [], activity_bank: [],
+        sponsor_type_categories: [], pr_contact_categories: [], pr_library_categories: [],
+        content_platform_categories: [], content_type_categories: [], activity_bank: [],
       };
       const defaults = GROUP_DEFAULT_CATEGORIES[state.activeGroup] || { expense: DEFAULT_EXPENSE_CATEGORIES, income: DEFAULT_INCOME_CATEGORIES };
       // Every group starts with sensible defaults for its kind — a leader
@@ -2365,6 +2625,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!state.groupSettings.sponsor_type_categories?.length) state.groupSettings.sponsor_type_categories = [...DEFAULT_SPONSOR_TYPE_CATEGORIES];
       if (!state.groupSettings.pr_contact_categories?.length) state.groupSettings.pr_contact_categories = [...DEFAULT_PR_CONTACT_CATEGORIES];
       if (!state.groupSettings.pr_library_categories?.length) state.groupSettings.pr_library_categories = [...DEFAULT_PR_LIBRARY_CATEGORIES];
+      if (!state.groupSettings.content_platform_categories?.length) state.groupSettings.content_platform_categories = [...DEFAULT_CONTENT_PLATFORM_CATEGORIES];
+      if (!state.groupSettings.content_type_categories?.length) state.groupSettings.content_type_categories = [...DEFAULT_CONTENT_TYPE_CATEGORIES];
       if (!state.groupSettings.activity_bank?.length) {
         state.groupSettings.activity_bank = ACTIVITY_BANK.map((a) => ({ id: a.type, en: a.en }));
       }
@@ -4301,6 +4563,453 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
+    // ---------- Content Calendar (Social Media only): a calendar + board
+    // view over the same content_items, plus its own category Settings --
+    const DEFAULT_CONTENT_PLATFORM_CATEGORIES = ['Instagram', 'Facebook', 'TikTok', 'X (Twitter)', 'YouTube', 'Other'];
+    const DEFAULT_CONTENT_TYPE_CATEGORIES = ['Photo Post', 'Reel / Video', 'Story', 'Carousel', 'Live', 'Other'];
+    const CONTENT_STATUS_LABELS: Record<string, string> = { idea: 'Idea', drafting: 'Drafting', scheduled: 'Scheduled', posted: 'Posted' };
+    const CONTENT_STATUS_BADGE_CLASS: Record<string, string> = { idea: 'ws-badge--fair', drafting: 'ws-badge--fair', scheduled: 'ws-badge--fair', posted: 'ws-badge--good' };
+    function contentStatusBadge(item: any) {
+      return `<span class="ws-badge ${CONTENT_STATUS_BADGE_CLASS[item.status]}">${CONTENT_STATUS_LABELS[item.status]}</span>`;
+    }
+    async function loadContent() {
+      if (!state.activeGroup) return;
+      await loadGroupSettings();
+      await ensureMembersLoaded();
+      renderContentCategories();
+      updateContentAssignedOptions();
+      const { data, error } = await db.from('content_items').select('*').eq('group_key', state.activeGroup).order('scheduled_date', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load content.'); return; }
+      state.contentItems = data || [];
+      contentRenderMonth();
+      contentRenderBoard();
+    }
+    // ---- Settings subtab: 2 category lists, same shared pattern as
+    // every other Settings subtab in the app.
+    function renderContentCategories() {
+      renderCategoryList(els.contentPlatformCatList, state.groupSettings.content_platform_categories || [], 'content_platform_categories', saveContentCategoryList);
+      renderCategoryList(els.contentTypeCatList, state.groupSettings.content_type_categories || [], 'content_type_categories', saveContentCategoryList);
+      updateContentPlatformOptions();
+      updateContentTypeOptions();
+    }
+    async function saveContentCategoryList(field: string, updated: string[]) {
+      const { error } = await db.from('group_settings').upsert({ group_key: state.activeGroup, [field]: updated }, { onConflict: 'group_key' });
+      if (error) { console.error(error); showToast('Could not save.'); return; }
+      state.groupSettings[field] = updated;
+      renderContentCategories();
+    }
+    function updateContentPlatformOptions() {
+      const list = state.groupSettings?.content_platform_categories || [];
+      const current = els.contentPlatform.value;
+      els.contentPlatform.innerHTML = '<option value="">— None —</option>' + list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+      if (list.includes(current)) els.contentPlatform.value = current;
+    }
+    function updateContentTypeOptions() {
+      const list = state.groupSettings?.content_type_categories || [];
+      const current = els.contentType.value;
+      els.contentType.innerHTML = '<option value="">— None —</option>' + list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+      if (list.includes(current)) els.contentType.value = current;
+    }
+    function updateContentAssignedOptions() {
+      const active = state.members.filter((m: any) => m.active);
+      els.contentAssigned.innerHTML = '<option value="">Unassigned</option>' + active.map((m: any) => `<option value="${m.id}">${escapeHtml(m.full_name)}</option>`).join('');
+    }
+    function bindContentCategories() {
+      els.contentPlatformCatAdd.addEventListener('click', () => {
+        const val = els.contentPlatformCatInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.content_platform_categories || [];
+        if (current.includes(val)) { els.contentPlatformCatInput.value = ''; return; }
+        saveContentCategoryList('content_platform_categories', [...current, val]);
+        els.contentPlatformCatInput.value = '';
+      });
+      els.contentTypeCatAdd.addEventListener('click', () => {
+        const val = els.contentTypeCatInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.content_type_categories || [];
+        if (current.includes(val)) { els.contentTypeCatInput.value = ''; return; }
+        saveContentCategoryList('content_type_categories', [...current, val]);
+        els.contentTypeCatInput.value = '';
+      });
+    }
+
+    // ---- Calendar view — same shape as Event Calendar's own month grid.
+    function contentGoToDate(dateStr: string) {
+      const d = parseDateStr(dateStr);
+      state.content.anchor = new Date(d.getFullYear(), d.getMonth(), 1);
+      contentRenderMonth();
+    }
+    function contentStepMonth(delta: number) {
+      state.content.anchor = new Date(state.content.anchor.getFullYear(), state.content.anchor.getMonth() + delta, 1);
+      contentRenderMonth();
+    }
+    function contentRenderMonth() {
+      const anchor = state.content.anchor;
+      const y = anchor.getFullYear(), mo = anchor.getMonth();
+      els.contentNavLabel.textContent = `${MONTHS[mo].en} ${y}`;
+      const first = new Date(y, mo, 1);
+      const last = new Date(y, mo + 1, 0);
+      const start = startOfWeek(first);
+      const end = addDays(startOfWeek(last), 6);
+      const today = todayStr();
+      let html = '<div class="curr-weekday-row">' + WEEKDAYS.map((w) => `<div class="curr-weekday">${w.en}</div>`).join('') + '</div><div class="curr-month-cells">';
+      let d = new Date(start);
+      while (d <= end) {
+        const dateStr = toDateStr(d);
+        const inMonth = d.getMonth() === mo;
+        const dayItems = state.contentItems.filter((c: any) => c.scheduled_date === dateStr);
+        const shown = dayItems.slice(0, 3);
+        const extra = dayItems.length - shown.length;
+        html += `<div class="curr-day-cell${inMonth ? '' : ' curr-day-cell--out'}${dateStr === today ? ' curr-day-cell--today' : ''}${dayItems.length ? ' curr-day-cell--has' : ''}" data-date="${dateStr}">
+          <span class="curr-day-num">${d.getDate()}</span>
+          <div class="curr-day-mini">
+            ${shown.map((c: any) => `<span class="curr-mini-chip">${escapeHtml(c.title)}</span>`).join('')}
+            ${extra > 0 ? `<span class="curr-mini-more">+${extra}</span>` : ''}
+          </div>
+        </div>`;
+        d = addDays(d, 1);
+      }
+      html += '</div>';
+      els.contentMonthGrid.innerHTML = html;
+      els.contentMonthGrid.querySelectorAll('.curr-day-cell').forEach((cell: any) => {
+        cell.addEventListener('click', () => contentOpenDay(cell.dataset.date));
+      });
+    }
+
+    // ---- Board view — the same content_items grouped by status, one
+    // column each. Moving a card between statuses is a dropdown rather
+    // than drag-and-drop, so it can't silently fail on a fumbled drop.
+    const CONTENT_STATUSES = ['idea', 'drafting', 'scheduled', 'posted'];
+    function contentRenderBoard() {
+      els.contentBoard.innerHTML = CONTENT_STATUSES.map((status) => {
+        const items = state.contentItems.filter((c: any) => c.status === status);
+        return `
+          <div class="ws-content-column">
+            <div class="ws-content-column-head">
+              <span>${CONTENT_STATUS_LABELS[status]}</span>
+              <span class="ws-content-column-count">${items.length}</span>
+            </div>
+            ${items.map((c: any) => `
+              <div class="ws-content-card" data-content-card-id="${c.id}">
+                <div class="ws-content-card-title">${escapeHtml(c.title)}</div>
+                <div class="ws-content-card-meta">
+                  ${c.platform ? `<span>${escapeHtml(c.platform)}</span>` : ''}
+                  ${c.scheduled_date ? `<span>${c.scheduled_date}</span>` : ''}
+                </div>
+                <div class="ws-content-card-move">
+                  <select data-content-move-select data-content-move-id="${c.id}">
+                    ${CONTENT_STATUSES.map((s) => `<option value="${s}" ${s === status ? 'selected' : ''}>${CONTENT_STATUS_LABELS[s]}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+      els.contentBoard.querySelectorAll('[data-content-card-id]').forEach((card: any) => {
+        card.addEventListener('click', (e: Event) => {
+          if ((e.target as any).closest('[data-content-move-select]')) return;
+          const item = state.contentItems.find((c: any) => c.id === card.dataset.contentCardId);
+          if (item) contentOpenDay(item.scheduled_date || todayStr(), item.id);
+        });
+      });
+      els.contentBoard.querySelectorAll('[data-content-move-select]').forEach((sel: any) => {
+        sel.addEventListener('click', (e: Event) => e.stopPropagation());
+        sel.addEventListener('change', async () => {
+          const { error } = await db.from('content_items').update({ status: sel.value, updated_at: new Date().toISOString() }).eq('id', sel.dataset.contentMoveId);
+          if (error) { showToast('Could not update status.'); return; }
+          await loadContent();
+        });
+      });
+    }
+    function contentSetView(view: string) {
+      state.content.view = view;
+      document.querySelectorAll('[data-content-view]').forEach((b: any) => b.classList.toggle('curr-view-btn--active', b.dataset.contentView === view));
+      document.querySelectorAll('[data-content-view-pane]').forEach((p: any) => p.toggleAttribute('hidden', p.dataset.contentViewPane !== view));
+    }
+
+    // ---- Day overlay: that day's agenda, plus the add/edit form for one
+    // piece of content at a time — same shell as Event Calendar's own.
+    function contentOpenDay(dateStr: string, focusItemId?: string) {
+      state.content.currentDay = dateStr;
+      const d = parseDateStr(dateStr);
+      els.contentDayHeader.textContent = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}, ${d.getFullYear()}`;
+      contentRenderDayList(dateStr);
+      els.contentDayOverlay.removeAttribute('hidden');
+      document.documentElement.style.overflow = 'hidden';
+      if (focusItemId) contentStartEdit(focusItemId);
+      else contentShowList();
+    }
+    function contentCloseDay() {
+      els.contentDayOverlay.setAttribute('hidden', '');
+      state.content.currentDay = null;
+      document.documentElement.style.overflow = '';
+    }
+    function contentShowList() {
+      els.contentDayListView.removeAttribute('hidden');
+      els.contentFormView.setAttribute('hidden', '');
+    }
+    function contentShowForm() {
+      els.contentDayListView.setAttribute('hidden', '');
+      els.contentFormView.removeAttribute('hidden');
+    }
+    function contentRenderDayList(dateStr: string) {
+      const dayItems = state.contentItems.filter((c: any) => c.scheduled_date === dateStr);
+      els.contentDayList.innerHTML = dayItems.length ? dayItems.map((c: any) => `
+        <div class="ws-evt-day-item" data-content-id="${c.id}">
+          <div class="ws-evt-day-item-main">
+            <span class="ws-evt-day-item-title">${escapeHtml(c.title)}</span>
+            <span class="ws-evt-day-item-sub">${escapeHtml(c.platform || '—')}${c.content_type ? ' · ' + escapeHtml(c.content_type) : ''}</span>
+          </div>
+          ${contentStatusBadge(c)}
+          <div class="ws-evt-day-item-actions">
+            <button type="button" class="ws-edit-btn" data-content-day-edit>Edit</button>
+          </div>
+        </div>
+      `).join('') : '<p class="ws-empty" style="padding:1rem 0">Nothing planned this day yet.</p>';
+      els.contentDayList.querySelectorAll('[data-content-day-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => contentStartEdit(btn.closest('[data-content-id]').dataset.contentId));
+      });
+    }
+    function contentResetForm() {
+      state.editingContentId = null;
+      els.contentFormView.reset();
+      els.contentDate.value = state.content.currentDay || todayStr();
+      updateContentPlatformOptions();
+      updateContentTypeOptions();
+      els.contentPlatform.value = '';
+      els.contentType.value = '';
+      els.contentStatus.value = 'idea';
+      els.contentAssigned.value = '';
+      els.contentFormTitle.textContent = 'New content';
+      els.contentDelete.hidden = true;
+      contentRenderAttachment(null);
+    }
+    function contentStartNew() {
+      contentResetForm();
+      contentShowForm();
+    }
+    function contentStartEdit(id: string) {
+      const c = state.contentItems.find((x: any) => x.id === id);
+      if (!c) return;
+      state.editingContentId = id;
+      els.contentTitle.value = c.title;
+      els.contentStatus.value = c.status;
+      els.contentDate.value = c.scheduled_date || '';
+      els.contentTime.value = c.scheduled_time || '';
+      updateContentPlatformOptions();
+      updateContentTypeOptions();
+      els.contentPlatform.value = c.platform || '';
+      els.contentType.value = c.content_type || '';
+      els.contentAssigned.value = c.assigned_to || '';
+      els.contentLink.value = c.link_url || '';
+      els.contentCaption.value = c.caption || '';
+      els.contentNotes.value = c.notes || '';
+      els.contentFormTitle.textContent = `Editing ${c.title}`;
+      els.contentDelete.hidden = false;
+      contentRenderAttachment(c);
+      contentShowForm();
+    }
+    async function contentRenderAttachment(c: any) {
+      const path = c && c.attachment_path;
+      els.contentAttachmentUpload.toggleAttribute('hidden', !!path);
+      els.contentAttachmentFile.value = '';
+      if (!path) { els.contentAttachmentCurrent.setAttribute('hidden', ''); return; }
+      els.contentAttachmentCurrent.removeAttribute('hidden');
+      const { data, error } = await db.storage.from('documents').createSignedUrl(path, 3600);
+      els.contentAttachmentLink.href = !error && data ? data.signedUrl : '#';
+    }
+    function bindContentForm() {
+      els.contentPrev.addEventListener('click', () => contentStepMonth(-1));
+      els.contentNext.addEventListener('click', () => contentStepMonth(1));
+      els.contentToday.addEventListener('click', () => { state.content.anchor = new Date(); contentRenderMonth(); });
+      els.contentAddBtn.addEventListener('click', () => contentOpenDay(todayStr()));
+      document.querySelectorAll('[data-content-view]').forEach((btn: any) => {
+        btn.addEventListener('click', () => contentSetView(btn.dataset.contentView));
+      });
+      els.contentDayClose.addEventListener('click', contentCloseDay);
+      els.contentDayAdd.addEventListener('click', contentStartNew);
+      els.contentFormBack.addEventListener('click', contentShowList);
+      els.contentAttachmentUploadBtn.addEventListener('click', async () => {
+        const dateStr = state.content.currentDay;
+        const file = els.contentAttachmentFile.files[0];
+        if (!file) { showToast('Choose a file first.'); return; }
+        if (!state.editingContentId) { showToast('Save the content first, then attach a file.'); return; }
+        els.contentAttachmentUploadBtn.disabled = true;
+        const path = `${state.activeGroup}/content/${dateStr}-${Date.now()}-${file.name}`;
+        const { error: upErr } = await db.storage.from('documents').upload(path, file);
+        if (upErr) { console.error(upErr); showToast('Could not upload.'); els.contentAttachmentUploadBtn.disabled = false; return; }
+        const { error } = await db.from('content_items').update({ attachment_path: path }).eq('id', state.editingContentId);
+        els.contentAttachmentUploadBtn.disabled = false;
+        if (error) { showToast('Could not save attachment.'); return; }
+        await loadContent();
+        contentRenderAttachment(state.contentItems.find((c: any) => c.id === state.editingContentId));
+      });
+      els.contentAttachmentRemove.addEventListener('click', async () => {
+        if (!state.editingContentId) return;
+        const c = state.contentItems.find((x: any) => x.id === state.editingContentId);
+        if (!c || !c.attachment_path) return;
+        const oldPath = c.attachment_path;
+        const { error } = await db.from('content_items').update({ attachment_path: null }).eq('id', state.editingContentId);
+        if (error) { showToast('Could not remove attachment.'); return; }
+        await db.storage.from('documents').remove([oldPath]);
+        await loadContent();
+        contentRenderAttachment(null);
+      });
+      els.contentDelete.addEventListener('click', async () => {
+        if (!state.editingContentId) return;
+        if (!confirm('Delete this content item?')) return;
+        const c = state.contentItems.find((x: any) => x.id === state.editingContentId);
+        const { error } = await db.from('content_items').delete().eq('id', state.editingContentId);
+        if (error) { showToast('Could not delete.'); return; }
+        if (c && c.attachment_path) await db.storage.from('documents').remove([c.attachment_path]);
+        const dateStr = state.content.currentDay;
+        await loadContent();
+        contentRenderDayList(dateStr);
+        contentShowList();
+      });
+      els.contentFormView.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const title = els.contentTitle.value.trim();
+        const date = els.contentDate.value;
+        if (!title || !date) { showToast('Title and date are required.'); return; }
+        const payload: any = {
+          title, status: els.contentStatus.value, scheduled_date: date, scheduled_time: els.contentTime.value || null,
+          platform: els.contentPlatform.value || null, content_type: els.contentType.value || null,
+          assigned_to: els.contentAssigned.value || null, link_url: els.contentLink.value.trim() || null,
+          caption: els.contentCaption.value.trim() || null, notes: els.contentNotes.value.trim() || null,
+        };
+        let error;
+        if (state.editingContentId) {
+          payload.updated_at = new Date().toISOString();
+          ({ error } = await db.from('content_items').update(payload).eq('id', state.editingContentId));
+        } else {
+          payload.group_key = state.activeGroup;
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ error } = await db.from('content_items').insert(payload));
+        }
+        if (error) { console.error(error); showToast('Could not save content.'); return; }
+        await loadContent();
+        contentRenderDayList(date);
+        contentShowList();
+      });
+    }
+
+    // ---------- Credentials (Social Media only): plain-text login vault,
+    // scoped to this group, masked on-screen with a Reveal/Copy toggle --
+    function resetCredForm() {
+      state.editingCredentialId = null;
+      els.credForm.reset();
+      els.credFormTitle.textContent = 'Add a login';
+      els.credSubmit.textContent = 'Add login';
+      els.credCancel.hidden = true;
+    }
+    function startEditCredential(id: string) {
+      const c = state.credentials.find((x: any) => x.id === id);
+      if (!c) return;
+      state.editingCredentialId = id;
+      els.credService.value = c.service_name;
+      els.credUsername.value = c.username || '';
+      els.credPassword.value = c.password || '';
+      els.credUrl.value = c.url || '';
+      els.credNotes.value = c.notes || '';
+      els.credFormTitle.textContent = `Editing ${c.service_name}`;
+      els.credSubmit.textContent = 'Save changes';
+      els.credCancel.hidden = false;
+      els.credForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    async function loadCredentials() {
+      if (!state.activeGroup) return;
+      const { data, error } = await db.from('credentials').select('*').eq('group_key', state.activeGroup).order('service_name', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load credentials.'); return; }
+      state.credentials = data || [];
+      renderCredentials();
+    }
+    function renderCredentials() {
+      if (!state.credentials.length) {
+        els.credBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No logins saved yet.</td></tr>';
+        return;
+      }
+      els.credBody.innerHTML = state.credentials.map((c: any) => `
+        <tr data-cred-id="${c.id}" data-password="${escapeHtml(c.password || '')}">
+          <td data-label="Service">${escapeHtml(c.service_name)}</td>
+          <td data-label="Username">${escapeHtml(c.username || '—')}</td>
+          <td data-label="Password">${c.password ? `
+            <span data-cred-pw-display>••••••••</span>
+            <button type="button" class="ws-edit-btn" data-cred-reveal>Show</button>
+            <button type="button" class="ws-edit-btn" data-cred-copy>Copy</button>
+          ` : '—'}</td>
+          <td data-label="URL">${c.url ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${escapeHtml(c.url)}</a>` : '—'}</td>
+          <td data-label="Notes">${escapeHtml(c.notes || '—')}</td>
+          <td data-label="Updated by">${escapeHtml(c.updated_by_name || c.created_by_name || '—')}</td>
+          <td class="ws-row-actions">
+            <button type="button" class="ws-edit-btn" data-cred-edit>Edit</button>
+            <button type="button" class="ws-row-del" data-cred-del>×</button>
+          </td>
+        </tr>
+      `).join('');
+      els.credBody.querySelectorAll('tr').forEach((row: any) => {
+        const id = row.dataset.credId;
+        const password = row.dataset.password;
+        row.querySelector('[data-cred-edit]')?.addEventListener('click', () => startEditCredential(id));
+        row.querySelector('[data-cred-del]').addEventListener('click', async () => {
+          if (!confirm('Delete this login?')) return;
+          const { error } = await db.from('credentials').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          if (state.editingCredentialId === id) resetCredForm();
+          await loadCredentials();
+        });
+        const revealBtn = row.querySelector('[data-cred-reveal]');
+        if (revealBtn) {
+          revealBtn.addEventListener('click', () => {
+            const span = row.querySelector('[data-cred-pw-display]');
+            const revealed = span.textContent !== '••••••••';
+            span.textContent = revealed ? '••••••••' : password;
+            revealBtn.textContent = revealed ? 'Show' : 'Hide';
+          });
+        }
+        row.querySelector('[data-cred-copy]')?.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(password);
+            showToast('Password copied.');
+          } catch {
+            showToast('Could not copy — your browser may be blocking clipboard access.');
+          }
+        });
+      });
+    }
+    function bindCredForm() {
+      els.credCancel.addEventListener('click', resetCredForm);
+      els.credForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const service = els.credService.value.trim();
+        if (!service) { showToast('Service name is required.'); return; }
+        els.credSubmit.disabled = true;
+        const payload: any = {
+          service_name: service, username: els.credUsername.value.trim() || null,
+          password: els.credPassword.value || null, url: els.credUrl.value.trim() || null,
+          notes: els.credNotes.value.trim() || null,
+        };
+        let error;
+        if (state.editingCredentialId) {
+          payload.updated_at = new Date().toISOString();
+          payload.updated_by = state.session.user.id;
+          payload.updated_by_name = state.profile?.name || null;
+          ({ error } = await db.from('credentials').update(payload).eq('id', state.editingCredentialId));
+        } else {
+          payload.group_key = state.activeGroup;
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ error } = await db.from('credentials').insert(payload));
+        }
+        els.credSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not save login.'); return; }
+        resetCredForm();
+        await loadCredentials();
+      });
+    }
+
     // ---------- Library (document storage, per group) ----------------------
     async function loadLibrary() {
       if (!state.activeGroup) return;
@@ -5624,29 +6333,35 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         });
       });
     }
-    // Music and General (see MUSIC_GROUP_KEY/GENERAL_GROUP_KEY) aren't
-    // scouting troops — Archive/Approvals/Attendance/Fees/Curriculum/
-    // Library/Reports don't apply to them. Both still get Roster: Music's
-    // is band members, General's is the board of directors/leadership.
-    // Runs on every group switch, not just once, so leaving one restores
-    // every other tab.
-    const NON_TROOP_GROUP_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY];
+    // Music, General, and Social Media (see MUSIC_GROUP_KEY/
+    // GENERAL_GROUP_KEY/SOCIAL_MEDIA_GROUP_KEY) aren't scouting troops —
+    // Archive/Approvals/Attendance/Fees/Curriculum/Dashboard don't apply
+    // to any of them (each gets its own dashboard-equivalent in the
+    // Admin console instead — see loadMusicDashboard()-style tabs
+    // there). All 3 still get Roster: Music's is band members,
+    // General's is the board of directors/leadership, Social Media's is
+    // whoever's on the team. Runs on every group switch, not just once,
+    // so leaving one restores every other tab.
+    const NON_TROOP_GROUP_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY];
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
       [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors'],
       [GENERAL_GROUP_KEY]: ['roster', 'finance', 'vendors', 'pr'],
+      [SOCIAL_MEDIA_GROUP_KEY]: ['roster', 'finance', 'vendors', 'reports', 'library', 'content', 'credentials'],
     };
     // Inventory/Event Calendar are Music-only, Public Relations is
-    // General-only — troops aren't in NON_TROOP_TAB_VISIBILITY at all,
-    // so each group's own inclusion list above doesn't hide anything
-    // for them; this covers that case for both. Vendors, unlike those,
-    // is universal — every troop gets it too, same as Roster/Finance,
-    // so it isn't in this list at all.
+    // General-only, Content Calendar/Credentials are Social-Media-only —
+    // troops aren't in NON_TROOP_TAB_VISIBILITY at all, so each group's
+    // own inclusion list above doesn't hide anything for them; this
+    // covers that case for all 3. Vendors, unlike those, is universal —
+    // every troop gets it too, same as Roster/Finance, so it isn't in
+    // this list at all.
     const MUSIC_ONLY_TABS = ['inventory', 'events'];
     const GENERAL_ONLY_TABS = ['pr'];
+    const SOCIAL_MEDIA_ONLY_TABS = ['content', 'credentials'];
     function isTabHidden(tab: string) {
       const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
       if (visible) return !visible.includes(tab);
-      return MUSIC_ONLY_TABS.includes(tab) || GENERAL_ONLY_TABS.includes(tab);
+      return MUSIC_ONLY_TABS.includes(tab) || GENERAL_ONLY_TABS.includes(tab) || SOCIAL_MEDIA_ONLY_TABS.includes(tab);
     }
     function updateTabVisibility() {
       els.tabs.querySelectorAll('.ws-tab:not([data-admin-only])').forEach((btn: any) => {
@@ -5659,6 +6374,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       // Music/General — this categories hint references it by name, so it
       // only makes sense for a troop.
       els.feesTabHint.toggleAttribute('hidden', NON_TROOP_GROUP_KEYS.includes(state.activeGroup));
+      // Library's own Lessons subtab (troop curriculum resource links)
+      // only makes sense for a troop — Social Media sees the rest of
+      // Library (Documents/Shared Library) but not this.
+      document.querySelectorAll('[data-troop-only]').forEach((el: any) => {
+        el.toggleAttribute('hidden', NON_TROOP_GROUP_KEYS.includes(state.activeGroup));
+      });
       balanceTabs();
     }
 
@@ -5674,6 +6395,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'events') loadEvents();
       if (tab === 'vendors') loadVendors();
       if (tab === 'pr') loadPR();
+      if (tab === 'content') loadContent();
+      if (tab === 'credentials') loadCredentials();
       if (tab === 'library') loadLibrary();
       if (tab === 'curriculum') currStart();
     }
@@ -5840,6 +6563,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindPrContactForm();
         bindPRLibraryUpload();
         bindPRCategories();
+        bindContentForm();
+        bindContentCategories();
+        bindCredForm();
         bindLibraryUpload();
         bindReports();
         bindTableSearch(els.rosterSearch, els.rosterBody);
@@ -5851,6 +6577,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindTableSearch(els.vendorSearch, els.vendorBody);
         bindTableSearch(els.sponsorSearch, els.sponsorBody);
         bindTableSearch(els.prcSearch, els.prcBody);
+        bindTableSearch(els.credSearch, els.credBody);
         currBindStatics();
         bindAttendance();
         els.feeMonth.addEventListener('change', loadFees);

@@ -58,6 +58,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
         <button type="button" class="ws-tab" data-tab="curriculum"><Icon name="flag" size={16} strokeWidth={1.8} /> Curriculum</button>
         <button type="button" class="ws-tab" data-tab="music"><Icon name="music" size={16} strokeWidth={1.8} /> Music</button>
+        <button type="button" class="ws-tab" data-tab="socialmedia"><Icon name="sparkle" size={16} strokeWidth={1.8} /> Social Media</button>
         <button type="button" class="ws-tab" data-tab="roster"><Icon name="star" size={16} strokeWidth={1.8} /> Roster</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
         <button type="button" class="ws-tab" data-tab="vendors"><Icon name="phone" size={16} strokeWidth={1.8} /> Vendors</button>
@@ -414,6 +415,75 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         </section>
 
+        <!-- ================= Social Media ================= -->
+        <section class="ws-panel" data-panel="socialmedia" hidden>
+          <p class="ws-att-hint">Social Media isn't a scouting troop either, so it's not part of the Overview rollup above — its own dashboard and Content Calendar report live here instead.</p>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="socialmedia" data-subtab="dashboard">Dashboard</button>
+            <button type="button" class="ws-subtab" data-subtabs="socialmedia" data-subtab="reports">Reports</button>
+          </div>
+
+          <div data-subpanel="socialmedia:dashboard">
+            <div class="ws-dash">
+              <div class="ws-dash-kpis" data-sm-kpis></div>
+
+              <div class="ws-dash-card ws-dash-card--full">
+                <div class="ws-dash-card-head">
+                  <h3>Income vs. expenses</h3>
+                  <span class="ws-dash-card-sub">Last 6 months</span>
+                </div>
+                <div data-sm-chart></div>
+              </div>
+
+              <div class="ws-dash-grid ws-dash-grid--2">
+                <div class="ws-dash-card">
+                  <div class="ws-dash-card-head"><h3>Content by status</h3></div>
+                  <div data-sm-status-breakdown></div>
+                </div>
+                <div class="ws-dash-card">
+                  <div class="ws-dash-card-head"><h3>Content by platform</h3></div>
+                  <div data-sm-platform-breakdown></div>
+                </div>
+              </div>
+
+              <div class="ws-dash-grid ws-dash-grid--2">
+                <div class="ws-dash-card">
+                  <div class="ws-dash-card-head"><h3>Needs posting</h3></div>
+                  <div class="ws-table-wrap">
+                    <table class="ws-table" data-sm-todo-table>
+                      <thead><tr><th>Date</th><th>Title</th><th>Status</th></tr></thead>
+                      <tbody data-sm-todo-body></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="ws-dash-card">
+                  <div class="ws-dash-card-head"><h3>Upcoming content</h3></div>
+                  <div class="ws-table-wrap">
+                    <table class="ws-table" data-sm-upcoming-table>
+                      <thead><tr><th>Date</th><th>Title</th><th>Platform</th></tr></thead>
+                      <tbody data-sm-upcoming-body></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div data-subpanel="socialmedia:reports" hidden>
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline"><span>Month</span><select data-sm-report-month></select></label>
+              <label class="ws-field ws-field--inline"><span>Year</span><select data-sm-report-year></select></label>
+            </div>
+            <div class="ws-report-grid">
+              <div class="ws-report-card">
+                <h3 class="ws-admin-h3">Content Calendar Report</h3>
+                <p class="ws-report-desc">Every piece of content scheduled or posted in the period — title, platform, type, status, and who it's assigned to.</p>
+                <button type="button" class="btn-primary" data-report-sm-content>Download PDF</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- ================= Vendors (Shared) ================= -->
         <section class="ws-panel" data-panel="vendors" hidden>
           <p class="ws-att-hint">Add a vendor once and tick which group(s) it should show up for, instead of typing it separately into each group's own Vendors tab. Each still sees it there, under Shared Vendors — Music's Inventory Maintenance Log can pick it too.</p>
@@ -494,7 +564,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     } from '../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
-    import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY } from '../lib/curriculum/constants';
+    import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY } from '../lib/curriculum/constants';
 
     const db: any = supabase;
 
@@ -715,6 +785,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.musicUpcomingBody = el('[data-music-upcoming-body]');
       els.musicReportMonth = el('[data-music-report-month]');
       els.musicReportYear = el('[data-music-report-year]');
+
+      els.smKpis = el('[data-sm-kpis]');
+      els.smChart = el('[data-sm-chart]');
+      els.smStatusBreakdown = el('[data-sm-status-breakdown]');
+      els.smPlatformBreakdown = el('[data-sm-platform-breakdown]');
+      els.smTodoBody = el('[data-sm-todo-body]');
+      els.smUpcomingBody = el('[data-sm-upcoming-body]');
+      els.smReportMonth = el('[data-sm-report-month]');
+      els.smReportYear = el('[data-sm-report-year]');
 
       els.currBody = el('[data-curr-body]');
 
@@ -987,10 +1066,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
 
     // Same starter lists as loadGroupSettings() in the Leaders Workspace —
-    // Music/General aren't scouting troops, so they need their own
-    // categories rather than an empty dropdown the first time anyone (here,
-    // possibly an admin before any leader has even opened that group's own
-    // Finance tab) tries to log something against them.
+    // Music/General/Social Media aren't scouting troops, so they need
+    // their own categories rather than an empty dropdown the first time
+    // anyone (here, possibly an admin before any leader has even opened
+    // that group's own Finance tab) tries to log something against them.
     const GROUP_DEFAULT_CATEGORIES: Record<string, { expense: string[]; income: string[] }> = {
       [MUSIC_GROUP_KEY]: {
         expense: ['Band Payouts', 'Equipment', 'Transport', 'Repairs', 'Refreshments', 'Miscellaneous'],
@@ -999,6 +1078,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       [GENERAL_GROUP_KEY]: {
         expense: ['Venue Maintenance', 'Furniture & Equipment', 'Utilities', 'Repairs', 'Supplies', 'Other'],
         income: ['Donations', 'Fundraising', 'Other'],
+      },
+      [SOCIAL_MEDIA_GROUP_KEY]: {
+        expense: ['Content Production', 'Advertising & Boosting', 'Software & Subscriptions', 'Equipment', 'Miscellaneous'],
+        income: ['Sponsored Content', 'Donations', 'Miscellaneous'],
       },
     };
     async function updateTxCategoryOptions() {
@@ -1815,6 +1898,149 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       el('[data-report-music-maintenance]').addEventListener('click', downloadMusicMaintenanceReport);
     }
 
+    // ---------- Social Media: its own dashboard + Content Calendar report --
+    function smContentStatusLabel(s: string): string {
+      return ({ idea: 'Idea', drafting: 'Drafting', scheduled: 'Scheduled', posted: 'Posted' } as any)[s] || s;
+    }
+    async function loadSocialMediaDashboard() {
+      const now = new Date();
+      const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const sixAgoD = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+      const sixStart = `${sixAgoD.getFullYear()}-${String(sixAgoD.getMonth() + 1).padStart(2, '0')}-01`;
+      const [membersRes, contentRes, finRes] = await Promise.all([
+        db.from('members').select('id', { count: 'exact', head: true }).eq('group_key', SOCIAL_MEDIA_GROUP_KEY).eq('active', true),
+        db.from('content_items').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('scheduled_date', { ascending: true }),
+        db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).gte('entry_date', sixStart),
+      ]);
+      const content = contentRes.data || [];
+      const fin = finRes.data || [];
+      const netAllTime = fin.reduce((s: number, e: any) => s + (e.entry_type === 'income' ? Number(e.amount) : -Number(e.amount)), 0);
+      const netThisMonth = fin.filter((e: any) => e.entry_date.startsWith(period))
+        .reduce((s: number, e: any) => s + (e.entry_type === 'income' ? Number(e.amount) : -Number(e.amount)), 0);
+      const today = todayStr();
+      const todo = content.filter((c: any) => c.scheduled_date && c.scheduled_date < today && c.status !== 'posted');
+      const upcoming = content.filter((c: any) => c.scheduled_date && c.scheduled_date >= today);
+      const thisMonthContent = content.filter((c: any) => c.scheduled_date && c.scheduled_date.startsWith(period));
+      els.smKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active team members</span></div>
+          <span class="ws-dash-kpi-num">${membersRes.count || 0}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">▤</span><span class="ws-dash-kpi-label">Content this month</span></div>
+          <span class="ws-dash-kpi-num">${thisMonthContent.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">↑</span><span class="ws-dash-kpi-label">Upcoming</span></div>
+          <span class="ws-dash-kpi-num">${upcoming.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">!</span><span class="ws-dash-kpi-label">Needs posting</span></div>
+          <span class="ws-dash-kpi-num">${todo.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
+          <span class="ws-dash-kpi-num">${netThisMonth.toFixed(2)}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">=</span><span class="ws-dash-kpi-label">Net income (all-time)</span></div>
+          <span class="ws-dash-kpi-num">${netAllTime.toFixed(2)}</span>
+        </div>
+      `;
+      // Same 6-month bar chart shape as Music's own income-vs-payouts chart.
+      const monthKeys: string[] = [];
+      const byMonth = new Map<string, { income: number; expense: number }>();
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        monthKeys.push(key);
+        byMonth.set(key, { income: 0, expense: 0 });
+      }
+      fin.forEach((e: any) => {
+        const b = byMonth.get(e.entry_date.slice(0, 7));
+        if (!b) return;
+        if (e.entry_type === 'income') b.income += Number(e.amount); else b.expense += Number(e.amount);
+      });
+      const totalIncome = monthKeys.reduce((s, k) => s + byMonth.get(k)!.income, 0);
+      const totalExpense = monthKeys.reduce((s, k) => s + byMonth.get(k)!.expense, 0);
+      if (!totalIncome && !totalExpense) {
+        els.smChart.innerHTML = '<p class="ws-dash-empty-mini">No Finance entries in the last 6 months.</p>';
+      } else {
+        const maxVal = Math.max(1, ...monthKeys.map((k) => Math.max(byMonth.get(k)!.income, byMonth.get(k)!.expense)));
+        els.smChart.innerHTML = `
+          <div class="ws-dash-fin-bars">
+            ${monthKeys.map((k) => {
+              const b = byMonth.get(k)!;
+              const d = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1);
+              const label = MONTHS[d.getMonth()].en.slice(0, 3);
+              const incPct = Math.round((b.income / maxVal) * 100);
+              const expPct = Math.round((b.expense / maxVal) * 100);
+              return `
+                <div class="ws-dash-fin-col" title="${MONTHS[d.getMonth()].en} ${d.getFullYear()}, Income ${b.income.toFixed(2)}, Expenses ${b.expense.toFixed(2)}">
+                  <div class="ws-dash-fin-pair">
+                    <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--income" style="height:${b.income ? Math.max(incPct, 3) : 0}%"></div></div>
+                    <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--expense" style="height:${b.expense ? Math.max(expPct, 3) : 0}%"></div></div>
+                  </div>
+                  <span class="ws-dash-fin-label">${label}</span>
+                </div>`;
+            }).join('')}
+          </div>
+          <div class="ws-dash-fin-legend">
+            <span><i class="ws-dash-fin-swatch ws-dash-fin-swatch--income"></i>Income</span>
+            <span><i class="ws-dash-fin-swatch ws-dash-fin-swatch--expense"></i>Expenses</span>
+          </div>
+        `;
+      }
+      const statusCounts = new Map<string, number>();
+      content.forEach((c: any) => statusCounts.set(c.status, (statusCounts.get(c.status) || 0) + 1));
+      els.smStatusBreakdown.innerHTML = statusCounts.size ? Array.from(statusCounts.entries()).map(([status, count]) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${smContentStatusLabel(status)}</span></span>
+          <span class="ws-dash-feed-amount">${count}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No content logged yet.</p>';
+      const platformCounts = new Map<string, number>();
+      content.forEach((c: any) => platformCounts.set(c.platform || 'Unspecified', (platformCounts.get(c.platform || 'Unspecified') || 0) + 1));
+      els.smPlatformBreakdown.innerHTML = platformCounts.size ? Array.from(platformCounts.entries()).sort((a, b) => b[1] - a[1]).map(([platform, count]) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${escapeHtml(platform)}</span></span>
+          <span class="ws-dash-feed-amount">${count}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No content logged yet.</p>';
+      els.smTodoBody.innerHTML = todo.length
+        ? todo.map((c: any) => `<tr><td data-label="Date">${c.scheduled_date}</td><td data-label="Title">${escapeHtml(c.title)}</td><td data-label="Status">${smContentStatusLabel(c.status)}</td></tr>`).join('')
+        : '<tr><td colspan="3" class="ws-empty">Nothing pending.</td></tr>';
+      els.smUpcomingBody.innerHTML = upcoming.length
+        ? upcoming.slice(0, 8).map((c: any) => `<tr><td data-label="Date">${c.scheduled_date}</td><td data-label="Title">${escapeHtml(c.title)}</td><td data-label="Platform">${escapeHtml(c.platform || '—')}</td></tr>`).join('')
+        : '<tr><td colspan="3" class="ws-empty">Nothing scheduled yet.</td></tr>';
+    }
+    async function downloadContentCalendarReport() {
+      try {
+        const { start, end, label } = periodRange(els.smReportMonth, els.smReportYear);
+        const { data } = await db.from('content_items').select('*, members(full_name)').eq('group_key', SOCIAL_MEDIA_GROUP_KEY)
+          .gte('scheduled_date', start).lte('scheduled_date', end).order('scheduled_date', { ascending: true });
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Content Calendar Report', `${label}, ${rows.length} item${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
+          head: [['Date', 'Title', 'Platform', 'Type', 'Status', 'Assigned to']],
+          body: rows.length ? rows.map((c: any) => [
+            c.scheduled_date || '—', c.title, c.platform || '—', c.content_type || '—',
+            smContentStatusLabel(c.status), c.members?.full_name || '—',
+          ]) : [['No content this period', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Content-Calendar', label));
+      } catch (err) {
+        console.error('content calendar report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    function bindSocialMediaReports() {
+      populatePeriodSelects(els.smReportMonth, els.smReportYear, true);
+      el('[data-report-sm-content]').addEventListener('click', downloadContentCalendarReport);
+    }
+
     // ---------- Roster: the 5 troops' full roster, with filters -------------
     async function loadRoster() {
       const { data, error } = await db.from('members').select('*').order('full_name', { ascending: true });
@@ -2139,6 +2365,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'finance') { loadFinanceKpis(); loadFinancePeriod(); compareReconcile(); loadReconcileHistory(); loadAdjustmentEntries(); }
       if (tab === 'curriculum') loadCurriculum();
       if (tab === 'music') loadMusicDashboard();
+      if (tab === 'socialmedia') loadSocialMediaDashboard();
       if (tab === 'roster') loadRoster();
       if (tab === 'library') loadSharedDocs();
       if (tab === 'vendors') loadSharedVendorsAdmin();
@@ -2219,6 +2446,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindLibraryUpload();
         bindSharedVendorForm();
         bindMusicReports();
+        bindSocialMediaReports();
         els.finMonth.addEventListener('change', loadFinancePeriod);
         els.finYear.addEventListener('change', loadFinancePeriod);
         els.rosterGroup.innerHTML = '<option value="">All Groups</option>' + GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
