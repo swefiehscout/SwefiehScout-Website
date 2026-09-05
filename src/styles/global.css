@@ -4519,6 +4519,10 @@ main.wide {
 .ws-remove-link:hover { color: var(--color-brand-light); }
 
 .ws-form-actions { display: flex; align-items: center; gap: 1.25rem; margin-top: 0.5rem; }
+/* Same display-vs-[hidden] specificity tie as .ws-report-card — Admin's
+   Reconcile tab hides/shows its "balances match" button block via a
+   bare `hidden` on this exact class. */
+.ws-form-actions[hidden] { display: none !important; }
 .ws-form-cancel {
   border: 0; background: none; color: var(--color-muted); font: inherit;
   font-size: 0.85rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
@@ -4676,6 +4680,9 @@ main.wide {
   flex-wrap: wrap;
   margin-bottom: 1.25rem;
 }
+/* Same display-vs-[hidden] specificity tie as .ws-report-card — the
+   custom date-range row toggles via a bare `hidden` on this class. */
+.ws-toolbar-row[hidden] { display: none !important; }
 /* Flex items default to a content-based min-width even with an explicit
    width set, so a long label (e.g. "Default fee this month") was still
    forcing its box wider than the others — min-width:0 + flex-shrink:0

@@ -1302,10 +1302,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <span>Month</span>
               <select data-report-month></select>
             </label>
-            <label class="ws-field ws-field--inline">
+            <label class="ws-field ws-field--inline" data-report-year-field>
               <span>Year</span>
               <select data-report-year></select>
             </label>
+          </div>
+          <div class="ws-toolbar-row" data-report-range-row hidden>
+            <label class="ws-field ws-field--inline"><span>From</span><select data-report-from-month></select></label>
+            <label class="ws-field ws-field--inline"><span>&nbsp;</span><select data-report-from-year></select></label>
+            <label class="ws-field ws-field--inline"><span>To</span><select data-report-to-month></select></label>
+            <label class="ws-field ws-field--inline"><span>&nbsp;</span><select data-report-to-year></select></label>
           </div>
           <div class="ws-report-grid">
             <div class="ws-report-card" data-generic-finance>
@@ -1858,6 +1864,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.settingsIncomeList = el('[data-settings-income-list]');
       els.reportMonth = el('[data-report-month]');
       els.reportYear = el('[data-report-year]');
+      els.reportYearField = el('[data-report-year-field]');
+      els.reportRangeRow = el('[data-report-range-row]');
+      els.reportFromMonth = el('[data-report-from-month]');
+      els.reportFromYear = el('[data-report-from-year]');
+      els.reportToMonth = el('[data-report-to-month]');
+      els.reportToYear = el('[data-report-to-year]');
       els.currPrev = el('[data-curr-prev]');
       els.currNext = el('[data-curr-next]');
       els.currToday = el('[data-curr-today]');
@@ -2452,7 +2464,27 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Shared by Finance and Reports: resolves a month+year select pair
     // (where the month select may have a "Whole Year" option) into a
     // concrete date range plus a display label.
+    // 'RANGE' is only ever a value on the Reports tab's own month select
+    // (els.reportMonth) — a custom month-to-month span, read straight
+    // from its 4 From/To selects rather than monthSel/yearSel.
     function periodRange(monthSel: any, yearSel: any) {
+      if (monthSel.value === 'RANGE') {
+        const fromYear = Number(els.reportFromYear.value), fromMonth = els.reportFromMonth.value;
+        const toYear = Number(els.reportToYear.value), toMonth = els.reportToMonth.value;
+        const lastDay = new Date(toYear, Number(toMonth), 0).getDate();
+        const fromLabel = `${els.reportFromMonth.selectedOptions[0]?.textContent} ${fromYear}`;
+        const toLabel = `${els.reportToMonth.selectedOptions[0]?.textContent} ${toYear}`;
+        return {
+          start: `${fromYear}-${fromMonth}-01`,
+          end: `${toYear}-${toMonth}-${String(lastDay).padStart(2, '0')}`,
+          label: fromLabel === toLabel ? fromLabel : `${fromLabel} – ${toLabel}`,
+          isYear: false,
+          isRange: true,
+          periodFrom: `${fromYear}-${fromMonth}`,
+          periodTo: `${toYear}-${toMonth}`,
+          period: `${fromYear}-${fromMonth}_${toYear}-${toMonth}`,
+        };
+      }
       const year = Number(yearSel.value);
       if (monthSel.value === 'ALL') {
         return { start: `${year}-01-01`, end: `${year}-12-31`, label: String(year), isYear: true, period: String(year) };
@@ -5315,10 +5347,37 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function downloadFeesReport() {
       try {
         await ensureMembersLoaded();
-        const { period, label, isYear } = periodRange(els.reportMonth, els.reportYear);
+        const { period, label, isYear, isRange, periodFrom, periodTo } = periodRange(els.reportMonth, els.reportYear);
         const active = state.members.filter((m: any) => m.active);
         const doc = new jsPDF();
-        if (!isYear) {
+        if (isYear || isRange) {
+          // Fees are keyed by a plain 'YYYY-MM' period string, not a real
+          // date column — a calendar year uses a LIKE prefix match, a
+          // custom range needs an inclusive string comparison instead
+          // (works fine since 'YYYY-MM' sorts lexicographically).
+          const query = db.from('fee_payments').select('*').eq('group_key', state.activeGroup);
+          const { data, error } = isYear
+            ? await query.like('period', `${els.reportYear.value}-%`)
+            : await query.gte('period', periodFrom).lte('period', periodTo);
+          if (error) throw error;
+          const monthCount = isYear ? 12 : (Number(periodTo!.slice(0, 4)) * 12 + Number(periodTo!.slice(5, 7))) - (Number(periodFrom!.slice(0, 4)) * 12 + Number(periodFrom!.slice(5, 7))) + 1;
+          const byMember = new Map<string, { months: number; total: number }>();
+          (data || []).forEach((r: any) => {
+            if (!r.paid) return;
+            const cur = byMember.get(r.member_id) || { months: 0, total: 0 };
+            cur.months++; cur.total += Number(r.amount || 0);
+            byMember.set(r.member_id, cur);
+          });
+          const rows = active.map((m: any) => {
+            const s = byMember.get(m.id) || { months: 0, total: 0 };
+            return [m.full_name, `${s.months} / ${monthCount}`, s.total.toFixed(2)];
+          });
+          const grandTotal = active.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
+          const y = pdfHeader(doc, isYear ? 'Yearly Fees Summary' : 'Fees Summary', `${label}, ${grandTotal.toFixed(2)} collected total`);
+          pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+            head: [['Member', 'Months Paid', 'Total']], body: rows.length ? rows : [['No data available', '', '']] });
+          doc.save(pdfFilename(isYear ? 'Yearly-Fees' : 'Fees-Summary', label));
+        } else {
           const { data, error } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).eq('period', period);
           if (error) throw error;
           const map: Map<string, any> = new Map((data || []).map((r: any) => [r.member_id, r]));
@@ -5332,26 +5391,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
             head: [['Member', 'Status', 'Amount']], body: rows.length ? rows : [['No data available', '', '']] });
           doc.save(pdfFilename('Monthly-Fees', label));
-        } else {
-          const year = els.reportYear.value;
-          const { data, error } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).like('period', `${year}-%`);
-          if (error) throw error;
-          const byMember = new Map<string, { months: number; total: number }>();
-          (data || []).forEach((r: any) => {
-            if (!r.paid) return;
-            const cur = byMember.get(r.member_id) || { months: 0, total: 0 };
-            cur.months++; cur.total += Number(r.amount || 0);
-            byMember.set(r.member_id, cur);
-          });
-          const rows = active.map((m: any) => {
-            const s = byMember.get(m.id) || { months: 0, total: 0 };
-            return [m.full_name, `${s.months} / 12`, s.total.toFixed(2)];
-          });
-          const grandTotal = active.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
-          const y = pdfHeader(doc, 'Yearly Fees Summary', `${label}, ${grandTotal.toFixed(2)} collected total`);
-          pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-            head: [['Member', 'Months Paid', 'Total']], body: rows.length ? rows : [['No data available', '', '']] });
-          doc.save(pdfFilename('Yearly-Fees', label));
         }
       } catch (err) {
         console.error('fees report failed', err);
@@ -5395,7 +5434,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           .filter((m: any) => (m.activities && m.activities.length) || m.theme || m.notes || m.materials_needed)
           .map((m: any) => {
             const d = new Date(m.date + 'T00:00:00');
-            const dateLabel = `${WEEKDAYS[d.getDay()].en} ${d.getDate()} ${MONTHS[d.getMonth()].en}`;
+            const dateLabel = `${WEEKDAYS[d.getDay()].en} ${d.getDate()} ${MONTHS[d.getMonth()].en} ${d.getFullYear()}`;
             const activitiesText = (m.activities || []).map((a: any) => a.en + (a.duration ? ` (${a.duration} min)` : '')).join('\n');
             return [dateLabel, m.theme || '—', activitiesText || '—', m.materials_needed || '—', m.notes || '—'];
           });
@@ -5679,6 +5718,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function bindReports() {
       populatePeriodSelects(els.reportMonth, els.reportYear, true);
+      els.reportMonth.appendChild(new Option('Custom range…', 'RANGE'));
+      populatePeriodSelects(els.reportFromMonth, els.reportFromYear);
+      populatePeriodSelects(els.reportToMonth, els.reportToYear);
+      els.reportMonth.addEventListener('change', () => {
+        const isRange = els.reportMonth.value === 'RANGE';
+        els.reportYearField.toggleAttribute('hidden', isRange);
+        els.reportRangeRow.toggleAttribute('hidden', !isRange);
+      });
       el('[data-report-finance]').addEventListener('click', downloadFinanceReport);
       el('[data-report-fees]').addEventListener('click', downloadFeesReport);
       el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);
