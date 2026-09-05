@@ -3273,7 +3273,7 @@ main.wide {
    disagree on whether `[hidden]` itself is `!important` (Safari's isn't),
    so a same-specificity `display` rule can silently win and leave the
    element visible — force it explicitly instead of relying on that. */
-.curr-view[hidden], .curr-day-overlay[hidden], .curr-day-attachment[hidden] {
+.curr-view[hidden], .curr-day-overlay[hidden], .curr-day-attachment[hidden], .curr-day-field-row[hidden] {
   display: none !important;
 }
 

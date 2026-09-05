@@ -662,13 +662,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 </label>
               </div>
               <div class="ws-form-grid">
+                <label class="ws-field">
+                  <span>Vendor (optional)</span>
+                  <select data-inv-maint-vendor>
+                    <option value="">— None / self —</option>
+                  </select>
+                </label>
                 <div class="ws-optional-block" data-inv-maint-vendor-block>
-                  <label class="ws-field">
-                    <span>Vendor (optional)</span>
-                    <select data-inv-maint-vendor>
-                      <option value="">— None / self —</option>
-                    </select>
-                  </label>
                   <button type="button" class="ws-add-link" data-inv-maint-vendor-add>+ New vendor</button>
                   <div class="ws-optional-fields" data-inv-maint-vendor-new hidden>
                     <div class="ws-form-grid">
@@ -1021,6 +1021,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <h3 class="ws-admin-h3">Curriculum</h3>
               <p class="ws-report-desc">The meeting plan, theme, notes, and activities for each date in the period.</p>
               <button type="button" class="btn-primary" data-report-curriculum>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Roster</h3>
+              <p class="ws-report-desc">Every active member in this group, with full contact and emergency-contact info. Not period-dependent.</p>
+              <button type="button" class="btn-primary" data-report-roster>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Vendors</h3>
+              <p class="ws-report-desc">This group's own vendors, plus any shared vendors visible to it. Not period-dependent.</p>
+              <button type="button" class="btn-primary" data-report-vendors>Download PDF</button>
             </div>
           </div>
         </section>
@@ -3987,12 +3997,74 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
+    // Not period-dependent — every active member in this group only,
+    // same columns as Admin's own Full Roster report. National ID stays
+    // off even here — edit-form-only, never a bulk export.
+    async function downloadRosterReport() {
+      try {
+        const { data, error } = await db.from('members').select('*').eq('group_key', state.activeGroup).eq('active', true).order('full_name', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF({ orientation: 'landscape' });
+        const y = pdfHeader(doc, 'Roster', `${rows.length} active member${rows.length === 1 ? '' : 's'}`);
+        autoTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
+          head: [['Name', 'Phone', 'Email', 'DOB', 'Emergency Contact 1', 'Emergency Contact 2', 'Allergy', 'Notes']],
+          body: rows.length ? rows.map((m: any) => [
+            m.full_name, m.phone || '—', m.email || '—', m.birth_date || '—',
+            m.guardian1_relation ? `${m.guardian1_relation}: ${m.guardian1_phone || '—'}` : '—',
+            m.guardian2_relation ? `${m.guardian2_relation}: ${m.guardian2_phone || '—'}` : '—',
+            m.has_allergies ? (m.allergy_detail || 'Yes') : '—', m.notes || '—',
+          ]) : [['No members found', '', '', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Roster', new Date().toISOString().slice(0, 10)));
+      } catch (err) {
+        console.error('roster report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    // Not period-dependent — this group's own vendors, plus any shared
+    // vendors visible to it (the same two lists its own Vendors tab
+    // shows, under Vendors / Shared Vendors).
+    async function downloadVendorReport() {
+      try {
+        const [ownRes, sharedRes] = await Promise.all([
+          db.from('vendors').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true }),
+          db.from('shared_vendor_groups').select('shared_vendors(*)').eq('group_key', state.activeGroup),
+        ]);
+        if (ownRes.error) throw ownRes.error;
+        if (sharedRes.error) throw sharedRes.error;
+        const own = ownRes.data || [];
+        const shared = (sharedRes.data || []).map((r: any) => r.shared_vendors).filter(Boolean);
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Vendors', `${own.length} own, ${shared.length} shared`);
+        const rowOf = (v: any) => [v.name, v.category || '—', v.phone, v.email || '—', v.location || '—', v.notes || '—'];
+        const tableOpts = {
+          theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['Name', 'Category', 'Phone', 'Email', 'Location', 'Notes']],
+        };
+        let sy = y;
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...PDF_BRAND);
+        doc.text('Own Vendors', 14, sy);
+        autoTable(doc, { ...tableOpts, startY: sy + 4, body: own.length ? own.map(rowOf) : [['No vendors yet', '', '', '', '', '']] });
+        sy = pdfNextY(doc, sy);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...PDF_BRAND);
+        doc.text('Shared Vendors', 14, sy);
+        autoTable(doc, { ...tableOpts, startY: sy + 4, body: shared.length ? shared.map(rowOf) : [['Nothing shared into this group yet', '', '', '', '', '']] });
+        doc.save(pdfFilename('Vendors', new Date().toISOString().slice(0, 10)));
+      } catch (err) {
+        console.error('vendor report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
     function bindReports() {
       populatePeriodSelects(els.reportMonth, els.reportYear, true);
       el('[data-report-finance]').addEventListener('click', downloadFinanceReport);
       el('[data-report-fees]').addEventListener('click', downloadFeesReport);
       el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);
       el('[data-report-curriculum]').addEventListener('click', downloadCurriculumReport);
+      el('[data-report-roster]').addEventListener('click', downloadRosterReport);
+      el('[data-report-vendors]').addEventListener('click', downloadVendorReport);
     }
 
     // ---------- Curriculum (embedded, shared per group; month view only,
