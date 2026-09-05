@@ -4395,7 +4395,23 @@ main.wide {
   .ws-form-grid--3, .ws-form-grid--4 { grid-template-columns: 1fr; }
 }
 .ws-field { display: block; margin-bottom: 0.9rem; font-size: 0.78rem; color: var(--color-muted); font-weight: 600; }
-.ws-form-grid .ws-field { margin-bottom: 0; }
+/* Grid cells stretch to the tallest row by default, but a plain block
+   field doesn't use that extra height — its input just sits wherever
+   the label (1 line here, 2 there, e.g. a bilingual label that wraps)
+   happens to end, so inputs in the same row drift out of alignment
+   with each other. Flex-column + margin-top:auto on the control always
+   pins it to the bottom of the cell, so every input in a row lines up
+   regardless of how tall its own label got. */
+.ws-form-grid .ws-field {
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ws-form-grid .ws-field > input,
+.ws-form-grid .ws-field > select,
+.ws-form-grid .ws-field > textarea {
+  margin-top: auto;
+}
 .ws-field--full { max-width: none; }
 .ws-field span { display: block; margin-bottom: 0.4rem; }
 .ws-field input, .ws-field select, .ws-field textarea {
