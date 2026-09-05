@@ -2,21 +2,17 @@
 // Public member sign-up form — no login required. A parent/new member
 // picks a group and fills in the same fields the leaders' Roster form
 // uses; it lands in `join_requests` for a leader/admin of that group to
-// approve (which creates the real roster member) or reject.
+// approve (which creates the real roster member) or reject. English
+// only, by request — unlike the rest of the public site, this form
+// doesn't pair English/Arabic.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
 ---
 <BaseLayout title="Join a Group" bare>
   <section class="page-hero" data-animate>
-    <h1 class="page-h1">
-      Join a Group
-      <span class="page-h1-ar">انضم إلى مجموعة</span>
-    </h1>
+    <h1 class="page-h1">Join a Group</h1>
     <p class="page-tag">
       New here? Fill this in and a leader will approve you into the group.
-    </p>
-    <p class="page-tag-ar">
-      جديد هنا؟ املأ هذا النموذج وسيوافق عليك أحد القادة للانضمام إلى المجموعة.
     </p>
   </section>
 
@@ -24,14 +20,10 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
 
     <!-- Step 1: pick a group -->
     <section class="portal-picker" data-join-step-group>
-      <p class="portal-picker-label">
-        Which group are you joining?
-        <span class="portal-picker-label-ar">أي مجموعة تريد الانضمام إليها؟</span>
-      </p>
+      <p class="portal-picker-label">Which group are you joining?</p>
       <div class="portal-picker-grid">
         {JOINABLE_GROUPS.map((g) => (
           <button type="button" class="portal-picker-btn" data-join-group={g.key}>
-            <span class="portal-picker-ar">{g.ar}</span>
             <span class="portal-picker-en">{g.en}</span>
           </button>
         ))}
@@ -40,32 +32,29 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
 
     <!-- Step 2: the form -->
     <section class="join-form-step" data-join-step-form hidden>
-      <button type="button" class="ws-form-cancel" data-join-change-group>← Change group · تغيير المجموعة</button>
+      <button type="button" class="ws-form-cancel" data-join-change-group>← Change group</button>
 
       <form class="ws-member-form" data-join-form>
         <div class="ws-member-form-bar" aria-hidden="true"></div>
-        <p class="ws-member-form-title">
-          Member details
-          <span dir="rtl">بيانات العضو</span>
-        </p>
+        <p class="ws-member-form-title">Member details</p>
 
         <div class="ws-form-grid ws-form-grid--4">
           <label class="ws-field">
-            <span>Full name · الاسم الكامل *</span>
+            <span>Full name *</span>
             <input type="text" data-j-name required />
           </label>
           <label class="ws-field">
-            <span>Phone · هاتفك الخاص</span>
+            <span>Phone</span>
             <input type="tel" data-j-phone />
           </label>
           <label class="ws-field">
-            <span>Date of birth · تاريخ الميلاد</span>
+            <span>Date of birth</span>
             <input type="date" data-j-dob />
           </label>
           <label class="ws-field">
-            <span>Emergency Contact Relationship 1 · صلة القرابة 1</span>
+            <span>Emergency Contact Relationship 1</span>
             <select data-j-g1-rel>
-              <option value="">Select… · اختر</option>
+              <option value="">Select…</option>
               <option>Mother</option>
               <option>Father</option>
               <option>Other</option>
@@ -74,76 +63,76 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
         </div>
 
         <label class="ws-field ws-field--full">
-          <span>Emergency Contact Phone 1 · هاتف الطوارئ 1</span>
+          <span>Emergency Contact Phone 1</span>
           <input type="tel" data-j-g1-phone />
         </label>
 
         <div class="ws-form-grid">
           <div class="ws-optional-block" data-j-g2-block>
-            <button type="button" class="ws-add-link" data-j-g2-add>+ Add second emergency contact · إضافة جهة اتصال طوارئ ثانية</button>
+            <button type="button" class="ws-add-link" data-j-g2-add>+ Add second emergency contact</button>
             <div class="ws-optional-fields" data-j-g2-fields hidden>
               <div class="ws-form-grid">
                 <label class="ws-field">
-                  <span>Emergency Contact Relationship 2 · صلة القرابة 2</span>
+                  <span>Emergency Contact Relationship 2</span>
                   <select data-j-g2-rel>
-                    <option value="">Select… · اختر</option>
+                    <option value="">Select…</option>
                     <option>Mother</option>
                     <option>Father</option>
                     <option>Other</option>
                   </select>
                 </label>
                 <label class="ws-field">
-                  <span>Emergency Contact Phone 2 · هاتف الطوارئ 2</span>
+                  <span>Emergency Contact Phone 2</span>
                   <input type="tel" data-j-g2-phone />
                 </label>
               </div>
-              <button type="button" class="ws-remove-link" data-j-g2-remove>Remove · إزالة</button>
+              <button type="button" class="ws-remove-link" data-j-g2-remove>Remove</button>
             </div>
           </div>
 
           <div class="ws-optional-block" data-j-allergy-block>
-            <button type="button" class="ws-add-link" data-j-allergy-add>+ Add allergy info · إضافة معلومات حساسية</button>
+            <button type="button" class="ws-add-link" data-j-allergy-add>+ Add allergy info</button>
             <div class="ws-optional-fields" data-j-allergy-fields hidden>
               <label class="ws-field">
-                <span>What allergy? · ما هي الحساسية؟</span>
+                <span>What allergy?</span>
                 <input type="text" data-j-allergy-detail placeholder="e.g. peanuts" />
               </label>
-              <button type="button" class="ws-remove-link" data-j-allergy-remove>Remove · إزالة</button>
+              <button type="button" class="ws-remove-link" data-j-allergy-remove>Remove</button>
             </div>
           </div>
 
           <div class="ws-optional-block" data-j-email-block>
-            <button type="button" class="ws-add-link" data-j-email-add>+ Add email · إضافة بريد إلكتروني</button>
+            <button type="button" class="ws-add-link" data-j-email-add>+ Add email</button>
             <div class="ws-optional-fields" data-j-email-fields hidden>
               <label class="ws-field">
-                <span>Email · البريد الإلكتروني</span>
+                <span>Email</span>
                 <input type="email" data-j-email />
               </label>
-              <button type="button" class="ws-remove-link" data-j-email-remove>Remove · إزالة</button>
+              <button type="button" class="ws-remove-link" data-j-email-remove>Remove</button>
             </div>
           </div>
 
           <div class="ws-optional-block" data-j-nid-block>
-            <button type="button" class="ws-add-link" data-j-nid-add>+ Add National ID · إضافة الرقم الوطني</button>
+            <button type="button" class="ws-add-link" data-j-nid-add>+ Add National ID</button>
             <div class="ws-optional-fields" data-j-nid-fields hidden>
               <label class="ws-field">
-                <span>National ID (yours or a parent's) · الرقم الوطني (لك أو لأحد الوالدين)</span>
+                <span>National ID (yours or a parent's)</span>
                 <input type="text" data-j-national-id />
               </label>
-              <button type="button" class="ws-remove-link" data-j-nid-remove>Remove · إزالة</button>
+              <button type="button" class="ws-remove-link" data-j-nid-remove>Remove</button>
             </div>
           </div>
         </div>
 
         <label class="ws-field ws-field--full">
-          <span>Notes · ملاحظات</span>
+          <span>Notes</span>
           <textarea data-j-notes rows="2"></textarea>
         </label>
 
         <p class="join-error" data-join-error hidden></p>
 
         <div class="ws-form-actions">
-          <button type="submit" class="btn-primary" data-join-submit>Submit request · إرسال الطلب</button>
+          <button type="submit" class="btn-primary" data-join-submit>Submit request</button>
         </div>
       </form>
     </section>
@@ -152,10 +141,8 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
     <section class="join-done" data-join-step-done hidden>
       <div class="ws-pending-card">
         <h2 class="section-h2">Request sent</h2>
-        <p class="section-h2-ar">تم إرسال الطلب</p>
         <p class="ws-pending-text">
           A leader will review it and approve you into the group soon.
-          <br /><span dir="rtl">سيقوم أحد القادة بمراجعته والموافقة على انضمامك قريبًا.</span>
         </p>
       </div>
     </section>
@@ -253,12 +240,12 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
       form.addEventListener('submit', async (e: Event) => {
         e.preventDefault();
         el('[data-join-error]').hidden = true;
-        if (!supabaseConfigured || !supabase) { showError('Not connected, please try again later. · غير متصل، حاول مرة أخرى لاحقًا.'); return; }
-        if (!selectedGroup) { showError('Pick a group first. · اختر مجموعة أولاً.'); return; }
+        if (!supabaseConfigured || !supabase) { showError('Not connected, please try again later.'); return; }
+        if (!selectedGroup) { showError('Pick a group first.'); return; }
 
         const name = el('[data-j-name]').value.trim();
         if (!name) {
-          showError('Full name is required. · الاسم الكامل مطلوب.');
+          showError('Full name is required.');
           return;
         }
         const hasAllergies = !el('[data-j-allergy-fields]').hidden;
@@ -284,7 +271,7 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
         submitBtn.disabled = false;
         if (error) {
           console.error(error);
-          showError('Could not submit, please try again. · تعذر الإرسال، حاول مرة أخرى.');
+          showError('Could not submit, please try again.');
           return;
         }
         el('[data-join-step-form]').hidden = true;
