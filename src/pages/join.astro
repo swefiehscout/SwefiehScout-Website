@@ -206,10 +206,28 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
       e.hidden = false;
     }
 
+    // English-only — this form dropped its Arabic labels already; this
+    // keeps what people actually type in step with that too, instead of
+    // just the labels around it.
+    function bindEnglishOnlyInputs() {
+      document.addEventListener('input', (e: any) => {
+        const t = e.target;
+        if (!(t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement)) return;
+        if (t instanceof HTMLInputElement && !['text', 'search', 'tel', 'email', 'url', ''].includes(t.type)) return;
+        const filtered = t.value.replace(/[^\x00-\x7F]/g, '');
+        if (filtered === t.value) return;
+        const pos = t.selectionStart ?? t.value.length;
+        const posInFiltered = t.value.slice(0, pos).replace(/[^\x00-\x7F]/g, '').length;
+        t.value = filtered;
+        t.setSelectionRange(posInFiltered, posInFiltered);
+      });
+    }
+
     function bind() {
       const form = el('[data-join-form]');
       if (form.dataset.bound) return;
       form.dataset.bound = '1';
+      bindEnglishOnlyInputs();
 
       el('[data-j-name]').addEventListener('blur', () => {
         const input = el('[data-j-name]');

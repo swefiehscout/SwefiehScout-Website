@@ -271,7 +271,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <p class="ws-att-hint">Every troop's next planned meeting, at a glance.</p>
           <div class="ws-table-wrap">
             <table class="ws-table" data-curr-table>
-              <thead><tr><th>Group</th><th>Next Meeting</th><th>Theme</th><th>Activities</th></tr></thead>
+              <thead><tr><th>Group</th><th>Next Meeting</th><th>Theme</th><th>Activities</th><th>Materials Needed</th></tr></thead>
               <tbody data-curr-body></tbody>
             </table>
           </div>
@@ -376,7 +376,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <input type="search" class="ws-search" data-roster-search placeholder="Search members…" />
           <div class="ws-table-wrap">
             <table class="ws-table" data-roster-table>
-              <thead><tr><th>Name</th><th>Group</th><th>Phone</th><th>Email</th><th>Emergency Contact</th><th>Allergies</th><th>Status</th></tr></thead>
+              <thead><tr><th>Name</th><th>Group</th><th>Phone</th><th>Email</th><th>National ID</th><th>DOB</th><th>Emergency Contact 1</th><th>Emergency Contact 2</th><th>Allergies</th><th>Notes</th><th>Status</th></tr></thead>
               <tbody data-roster-body></tbody>
             </table>
           </div>
@@ -605,6 +605,55 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function pdfNextY(doc: any, fallback: number): number {
       return (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 10 : fallback;
+    }
+    // English-only, everywhere in the console — same reasoning as the
+    // Leaders Workspace's own bindEnglishOnlyInputs(): Arabic typed into
+    // a free-text field is exactly what was turning into mojibake in
+    // PDF exports, so it's stripped at entry time instead.
+    function bindEnglishOnlyInputs() {
+      document.addEventListener('input', (e: any) => {
+        const t = e.target;
+        if (!(t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement)) return;
+        if (t instanceof HTMLInputElement && !['text', 'search', 'tel', 'email', 'url', ''].includes(t.type)) return;
+        const filtered = t.value.replace(/[^\x00-\x7F]/g, '');
+        if (filtered === t.value) return;
+        const pos = t.selectionStart ?? t.value.length;
+        const posInFiltered = t.value.slice(0, pos).replace(/[^\x00-\x7F]/g, '').length;
+        t.value = filtered;
+        t.setSelectionRange(posInFiltered, posInFiltered);
+      });
+    }
+    // jsPDF's built-in fonts (Helvetica etc.) can only draw Latin-1 —
+    // Arabic, emoji, or anything else outside that range comes out as
+    // full mojibake, not just a missing glyph; "smart" typographic
+    // characters iOS/Mac autocorrect loves to substitute (curly quotes,
+    // en/em dashes, ellipsis) do have a real ASCII equivalent worth
+    // keeping, so those get normalized first. Applied to every cell, in
+    // every report, rather than chasing down whichever field trips it —
+    // Arabic content itself is unaffected anywhere else in the app,
+    // this only touches what a PDF cell can actually render.
+    function pdfSafe(s: any): any {
+      if (typeof s !== 'string') return s;
+      return s
+        .replace(/[‘’]/g, "'")
+        .replace(/[“”]/g, '"')
+        .replace(/[–—]/g, '-')
+        .replace(/…/g, '...')
+        .replace(/[^\x00-\xFF]/g, '')
+        .trim();
+    }
+    function pdfTable(doc: any, opts: any) {
+      const clean = (arr: any) => Array.isArray(arr) ? arr.map((row: any) => Array.isArray(row) ? row.map(pdfSafe) : pdfSafe(row)) : arr;
+      if (opts.head) opts.head = clean(opts.head);
+      if (opts.body) opts.body = clean(opts.body);
+      if (opts.foot) opts.foot = clean(opts.foot);
+      // A wrapped cell (long notes, an activities list, ...) otherwise
+      // gets physically cut at the page boundary — the rest of that
+      // row's own cells continuing on the next page instead of the
+      // whole row moving down together. Every report gets this by
+      // default; an explicit rowPageBreak in opts still wins.
+      if (opts.rowPageBreak === undefined) opts.rowPageBreak = 'avoid';
+      return autoTable(doc, opts);
     }
 
     function cacheEls() {
@@ -1176,7 +1225,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             return [m.full_name, g ? g.en : m.group_key, rec && rec.paid ? 'Paid' : 'Unpaid', rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'];
           });
           const y = pdfHeader(doc, 'Monthly Fees', `${label}, ${paidCount} of ${members.length} paid, ${collected.toFixed(2)} collected`);
-          autoTable(doc, {
+          pdfTable(doc, {
             startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
             head: [['Member', 'Group', 'Status', 'Amount']], body: rows.length ? rows : [['No data available', '', '', '']],
           });
@@ -1198,7 +1247,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           });
           const grandTotal = members.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
           const y = pdfHeader(doc, 'Yearly Fees Summary', `${label}, ${grandTotal.toFixed(2)} collected total`);
-          autoTable(doc, {
+          pdfTable(doc, {
             startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
             head: [['Member', 'Group', 'Months Paid', 'Total']], body: rows.length ? rows : [['No data available', '', '', '']],
           });
@@ -1237,7 +1286,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         });
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Attendance', `${label}, ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held across the 5 troops`);
-        autoTable(doc, {
+        pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
           head: [['Member', 'Group', 'Present', 'Rate']], body: bodyRows.length ? bodyRows : [['No data available', '', '', '']],
         });
@@ -1300,13 +1349,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             columnStyles: { 1: { halign: 'right' } },
           };
           let sy = 38;
-          autoTable(doc, {
+          pdfTable(doc, {
             ...tableOpts, startY: sy, head: [['Income', '']],
             body: incomeRows.length ? incomeRows.map(([c, v]) => [c, fmt(v)]) : [['No data', '']],
             foot: [['Total Income', fmt(income)]],
           });
           sy = pdfNextY(doc, sy);
-          autoTable(doc, {
+          pdfTable(doc, {
             ...tableOpts, startY: sy, head: [['Expenses', '']],
             body: expenseRows.length ? expenseRows.map(([c, v]) => [c, fmt(v)]) : [['No data', '']],
             foot: [['Total Expenses', fmt(expense)]],
@@ -1329,7 +1378,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...PDF_BRAND);
         doc.text('Summary', 14, y);
-        autoTable(doc, {
+        pdfTable(doc, {
           startY: y + 4, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9, cellPadding: 2.5 },
           columnStyles: { 0: { fontStyle: 'bold', cellWidth: 44 }, 1: { cellWidth: 100 }, 2: { halign: 'right', fontStyle: 'bold', cellWidth: 38 } },
           head: [['', 'What this means', 'Amount']],
@@ -1357,7 +1406,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           const b = byGroup.get(r.group_key); if (!b) return;
           if (r.entry_type === 'income') b.income += Number(r.amount); else b.expense += Number(r.amount);
         });
-        autoTable(doc, {
+        pdfTable(doc, {
           startY: y + 9, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
           footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
           columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
@@ -1424,7 +1473,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             y = 31;
           }
           const body = meetingRows(rows.filter((r: any) => r.group_key === g.key));
-          autoTable(doc, { ...tableOpts, startY: y, body: body.length ? body : [['No data', '', '', '', '']] });
+          pdfTable(doc, { ...tableOpts, startY: y, body: body.length ? body : [['No data', '', '', '', '']] });
         });
         doc.save(pdfFilename('Curriculum', label));
       } catch (err) {
@@ -1434,9 +1483,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     // Not period-dependent — every active member, across every group
     // (troops, Music, and General alike), one page. Landscape, since
-    // "all their info" is enough columns that portrait would cramp it;
-    // National ID is deliberately left off even here — sensitive enough
-    // that it stays an edit-form-only detail, not a bulk export.
+    // "all their info" is enough columns that portrait would cramp it.
     async function downloadRosterReport() {
       try {
         const { data, error } = await db.from('members').select('*').eq('active', true).order('group_key', { ascending: true }).order('full_name', { ascending: true });
@@ -1444,18 +1491,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const rows = data || [];
         const doc = new jsPDF({ orientation: 'landscape' });
         const y = pdfHeader(doc, 'Full Roster', `${rows.length} active member${rows.length === 1 ? '' : 's'}, every group`);
-        autoTable(doc, {
+        pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
-          head: [['Name', 'Group', 'Phone', 'Email', 'DOB', 'Emergency Contact 1', 'Emergency Contact 2', 'Allergy', 'Notes']],
+          head: [['Name', 'Group', 'Phone', 'Email', 'National ID', 'DOB', 'Emergency Contact 1', 'Emergency Contact 2', 'Allergy', 'Notes']],
           body: rows.length ? rows.map((m: any) => {
             const g = GROUPS.find((x) => x.key === m.group_key);
             return [
-              m.full_name, g ? g.en : m.group_key, m.phone || '—', m.email || '—', m.birth_date || '—',
+              m.full_name, g ? g.en : m.group_key, m.phone || '—', m.email || '—', m.national_id || '—', m.birth_date || '—',
               m.guardian1_relation ? `${m.guardian1_relation}: ${m.guardian1_phone || '—'}` : '—',
               m.guardian2_relation ? `${m.guardian2_relation}: ${m.guardian2_phone || '—'}` : '—',
               m.has_allergies ? (m.allergy_detail || 'Yes') : '—', m.notes || '—',
             ];
-          }) : [['No members found', '', '', '', '', '', '', '', '']],
+          }) : [['No members found', '', '', '', '', '', '', '', '', '']],
         });
         doc.save(pdfFilename('Full-Roster', new Date().toISOString().slice(0, 10)));
       } catch (err) {
@@ -1486,7 +1533,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           return [`Shared: ${groupNames.join(', ') || '—'}`, v.name, v.category || '—', v.phone, v.email || '—', v.location || '—'];
         });
         const body = [...ownRows, ...sharedRows];
-        autoTable(doc, {
+        pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
           head: [['Group', 'Name', 'Category', 'Phone', 'Email', 'Location']],
           body: body.length ? body : [['No vendors found', '', '', '', '', '']],
@@ -1510,7 +1557,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // ---------- Curriculum: next meeting per troop --------------------------
     async function loadCurriculum() {
       const troopKeys = TROOP_GROUPS.map((g) => g.key);
-      const { data, error } = await db.from('curriculum_meetings').select('group_key, date, theme, activities')
+      const { data, error } = await db.from('curriculum_meetings').select('group_key, date, theme, activities, materials_needed')
         .in('group_key', troopKeys).gte('date', todayStr()).order('date', { ascending: true });
       if (error) { console.error(error); showToast('Could not load curriculum.'); return; }
       const byGroup = new Map<string, any>();
@@ -1520,7 +1567,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderCurriculum(byGroup: Map<string, any>) {
       els.currBody.innerHTML = TROOP_GROUPS.map((g) => {
         const m = byGroup.get(g.key);
-        if (!m) return `<tr><td colspan="4" class="ws-empty">${escapeHtml(g.en)}: nothing planned yet</td></tr>`;
+        if (!m) return `<tr><td colspan="5" class="ws-empty">${escapeHtml(g.en)}: nothing planned yet</td></tr>`;
         const d = parseDateStr(m.date);
         const dateLabel = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}`;
         return `
@@ -1529,6 +1576,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <td data-label="Next Meeting">${dateLabel}</td>
             <td data-label="Theme">${escapeHtml(m.theme || '—')}</td>
             <td data-label="Activities">${(m.activities || []).length}</td>
+            <td data-label="Materials Needed">${escapeHtml(m.materials_needed || '—')}</td>
           </tr>`;
       }).join('');
     }
@@ -1707,7 +1755,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const expense = rows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Music Finance Report', `${label}, Income ${income.toFixed(2)}, Expenses ${expense.toFixed(2)}, Net ${(income - expense).toFixed(2)}`);
-        autoTable(doc, {
+        pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
           head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
           body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), r.created_by_name || '—']) : [['No entries this period', '', '', '', '', '']],
@@ -1725,7 +1773,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const rows = data || [];
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Music Event Report', `${label}, ${rows.length} booking${rows.length === 1 ? '' : 's'}`);
-        autoTable(doc, {
+        pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
           head: [['Date', 'Client', 'Type', 'Players', 'Received', 'Via', 'Payouts', 'Net', 'Status']],
           body: rows.length ? rows.map((r: any) => {
@@ -1749,7 +1797,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const totalCost = rows.reduce((s: number, r: any) => s + Number(r.cost || 0), 0);
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Maintenance Report', `${label}, ${rows.length} record${rows.length === 1 ? '' : 's'}, ${totalCost.toFixed(2)} total cost`);
-        autoTable(doc, {
+        pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
           head: [['Date', 'Item', 'Performed by', 'Description', 'Cost', 'Added by']],
           body: rows.length ? rows.map((r: any) => [r.performed_on, r.inventory_items?.name || '—', r.performed_by, r.description, r.cost != null ? Number(r.cost).toFixed(2) : '—', r.created_by_name || '—']) : [['No records this period', '', '', '', '', '']],
@@ -1781,7 +1829,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (groupFilter) rows = rows.filter((m: any) => m.group_key === groupFilter);
       if (statusFilter === 'active') rows = rows.filter((m: any) => m.active);
       else if (statusFilter === 'archived') rows = rows.filter((m: any) => !m.active);
-      if (!rows.length) { els.rosterBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No members match these filters.</td></tr>'; return; }
+      if (!rows.length) { els.rosterBody.innerHTML = '<tr><td colspan="11" class="ws-empty">No members match these filters.</td></tr>'; return; }
       els.rosterBody.innerHTML = rows.map((m: any) => {
         const g = GROUPS.find((x) => x.key === m.group_key);
         return `
@@ -1790,10 +1838,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <td data-label="Group">${escapeHtml(g ? g.en : m.group_key)}</td>
             <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
             <td data-label="Email">${escapeHtml(m.email || '—')}</td>
-            <td data-label="Emergency Contact">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
+            <td data-label="National ID">${escapeHtml(m.national_id || '—')}</td>
+            <td data-label="DOB">${escapeHtml(m.birth_date || '—')}</td>
+            <td data-label="Emergency Contact 1">${m.guardian1_relation ? `${escapeHtml(m.guardian1_relation)}: ${escapeHtml(m.guardian1_phone || '—')}` : '—'}</td>
+            <td data-label="Emergency Contact 2">${m.guardian2_relation ? `${escapeHtml(m.guardian2_relation)}: ${escapeHtml(m.guardian2_phone || '—')}` : '—'}</td>
             <td data-label="Allergies">${m.has_allergies
-                ? `<span class="ws-allergy-badge" title="${escapeHtml(m.allergy_detail || '')}">Yes${m.allergy_detail ? ', ' + escapeHtml(m.allergy_detail) : ''}</span>`
+                ? `<span class="ws-allergy-badge">${m.allergy_detail ? escapeHtml(m.allergy_detail) : 'Yes'}</span>`
                 : '—'}</td>
+            <td data-label="Notes">${escapeHtml(m.notes || '—')}</td>
             <td data-label="Status">${m.active ? 'Active' : (m.archived_reason === 'inactive' ? 'Auto-archived' : 'Archived')}</td>
           </tr>`;
       }).join('');
@@ -2156,6 +2208,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           els.accountMenu.setAttribute('hidden', '');
         });
         els.signout.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
+        bindEnglishOnlyInputs();
 
         bindTabs();
         bindSubtabs();
