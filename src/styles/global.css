@@ -3929,6 +3929,9 @@ main.wide {
 }
 .ws-guide-link:hover { background: var(--color-brand); color: #fff; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 .ws-guide-link svg { flex-shrink: 0; }
+/* Same display-vs-[hidden] specificity tie as .ws-report-card below —
+   this link is data-admin-only, so without this it shows to everyone. */
+.ws-guide-link[hidden] { display: none !important; }
 
 /* ----- Account menu: an avatar button that opens a small dropdown with
    the signed-in leader's name/role and Sign out, instead of cluttering
@@ -4816,6 +4819,13 @@ main.wide {
   flex-direction: column;
   gap: 0.75rem;
 }
+/* .ws-report-card's own `display: flex` above is equal-specificity with
+   the browser's built-in `[hidden] { display: none }` UA rule, and
+   author CSS always wins that tie regardless of source order — so a
+   hidden report card (Music/Social Media/General/troop-only gating)
+   stayed visually visible despite the `hidden` attribute being set
+   correctly. Same bug class as .curr-day-field-row[hidden] earlier. */
+.ws-report-card[hidden] { display: none !important; }
 .ws-report-desc { color: var(--color-muted); font-size: 0.85rem; line-height: 1.5; margin: 0; flex: 1; }
 
 /* ----- Settings: category tag editors ----- */
