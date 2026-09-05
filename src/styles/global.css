@@ -4517,7 +4517,7 @@ main.wide {
   white-space: nowrap;
   border-bottom: 1px solid var(--color-border);
 }
-.ws-table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.ws-table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--color-border); vertical-align: middle; white-space: nowrap; }
 .ws-table tr:last-child td { border-bottom: 0; }
 .ws-table tbody tr:hover { background: var(--color-bg); }
 .ws-editable { cursor: text; display: inline-block; min-width: 3rem; border-bottom: 1px dashed transparent; }
@@ -5314,6 +5314,7 @@ main.wide {
     padding: 0.5rem 0;
     border: 0;
     border-top: 1px solid var(--color-border);
+    white-space: normal;
     overflow-wrap: anywhere;
   }
   .ws-table td:first-child { border-top: 0; padding-top: 0; }
