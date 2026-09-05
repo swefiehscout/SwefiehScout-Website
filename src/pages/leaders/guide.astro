@@ -13,7 +13,7 @@ const marqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos];
 type IconName =
   | 'sparkle' | 'cross' | 'star' | 'heart' | 'flag' | 'music' | 'flower' | 'fleur'
   | 'arrow-right' | 'phone' | 'envelope' | 'pin' | 'bank' | 'cliq' | 'cash'
-  | 'calendar' | 'compass' | 'plus' | 'diamond' | 'sun';
+  | 'calendar' | 'compass' | 'plus' | 'diamond' | 'sun' | 'box' | 'megaphone' | 'lock';
 
 const sections: { id: string; label: string; icon: IconName; intro: string; lines: string[]; numbered?: boolean; adminOnly?: boolean }[] = [
   {
@@ -34,12 +34,13 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       "Lead one group? That's all you'll see.",
       "Lead more than one? Tap a group's name at the top to switch.",
       "The bar under the tabs always shows which group you're viewing.",
-      "Music and General aren't scout troops, switching to either only shows Roster and Finance, nothing else.",
+      "The 5 troops (Baraem, Ashbal & Zahrat, Mubtadi, Mutaqaddim, Jawalah) get the full set of tabs below.",
+      "Music, Social Media, and General aren't scout troops, so each sees its own smaller, tailored set of tabs instead — no Dashboard, Attendance, Fees, or Curriculum for any of them.",
     ],
   },
   {
     id: 'dashboard', label: 'Dashboard', icon: 'compass',
-    intro: "Your group's story at a glance, the moment you sign in.",
+    intro: "Your troop's story at a glance, the moment you sign in. Troops only.",
     lines: [
       'Member count, attendance, fees, and money in and out.',
       'Your next planned meeting.',
@@ -51,7 +52,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     intro: 'Everyone currently in your group.',
     lines: [
       "Add a member, only their name is required, though their own phone and an emergency contact are worth adding too.",
-      "In Music or General, check people off from another group's roster instead of retyping them, most band and board members are already scouts somewhere.",
+      "In Music, Social Media, or General, check people off from a troop's roster instead of retyping them, most band members, content creators, and board members are already scouts somewhere.",
       'Search to find someone quickly.',
       'Edit to update their details, or Archive when they leave.',
     ],
@@ -74,7 +75,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'attendance', label: 'Attendance', icon: 'calendar',
-    intro: 'Mark who showed up, one meeting at a time.',
+    intro: 'Mark who showed up, one meeting at a time. Troops only.',
     lines: [
       'Pick a date on the calendar.',
       "Tick who's present, it saves instantly.",
@@ -82,7 +83,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'fees', label: 'Fees', icon: 'cash',
-    intro: "Track who's paid their dues each month.",
+    intro: "Track who's paid their dues each month. Troops only.",
     lines: [
       'Pick the month.',
       "Tick who's paid, the date is recorded automatically.",
@@ -90,44 +91,100 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'curriculum', label: 'Curriculum', icon: 'flag',
-    intro: 'Plan what happens at each meeting.',
+    intro: 'Plan what happens at each meeting. Troops only.',
     lines: [
       'Tap a date to plan that meeting.',
       'Add a theme and pick or type activities.',
-      "Download a PDF of the month's plan anytime.",
+      "Download a PDF of the plan from the Reports tab anytime.",
+    ],
+  },
+  {
+    id: 'inventory', label: 'Inventory', icon: 'box',
+    intro: "Every instrument and piece of equipment the band owns. Music only.",
+    lines: [
+      'Add an item, its category, quantity, and condition.',
+      "Assign it to a band member, and log maintenance when it needs fixing.",
+    ],
+  },
+  {
+    id: 'events', label: 'Event Calendar', icon: 'heart',
+    intro: "Every booking the band plays, from first inquiry to getting paid. Music only.",
+    lines: [
+      'Tap a date to see or add that day\'s bookings.',
+      'Pick which band members are playing, their pay, and any transport pay.',
+      "Once the event happens, fill in what was actually received, it posts to Finance automatically.",
+    ],
+  },
+  {
+    id: 'pr', label: 'Public Relations', icon: 'megaphone',
+    intro: "Sponsors, community contacts, and General's own files. General only.",
+    lines: [
+      'Sponsors: current, past, and prospective, contact info and status.',
+      'Community & Church Contacts: clergy, schools, media, government, anyone worth keeping on file.',
+      'Library and Settings tabs sit here too, alongside these two.',
+    ],
+  },
+  {
+    id: 'content', label: 'Content Calendar', icon: 'sparkle',
+    intro: "Plan what gets posted and when. Social Media only.",
+    lines: [
+      'Calendar view for scheduling by date, Board view for tracking by status (Idea → Drafting → Scheduled → Posted).',
+      'Attach a draft image, video, or file, and add the live link once it\'s posted.',
+    ],
+  },
+  {
+    id: 'credentials', label: 'Credentials', icon: 'lock',
+    intro: "Every login the group's accounts use, in one place. Social Media only.",
+    lines: [
+      'Passwords are masked by default, tap Reveal to view one, or Copy to grab it without showing it.',
+      'Anyone with access to this group can view, add, or edit a login.',
     ],
   },
   {
     id: 'finance', label: 'Finance', icon: 'bank',
-    intro: "Keep track of your group's money.",
+    intro: "Keep track of your group's money. Every group has one.",
     lines: [
       'Log money coming in or going out.',
       'See totals for whichever month you pick.',
-      'Download a PDF of any month right from this tab.',
+      'The same ledger Admin sees, nothing here is separate from the org-wide accounting system.',
+    ],
+  },
+  {
+    id: 'vendors', label: 'Vendors', icon: 'phone',
+    intro: "Suppliers, repair shops, venues, anyone your group deals with. Every group has one.",
+    lines: [
+      'Add your own, or use one an admin already shared into your group under Shared Vendors.',
     ],
   },
   {
     id: 'library', label: 'Library', icon: 'diamond',
-    intro: 'Share files with your group.',
+    intro: 'Share files with your group. Troops and Social Media.',
     lines: [
       'Upload documents for your leaders to use.',
-      'Find shared lesson resources here too.',
+      'Find shared lesson resources and anything an admin shared org-wide here too.',
     ],
   },
   {
     id: 'reports', label: 'Reports', icon: 'envelope',
-    intro: 'Download a clean PDF summary anytime.',
+    intro: 'Download a clean PDF summary anytime, tailored to your own group.',
     lines: [
-      'Pick a month, then choose fees, attendance, money, or the meeting plan.',
+      'Troops: Income Statement, Monthly Fees, Attendance, Curriculum, Roster, Vendors.',
+      'Music: Music Finance Report, Inventory, Music Event Report, Maintenance, Roster, Vendors.',
+      'Social Media: Social Media Finance Report, Content Calendar, Credentials, Roster, Vendors.',
+      'General: Income Statement, Sponsors, Community & Church Contacts, Roster, Vendors.',
+      "Pick a single month, a whole year, or a custom range spanning several months, whichever a report needs. Roster and Vendors (and Sponsors/Contacts/Credentials where they apply) aren't tied to a date at all.",
     ],
   },
   {
     id: 'admin', label: 'Admin', icon: 'pin', adminOnly: true,
     intro: 'A separate page for admins, tap Admin in the header to get there.',
     lines: [
-      'Overview, Reports, Curriculum, Roster, every group rolled up together.',
-      "Finance, one accounting system for the whole organization: an opening balance, a running balance, logging a transaction to any group, and reconciling against what the bank actually shows.",
-      'People, approve leaders and admins, and set which groups each one can access.',
+      'Overview: the 5 troops rolled up together, at a glance.',
+      'Music and Social Media each get their own dashboard here too, since neither is a scouting troop.',
+      "Finance: one accounting system for every group, an opening balance, a running balance, logging a transaction to any group, and reconciling against what the bank actually shows.",
+      'Reports: every report from every group\'s own Reports tab, combined in one place, with the same single month / whole year / custom range picker.',
+      'Roster, Vendors (Shared), and Curriculum roll up every group too.',
+      'People: approve leaders and admins, and set which groups each one can access.',
     ],
   },
 ];
