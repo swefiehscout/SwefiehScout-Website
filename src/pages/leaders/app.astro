@@ -82,6 +82,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="inventory"><Icon name="box" size={16} strokeWidth={1.8} /> Inventory</button>
         <button type="button" class="ws-tab" data-tab="events"><Icon name="heart" size={16} strokeWidth={1.8} /> Event Calendar<span class="ws-tab-badge" data-events-badge hidden></span></button>
         <button type="button" class="ws-tab" data-tab="vendors"><Icon name="phone" size={16} strokeWidth={1.8} /> Vendors</button>
+        <button type="button" class="ws-tab" data-tab="pr"><Icon name="megaphone" size={16} strokeWidth={1.8} /> Public Relations</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
       </nav>
@@ -933,6 +934,194 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         </section>
 
+        <section class="ws-panel" data-panel="pr" hidden>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="pr" data-subtab="sponsors">Sponsors</button>
+            <button type="button" class="ws-subtab" data-subtabs="pr" data-subtab="contacts">Community &amp; Church Contacts</button>
+            <button type="button" class="ws-subtab" data-subtabs="pr" data-subtab="library">Library</button>
+            <button type="button" class="ws-subtab" data-subtabs="pr" data-subtab="settings">Settings</button>
+          </div>
+
+          <div data-subpanel="pr:sponsors">
+            <p class="ws-att-hint">Current, past, and prospective sponsors — pure contact tracking, nothing here posts to Finance.</p>
+            <form class="ws-member-form" data-sponsor-form>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title" data-sponsor-form-title>Add a sponsor</p>
+              <div class="ws-form-grid ws-form-grid--4">
+                <label class="ws-field">
+                  <span>Name / Organization *</span>
+                  <input type="text" data-sponsor-name required />
+                </label>
+                <label class="ws-field">
+                  <span>Contact person</span>
+                  <input type="text" data-sponsor-contact-person />
+                </label>
+                <label class="ws-field">
+                  <span>Phone *</span>
+                  <input type="tel" data-sponsor-phone required />
+                </label>
+                <label class="ws-field">
+                  <span>Email</span>
+                  <input type="email" data-sponsor-email />
+                </label>
+              </div>
+              <div class="ws-form-grid">
+                <label class="ws-field">
+                  <span>Type</span>
+                  <select data-sponsor-type></select>
+                </label>
+                <label class="ws-field">
+                  <span>Status</span>
+                  <select data-sponsor-status>
+                    <option value="prospective" selected>Prospective</option>
+                    <option value="active">Active</option>
+                    <option value="past">Past</option>
+                  </select>
+                </label>
+              </div>
+              <label class="ws-field ws-field--full">
+                <span>Notes</span>
+                <input type="text" data-sponsor-notes />
+              </label>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary" data-sponsor-submit>Add sponsor</button>
+                <button type="button" class="ws-form-cancel" data-sponsor-cancel hidden>Cancel edit</button>
+              </div>
+            </form>
+
+            <input type="search" class="ws-search" data-sponsor-search placeholder="Search sponsors…" />
+
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-sponsor-table>
+                <thead>
+                  <tr><th>Name</th><th>Contact person</th><th>Phone</th><th>Email</th><th>Type</th><th>Status</th><th>Notes</th><th>Added by</th><th></th></tr>
+                </thead>
+                <tbody data-sponsor-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="pr:contacts" hidden>
+            <p class="ws-att-hint">Clergy, other organizations, schools, media, and government contacts — not tied to any one troop's own roster.</p>
+            <form class="ws-member-form" data-prc-form>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title" data-prc-form-title>Add a contact</p>
+              <div class="ws-form-grid ws-form-grid--4">
+                <label class="ws-field">
+                  <span>Name *</span>
+                  <input type="text" data-prc-name required />
+                </label>
+                <label class="ws-field">
+                  <span>Role / Title</span>
+                  <input type="text" data-prc-role placeholder="e.g. Parish Priest" />
+                </label>
+                <label class="ws-field">
+                  <span>Organization</span>
+                  <input type="text" data-prc-org />
+                </label>
+                <label class="ws-field">
+                  <span>Category</span>
+                  <select data-prc-category></select>
+                </label>
+              </div>
+              <div class="ws-form-grid">
+                <label class="ws-field">
+                  <span>Phone *</span>
+                  <input type="tel" data-prc-phone required />
+                </label>
+                <label class="ws-field">
+                  <span>Email</span>
+                  <input type="email" data-prc-email />
+                </label>
+              </div>
+              <label class="ws-field ws-field--full">
+                <span>Notes</span>
+                <input type="text" data-prc-notes />
+              </label>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary" data-prc-submit>Add contact</button>
+                <button type="button" class="ws-form-cancel" data-prc-cancel hidden>Cancel edit</button>
+              </div>
+            </form>
+
+            <input type="search" class="ws-search" data-prc-search placeholder="Search contacts…" />
+
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-prc-table>
+                <thead>
+                  <tr><th>Name</th><th>Role</th><th>Organization</th><th>Category</th><th>Phone</th><th>Email</th><th>Notes</th><th>Added by</th><th></th></tr>
+                </thead>
+                <tbody data-prc-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="pr:library" hidden>
+            <p class="ws-att-hint">Press releases, media kits/photos, sponsorship agreements, promotional materials — General's own file library.</p>
+            <div class="ws-member-form ws-library-upload">
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Upload a document</p>
+              <div class="ws-form-grid">
+                <label class="ws-field">
+                  <span>File *</span>
+                  <input type="file" data-prlib-file />
+                </label>
+                <label class="ws-field">
+                  <span>Title (optional)</span>
+                  <input type="text" data-prlib-title placeholder="Defaults to the file name" />
+                </label>
+                <label class="ws-field">
+                  <span>Category</span>
+                  <select data-prlib-category></select>
+                </label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="button" class="btn-primary" data-prlib-upload>Upload</button>
+              </div>
+            </div>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-prlib-table>
+                <thead>
+                  <tr><th>Title</th><th>Category</th><th>Type</th><th>Uploaded</th><th>Uploaded by</th><th></th></tr>
+                </thead>
+                <tbody data-prlib-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="pr:settings" hidden>
+            <div class="ws-form-grid ws-form-grid--3">
+              <div class="ws-member-form">
+                <div class="ws-member-form-bar" aria-hidden="true"></div>
+                <p class="ws-member-form-title">Sponsor types</p>
+                <div class="ws-category-add">
+                  <input type="text" data-sponsor-type-cat-input placeholder="e.g. Financial" />
+                  <button type="button" class="btn-primary" data-sponsor-type-cat-add>Add</button>
+                </div>
+                <div class="ws-category-list" data-sponsor-type-cat-list></div>
+              </div>
+              <div class="ws-member-form">
+                <div class="ws-member-form-bar" aria-hidden="true"></div>
+                <p class="ws-member-form-title">Contact categories</p>
+                <div class="ws-category-add">
+                  <input type="text" data-prc-cat-input placeholder="e.g. Church" />
+                  <button type="button" class="btn-primary" data-prc-cat-add>Add</button>
+                </div>
+                <div class="ws-category-list" data-prc-cat-list></div>
+              </div>
+              <div class="ws-member-form">
+                <div class="ws-member-form-bar" aria-hidden="true"></div>
+                <p class="ws-member-form-title">Library categories</p>
+                <div class="ws-category-add">
+                  <input type="text" data-prlib-cat-input placeholder="e.g. Press Release" />
+                  <button type="button" class="btn-primary" data-prlib-cat-add>Add</button>
+                </div>
+                <div class="ws-category-list" data-prlib-cat-list></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="ws-panel" data-panel="library" hidden>
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="library" data-subtab="documents">Documents</button>
@@ -1278,6 +1467,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       editingFinEntryId: null, editingMaintenanceLogId: null,
       events: [], eventCosts: [], editingEventId: null, editingEventCostId: null,
       vendors: [], sharedVendors: [], editingVendorId: null,
+      sponsors: [], editingSponsorId: null, prContacts: [], editingPrContactId: null, prDocs: [],
       evt: { anchor: new Date(), currentDay: null },
       attAnchor: new Date(), attSelected: todayStr(), attDatesWithRecords: null,
       curr: { anchor: new Date(), meetings: new Map(), currentDay: null, channel: null },
@@ -1513,6 +1703,46 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.vendorSearch = el('[data-vendor-search]');
       els.vendorBody = el('[data-vendor-body]');
       els.vendorSharedBody = el('[data-vendor-shared-body]');
+      els.sponsorForm = el('[data-sponsor-form]');
+      els.sponsorFormTitle = el('[data-sponsor-form-title]');
+      els.sponsorName = el('[data-sponsor-name]');
+      els.sponsorContactPerson = el('[data-sponsor-contact-person]');
+      els.sponsorPhone = el('[data-sponsor-phone]');
+      els.sponsorEmail = el('[data-sponsor-email]');
+      els.sponsorType = el('[data-sponsor-type]');
+      els.sponsorStatus = el('[data-sponsor-status]');
+      els.sponsorNotes = el('[data-sponsor-notes]');
+      els.sponsorSubmit = el('[data-sponsor-submit]');
+      els.sponsorCancel = el('[data-sponsor-cancel]');
+      els.sponsorSearch = el('[data-sponsor-search]');
+      els.sponsorBody = el('[data-sponsor-body]');
+      els.sponsorTypeCatInput = el('[data-sponsor-type-cat-input]');
+      els.sponsorTypeCatAdd = el('[data-sponsor-type-cat-add]');
+      els.sponsorTypeCatList = el('[data-sponsor-type-cat-list]');
+      els.prcForm = el('[data-prc-form]');
+      els.prcFormTitle = el('[data-prc-form-title]');
+      els.prcName = el('[data-prc-name]');
+      els.prcRole = el('[data-prc-role]');
+      els.prcOrg = el('[data-prc-org]');
+      els.prcCategory = el('[data-prc-category]');
+      els.prcPhone = el('[data-prc-phone]');
+      els.prcEmail = el('[data-prc-email]');
+      els.prcNotes = el('[data-prc-notes]');
+      els.prcSubmit = el('[data-prc-submit]');
+      els.prcCancel = el('[data-prc-cancel]');
+      els.prcSearch = el('[data-prc-search]');
+      els.prcBody = el('[data-prc-body]');
+      els.prcCatInput = el('[data-prc-cat-input]');
+      els.prcCatAdd = el('[data-prc-cat-add]');
+      els.prcCatList = el('[data-prc-cat-list]');
+      els.prlibFile = el('[data-prlib-file]');
+      els.prlibTitle = el('[data-prlib-title]');
+      els.prlibCategory = el('[data-prlib-category]');
+      els.prlibUpload = el('[data-prlib-upload]');
+      els.prlibBody = el('[data-prlib-body]');
+      els.prlibCatInput = el('[data-prlib-cat-input]');
+      els.prlibCatAdd = el('[data-prlib-cat-add]');
+      els.prlibCatList = el('[data-prlib-cat-list]');
       els.eventsBadge = el('[data-events-badge]');
       els.evtDashStats = el('[data-evt-dash-stats]');
       els.evtTopMembers = el('[data-evt-top-members]');
@@ -2119,7 +2349,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const { data } = await db.from('group_settings').select('*').eq('group_key', state.activeGroup).maybeSingle();
       state.groupSettings = data || {
         group_key: state.activeGroup, monthly_fee_defaults: {}, expense_categories: [], income_categories: [],
-        inventory_categories: [], event_type_categories: [], event_cost_categories: [], event_location_categories: [], activity_bank: [],
+        inventory_categories: [], event_type_categories: [], event_cost_categories: [], event_location_categories: [],
+        sponsor_type_categories: [], pr_contact_categories: [], pr_library_categories: [], activity_bank: [],
       };
       const defaults = GROUP_DEFAULT_CATEGORIES[state.activeGroup] || { expense: DEFAULT_EXPENSE_CATEGORIES, income: DEFAULT_INCOME_CATEGORIES };
       // Every group starts with sensible defaults for its kind — a leader
@@ -2131,6 +2362,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!state.groupSettings.event_type_categories?.length) state.groupSettings.event_type_categories = [...DEFAULT_EVENT_TYPE_CATEGORIES];
       if (!state.groupSettings.event_cost_categories?.length) state.groupSettings.event_cost_categories = [...DEFAULT_EVENT_COST_CATEGORIES];
       if (!state.groupSettings.event_location_categories?.length) state.groupSettings.event_location_categories = [...DEFAULT_EVENT_LOCATION_CATEGORIES];
+      if (!state.groupSettings.sponsor_type_categories?.length) state.groupSettings.sponsor_type_categories = [...DEFAULT_SPONSOR_TYPE_CATEGORIES];
+      if (!state.groupSettings.pr_contact_categories?.length) state.groupSettings.pr_contact_categories = [...DEFAULT_PR_CONTACT_CATEGORIES];
+      if (!state.groupSettings.pr_library_categories?.length) state.groupSettings.pr_library_categories = [...DEFAULT_PR_LIBRARY_CATEGORIES];
       if (!state.groupSettings.activity_bank?.length) {
         state.groupSettings.activity_bank = ACTIVITY_BANK.map((a) => ({ id: a.type, en: a.en }));
       }
@@ -3714,6 +3948,359 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
+    // ---------- Public Relations (General only): Sponsors, Contacts,
+    // a PR-scoped Library, and their 3 editable category lists ----------
+    const DEFAULT_SPONSOR_TYPE_CATEGORIES = ['Financial', 'In-Kind', 'Media', 'Venue', 'Other'];
+    const DEFAULT_PR_CONTACT_CATEGORIES = ['Church', 'Community', 'School', 'Media', 'Government', 'Other'];
+    const DEFAULT_PR_LIBRARY_CATEGORIES = ['Press Release', 'Media Kit / Photos', 'Sponsorship Agreement', 'Promotional Material', 'Other'];
+    async function loadPR() {
+      if (!state.activeGroup) return;
+      await loadGroupSettings();
+      renderPRCategories();
+      const [sponsorsRes, contactsRes, docsRes] = await Promise.all([
+        db.from('sponsors').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true }),
+        db.from('pr_contacts').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true }),
+        db.from('documents').select('*').eq('group_key', state.activeGroup).order('uploaded_at', { ascending: false }),
+      ]);
+      if (sponsorsRes.error || contactsRes.error || docsRes.error) {
+        console.error(sponsorsRes.error || contactsRes.error || docsRes.error);
+        showToast('Could not load Public Relations.');
+        return;
+      }
+      state.sponsors = sponsorsRes.data || [];
+      state.prContacts = contactsRes.data || [];
+      state.prDocs = docsRes.data || [];
+      renderSponsors();
+      renderPrContacts();
+      renderPRLibrary();
+    }
+
+    // ---- Settings subtab: 3 category lists, same shared renderCategoryList
+    // pattern as Inventory/Event Calendar's own Settings subtabs. ----
+    function renderPRCategories() {
+      renderCategoryList(els.sponsorTypeCatList, state.groupSettings.sponsor_type_categories || [], 'sponsor_type_categories', savePRCategoryList);
+      renderCategoryList(els.prcCatList, state.groupSettings.pr_contact_categories || [], 'pr_contact_categories', savePRCategoryList);
+      renderCategoryList(els.prlibCatList, state.groupSettings.pr_library_categories || [], 'pr_library_categories', savePRCategoryList);
+      updateSponsorTypeOptions();
+      updatePrcCategoryOptions();
+      updatePrlibCategoryOptions();
+    }
+    async function savePRCategoryList(field: string, updated: string[]) {
+      const { error } = await db.from('group_settings').upsert({ group_key: state.activeGroup, [field]: updated }, { onConflict: 'group_key' });
+      if (error) { console.error(error); showToast('Could not save.'); return; }
+      state.groupSettings[field] = updated;
+      renderPRCategories();
+    }
+    function updateSponsorTypeOptions() {
+      const list = state.groupSettings?.sponsor_type_categories || [];
+      const current = els.sponsorType.value;
+      els.sponsorType.innerHTML = '<option value="">— None —</option>'
+        + list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+      if (list.includes(current)) els.sponsorType.value = current;
+    }
+    function updatePrcCategoryOptions() {
+      const list = state.groupSettings?.pr_contact_categories || [];
+      const current = els.prcCategory.value;
+      els.prcCategory.innerHTML = '<option value="">— None —</option>'
+        + list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+      if (list.includes(current)) els.prcCategory.value = current;
+    }
+    function updatePrlibCategoryOptions() {
+      const list = state.groupSettings?.pr_library_categories || [];
+      els.prlibCategory.innerHTML = list.length
+        ? list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
+        : '<option value="">No categories yet, add some below</option>';
+    }
+    function bindPRCategories() {
+      els.sponsorTypeCatAdd.addEventListener('click', () => {
+        const val = els.sponsorTypeCatInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.sponsor_type_categories || [];
+        if (current.includes(val)) { els.sponsorTypeCatInput.value = ''; return; }
+        savePRCategoryList('sponsor_type_categories', [...current, val]);
+        els.sponsorTypeCatInput.value = '';
+      });
+      els.prcCatAdd.addEventListener('click', () => {
+        const val = els.prcCatInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.pr_contact_categories || [];
+        if (current.includes(val)) { els.prcCatInput.value = ''; return; }
+        savePRCategoryList('pr_contact_categories', [...current, val]);
+        els.prcCatInput.value = '';
+      });
+      els.prlibCatAdd.addEventListener('click', () => {
+        const val = els.prlibCatInput.value.trim();
+        if (!val) return;
+        const current = state.groupSettings?.pr_library_categories || [];
+        if (current.includes(val)) { els.prlibCatInput.value = ''; return; }
+        savePRCategoryList('pr_library_categories', [...current, val]);
+        els.prlibCatInput.value = '';
+      });
+    }
+
+    // ---- Sponsors ----
+    function resetSponsorForm() {
+      state.editingSponsorId = null;
+      els.sponsorForm.reset();
+      els.sponsorFormTitle.textContent = 'Add a sponsor';
+      els.sponsorSubmit.textContent = 'Add sponsor';
+      els.sponsorCancel.hidden = true;
+    }
+    function startEditSponsor(id: string) {
+      const s = state.sponsors.find((x: any) => x.id === id);
+      if (!s) return;
+      state.editingSponsorId = id;
+      els.sponsorName.value = s.name;
+      els.sponsorContactPerson.value = s.contact_person || '';
+      els.sponsorPhone.value = s.phone;
+      els.sponsorEmail.value = s.email || '';
+      els.sponsorType.value = s.type || '';
+      els.sponsorStatus.value = s.status;
+      els.sponsorNotes.value = s.notes || '';
+      els.sponsorFormTitle.textContent = `Editing ${s.name}`;
+      els.sponsorSubmit.textContent = 'Save changes';
+      els.sponsorCancel.hidden = false;
+      els.sponsorForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    const SPONSOR_STATUS_LABELS: Record<string, string> = { active: 'Active', past: 'Past', prospective: 'Prospective' };
+    const SPONSOR_STATUS_BADGE_CLASS: Record<string, string> = { active: 'ws-badge--good', past: 'ws-badge--fair', prospective: 'ws-badge--fair' };
+    function renderSponsors() {
+      if (!state.sponsors.length) {
+        els.sponsorBody.innerHTML = '<tr><td colspan="9" class="ws-empty">No sponsors yet.</td></tr>';
+        return;
+      }
+      els.sponsorBody.innerHTML = state.sponsors.map((s: any) => `
+        <tr data-sponsor-id="${s.id}">
+          <td data-label="Name">${escapeHtml(s.name)}</td>
+          <td data-label="Contact person">${escapeHtml(s.contact_person || '—')}</td>
+          <td data-label="Phone">${escapeHtml(s.phone)}</td>
+          <td data-label="Email">${escapeHtml(s.email || '—')}</td>
+          <td data-label="Type">${escapeHtml(s.type || '—')}</td>
+          <td data-label="Status"><span class="ws-badge ${SPONSOR_STATUS_BADGE_CLASS[s.status]}">${SPONSOR_STATUS_LABELS[s.status]}</span></td>
+          <td data-label="Notes">${escapeHtml(s.notes || '—')}</td>
+          <td data-label="Added by">${escapeHtml(s.created_by_name || '—')}</td>
+          <td class="ws-row-actions">
+            <button type="button" class="ws-edit-btn" data-sponsor-edit>Edit</button>
+            <button type="button" class="ws-row-del" data-sponsor-del>×</button>
+          </td>
+        </tr>
+      `).join('');
+      els.sponsorBody.querySelectorAll('[data-sponsor-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => startEditSponsor(btn.closest('tr').dataset.sponsorId));
+      });
+      els.sponsorBody.querySelectorAll('[data-sponsor-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.closest('tr').dataset.sponsorId;
+          if (!confirm('Delete this sponsor?')) return;
+          const { error } = await db.from('sponsors').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          if (state.editingSponsorId === id) resetSponsorForm();
+          await loadPR();
+        });
+      });
+    }
+    function bindSponsorForm() {
+      els.sponsorCancel.addEventListener('click', resetSponsorForm);
+      els.sponsorForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const name = els.sponsorName.value.trim();
+        const phone = els.sponsorPhone.value.trim();
+        if (!name || !phone) { showToast('Name and phone are required.'); return; }
+        els.sponsorSubmit.disabled = true;
+        const payload: any = {
+          name, contact_person: els.sponsorContactPerson.value.trim() || null, phone,
+          email: els.sponsorEmail.value.trim() || null, type: els.sponsorType.value || null,
+          status: els.sponsorStatus.value, notes: els.sponsorNotes.value.trim() || null,
+        };
+        let error;
+        if (state.editingSponsorId) {
+          payload.updated_at = new Date().toISOString();
+          ({ error } = await db.from('sponsors').update(payload).eq('id', state.editingSponsorId));
+        } else {
+          payload.group_key = state.activeGroup;
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ error } = await db.from('sponsors').insert(payload));
+        }
+        els.sponsorSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not save sponsor.'); return; }
+        resetSponsorForm();
+        await loadPR();
+      });
+    }
+
+    // ---- Community & Church Contacts ----
+    function resetPrContactForm() {
+      state.editingPrContactId = null;
+      els.prcForm.reset();
+      els.prcFormTitle.textContent = 'Add a contact';
+      els.prcSubmit.textContent = 'Add contact';
+      els.prcCancel.hidden = true;
+    }
+    function startEditPrContact(id: string) {
+      const c = state.prContacts.find((x: any) => x.id === id);
+      if (!c) return;
+      state.editingPrContactId = id;
+      els.prcName.value = c.name;
+      els.prcRole.value = c.role || '';
+      els.prcOrg.value = c.organization || '';
+      els.prcCategory.value = c.category || '';
+      els.prcPhone.value = c.phone;
+      els.prcEmail.value = c.email || '';
+      els.prcNotes.value = c.notes || '';
+      els.prcFormTitle.textContent = `Editing ${c.name}`;
+      els.prcSubmit.textContent = 'Save changes';
+      els.prcCancel.hidden = false;
+      els.prcForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function renderPrContacts() {
+      if (!state.prContacts.length) {
+        els.prcBody.innerHTML = '<tr><td colspan="9" class="ws-empty">No contacts yet.</td></tr>';
+        return;
+      }
+      els.prcBody.innerHTML = state.prContacts.map((c: any) => `
+        <tr data-contact-id="${c.id}">
+          <td data-label="Name">${escapeHtml(c.name)}</td>
+          <td data-label="Role">${escapeHtml(c.role || '—')}</td>
+          <td data-label="Organization">${escapeHtml(c.organization || '—')}</td>
+          <td data-label="Category">${escapeHtml(c.category || '—')}</td>
+          <td data-label="Phone">${escapeHtml(c.phone)}</td>
+          <td data-label="Email">${escapeHtml(c.email || '—')}</td>
+          <td data-label="Notes">${escapeHtml(c.notes || '—')}</td>
+          <td data-label="Added by">${escapeHtml(c.created_by_name || '—')}</td>
+          <td class="ws-row-actions">
+            <button type="button" class="ws-edit-btn" data-prc-edit>Edit</button>
+            <button type="button" class="ws-row-del" data-prc-del>×</button>
+          </td>
+        </tr>
+      `).join('');
+      els.prcBody.querySelectorAll('[data-prc-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => startEditPrContact(btn.closest('tr').dataset.contactId));
+      });
+      els.prcBody.querySelectorAll('[data-prc-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.closest('tr').dataset.contactId;
+          if (!confirm('Delete this contact?')) return;
+          const { error } = await db.from('pr_contacts').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          if (state.editingPrContactId === id) resetPrContactForm();
+          await loadPR();
+        });
+      });
+    }
+    function bindPrContactForm() {
+      els.prcCancel.addEventListener('click', resetPrContactForm);
+      els.prcForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const name = els.prcName.value.trim();
+        const phone = els.prcPhone.value.trim();
+        if (!name || !phone) { showToast('Name and phone are required.'); return; }
+        els.prcSubmit.disabled = true;
+        const payload: any = {
+          name, role: els.prcRole.value.trim() || null, organization: els.prcOrg.value.trim() || null,
+          category: els.prcCategory.value || null, phone, email: els.prcEmail.value.trim() || null,
+          notes: els.prcNotes.value.trim() || null,
+        };
+        let error;
+        if (state.editingPrContactId) {
+          payload.updated_at = new Date().toISOString();
+          ({ error } = await db.from('pr_contacts').update(payload).eq('id', state.editingPrContactId));
+        } else {
+          payload.group_key = state.activeGroup;
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ error } = await db.from('pr_contacts').insert(payload));
+        }
+        els.prcSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not save contact.'); return; }
+        resetPrContactForm();
+        await loadPR();
+      });
+    }
+
+    // ---- PR Library — reuses the same `documents` table every troop's
+    // own Library tab writes to; General never had a Library tab
+    // before, so this is its first use of it.
+    function renderPRLibrary() {
+      if (!state.prDocs.length) {
+        els.prlibBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No documents yet.</td></tr>';
+        return;
+      }
+      els.prlibBody.innerHTML = state.prDocs.map((d: any) => `
+        <tr data-doc-id="${d.id}" data-doc-path="${escapeHtml(d.file_path)}">
+          <td data-label="Title">${escapeHtml(d.title)}</td>
+          <td data-label="Category">${escapeHtml(d.category && d.category !== 'general' ? d.category : '—')}</td>
+          <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
+          <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
+          <td data-label="Uploaded by">${escapeHtml(d.uploaded_by_name || '—')}</td>
+          <td class="ws-row-actions">
+            <button type="button" class="ws-edit-btn" data-doc-rename>Rename</button>
+            <button type="button" class="ws-edit-btn" data-doc-download>Download</button>
+            <button type="button" class="ws-row-del" data-doc-del>×</button>
+          </td>
+        </tr>
+      `).join('');
+      els.prlibBody.querySelectorAll('tr').forEach((row: any) => {
+        const path = row.dataset.docPath;
+        const id = row.dataset.docId;
+        row.querySelector('[data-doc-download]').addEventListener('click', async () => {
+          const { data, error } = await db.storage.from('documents').createSignedUrl(path, 60);
+          if (error || !data) { showToast('Could not open file.'); return; }
+          window.open(data.signedUrl, '_blank');
+        });
+        row.querySelector('[data-doc-del]').addEventListener('click', async () => {
+          if (!confirm('Delete this document?')) return;
+          await db.storage.from('documents').remove([path]);
+          const { error } = await db.from('documents').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          await loadPR();
+        });
+        row.querySelector('[data-doc-rename]').addEventListener('click', () => startRenamePrDoc(row, id));
+      });
+    }
+    function startRenamePrDoc(row: any, id: string) {
+      const titleCell = row.querySelector('[data-label="Title"]');
+      const current = titleCell.textContent;
+      titleCell.innerHTML = `<input type="text" class="ws-inline-amount" value="${escapeHtml(current)}" data-doc-rename-input />`;
+      const input = titleCell.querySelector('[data-doc-rename-input]');
+      input.focus();
+      input.select();
+      const actionsCell = row.querySelector('.ws-row-actions');
+      actionsCell.innerHTML = `
+        <button type="button" class="ws-edit-btn" data-doc-rename-save>Save</button>
+        <button type="button" class="ws-edit-btn" data-doc-rename-cancel>Cancel</button>
+      `;
+      actionsCell.querySelector('[data-doc-rename-cancel]').addEventListener('click', renderPRLibrary);
+      actionsCell.querySelector('[data-doc-rename-save]').addEventListener('click', async () => {
+        const title = input.value.trim();
+        if (!title) { showToast('Title is required.'); return; }
+        const { error } = await db.from('documents').update({ title }).eq('id', id);
+        if (error) { console.error(error); showToast('Could not rename.'); return; }
+        await loadPR();
+      });
+    }
+    function bindPRLibraryUpload() {
+      els.prlibUpload.addEventListener('click', async () => {
+        const file = els.prlibFile.files[0];
+        if (!file) { showToast('Choose a file first.'); return; }
+        els.prlibUpload.disabled = true;
+        const path = `${state.activeGroup}/${Date.now()}-${file.name}`;
+        const { error: upErr } = await db.storage.from('documents').upload(path, file);
+        if (upErr) { console.error(upErr); showToast('Could not upload.'); els.prlibUpload.disabled = false; return; }
+        const title = els.prlibTitle.value.trim() || file.name;
+        const { error } = await db.from('documents').insert({
+          group_key: state.activeGroup, category: els.prlibCategory.value || 'general', title, file_path: path,
+          file_type: file.type || null, size_bytes: file.size, uploaded_by: state.session.user.id,
+          uploaded_by_name: state.profile?.name || null,
+        });
+        els.prlibUpload.disabled = false;
+        if (error) { console.error(error); showToast('Could not save document.'); return; }
+        els.prlibFile.value = '';
+        els.prlibTitle.value = '';
+        await loadPR();
+      });
+    }
+
     // ---------- Library (document storage, per group) ----------------------
     async function loadLibrary() {
       if (!state.activeGroup) return;
@@ -5046,18 +5633,20 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const NON_TROOP_GROUP_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY];
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
       [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors'],
-      [GENERAL_GROUP_KEY]: ['roster', 'finance', 'vendors'],
+      [GENERAL_GROUP_KEY]: ['roster', 'finance', 'vendors', 'pr'],
     };
-    // Inventory/Event Calendar are Music-only — troops aren't in
-    // NON_TROOP_TAB_VISIBILITY at all, so Music's own inclusion list
-    // above doesn't hide anything for them; this covers that case.
-    // Vendors, unlike those two, is universal — every troop gets it too,
-    // same as Roster/Finance, so it isn't in this list at all.
+    // Inventory/Event Calendar are Music-only, Public Relations is
+    // General-only — troops aren't in NON_TROOP_TAB_VISIBILITY at all,
+    // so each group's own inclusion list above doesn't hide anything
+    // for them; this covers that case for both. Vendors, unlike those,
+    // is universal — every troop gets it too, same as Roster/Finance,
+    // so it isn't in this list at all.
     const MUSIC_ONLY_TABS = ['inventory', 'events'];
+    const GENERAL_ONLY_TABS = ['pr'];
     function isTabHidden(tab: string) {
       const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
       if (visible) return !visible.includes(tab);
-      return MUSIC_ONLY_TABS.includes(tab);
+      return MUSIC_ONLY_TABS.includes(tab) || GENERAL_ONLY_TABS.includes(tab);
     }
     function updateTabVisibility() {
       els.tabs.querySelectorAll('.ws-tab:not([data-admin-only])').forEach((btn: any) => {
@@ -5084,6 +5673,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'inventory') loadInventory();
       if (tab === 'events') loadEvents();
       if (tab === 'vendors') loadVendors();
+      if (tab === 'pr') loadPR();
       if (tab === 'library') loadLibrary();
       if (tab === 'curriculum') currStart();
     }
@@ -5246,6 +5836,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindEventForm();
         bindEventCategories();
         bindVendorForm();
+        bindSponsorForm();
+        bindPrContactForm();
+        bindPRLibraryUpload();
+        bindPRCategories();
         bindLibraryUpload();
         bindReports();
         bindTableSearch(els.rosterSearch, els.rosterBody);
@@ -5255,6 +5849,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindTableSearch(els.feeSearch, els.feeBody);
         bindTableSearch(els.invSearch, els.invBody);
         bindTableSearch(els.vendorSearch, els.vendorBody);
+        bindTableSearch(els.sponsorSearch, els.sponsorBody);
+        bindTableSearch(els.prcSearch, els.prcBody);
         currBindStatics();
         bindAttendance();
         els.feeMonth.addEventListener('change', loadFees);

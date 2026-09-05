@@ -25,7 +25,8 @@ interface Props {
     | 'plus'
     | 'diamond'
     | 'sun'
-    | 'box';
+    | 'box'
+    | 'megaphone';
   size?: number | string;
   strokeWidth?: number;
   class?: string;
@@ -193,6 +194,13 @@ const sw = strokeWidth;
       <path d="M3 8l9-5 9 5-9 5-9-5z" />
       <path d="M3 8v8l9 5 9-5V8" />
       <path d="M12 13v8" />
+    </>
+  )}
+  {name === 'megaphone' && (
+    <>
+      <path d="M3 10a2 2 0 0 1 2-2h1l11-5v14l-11-5H5a2 2 0 0 1-2-2z" />
+      <path d="M8 14v4a2 2 0 0 0 2 2h1v-6" />
+      <path d="M20 9a4 4 0 0 1 0 6" />
     </>
   )}
 </svg>
