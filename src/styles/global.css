@@ -5636,7 +5636,18 @@ body.ws-scroll-locked { overflow: hidden; }
      above — left as 100%, it becomes each flex item's used flex-basis
      (since these all resolve to flex-basis:auto) and every "inline"
      cell claims the full row width and wraps onto its own line anyway. */
-  .ws-table--compact-row td.ws-row-num { order: 1; width: auto; }
+  /* Reserved width regardless of digit count (1 vs 12 vs 123) — a real
+     desktop <table> keeps a column's width consistent down every row
+     automatically; this flex layout doesn't, so without it "#" shifts
+     everything beside it sideways by a different amount on every row
+     once the roster passes 9, then 99, members. */
+  .ws-table--compact-row td.ws-row-num {
+    order: 1;
+    width: auto;
+    flex: 0 0 auto;
+    min-width: 1.6em;
+    text-align: right;
+  }
   .ws-table--compact-row td[data-label="Member ID"] {
     order: 2;
     width: auto;
@@ -5671,6 +5682,10 @@ body.ws-scroll-locked { overflow: hidden; }
      See initCollapsibleRows() in row-numbers.ts for the tap handler. */
   .ws-table--collapsible tbody tr { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.5rem; cursor: pointer; }
   .ws-table--collapsible tbody tr td { flex: 0 0 auto; width: auto; }
+  /* Same reserved width as the compact-row tables, so "#" stays a fixed
+     column instead of shifting Name sideways by a different amount on
+     every row as the roster passes 9, then 99, members. */
+  .ws-table--collapsible td.ws-row-num { min-width: 1.6em; text-align: right; }
   .ws-table--collapsible tbody tr td:not(.ws-row-num):not([data-label="Name"]) { flex-basis: 100%; }
   .ws-table--collapsible tbody tr:not(.ws-row--expanded) td:not(.ws-row-num):not([data-label="Name"]):not(.ws-empty) {
     display: none;
