@@ -448,8 +448,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
           <input type="search" class="ws-search" data-roster-search placeholder="Search members…" />
           <div class="ws-table-wrap">
-            <table class="ws-table" data-roster-table>
-              <thead><tr><th>Name</th><th>Member ID</th><th>Group</th><th>Phone</th><th>Email</th><th>National ID</th><th>DOB</th><th>Emergency Contact 1</th><th>Emergency Contact 2</th><th>Allergies</th><th>Notes</th><th>Status</th></tr></thead>
+            <table class="ws-table ws-table--collapsible" data-roster-table>
+              <thead><tr><th>Member ID</th><th>Name</th><th>Group</th><th>Phone</th><th>Email</th><th>National ID</th><th>DOB</th><th>Emergency Contact 1</th><th>Emergency Contact 2</th><th>Allergies</th><th>Notes</th><th>Status</th></tr></thead>
               <tbody data-roster-body></tbody>
             </table>
           </div>
@@ -823,7 +823,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
     import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY } from '../lib/curriculum/constants';
-    import { initRowNumbering } from '../lib/workspace/row-numbers';
+    import { initRowNumbering, initCollapsibleRows } from '../lib/workspace/row-numbers';
 
     const db: any = supabase;
 
@@ -2336,13 +2336,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           const rows = members.map((m: any) => {
             const g = GROUPS.find((x) => x.key === m.group_key);
             const s = byMember.get(m.id) || { months: 0, total: 0 };
-            return [m.full_name, m.member_code || '—', g ? g.en : m.group_key, `${s.months} / ${monthCount}`, s.total.toFixed(2)];
+            return [m.member_code || '—', m.full_name, g ? g.en : m.group_key, `${s.months} / ${monthCount}`, s.total.toFixed(2)];
           });
           const grandTotal = members.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
           const y = pdfHeader(doc, isYear ? 'Yearly Fees Summary' : 'Fees Summary', `${label}, ${grandTotal.toFixed(2)} collected total`);
           pdfTable(doc, {
             startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-            head: [['Member', 'Member ID', 'Group', 'Months Paid', 'Total']], body: rows.length ? rows : [['No data available', '', '', '', '']],
+            head: [['Member ID', 'Member', 'Group', 'Months Paid', 'Total']], body: rows.length ? rows : [['', 'No data available', '', '', '']],
           });
           doc.save(pdfFilename(isYear ? 'Yearly-Fees' : 'Fees-Summary', label));
         } else {
@@ -2353,12 +2353,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             const rec = map.get(m.id);
             const g = GROUPS.find((x) => x.key === m.group_key);
             if (rec && rec.paid) { paidCount++; collected += Number(rec.amount || 0); }
-            return [m.full_name, m.member_code || '—', g ? g.en : m.group_key, rec && rec.paid ? 'Paid' : 'Unpaid', rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'];
+            return [m.member_code || '—', m.full_name, g ? g.en : m.group_key, rec && rec.paid ? 'Paid' : 'Unpaid', rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'];
           });
           const y = pdfHeader(doc, 'Monthly Fees', `${label}, ${paidCount} of ${members.length} paid, ${collected.toFixed(2)} collected`);
           pdfTable(doc, {
             startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-            head: [['Member', 'Member ID', 'Group', 'Status', 'Amount']], body: rows.length ? rows : [['No data available', '', '', '', '']],
+            head: [['Member ID', 'Member', 'Group', 'Status', 'Amount']], body: rows.length ? rows : [['', 'No data available', '', '', '']],
           });
           doc.save(pdfFilename('Monthly-Fees', label));
         }
@@ -2391,13 +2391,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           const sessions = byGroupSessions.get(m.group_key)?.size || 0;
           const present = presentByMember.get(m.id) || 0;
           const rate = sessions ? Math.round((present / sessions) * 100) : 0;
-          return [m.full_name, m.member_code || '—', g ? g.en : m.group_key, `${present} / ${sessions}`, `${rate}%`];
+          return [m.member_code || '—', m.full_name, g ? g.en : m.group_key, `${present} / ${sessions}`, `${rate}%`];
         });
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Attendance', `${label}, ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held across the 5 troops`);
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          head: [['Member', 'Member ID', 'Group', 'Present', 'Rate']], body: bodyRows.length ? bodyRows : [['No data available', '', '', '', '']],
+          head: [['Member ID', 'Member', 'Group', 'Present', 'Rate']], body: bodyRows.length ? bodyRows : [['', 'No data available', '', '', '']],
         });
         doc.save(pdfFilename('Attendance', label));
       } catch (err) {
@@ -2602,16 +2602,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const y = pdfHeader(doc, 'Full Roster', `${rows.length} active member${rows.length === 1 ? '' : 's'}, every group`);
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
-          head: [['Name', 'Member ID', 'Group', 'Phone', 'Email', 'National ID', 'DOB', 'Emergency Contact 1', 'Emergency Contact 2', 'Allergy', 'Notes']],
+          head: [['Member ID', 'Name', 'Group', 'Phone', 'Email', 'National ID', 'DOB', 'Emergency Contact 1', 'Emergency Contact 2', 'Allergy', 'Notes']],
           body: rows.length ? rows.map((m: any) => {
             const g = GROUPS.find((x) => x.key === m.group_key);
             return [
-              m.full_name, m.member_code || '—', g ? g.en : m.group_key, m.phone || '—', m.email || '—', m.national_id || '—', m.birth_date || '—',
+              m.member_code || '—', m.full_name, g ? g.en : m.group_key, m.phone || '—', m.email || '—', m.national_id || '—', m.birth_date || '—',
               m.guardian1_relation ? `${m.guardian1_relation}: ${m.guardian1_phone || '—'}` : '—',
               m.guardian2_relation ? `${m.guardian2_relation}: ${m.guardian2_phone || '—'}` : '—',
               m.has_allergies ? (m.allergy_detail || 'Yes') : '—', m.notes || '—',
             ];
-          }) : [['No members found', '', '', '', '', '', '', '', '', '', '']],
+          }) : [['', 'No members found', '', '', '', '', '', '', '', '', '']],
         });
         doc.save(pdfFilename('Full-Roster', new Date().toISOString().slice(0, 10)));
       } catch (err) {
@@ -3328,8 +3328,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const g = GROUPS.find((x) => x.key === m.group_key);
         return `
           <tr>
-            <td data-label="Name">${escapeHtml(m.full_name)}</td>
             <td data-label="Member ID">${escapeHtml(m.member_code || '—')}</td>
+            <td data-label="Name">${escapeHtml(m.full_name)}</td>
             <td data-label="Group">${escapeHtml(g ? g.en : m.group_key)}</td>
             <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
             <td data-label="Email">${escapeHtml(m.email || '—')}</td>
@@ -3670,6 +3670,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function init() {
       cacheEls();
       initRowNumbering();
+      initCollapsibleRows();
       if (!supabaseConfigured) { showToast('Not connected to the database.'); return; }
 
       const session = await getSession();

@@ -51,3 +51,23 @@ export function initRowNumbering(root: ParentNode = document): void {
     observer.observe(tbody, { childList: true });
   });
 }
+
+// Roster / Archive on phones: rows collapse to just "# Name" (see the
+// `.ws-table--collapsible` rules in global.css, only in effect at
+// narrow widths) — tapping one reveals the rest of that member's
+// fields. One delegated listener per table, on the stable <table>
+// element itself, so it keeps working through every re-render of the
+// <tbody> without needing to be re-bound per row.
+const EXPANDED_CLASS = 'ws-row--expanded';
+
+export function initCollapsibleRows(root: ParentNode = document): void {
+  root.querySelectorAll('table.ws-table--collapsible').forEach((table) => {
+    table.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('button, a, input, select, textarea')) return;
+      const row = target.closest('tr');
+      if (!row || row.parentElement?.tagName !== 'TBODY' || row.querySelector('td.ws-empty')) return;
+      row.classList.toggle(EXPANDED_CLASS);
+    });
+  });
+}

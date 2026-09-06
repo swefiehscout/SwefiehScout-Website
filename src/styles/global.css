@@ -5607,6 +5607,92 @@ body.ws-scroll-locked { overflow: hidden; }
   }
   .ws-table td.ws-row-actions::before { content: none; }
 
+  /* ----- Attendance / Fees: keep "#", Member ID, Name, and the one
+     checkbox that matters (Present / Paid) together on a single line
+     instead of stacking all 4 as separate fields — this is the table
+     someone is scanning fast and ticking boxes on, not reading. DOM
+     order stays Name-then-Member-ID (matches the desktop columns);
+     `order` below is what actually puts Member ID first visually.
+     Fees' Amount / Paid on still get their own labeled line below,
+     same as every other table's fields. ----- */
+  .ws-table--compact-row tbody tr { display: flex; flex-wrap: wrap; align-items: center; column-gap: 0.6rem; }
+  .ws-table--compact-row td.ws-row-num,
+  .ws-table--compact-row td[data-label="Member ID"],
+  .ws-table--compact-row td[data-label="Name"],
+  .ws-table--compact-row td[data-label="Present"],
+  .ws-table--compact-row td[data-label="Paid"] {
+    border-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .ws-table--compact-row td.ws-row-num::before,
+  .ws-table--compact-row td[data-label="Member ID"]::before,
+  .ws-table--compact-row td[data-label="Name"]::before,
+  .ws-table--compact-row td[data-label="Present"]::before,
+  .ws-table--compact-row td[data-label="Paid"]::before {
+    content: none;
+  }
+  .ws-table--compact-row td.ws-row-num { order: 1; }
+  .ws-table--compact-row td[data-label="Member ID"] {
+    order: 2;
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+  .ws-table--compact-row td[data-label="Name"] {
+    order: 3;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .ws-table--compact-row td[data-label="Present"],
+  .ws-table--compact-row td[data-label="Paid"] {
+    order: 4;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+  .ws-table--compact-row td[data-label="Amount"] { order: 5; flex-basis: 100%; }
+  .ws-table--compact-row td[data-label="Paid on"] { order: 6; flex-basis: 100%; }
+
+  /* ----- Roster / Archive: even without every field to check off, a
+     plain list of names runs long on a phone — collapse each row to
+     just "# Name", tap to reveal Member ID, contact info, Emergency
+     Contacts, Allergies, Notes, and the Edit/Archive/Delete buttons.
+     See initCollapsibleRows() in row-numbers.ts for the tap handler. */
+  .ws-table--collapsible tbody tr { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.5rem; cursor: pointer; }
+  .ws-table--collapsible tbody tr td { flex: 0 0 auto; }
+  .ws-table--collapsible tbody tr td:not(.ws-row-num):not([data-label="Name"]) { flex-basis: 100%; }
+  .ws-table--collapsible tbody tr:not(.ws-row--expanded) td:not(.ws-row-num):not([data-label="Name"]):not(.ws-empty) {
+    display: none;
+  }
+  .ws-table--collapsible td.ws-row-num,
+  .ws-table--collapsible td[data-label="Name"] {
+    border-top: 0;
+    padding-top: 0;
+    padding-bottom: 0.3rem;
+  }
+  .ws-table--collapsible td.ws-row-num::before,
+  .ws-table--collapsible td[data-label="Name"]::before {
+    content: none;
+  }
+  .ws-table--collapsible td[data-label="Name"] {
+    font-weight: 600;
+    padding-right: 1.4rem;
+    position: relative;
+  }
+  .ws-table--collapsible td[data-label="Name"]::after {
+    content: '›';
+    position: absolute;
+    right: 0;
+    top: 0;
+    color: var(--color-muted);
+    transition: transform 0.15s ease;
+  }
+  .ws-table--collapsible tr.ws-row--expanded td[data-label="Name"]::after { transform: rotate(90deg); }
+
   /* ----- Attendance / Curriculum month grid: drop the minimum column
      width instead of ever overflowing sideways, and hide the theme/
      activity-chip preview text inside each cell — full detail is one
