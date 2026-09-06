@@ -6293,12 +6293,24 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         html += `<div class="ws-sc-tl-hourlabel" style="top:${h * SC_ROW_H}rem">${scHourLabel(h)}</div>`;
       }
       html += '</div>';
+      const nowInView = dateStrs.includes(today);
+      const nowTop = (new Date().getHours() + new Date().getMinutes() / 60) * SC_ROW_H;
       dateStrs.forEach((ds) => {
         const items = (idx.get(ds) || []).filter((it: any) => it.event_time);
-        html += `<div class="ws-sc-tl-daycol" data-date="${ds}">${items.map((it: any) => scTimelineChipHTML(it, true)).join('')}</div>`;
+        const nowLine = nowInView && ds === today ? `<div class="ws-sc-tl-now-line" style="top:${nowTop}rem"></div>` : '';
+        html += `<div class="ws-sc-tl-daycol" data-date="${ds}">${items.map((it: any) => scTimelineChipHTML(it, true)).join('')}${nowLine}</div>`;
       });
       html += '</div>';
       container.innerHTML = html;
+      // Center on now (or a reasonable default when today isn't in
+      // view) so opening the timeline never starts scrolled to
+      // midnight — every hour is still one scroll away either way.
+      const hourGridEl = container.querySelector('.ws-sc-tl-hourgrid');
+      if (hourGridEl) {
+        const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        const targetTopRem = nowInView ? nowTop : 8 * SC_ROW_H;
+        container.scrollTop = Math.max(0, hourGridEl.offsetTop + targetTopRem * remPx - container.clientHeight / 2);
+      }
       container.querySelectorAll('[data-date]').forEach((cell: any) => {
         cell.addEventListener('click', (e: Event) => {
           if ((e.target as any).closest('[data-sc-chip-id]')) return; // handled below
