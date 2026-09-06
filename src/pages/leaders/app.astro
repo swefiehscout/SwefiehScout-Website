@@ -6192,9 +6192,21 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       else if (state.sc.view === 'year') scRenderYear();
       else scRenderMonth();
     }
+    // "17:00" -> "5 PM", "17:30" -> "5:30 PM"
+    function scFormatTime12(t: string): { label: string; period: string } {
+      const [h, m] = t.split(':').map(Number);
+      const period = h < 12 ? 'AM' : 'PM';
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return { label: m ? `${h12}:${String(m).padStart(2, '0')}` : String(h12), period };
+    }
+    // Same-period ranges compact like Google's own ("5–7 PM" instead of
+    // "5 PM – 7 PM"); different periods spell both out.
     function scTimeRangeLabel(item: any): string {
       if (!item.event_time) return 'All day';
-      return item.event_end_time ? `${item.event_time.slice(0, 5)}–${item.event_end_time.slice(0, 5)}` : item.event_time.slice(0, 5);
+      const start = scFormatTime12(item.event_time);
+      if (!item.event_end_time) return `${start.label} ${start.period}`;
+      const end = scFormatTime12(item.event_end_time);
+      return start.period === end.period ? `${start.label}–${end.label} ${end.period}` : `${start.label} ${start.period} – ${end.label} ${end.period}`;
     }
     function scDayItemRowHTML(item: any) {
       if (item.kind === 'music') {
@@ -6237,44 +6249,54 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (h === 12) return '12 PM';
       return h < 12 ? `${h} AM` : `${h - 12} PM`;
     }
+    const SC_ROW_H = 3; // rem per hour — kept in sync with --sc-row-h below
+    function scTimeToHours(t: string): number {
+      const [h, m] = t.split(':').map(Number);
+      return h + m / 60;
+    }
     // Shared by Day (1 day) and Week (7 days) — a 24-hour grid, always
     // fully drawn even with nothing on it (an empty day should still
-    // look like a calendar, not a blank box). One CSS Grid for the
-    // whole thing (label column + one column per day) so hour rows
-    // can't drift out of alignment the way separate label/content
-    // columns would.
+    // look like a calendar, not a blank box). Timed events are
+    // absolutely positioned by their actual start/end time (a 2-hour
+    // block visibly spans 2 hours), not just dropped into whichever
+    // hour they start in.
     function scRenderTimelineGrid(container: any, days: Date[]) {
       const dateStrs = days.map(toDateStr);
       const idx = scBuildOccurrenceIndex(days[0], days[days.length - 1]);
       const today = todayStr();
       const multiDay = days.length > 1;
       container.style.setProperty('--sc-days', String(days.length));
+      container.style.setProperty('--sc-row-h', `${SC_ROW_H}rem`);
 
-      let html = '<div class="ws-sc-tl-grid">';
+      let html = '';
       if (multiDay) {
-        html += '<div class="ws-sc-tl-cell ws-sc-tl-head"></div>';
+        html += '<div class="ws-sc-tl-head-row"><div class="ws-sc-tl-head-spacer"></div>';
         days.forEach((d, i) => {
-          html += `<div class="ws-sc-tl-cell ws-sc-tl-head${dateStrs[i] === today ? ' ws-sc-tl-head--today' : ''}">
+          html += `<div class="ws-sc-tl-head-day${dateStrs[i] === today ? ' ws-sc-tl-head-day--today' : ''}">
             <span class="ws-sc-tl-head-name">${WEEKDAYS[d.getDay()].en.slice(0, 3)}</span>
             <span class="ws-sc-tl-head-num">${d.getDate()}</span>
           </div>`;
         });
+        html += '</div>';
       }
       const anyAllDay = dateStrs.some((ds) => (idx.get(ds) || []).some((it: any) => !it.event_time));
       if (anyAllDay) {
-        html += '<div class="ws-sc-tl-cell ws-sc-tl-hour-label">All day</div>';
+        html += '<div class="ws-sc-tl-allday-row"><div class="ws-sc-tl-head-spacer"></div>';
         dateStrs.forEach((ds) => {
           const items = (idx.get(ds) || []).filter((it: any) => !it.event_time);
-          html += `<div class="ws-sc-tl-cell ws-sc-tl-content" data-date="${ds}">${items.map(scTimelineChipHTML).join('')}</div>`;
+          html += `<div class="ws-sc-tl-allday-cell" data-date="${ds}">${items.map((it: any) => scTimelineChipHTML(it, false)).join('')}</div>`;
         });
+        html += '</div>';
       }
+      html += '<div class="ws-sc-tl-hourgrid"><div class="ws-sc-tl-hourlabelcol">';
       for (let h = 0; h < 24; h++) {
-        html += `<div class="ws-sc-tl-cell ws-sc-tl-hour-label">${scHourLabel(h)}</div>`;
-        dateStrs.forEach((ds) => {
-          const items = (idx.get(ds) || []).filter((it: any) => it.event_time && Number(it.event_time.slice(0, 2)) === h);
-          html += `<div class="ws-sc-tl-cell ws-sc-tl-content" data-date="${ds}">${items.map(scTimelineChipHTML).join('')}</div>`;
-        });
+        html += `<div class="ws-sc-tl-hourlabel" style="top:${h * SC_ROW_H}rem">${scHourLabel(h)}</div>`;
       }
+      html += '</div>';
+      dateStrs.forEach((ds) => {
+        const items = (idx.get(ds) || []).filter((it: any) => it.event_time);
+        html += `<div class="ws-sc-tl-daycol" data-date="${ds}">${items.map((it: any) => scTimelineChipHTML(it, true)).join('')}</div>`;
+      });
       html += '</div>';
       container.innerHTML = html;
       container.querySelectorAll('[data-date]').forEach((cell: any) => {
@@ -6290,9 +6312,20 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         });
       });
     }
-    function scTimelineChipHTML(item: any): string {
-      const label = item.event_time ? `${item.event_time.slice(0, 5)} ${item.title}` : item.title;
-      return `<div class="ws-sc-tl-event${item.kind === 'music' ? ' ws-sc-tl-event--music' : ''}" data-sc-chip-id="${item.id}" title="${escapeHtml(label)}">${escapeHtml(label)}</div>`;
+    // positioned=true places the chip absolutely by start/end time
+    // (the hour grid); false is the plain flow layout used for the
+    // all-day strip, which has no time axis to position against.
+    function scTimelineChipHTML(item: any, positioned: boolean): string {
+      const label = item.event_time ? `${scTimeRangeLabel(item)} ${item.title}` : item.title;
+      const cls = `ws-sc-tl-event${item.kind === 'music' ? ' ws-sc-tl-event--music' : ''}`;
+      if (!positioned || !item.event_time) {
+        return `<div class="${cls}" style="position:static" data-sc-chip-id="${item.id}" title="${escapeHtml(label)}">${escapeHtml(label)}</div>`;
+      }
+      const startH = scTimeToHours(item.event_time);
+      const endH = item.event_end_time ? Math.max(startH + 0.25, scTimeToHours(item.event_end_time)) : startH + 0.75;
+      const top = startH * SC_ROW_H;
+      const height = (endH - startH) * SC_ROW_H;
+      return `<div class="${cls}" style="top:${top}rem;height:${height}rem" data-sc-chip-id="${item.id}" title="${escapeHtml(label)}">${escapeHtml(label)}</div>`;
     }
     function scRenderDay() {
       scRenderTimelineGrid(els.scDayAgenda, [state.sc.anchor]);

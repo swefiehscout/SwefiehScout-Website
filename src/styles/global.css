@@ -3624,34 +3624,51 @@ main.wide {
    both, a Google-Calendar-style 24-hour grid — 1 hour-label column
    plus N day columns (N=1 for Day, N=7 for Week), so the two views
    can never visually drift apart. Column count comes from --sc-days,
-   set inline per render. ---- */
+   row height from --sc-row-h, both set inline per render. Events are
+   absolutely positioned by actual start/end time (not just bucketed
+   into whichever hour they start in), so a 2-hour block visibly
+   spans 2 hours. ---- */
 .ws-sc-allday { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
 .ws-sc-tl-wrap { border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto; overflow-y: hidden; background: var(--color-surface); }
-.ws-sc-tl-grid { display: grid; grid-template-columns: 3.75rem repeat(var(--sc-days, 1), 1fr); }
-.ws-sc-tl-cell { border-bottom: 1px solid var(--color-border); border-right: 1px solid var(--color-border); box-sizing: border-box; min-height: 2.75rem; }
-.ws-sc-tl-head { padding: 0.5rem 0.4rem; text-align: center; min-height: 0; }
-.ws-sc-tl-head--today .ws-sc-tl-head-num { background: var(--color-brand); color: #fff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; width: 1.9rem; height: 1.9rem; }
+.ws-sc-tl-head-row, .ws-sc-tl-allday-row { display: grid; grid-template-columns: 3.75rem repeat(var(--sc-days, 1), 1fr); }
+.ws-sc-tl-head-row { border-bottom: 1px solid var(--color-border); }
+.ws-sc-tl-allday-row { border-bottom: 1px solid var(--color-border); }
+.ws-sc-tl-head-spacer { border-right: 1px solid var(--color-border); }
+.ws-sc-tl-head-day { padding: 0.5rem 0.4rem; text-align: center; border-right: 1px solid var(--color-border); }
+.ws-sc-tl-head-day--today .ws-sc-tl-head-num { background: var(--color-brand); color: #fff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; width: 1.9rem; height: 1.9rem; }
 .ws-sc-tl-head-name { display: block; font-size: 0.65rem; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.04em; }
 .ws-sc-tl-head-num { display: block; font-family: var(--font-display); font-size: 1.15rem; margin-top: 0.15rem; color: var(--color-brand-dark); }
-.ws-sc-tl-hour-label { padding: 0.3rem 0.5rem 0 0; text-align: right; font-size: 0.68rem; color: var(--color-muted); }
-.ws-sc-tl-content { padding: 0.25rem; display: flex; flex-direction: column; gap: 0.25rem; cursor: pointer; }
-.ws-sc-tl-content:hover { background: var(--color-bg); }
+.ws-sc-tl-allday-cell { padding: 0.3rem; display: flex; flex-direction: column; gap: 0.25rem; border-right: 1px solid var(--color-border); cursor: pointer; }
+.ws-sc-tl-allday-cell:hover { background: var(--color-bg); }
+.ws-sc-tl-hourgrid { display: grid; grid-template-columns: 3.75rem repeat(var(--sc-days, 1), 1fr); grid-template-rows: repeat(24, var(--sc-row-h, 3rem)); }
+.ws-sc-tl-hourlabelcol { grid-row: 1 / -1; grid-column: 1; position: relative; border-right: 1px solid var(--color-border); }
+.ws-sc-tl-hourlabel { position: absolute; left: 0; right: 0; transform: translateY(-0.55em); text-align: right; padding-right: 0.5rem; font-size: 0.68rem; color: var(--color-muted); box-sizing: border-box; }
+.ws-sc-tl-daycol {
+  grid-row: 1 / -1;
+  position: relative;
+  border-right: 1px solid var(--color-border);
+  cursor: pointer;
+  background-image: repeating-linear-gradient(to bottom, var(--color-border) 0, var(--color-border) 1px, transparent 1px, transparent var(--sc-row-h, 3rem));
+}
+.ws-sc-tl-daycol:hover { background-color: var(--color-bg); }
 .ws-sc-tl-event {
+  position: absolute;
+  left: 2px;
+  right: 2px;
   background: var(--color-brand);
   color: #fff;
   border-radius: 4px;
-  padding: 0.2rem 0.45rem;
+  padding: 0.15rem 0.4rem;
   font-size: 0.72rem;
-  line-height: 1.3;
+  line-height: 1.25;
   cursor: pointer;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  box-sizing: border-box;
 }
 .ws-sc-tl-event--music { background: var(--color-muted); }
 @media (max-width: 640px) {
-  .ws-sc-tl-grid { grid-template-columns: 2.75rem repeat(var(--sc-days, 1), minmax(4rem, 1fr)); }
-  .ws-sc-tl-hour-label { font-size: 0.6rem; padding-right: 0.3rem; }
+  .ws-sc-tl-head-row, .ws-sc-tl-allday-row, .ws-sc-tl-hourgrid { grid-template-columns: 2.75rem repeat(var(--sc-days, 1), minmax(4rem, 1fr)); }
+  .ws-sc-tl-hourlabel { font-size: 0.6rem; padding-right: 0.3rem; }
 }
 
 /* ---- Shared Calendar's Year view: 12 small month cards. ---- */
