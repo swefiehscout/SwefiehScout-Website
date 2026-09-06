@@ -6308,13 +6308,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       // The day-header row is sticky and covers the top of the
       // viewport, so the centering has to leave room for it — otherwise
       // a dead-center target can land right behind the header instead
-      // of visibly below it.
+      // of visibly below it. Using getBoundingClientRect() rather than
+      // offsetTop here on purpose: .ws-sc-tl-wrap has no `position` set,
+      // so it isn't hourGridEl's offsetParent — offsetTop would measure
+      // from whatever positioned ancestor is further up the page, not
+      // from the scroll container itself.
       const hourGridEl = container.querySelector('.ws-sc-tl-hourgrid');
       if (hourGridEl) {
         const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
         const targetTopRem = nowInView ? nowTop : 8 * SC_ROW_H;
-        const headerH = (container.querySelector('.ws-sc-tl-head-row') as any)?.offsetHeight || 0;
-        const contentY = hourGridEl.offsetTop + targetTopRem * remPx;
+        const headerEl = container.querySelector('.ws-sc-tl-head-row');
+        const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
+        const gridOffsetInContainer = hourGridEl.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+        const contentY = gridOffsetInContainer + targetTopRem * remPx;
         container.scrollTop = Math.max(0, contentY - container.clientHeight / 2 - headerH / 2);
       }
       container.querySelectorAll('[data-date]').forEach((cell: any) => {
