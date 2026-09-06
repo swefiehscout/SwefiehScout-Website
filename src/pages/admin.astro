@@ -60,6 +60,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="curriculum"><Icon name="flag" size={16} strokeWidth={1.8} /> Curriculum</button>
         <button type="button" class="ws-tab" data-tab="music"><Icon name="music" size={16} strokeWidth={1.8} /> Music</button>
         <button type="button" class="ws-tab" data-tab="socialmedia"><Icon name="sparkle" size={16} strokeWidth={1.8} /> Social Media</button>
+        <button type="button" class="ws-tab" data-tab="general"><Icon name="megaphone" size={16} strokeWidth={1.8} /> General</button>
         <button type="button" class="ws-tab" data-tab="roster"><Icon name="star" size={16} strokeWidth={1.8} /> Roster</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
         <button type="button" class="ws-tab" data-tab="vendors"><Icon name="phone" size={16} strokeWidth={1.8} /> Vendors</button>
@@ -538,6 +539,54 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                   <table class="ws-table" data-sm-upcoming-table>
                     <thead><tr><th>Date</th><th>Title</th><th>Platform</th></tr></thead>
                     <tbody data-sm-upcoming-body></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= General (Public Relations) ================= -->
+        <section class="ws-panel" data-panel="general" hidden>
+          <p class="ws-att-hint">General isn't a scouting troop either, so it's not part of the Overview rollup above — this is its own equivalent, covering its Public Relations tab (Sponsors, Community &amp; Church Contacts, Library). Its reports live in the main Reports tab, alongside everyone else's.</p>
+          <div class="ws-dash">
+            <div class="ws-dash-kpis" data-gen-kpis></div>
+
+            <div class="ws-dash-card ws-dash-card--full">
+              <div class="ws-dash-card-head">
+                <h3>Income vs. expenses</h3>
+                <span class="ws-dash-card-sub">Last 6 months</span>
+              </div>
+              <div data-gen-chart></div>
+            </div>
+
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Sponsors by status</h3></div>
+                <div data-gen-sponsor-status></div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Sponsors by type</h3></div>
+                <div data-gen-sponsor-type></div>
+              </div>
+            </div>
+
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Recent sponsors</h3></div>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-gen-sponsors-table>
+                    <thead><tr><th>Name</th><th>Status</th><th>Added</th></tr></thead>
+                    <tbody data-gen-sponsors-body></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Recent contacts</h3></div>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-gen-contacts-table>
+                    <thead><tr><th>Name</th><th>Category</th><th>Added</th></tr></thead>
+                    <tbody data-gen-contacts-body></tbody>
                   </table>
                 </div>
               </div>
@@ -1058,6 +1107,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.smCredSummary = el('[data-sm-cred-summary]');
       els.smTodoBody = el('[data-sm-todo-body]');
       els.smUpcomingBody = el('[data-sm-upcoming-body]');
+      els.genKpis = el('[data-gen-kpis]');
+      els.genChart = el('[data-gen-chart]');
+      els.genSponsorStatus = el('[data-gen-sponsor-status]');
+      els.genSponsorType = el('[data-gen-sponsor-type]');
+      els.genSponsorsBody = el('[data-gen-sponsors-body]');
+      els.genContactsBody = el('[data-gen-contacts-body]');
 
       els.currBody = el('[data-curr-body]');
 
@@ -1326,6 +1381,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       else if (state.sc.view === 'week') scRenderWeek();
       else if (state.sc.view === 'year') scRenderYear();
       else scRenderMonth();
+    }
+    // "17:00" -> "5 PM", "17:30" -> "5:30 PM"
+    function scFormatTime12(t: string): { label: string; period: string } {
+      const [h, m] = t.split(':').map(Number);
+      const period = h < 12 ? 'AM' : 'PM';
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return { label: m ? `${h12}:${String(m).padStart(2, '0')}` : String(h12), period };
     }
     function scTimeRangeLabel(item: any): string {
       if (!item.event_time) return 'All day';
@@ -3065,6 +3127,127 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         ? upcoming.slice(0, 8).map((c: any) => `<tr><td data-label="Date">${c.scheduled_date}</td><td data-label="Title">${escapeHtml(c.title)}</td><td data-label="Platform">${escapeHtml(c.platform || '—')}</td></tr>`).join('')
         : '<tr><td colspan="3" class="ws-empty">Nothing scheduled yet.</td></tr>';
     }
+    async function loadGeneralDashboard() {
+      const now = new Date();
+      const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const sixAgoD = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+      const sixStart = `${sixAgoD.getFullYear()}-${String(sixAgoD.getMonth() + 1).padStart(2, '0')}-01`;
+      const [membersRes, sponsorsRes, contactsRes, docsRes, finRes] = await Promise.all([
+        db.from('members').select('id', { count: 'exact', head: true }).eq('group_key', GENERAL_GROUP_KEY).eq('active', true),
+        db.from('sponsors').select('*').eq('group_key', GENERAL_GROUP_KEY).order('created_at', { ascending: false }),
+        db.from('pr_contacts').select('*').eq('group_key', GENERAL_GROUP_KEY).order('created_at', { ascending: false }),
+        db.from('documents').select('id', { count: 'exact', head: true }).eq('group_key', GENERAL_GROUP_KEY),
+        db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', GENERAL_GROUP_KEY).gte('entry_date', sixStart),
+      ]);
+      const sponsors = sponsorsRes.data || [];
+      const contacts = contactsRes.data || [];
+      const fin = finRes.data || [];
+      const netAllTime = fin.reduce((s: number, e: any) => s + (e.entry_type === 'income' ? Number(e.amount) : -Number(e.amount)), 0);
+      const netThisMonth = fin.filter((e: any) => e.entry_date.startsWith(period))
+        .reduce((s: number, e: any) => s + (e.entry_type === 'income' ? Number(e.amount) : -Number(e.amount)), 0);
+      const activeSponsors = sponsors.filter((s: any) => s.status === 'active').length;
+      const prospectiveSponsors = sponsors.filter((s: any) => s.status === 'prospective').length;
+      els.genKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active team members</span></div>
+          <span class="ws-dash-kpi-num">${membersRes.count || 0}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">◆</span><span class="ws-dash-kpi-label">Total sponsors</span></div>
+          <span class="ws-dash-kpi-num">${sponsors.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Active sponsors</span></div>
+          <span class="ws-dash-kpi-num">${activeSponsors}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">◔</span><span class="ws-dash-kpi-label">Prospective sponsors</span></div>
+          <span class="ws-dash-kpi-num">${prospectiveSponsors}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">☎</span><span class="ws-dash-kpi-label">Community &amp; Church contacts</span></div>
+          <span class="ws-dash-kpi-num">${contacts.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">▤</span><span class="ws-dash-kpi-label">Library documents</span></div>
+          <span class="ws-dash-kpi-num">${docsRes.count || 0}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
+          <span class="ws-dash-kpi-num">${netThisMonth.toFixed(2)}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">=</span><span class="ws-dash-kpi-label">Net income (all-time)</span></div>
+          <span class="ws-dash-kpi-num">${netAllTime.toFixed(2)}</span>
+        </div>
+      `;
+      // Same 6-month bar chart shape as Music/Social Media's own charts.
+      const monthKeys: string[] = [];
+      const byMonth = new Map<string, { income: number; expense: number }>();
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        monthKeys.push(key);
+        byMonth.set(key, { income: 0, expense: 0 });
+      }
+      fin.forEach((e: any) => {
+        const b = byMonth.get(e.entry_date.slice(0, 7));
+        if (!b) return;
+        if (e.entry_type === 'income') b.income += Number(e.amount); else b.expense += Number(e.amount);
+      });
+      const totalIncome = monthKeys.reduce((s, k) => s + byMonth.get(k)!.income, 0);
+      const totalExpense = monthKeys.reduce((s, k) => s + byMonth.get(k)!.expense, 0);
+      if (!totalIncome && !totalExpense) {
+        els.genChart.innerHTML = '<p class="ws-dash-empty-mini">No Finance entries in the last 6 months.</p>';
+      } else {
+        const maxVal = Math.max(1, ...monthKeys.map((k) => Math.max(byMonth.get(k)!.income, byMonth.get(k)!.expense)));
+        els.genChart.innerHTML = `
+          <div class="ws-dash-fin-bars">
+            ${monthKeys.map((k) => {
+              const b = byMonth.get(k)!;
+              const d = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1);
+              const label = MONTHS[d.getMonth()].en.slice(0, 3);
+              const incPct = Math.round((b.income / maxVal) * 100);
+              const expPct = Math.round((b.expense / maxVal) * 100);
+              return `
+                <div class="ws-dash-fin-col" title="${MONTHS[d.getMonth()].en} ${d.getFullYear()}, Income ${b.income.toFixed(2)}, Expenses ${b.expense.toFixed(2)}">
+                  <div class="ws-dash-fin-pair">
+                    <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--income" style="height:${b.income ? Math.max(incPct, 3) : 0}%"></div></div>
+                    <div class="ws-dash-fin-track"><div class="ws-dash-fin-bar ws-dash-fin-bar--expense" style="height:${b.expense ? Math.max(expPct, 3) : 0}%"></div></div>
+                  </div>
+                  <span class="ws-dash-fin-label">${label}</span>
+                </div>`;
+            }).join('')}
+          </div>
+          <div class="ws-dash-fin-legend">
+            <span><i class="ws-dash-fin-swatch ws-dash-fin-swatch--income"></i>Income</span>
+            <span><i class="ws-dash-fin-swatch ws-dash-fin-swatch--expense"></i>Expenses</span>
+          </div>
+        `;
+      }
+      const statusCounts = new Map<string, number>();
+      sponsors.forEach((s: any) => statusCounts.set(s.status, (statusCounts.get(s.status) || 0) + 1));
+      els.genSponsorStatus.innerHTML = statusCounts.size ? Array.from(statusCounts.entries()).map(([status, count]) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${SPONSOR_STATUS_LABELS[status] || status}</span></span>
+          <span class="ws-dash-feed-amount">${count}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No sponsors logged yet.</p>';
+      const typeCounts = new Map<string, number>();
+      sponsors.forEach((s: any) => typeCounts.set(s.type || 'Unspecified', (typeCounts.get(s.type || 'Unspecified') || 0) + 1));
+      els.genSponsorType.innerHTML = typeCounts.size ? Array.from(typeCounts.entries()).sort((a, b) => b[1] - a[1]).map(([type, count]) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${escapeHtml(type)}</span></span>
+          <span class="ws-dash-feed-amount">${count}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No sponsors logged yet.</p>';
+      els.genSponsorsBody.innerHTML = sponsors.length
+        ? sponsors.slice(0, 8).map((s: any) => `<tr><td data-label="Name">${escapeHtml(s.name)}</td><td data-label="Status">${SPONSOR_STATUS_LABELS[s.status] || s.status}</td><td data-label="Added">${s.created_at ? new Date(s.created_at).toLocaleDateString() : '—'}</td></tr>`).join('')
+        : '<tr><td colspan="3" class="ws-empty">No sponsors yet.</td></tr>';
+      els.genContactsBody.innerHTML = contacts.length
+        ? contacts.slice(0, 8).map((c: any) => `<tr><td data-label="Name">${escapeHtml(c.name)}</td><td data-label="Category">${escapeHtml(c.category || '—')}</td><td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td></tr>`).join('')
+        : '<tr><td colspan="3" class="ws-empty">No contacts yet.</td></tr>';
+    }
     async function downloadContentCalendarReport(monthEl?: any, yearEl?: any) {
       try {
         const { start, end, label } = periodRange(monthEl || els.smReportMonth, yearEl || els.smReportYear);
@@ -3451,6 +3634,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'curriculum') loadCurriculum();
       if (tab === 'music') loadMusicDashboard();
       if (tab === 'socialmedia') loadSocialMediaDashboard();
+      if (tab === 'general') loadGeneralDashboard();
       if (tab === 'roster') loadRoster();
       if (tab === 'library') loadSharedDocs();
       if (tab === 'vendors') loadSharedVendorsAdmin();
