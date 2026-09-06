@@ -6378,7 +6378,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         html += `<div class="curr-day-cell${inMonth ? '' : ' curr-day-cell--out'}${dateStr === today ? ' curr-day-cell--today' : ''}${items.length ? ' curr-day-cell--has' : ''}" data-date="${dateStr}">
           <span class="curr-day-num">${d.getDate()}</span>
           <div class="curr-day-mini">
-            ${shown.map((it: any) => `<span class="curr-mini-chip">${escapeHtml(it.title)}</span>`).join('')}
+            ${shown.map((it: any) => `<span class="ws-sc-month-chip${it.kind === 'music' ? ' ws-sc-month-chip--music' : ''}">${escapeHtml(it.title)}</span>`).join('')}
             ${extra > 0 ? `<span class="curr-mini-more">+${extra}</span>` : ''}
           </div>
         </div>`;
