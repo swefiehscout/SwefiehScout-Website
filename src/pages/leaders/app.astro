@@ -6228,7 +6228,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
           <div class="ws-evt-day-item-actions">
             ${canManage
-              ? '<button type="button" class="ws-edit-btn" data-sc-day-edit>Edit</button>'
+              ? '<button type="button" class="ws-edit-btn" data-sc-day-edit>Edit</button><button type="button" class="ws-row-del" data-sc-day-delete title="Delete">×</button>'
               : '<button type="button" class="ws-edit-btn" data-sc-day-request>Request a change</button>'}
           </div>
         </div>`;
@@ -6242,6 +6242,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
       container.querySelectorAll('[data-sc-day-request]').forEach((btn: any) => {
         btn.addEventListener('click', () => scRequestChange(btn.closest('[data-sc-event-id]').dataset.scEventId));
+      });
+      container.querySelectorAll('[data-sc-day-delete]').forEach((btn: any) => {
+        btn.addEventListener('click', () => {
+          const row = btn.closest('[data-sc-event-id]');
+          scDeleteFlow(row.dataset.scEventId, row.dataset.scOccurrenceDate);
+        });
       });
     }
     function scHourLabel(h: number): string {
@@ -6562,6 +6568,21 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (error) { console.error(error); showToast('Could not delete.'); return false; }
       return true;
     }
+    // Shared by the list view's own Delete button and the edit form's
+    // — recurring entries need the This event/All events choice either
+    // way, so both routes funnel through here rather than requiring an
+    // Edit click first just to reach Delete.
+    function scDeleteFlow(id: string, occurrenceDate: string) {
+      const item = state.scEvents.find((x: any) => x.id === id);
+      if (!item) return;
+      state.editingScId = id;
+      state.editingScOccurrenceDate = occurrenceDate;
+      if (item.recurrence_unit) {
+        els.scDeleteChoiceOverlay.removeAttribute('hidden');
+      } else if (confirm('Delete this calendar entry?')) {
+        scDeleteSeries(id).then((ok) => { if (ok) { loadSharedCal(); scShowList(); } });
+      }
+    }
     function bindSharedCalForm() {
       els.scPrev.addEventListener('click', () => scStep(-1));
       els.scNext.addEventListener('click', () => scStep(1));
@@ -6620,12 +6641,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
       els.scDelete.addEventListener('click', () => {
         if (!state.editingScId) return;
-        const item = state.scEvents.find((x: any) => x.id === state.editingScId);
-        if (item && item.recurrence_unit) {
-          els.scDeleteChoiceOverlay.removeAttribute('hidden');
-        } else if (confirm('Delete this calendar entry?')) {
-          scDeleteSeries(state.editingScId).then((ok) => { if (ok) { loadSharedCal(); scShowList(); } });
-        }
+        scDeleteFlow(state.editingScId, state.editingScOccurrenceDate || els.scDate.value);
       });
       els.scDeleteChoiceCancel.addEventListener('click', () => els.scDeleteChoiceOverlay.setAttribute('hidden', ''));
       els.scDeleteChoiceOk.addEventListener('click', async () => {
