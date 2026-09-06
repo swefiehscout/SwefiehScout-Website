@@ -54,6 +54,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
       <nav class="ws-tabs" data-ws-tabs>
         <button type="button" class="ws-tab" data-tab="overview"><Icon name="compass" size={16} strokeWidth={1.8} /> Overview</button>
+        <button type="button" class="ws-tab" data-tab="sharedcal"><Icon name="sun" size={16} strokeWidth={1.8} /> Shared Calendar</button>
         <button type="button" class="ws-tab" data-tab="finance"><Icon name="bank" size={16} strokeWidth={1.8} /> Finance</button>
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
         <button type="button" class="ws-tab" data-tab="curriculum"><Icon name="flag" size={16} strokeWidth={1.8} /> Curriculum</button>
@@ -105,6 +106,61 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                   <tbody data-ov-body></tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= Shared Calendar (org-wide, same data as
+             every group's own Shared Calendar tab) ================= -->
+        <section class="ws-panel" data-panel="sharedcal" hidden>
+          <p class="ws-att-hint">The exact same calendar every leader sees on their own Shared Calendar tab — anyone approved can add to it. Music's own Event Calendar bookings show up too, as a read-only marker.</p>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="sharedcal" data-subtab="calendar">Calendar</button>
+            <button type="button" class="ws-subtab" data-subtabs="sharedcal" data-subtab="requests">Change Requests<span class="ws-tab-badge" data-sc-requests-badge hidden></span></button>
+          </div>
+
+          <div data-subpanel="sharedcal:calendar">
+            <div class="curr-toolbar">
+              <div class="curr-toolbar-row">
+                <div class="curr-nav">
+                  <button type="button" class="curr-nav-btn" data-sc-prev aria-label="Previous">‹</button>
+                  <button type="button" class="curr-nav-today" data-sc-today>Today</button>
+                  <button type="button" class="curr-nav-btn" data-sc-next aria-label="Next">›</button>
+                </div>
+                <span class="curr-nav-label" data-sc-nav-label></span>
+                <div class="curr-view-toggle" data-sc-view-toggle>
+                  <button type="button" class="curr-view-btn--active" data-sc-view="day">Day</button>
+                  <button type="button" data-sc-view="week">Week</button>
+                  <button type="button" data-sc-view="month">Month</button>
+                  <button type="button" data-sc-view="year">Year</button>
+                </div>
+                <button type="button" class="btn-primary" data-sc-add-btn>+ Add to calendar</button>
+              </div>
+            </div>
+
+            <div data-sc-view-pane="day">
+              <div class="ws-sc-tl-wrap" data-sc-day-agenda></div>
+            </div>
+            <div data-sc-view-pane="week" hidden>
+              <div class="ws-sc-tl-wrap" data-sc-week-grid></div>
+            </div>
+            <div data-sc-view-pane="month" hidden>
+              <div class="curr-view curr-view--month">
+                <div class="curr-month-grid" data-sc-month-grid></div>
+              </div>
+            </div>
+            <div data-sc-view-pane="year" hidden>
+              <div class="ws-sc-year" data-sc-year-grid></div>
+            </div>
+          </div>
+
+          <div data-subpanel="sharedcal:requests" hidden>
+            <p class="ws-att-hint">Every open change request, org-wide — as an admin you can act on any of them, not just entries you created.</p>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-sc-requests-table>
+                <thead><tr><th>Entry</th><th>Date</th><th>Message</th><th>Requested by</th><th>Status</th><th></th></tr></thead>
+                <tbody data-sc-requests-body></tbody>
+              </table>
             </div>
           </div>
         </section>
@@ -563,6 +619,154 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     </div>
   </div>
 
+  <!-- Shared Calendar's day view — same shell as every other day-overlay
+       in the workspace. Admins can edit/delete any entry (not just
+       their own), so there's no "Request a change" branch here. -->
+  <div class="curr-day-overlay" data-sc-day-overlay hidden>
+    <div class="curr-day-panel curr-day-panel--sharedcal" data-sc-day-panel>
+      <div class="curr-day-banner">
+        <span class="curr-day-banner-text">
+          <span class="curr-day-banner-label">Shared Calendar for</span>
+          <p class="curr-day-banner-value" data-sc-day-header></p>
+        </span>
+      </div>
+
+      <div data-sc-day-list-view>
+        <p class="curr-day-section-label">On this day</p>
+        <div class="curr-day-list" data-sc-day-list></div>
+        <div class="curr-day-actions">
+          <button type="button" class="ws-form-cancel" data-sc-day-close>Close</button>
+          <button type="button" class="btn-primary" data-sc-day-add>+ Add to calendar</button>
+        </div>
+      </div>
+
+      <form data-sc-form-view hidden>
+        <p class="curr-day-section-label" data-sc-form-title>New calendar entry</p>
+        <label class="curr-day-field">
+          <span>Title *</span>
+          <input type="text" data-sc-title required placeholder="e.g. Weekly Leaders Meeting" />
+        </label>
+        <label class="curr-day-field">
+          <span>Date *</span>
+          <input type="date" data-sc-date required />
+        </label>
+        <div class="curr-day-field-row">
+          <label class="curr-day-field">
+            <span>From</span>
+            <input type="time" data-sc-time />
+          </label>
+          <label class="curr-day-field">
+            <span>To</span>
+            <input type="time" data-sc-time-end />
+          </label>
+        </div>
+        <label class="curr-day-field">
+          <span>Description</span>
+          <textarea data-sc-notes rows="2"></textarea>
+        </label>
+
+        <label class="curr-day-field">
+          <span>Repeat</span>
+          <select data-sc-repeat>
+            <option value="none">Does not repeat</option>
+            <option value="day">Daily</option>
+            <option value="week">Weekly</option>
+            <option value="month">Monthly</option>
+            <option value="year">Annually</option>
+            <option value="weekdays">Every weekday (Mon–Fri)</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </label>
+
+        <div class="curr-day-actions">
+          <button type="button" class="ws-edit-btn" data-sc-delete hidden>Delete</button>
+          <button type="button" class="ws-form-cancel" data-sc-form-back>Back to list</button>
+          <button type="submit" class="btn-primary" data-sc-save>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom recurrence — its own small popup, matching the pattern
+       most leaders already know from Google Calendar, opened when
+       "Custom…" is picked from the Repeat select. Cancel reverts the
+       Repeat select to whatever it was before; Done keeps these values
+       and leaves "Custom…" selected. -->
+  <div class="curr-day-overlay" data-sc-custom-overlay hidden>
+    <div class="curr-day-panel ws-sc-custom-panel" data-sc-custom-panel>
+      <p class="curr-day-section-label ws-sc-custom-title">Custom recurrence</p>
+      <label class="curr-day-field">
+        <span>Repeat every</span>
+        <div class="ws-sc-repeat-every">
+          <input type="number" min="1" data-sc-repeat-interval value="1" />
+          <select data-sc-repeat-unit>
+            <option value="day">day(s)</option>
+            <option value="week">week(s)</option>
+            <option value="month">month(s)</option>
+            <option value="year">year(s)</option>
+          </select>
+        </div>
+      </label>
+      <div class="curr-day-field" data-sc-repeat-days hidden>
+        <span>Repeat on</span>
+        <div class="ws-sc-weekday-toggle" data-sc-weekday-toggle>
+          <button type="button" data-day="0">S</button>
+          <button type="button" data-day="1">M</button>
+          <button type="button" data-day="2">T</button>
+          <button type="button" data-day="3">W</button>
+          <button type="button" data-day="4">T</button>
+          <button type="button" data-day="5">F</button>
+          <button type="button" data-day="6">S</button>
+        </div>
+      </div>
+      <p class="curr-day-section-label">Ends</p>
+      <div class="ws-sc-end-options">
+        <label class="ws-sc-end-option">
+          <input type="radio" name="sc-end" value="never" data-sc-repeat-end-type checked />
+          <span>Never</span>
+        </label>
+        <label class="ws-sc-end-option">
+          <input type="radio" name="sc-end" value="on_date" data-sc-repeat-end-type />
+          <span>On</span>
+          <input type="date" data-sc-repeat-end-date />
+        </label>
+        <label class="ws-sc-end-option">
+          <input type="radio" name="sc-end" value="after_count" data-sc-repeat-end-type />
+          <span>After</span>
+          <input type="number" min="1" data-sc-repeat-end-count value="13" />
+          <span>occurrences</span>
+        </label>
+      </div>
+      <div class="curr-day-actions">
+        <button type="button" class="ws-form-cancel" data-sc-custom-cancel>Cancel</button>
+        <button type="button" class="btn-primary" data-sc-custom-done>Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Only shown when deleting an entry that actually repeats — a
+       one-off entry just gets the plain confirm() everything else in
+       the workspace uses. -->
+  <div class="curr-day-overlay" data-sc-delete-choice-overlay hidden>
+    <div class="curr-day-panel ws-sc-custom-panel" data-sc-delete-choice-panel>
+      <p class="curr-day-section-label ws-sc-custom-title">Delete recurring event</p>
+      <div class="ws-sc-end-options">
+        <label class="ws-sc-end-option">
+          <input type="radio" name="sc-delete-scope" value="this" data-sc-delete-scope checked />
+          <span>This event</span>
+        </label>
+        <label class="ws-sc-end-option">
+          <input type="radio" name="sc-delete-scope" value="all" data-sc-delete-scope />
+          <span>All events</span>
+        </label>
+      </div>
+      <div class="curr-day-actions">
+        <button type="button" class="ws-form-cancel" data-sc-delete-choice-cancel>Cancel</button>
+        <button type="button" class="btn-primary" data-sc-delete-choice-ok>OK</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     import {
       supabase, supabaseConfigured, getSession, isSessionExpired, msUntilSessionExpiry, signOut,
@@ -583,6 +787,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       recSystemBalance: 0,
       recDiff: null,
       editingSharedVendorId: null,
+      sc: { view: 'month', anchor: new Date(), currentDay: null },
+      scEvents: [], scMusicEvents: [], editingScId: null, editingScOccurrenceDate: null, scRequests: [],
     };
     const els: any = {};
 
@@ -608,6 +814,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function parseDateStr(s: string) {
       const [y, m, d] = s.split('-').map(Number);
       return new Date(y, m - 1, d);
+    }
+    function toDateStr(d: Date) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function addDays(d: Date, n: number) {
+      const c = new Date(d);
+      c.setDate(c.getDate() + n);
+      return c;
+    }
+    function startOfWeek(d: Date) {
+      const c = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      c.setDate(c.getDate() - c.getDay());
+      return c;
     }
     function bindTableSearch(input: any, tbody: any) {
       input.addEventListener('input', () => {
@@ -851,6 +1070,634 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.svendorBody = el('[data-svendor-body]');
 
       els.peopleBody = el('[data-people-body]');
+
+      els.scPrev = el('[data-sc-prev]');
+      els.scNext = el('[data-sc-next]');
+      els.scToday = el('[data-sc-today]');
+      els.scNavLabel = el('[data-sc-nav-label]');
+      els.scAddBtn = el('[data-sc-add-btn]');
+      els.scDayAgenda = el('[data-sc-day-agenda]');
+      els.scRepeat = el('[data-sc-repeat]');
+      els.scRepeatInterval = el('[data-sc-repeat-interval]');
+      els.scRepeatUnit = el('[data-sc-repeat-unit]');
+      els.scRepeatDays = el('[data-sc-repeat-days]');
+      els.scWeekdayToggle = el('[data-sc-weekday-toggle]');
+      els.scRepeatEndDate = el('[data-sc-repeat-end-date]');
+      els.scRepeatEndCount = el('[data-sc-repeat-end-count]');
+      els.scCustomOverlay = el('[data-sc-custom-overlay]');
+      els.scCustomPanel = el('[data-sc-custom-panel]');
+      els.scCustomCancel = el('[data-sc-custom-cancel]');
+      els.scCustomDone = el('[data-sc-custom-done]');
+      els.scDeleteChoiceOverlay = el('[data-sc-delete-choice-overlay]');
+      els.scDeleteChoicePanel = el('[data-sc-delete-choice-panel]');
+      els.scDeleteChoiceCancel = el('[data-sc-delete-choice-cancel]');
+      els.scDeleteChoiceOk = el('[data-sc-delete-choice-ok]');
+      els.scWeekGrid = el('[data-sc-week-grid]');
+      els.scMonthGrid = el('[data-sc-month-grid]');
+      els.scYearGrid = el('[data-sc-year-grid]');
+      els.scRequestsBadge = el('[data-sc-requests-badge]');
+      els.scRequestsBody = el('[data-sc-requests-body]');
+      els.scDayOverlay = el('[data-sc-day-overlay]');
+      els.scDayHeader = el('[data-sc-day-header]');
+      els.scDayListView = el('[data-sc-day-list-view]');
+      els.scDayList = el('[data-sc-day-list]');
+      els.scDayClose = el('[data-sc-day-close]');
+      els.scDayAdd = el('[data-sc-day-add]');
+      els.scFormView = el('[data-sc-form-view]');
+      els.scFormTitle = el('[data-sc-form-title]');
+      els.scFormBack = el('[data-sc-form-back]');
+      els.scTitle = el('[data-sc-title]');
+      els.scDate = el('[data-sc-date]');
+      els.scTime = el('[data-sc-time]');
+      els.scTimeEnd = el('[data-sc-time-end]');
+      els.scNotes = el('[data-sc-notes]');
+      els.scDelete = el('[data-sc-delete]');
+    }
+
+    // ---------- Shared Calendar (org-wide — the exact same rows every
+    // group's own Shared Calendar tab shows). Music's own Event Calendar
+    // bookings are pulled in read-only via shared_calendar_music_events(),
+    // a SECURITY DEFINER function (see shared_calendar_schema.sql). An
+    // admin can manage any entry here regardless of who created it, so
+    // scCanManage() is really just documentation of that in this file —
+    // it always evaluates true on this page. -----------------------------
+    function scCanManage(item: any) {
+      return item.created_by === state.session.user.id || state.profile?.role === 'admin';
+    }
+    // Recurrence is never materialized as rows — one event row is the
+    // whole series, and occurrences are computed on the fly for
+    // whatever range is currently on screen. 'never'/'on_date' end
+    // conditions are answered analytically (O(1)); 'after_count' is the
+    // one case that needs an actual occurrence count, so it walks
+    // day-by-day from the series' own start (not from today, and only
+    // for that one end-type) — see scOccurrenceCountUpTo.
+    function scDateMatchesRecurrence(event: any, dateStr: string): boolean {
+      if (!event.recurrence_unit) return dateStr === event.event_date;
+      if (event.recurrence_exceptions && event.recurrence_exceptions.includes(dateStr)) return false;
+      const startDate = parseDateStr(event.event_date);
+      const d = parseDateStr(dateStr);
+      if (d < startDate) return false;
+      if (event.recurrence_end_type === 'on_date' && event.recurrence_end_date && dateStr > event.recurrence_end_date) return false;
+      const interval = Math.max(1, event.recurrence_interval || 1);
+      const days = (event.recurrence_days && event.recurrence_days.length) ? event.recurrence_days : [startDate.getDay()];
+      let periodIndex: number, matchesShape: boolean;
+      if (event.recurrence_unit === 'day') {
+        periodIndex = Math.round((d.getTime() - startDate.getTime()) / 86400000);
+        matchesShape = true;
+      } else if (event.recurrence_unit === 'week') {
+        periodIndex = Math.floor((startOfWeek(d).getTime() - startOfWeek(startDate).getTime()) / (7 * 86400000));
+        matchesShape = days.includes(d.getDay());
+      } else if (event.recurrence_unit === 'month') {
+        periodIndex = (d.getFullYear() - startDate.getFullYear()) * 12 + (d.getMonth() - startDate.getMonth());
+        matchesShape = d.getDate() === startDate.getDate();
+      } else {
+        periodIndex = d.getFullYear() - startDate.getFullYear();
+        matchesShape = d.getMonth() === startDate.getMonth() && d.getDate() === startDate.getDate();
+      }
+      if (!matchesShape || periodIndex < 0 || periodIndex % interval !== 0) return false;
+      if (event.recurrence_end_type === 'after_count' && event.recurrence_end_count) {
+        if (scOccurrenceCountUpTo(event, d) > event.recurrence_end_count) return false;
+      }
+      return true;
+    }
+    function scOccurrenceCountUpTo(event: any, d: Date): number {
+      const startDate = parseDateStr(event.event_date);
+      const interval = Math.max(1, event.recurrence_interval || 1);
+      const days = (event.recurrence_days && event.recurrence_days.length) ? event.recurrence_days : [startDate.getDay()];
+      let cursor = new Date(startDate);
+      let count = 0, guard = 0;
+      while (cursor <= d && guard < 5000) {
+        guard++;
+        let occurs = false;
+        if (event.recurrence_unit === 'day') {
+          occurs = Math.round((cursor.getTime() - startDate.getTime()) / 86400000) % interval === 0;
+        } else if (event.recurrence_unit === 'week') {
+          const weeksSince = Math.floor((startOfWeek(cursor).getTime() - startOfWeek(startDate).getTime()) / (7 * 86400000));
+          occurs = weeksSince % interval === 0 && days.includes(cursor.getDay());
+        } else if (event.recurrence_unit === 'month') {
+          const monthsSince = (cursor.getFullYear() - startDate.getFullYear()) * 12 + (cursor.getMonth() - startDate.getMonth());
+          occurs = monthsSince % interval === 0 && cursor.getDate() === startDate.getDate();
+        } else {
+          const yearsSince = cursor.getFullYear() - startDate.getFullYear();
+          occurs = yearsSince % interval === 0 && cursor.getMonth() === startDate.getMonth() && cursor.getDate() === startDate.getDate();
+        }
+        if (occurs) count++;
+        cursor = addDays(cursor, 1);
+      }
+      return count;
+    }
+    function scOccurrenceDatesInRange(event: any, rangeStart: Date, rangeEnd: Date): string[] {
+      const results: string[] = [];
+      let d = new Date(rangeStart);
+      while (d <= rangeEnd) {
+        const dateStr = toDateStr(d);
+        if (scDateMatchesRecurrence(event, dateStr)) results.push(dateStr);
+        d = addDays(d, 1);
+      }
+      return results;
+    }
+    // One pass over every event for the whole visible range, instead of
+    // re-checking every event for every single day — the difference
+    // between O(events) and O(events × days) once Year view (365+ days
+    // × every month card) is in the mix.
+    function scBuildOccurrenceIndex(rangeStart: Date, rangeEnd: Date): Map<string, any[]> {
+      const map = new Map<string, any[]>();
+      const add = (dateStr: string, item: any) => {
+        if (!map.has(dateStr)) map.set(dateStr, []);
+        map.get(dateStr)!.push(item);
+      };
+      state.scEvents.forEach((e: any) => {
+        scOccurrenceDatesInRange(e, rangeStart, rangeEnd).forEach((dateStr) => add(dateStr, { ...e, kind: 'own', occurrence_date: dateStr }));
+      });
+      const rangeStartStr = toDateStr(rangeStart), rangeEndStr = toDateStr(rangeEnd);
+      state.scMusicEvents.forEach((e: any) => {
+        if (e.event_date >= rangeStartStr && e.event_date <= rangeEndStr) {
+          add(e.event_date, { ...e, kind: 'music', title: e.event_type ? `${e.event_type} — ${e.client_name}` : e.client_name });
+        }
+      });
+      map.forEach((items) => items.sort((a, b) => (a.event_time || '99:99').localeCompare(b.event_time || '99:99')));
+      return map;
+    }
+    function scItemsForDate(dateStr: string): any[] {
+      const d = parseDateStr(dateStr);
+      return scBuildOccurrenceIndex(d, d).get(dateStr) || [];
+    }
+    async function loadSharedCal() {
+      // Render the grid regardless of how the fetch goes — otherwise a
+      // failed/slow load leaves the tab looking entirely blank until
+      // something else (like clicking Today) happens to call
+      // scRenderView() on its own.
+      try {
+        const [ownRes, musicRes] = await Promise.all([
+          db.from('shared_calendar_events').select('*').order('event_date', { ascending: true }),
+          db.rpc('shared_calendar_music_events'),
+        ]);
+        if (ownRes.error) { console.error(ownRes.error); showToast('Could not load the Shared Calendar.'); }
+        else state.scEvents = ownRes.data || [];
+        if (musicRes.error) console.error(musicRes.error);
+        else state.scMusicEvents = musicRes.data || [];
+        await loadScRequests();
+      } catch (err) {
+        console.error('shared calendar load failed', err);
+        showToast('Could not load the Shared Calendar.');
+      }
+      scRenderView();
+    }
+    async function loadScRequests() {
+      const { data, error } = await db.from('shared_calendar_change_requests')
+        .select('*, shared_calendar_events(title, event_date)').order('created_at', { ascending: false });
+      if (error) { console.error(error); return; }
+      state.scRequests = data || [];
+      renderScRequests();
+    }
+    function renderScRequests() {
+      const openCount = state.scRequests.filter((r: any) => r.status === 'open').length;
+      els.scRequestsBadge.textContent = String(openCount);
+      els.scRequestsBadge.toggleAttribute('hidden', !openCount);
+      els.scRequestsBody.innerHTML = state.scRequests.length ? state.scRequests.map((r: any) => `
+        <tr data-sc-request-id="${r.id}">
+          <td data-label="Entry">${escapeHtml(r.shared_calendar_events?.title || '(deleted)')}</td>
+          <td data-label="Date">${r.shared_calendar_events?.event_date || '—'}</td>
+          <td data-label="Message">${escapeHtml(r.message)}</td>
+          <td data-label="Requested by">${escapeHtml(r.requested_by_name || '—')}</td>
+          <td data-label="Status">${r.status === 'open' ? '<span class="ws-badge ws-badge--fair">Open</span>' : '<span class="ws-badge ws-badge--good">Resolved</span>'}</td>
+          <td class="ws-row-actions">${r.status === 'open' ? '<button type="button" class="ws-edit-btn" data-sc-resolve>Mark resolved</button>' : ''}</td>
+        </tr>
+      `).join('') : '<tr><td colspan="6" class="ws-empty">No change requests.</td></tr>';
+      els.scRequestsBody.querySelectorAll('[data-sc-resolve]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.closest('tr').dataset.scRequestId;
+          const { error } = await db.from('shared_calendar_change_requests')
+            .update({ status: 'resolved', resolved_at: new Date().toISOString(), resolved_by_name: state.profile?.name || null })
+            .eq('id', id);
+          if (error) { console.error(error); showToast('Could not resolve the request.'); return; }
+          await loadScRequests();
+        });
+      });
+    }
+    async function scRequestChange(eventId: string) {
+      const message = prompt('What should change about this entry?');
+      if (!message || !message.trim()) return;
+      const { error } = await db.from('shared_calendar_change_requests').insert({
+        event_id: eventId, message: message.trim(),
+        requested_by: state.session.user.id, requested_by_name: state.profile?.name || null,
+      });
+      if (error) { console.error(error); showToast('Could not send the request.'); return; }
+      showToast('Request sent.');
+      await loadScRequests();
+    }
+    function scNavLabelFor(): string {
+      const a = state.sc.anchor;
+      if (state.sc.view === 'day') {
+        const d = new Date(a);
+        return `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}, ${d.getFullYear()}`;
+      }
+      if (state.sc.view === 'week') {
+        const start = startOfWeek(a);
+        const end = addDays(start, 6);
+        return start.getMonth() === end.getMonth()
+          ? `${MONTHS[start.getMonth()].en} ${start.getDate()}–${end.getDate()}, ${end.getFullYear()}`
+          : `${MONTHS[start.getMonth()].en} ${start.getDate()} – ${MONTHS[end.getMonth()].en} ${end.getDate()}, ${end.getFullYear()}`;
+      }
+      if (state.sc.view === 'year') return String(a.getFullYear());
+      return `${MONTHS[a.getMonth()].en} ${a.getFullYear()}`;
+    }
+    function scRenderView() {
+      els.scNavLabel.textContent = scNavLabelFor();
+      document.querySelectorAll('[data-sc-view-pane]').forEach((p: any) => p.toggleAttribute('hidden', p.dataset.scViewPane !== state.sc.view));
+      document.querySelectorAll('[data-sc-view]').forEach((btn: any) => btn.classList.toggle('curr-view-btn--active', btn.dataset.scView === state.sc.view));
+      if (state.sc.view === 'day') scRenderDay();
+      else if (state.sc.view === 'week') scRenderWeek();
+      else if (state.sc.view === 'year') scRenderYear();
+      else scRenderMonth();
+    }
+    function scTimeRangeLabel(item: any): string {
+      if (!item.event_time) return 'All day';
+      return item.event_end_time ? `${item.event_time.slice(0, 5)}–${item.event_end_time.slice(0, 5)}` : item.event_time.slice(0, 5);
+    }
+    function scDayItemRowHTML(item: any) {
+      if (item.kind === 'music') {
+        return `
+          <div class="ws-evt-day-item ws-evt-day-item--readonly">
+            <div class="ws-evt-day-item-main">
+              <span class="ws-evt-day-item-title">${escapeHtml(item.title)}</span>
+              <span class="ws-evt-day-item-sub">${scTimeRangeLabel(item)} · Music Event Calendar</span>
+            </div>
+            <span class="ws-badge ws-badge--fair">View only</span>
+          </div>`;
+      }
+      const canManage = scCanManage(item);
+      return `
+        <div class="ws-evt-day-item" data-sc-event-id="${item.id}" data-sc-occurrence-date="${item.occurrence_date || item.event_date}">
+          <div class="ws-evt-day-item-main">
+            <span class="ws-evt-day-item-title">${escapeHtml(item.title)}${item.recurrence_unit ? ' <span class="ws-sc-repeat-mark" title="Repeats">↻</span>' : ''}</span>
+            <span class="ws-evt-day-item-sub">${scTimeRangeLabel(item)}${item.notes ? ' · ' + escapeHtml(item.notes) : ''} · Added by ${escapeHtml(item.created_by_name || '—')}</span>
+          </div>
+          <div class="ws-evt-day-item-actions">
+            ${canManage
+              ? '<button type="button" class="ws-edit-btn" data-sc-day-edit>Edit</button>'
+              : '<button type="button" class="ws-edit-btn" data-sc-day-request>Request a change</button>'}
+          </div>
+        </div>`;
+    }
+    function bindScDayItemActions(container: any) {
+      container.querySelectorAll('[data-sc-day-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => {
+          const row = btn.closest('[data-sc-event-id]');
+          scStartEdit(row.dataset.scEventId, row.dataset.scOccurrenceDate);
+        });
+      });
+      container.querySelectorAll('[data-sc-day-request]').forEach((btn: any) => {
+        btn.addEventListener('click', () => scRequestChange(btn.closest('[data-sc-event-id]').dataset.scEventId));
+      });
+    }
+    function scHourLabel(h: number): string {
+      if (h === 0) return '12 AM';
+      if (h === 12) return '12 PM';
+      return h < 12 ? `${h} AM` : `${h - 12} PM`;
+    }
+    // Shared by Day (1 day) and Week (7 days) — a 24-hour grid, always
+    // fully drawn even with nothing on it (an empty day should still
+    // look like a calendar, not a blank box). One CSS Grid for the
+    // whole thing (label column + one column per day) so hour rows
+    // can't drift out of alignment the way separate label/content
+    // columns would.
+    function scRenderTimelineGrid(container: any, days: Date[]) {
+      const dateStrs = days.map(toDateStr);
+      const idx = scBuildOccurrenceIndex(days[0], days[days.length - 1]);
+      const today = todayStr();
+      const multiDay = days.length > 1;
+      container.style.setProperty('--sc-days', String(days.length));
+
+      let html = '<div class="ws-sc-tl-grid">';
+      if (multiDay) {
+        html += '<div class="ws-sc-tl-cell ws-sc-tl-head"></div>';
+        days.forEach((d, i) => {
+          html += `<div class="ws-sc-tl-cell ws-sc-tl-head${dateStrs[i] === today ? ' ws-sc-tl-head--today' : ''}">
+            <span class="ws-sc-tl-head-name">${WEEKDAYS[d.getDay()].en.slice(0, 3)}</span>
+            <span class="ws-sc-tl-head-num">${d.getDate()}</span>
+          </div>`;
+        });
+      }
+      const anyAllDay = dateStrs.some((ds) => (idx.get(ds) || []).some((it: any) => !it.event_time));
+      if (anyAllDay) {
+        html += '<div class="ws-sc-tl-cell ws-sc-tl-hour-label">All day</div>';
+        dateStrs.forEach((ds) => {
+          const items = (idx.get(ds) || []).filter((it: any) => !it.event_time);
+          html += `<div class="ws-sc-tl-cell ws-sc-tl-content" data-date="${ds}">${items.map(scTimelineChipHTML).join('')}</div>`;
+        });
+      }
+      for (let h = 0; h < 24; h++) {
+        html += `<div class="ws-sc-tl-cell ws-sc-tl-hour-label">${scHourLabel(h)}</div>`;
+        dateStrs.forEach((ds) => {
+          const items = (idx.get(ds) || []).filter((it: any) => it.event_time && Number(it.event_time.slice(0, 2)) === h);
+          html += `<div class="ws-sc-tl-cell ws-sc-tl-content" data-date="${ds}">${items.map(scTimelineChipHTML).join('')}</div>`;
+        });
+      }
+      html += '</div>';
+      container.innerHTML = html;
+      container.querySelectorAll('[data-date]').forEach((cell: any) => {
+        cell.addEventListener('click', (e: Event) => {
+          if ((e.target as any).closest('[data-sc-chip-id]')) return; // handled below
+          scOpenDay(cell.dataset.date);
+        });
+      });
+      container.querySelectorAll('[data-sc-chip-id]').forEach((chip: any) => {
+        chip.addEventListener('click', (e: Event) => {
+          e.stopPropagation();
+          scOpenDay(chip.closest('[data-date]').dataset.date);
+        });
+      });
+    }
+    function scTimelineChipHTML(item: any): string {
+      const label = item.event_time ? `${item.event_time.slice(0, 5)} ${item.title}` : item.title;
+      return `<div class="ws-sc-tl-event${item.kind === 'music' ? ' ws-sc-tl-event--music' : ''}" data-sc-chip-id="${item.id}" title="${escapeHtml(label)}">${escapeHtml(label)}</div>`;
+    }
+    function scRenderDay() {
+      scRenderTimelineGrid(els.scDayAgenda, [state.sc.anchor]);
+    }
+    function scRenderWeek() {
+      const start = startOfWeek(state.sc.anchor);
+      scRenderTimelineGrid(els.scWeekGrid, Array.from({ length: 7 }, (_, i) => addDays(start, i)));
+    }
+    function scRenderMonth() {
+      const anchor = state.sc.anchor;
+      const y = anchor.getFullYear(), mo = anchor.getMonth();
+      const first = new Date(y, mo, 1);
+      const last = new Date(y, mo + 1, 0);
+      const start = startOfWeek(first);
+      const end = addDays(startOfWeek(last), 6);
+      const today = todayStr();
+      const idx = scBuildOccurrenceIndex(start, end);
+      let html = '<div class="curr-weekday-row">' + WEEKDAYS.map((w) => `<div class="curr-weekday">${w.en}</div>`).join('') + '</div><div class="curr-month-cells">';
+      let d = new Date(start);
+      while (d <= end) {
+        const dateStr = toDateStr(d);
+        const inMonth = d.getMonth() === mo;
+        const items = idx.get(dateStr) || [];
+        const shown = items.slice(0, 3);
+        const extra = items.length - shown.length;
+        html += `<div class="curr-day-cell${inMonth ? '' : ' curr-day-cell--out'}${dateStr === today ? ' curr-day-cell--today' : ''}${items.length ? ' curr-day-cell--has' : ''}" data-date="${dateStr}">
+          <span class="curr-day-num">${d.getDate()}</span>
+          <div class="curr-day-mini">
+            ${shown.map((it: any) => `<span class="curr-mini-chip">${escapeHtml(it.title)}</span>`).join('')}
+            ${extra > 0 ? `<span class="curr-mini-more">+${extra}</span>` : ''}
+          </div>
+        </div>`;
+        d = addDays(d, 1);
+      }
+      html += '</div>';
+      els.scMonthGrid.innerHTML = html;
+      els.scMonthGrid.querySelectorAll('.curr-day-cell').forEach((cell: any) => {
+        cell.addEventListener('click', () => scOpenDay(cell.dataset.date));
+      });
+    }
+    function scRenderYear() {
+      const year = state.sc.anchor.getFullYear();
+      const today = todayStr();
+      const idx = scBuildOccurrenceIndex(new Date(year, 0, 1), new Date(year, 11, 31));
+      let html = '';
+      for (let mo = 0; mo < 12; mo++) {
+        const first = new Date(year, mo, 1);
+        const start = startOfWeek(first);
+        let cellsHtml = '';
+        let d = new Date(start);
+        // Always exactly 6 rows (42 cells) so every month card lines up.
+        for (let i = 0; i < 42; i++) {
+          const dateStr = toDateStr(d);
+          const inMonth = d.getMonth() === mo;
+          const has = inMonth && (idx.get(dateStr) || []).length > 0;
+          cellsHtml += `<div class="ws-sc-year-cell${inMonth ? '' : ' ws-sc-year-cell--out'}${dateStr === today ? ' ws-sc-year-cell--today' : ''}${has ? ' ws-sc-year-cell--has' : ''}" data-date="${dateStr}">${inMonth ? d.getDate() : ''}</div>`;
+          d = addDays(d, 1);
+        }
+        html += `<div class="ws-sc-year-month"><p class="ws-sc-year-month-head">${MONTHS[mo].en}</p><div class="ws-sc-year-cells">${cellsHtml}</div></div>`;
+      }
+      els.scYearGrid.innerHTML = html;
+      els.scYearGrid.querySelectorAll('.ws-sc-year-cell:not(.ws-sc-year-cell--out)').forEach((cell: any) => {
+        cell.addEventListener('click', () => scOpenDay(cell.dataset.date));
+      });
+    }
+    function scSetView(view: string) {
+      state.sc.view = view;
+      document.querySelectorAll('[data-sc-view]').forEach((btn: any) => btn.classList.toggle('curr-view-btn--active', btn.dataset.scView === view));
+      scRenderView();
+    }
+    function scStep(delta: number) {
+      const a = state.sc.anchor;
+      if (state.sc.view === 'day') state.sc.anchor = addDays(a, delta);
+      else if (state.sc.view === 'week') state.sc.anchor = addDays(a, delta * 7);
+      else if (state.sc.view === 'year') state.sc.anchor = new Date(a.getFullYear() + delta, a.getMonth(), 1);
+      else state.sc.anchor = new Date(a.getFullYear(), a.getMonth() + delta, 1);
+      scRenderView();
+    }
+    function scShowForm() { els.scDayListView.hidden = true; els.scFormView.hidden = false; }
+    function scShowList() { els.scFormView.hidden = true; els.scDayListView.hidden = false; scRenderDayList(state.sc.currentDay); }
+    // The weekday toggle (S M T W T F S) only appears for a Custom
+    // weekly repeat — its selection lives here rather than as a
+    // multi-select form field, and gets read/written alongside the
+    // rest of the form.
+    function scSetWeekdaySelection(days: number[]) {
+      els.scWeekdayToggle.querySelectorAll('button').forEach((btn: any) => {
+        btn.classList.toggle('ws-sc-weekday--active', days.includes(Number(btn.dataset.day)));
+      });
+    }
+    function scGetWeekdaySelection(): number[] {
+      return Array.from(els.scWeekdayToggle.querySelectorAll('button.ws-sc-weekday--active')).map((btn: any) => Number(btn.dataset.day));
+    }
+    function scGetEndType(): string {
+      const checked = els.scCustomPanel.querySelector('input[name="sc-end"]:checked');
+      return checked ? checked.value : 'never';
+    }
+    function scSetEndType(type: string) {
+      const radio = els.scCustomPanel.querySelector(`input[name="sc-end"][value="${type}"]`);
+      if (radio) radio.checked = true;
+    }
+    // Reverse of the preset→fields mapping below, for loading an
+    // existing series back into the popup/select.
+    function scRepeatPresetFor(item: any): string {
+      if (!item.recurrence_unit) return 'none';
+      const days = item.recurrence_days || [];
+      if (item.recurrence_interval === 1 && item.recurrence_unit === 'week' && days.length === 5 && [1, 2, 3, 4, 5].every((x) => days.includes(x))) return 'weekdays';
+      if (item.recurrence_interval === 1 && (item.recurrence_unit !== 'week' || days.length <= 1)) return item.recurrence_unit;
+      return 'custom';
+    }
+    // Fills the Custom recurrence popup's own fields — called both when
+    // opening it for an existing custom series, and with sensible
+    // defaults the first time someone picks "Custom…" on a fresh entry.
+    function scFillCustomPopup(item: any) {
+      const isCustomSeries = item.recurrence_unit && scRepeatPresetFor(item) === 'custom';
+      els.scRepeatUnit.value = isCustomSeries ? item.recurrence_unit : 'week';
+      els.scRepeatInterval.value = isCustomSeries ? String(item.recurrence_interval || 1) : '1';
+      scSetWeekdaySelection(isCustomSeries ? (item.recurrence_days || []) : [parseDateStr(els.scDate.value).getDay()]);
+      scSetEndType(item.recurrence_end_type || 'never');
+      els.scRepeatEndDate.value = item.recurrence_end_date || '';
+      els.scRepeatEndCount.value = String(item.recurrence_end_count || 13);
+      els.scRepeatDays.toggleAttribute('hidden', els.scRepeatUnit.value !== 'week');
+    }
+    function scApplyRepeatToForm(item: any) {
+      els.scRepeat.value = scRepeatPresetFor(item);
+      scFillCustomPopup(item);
+    }
+    // The "Repeat" select is a handful of friendly presets — this maps
+    // whichever one is chosen (plus whatever the Custom recurrence
+    // popup was last filled with) to the plain fields actually stored
+    // on the row.
+    function scRepeatFieldsFromForm(): any {
+      const preset = els.scRepeat.value;
+      if (preset === 'none') {
+        return { recurrence_unit: null, recurrence_interval: 1, recurrence_days: null, recurrence_end_type: 'never', recurrence_end_date: null, recurrence_end_count: null };
+      }
+      let unit: string, interval = 1, days: number[] | null = null;
+      if (preset === 'custom') {
+        unit = els.scRepeatUnit.value;
+        interval = Math.max(1, Number(els.scRepeatInterval.value) || 1);
+        if (unit === 'week') days = scGetWeekdaySelection();
+      } else if (preset === 'weekdays') {
+        unit = 'week'; days = [1, 2, 3, 4, 5];
+      } else {
+        unit = preset;
+        if (unit === 'week') days = [parseDateStr(els.scDate.value).getDay()];
+      }
+      const endType = preset === 'custom' ? scGetEndType() : 'never';
+      return {
+        recurrence_unit: unit, recurrence_interval: interval, recurrence_days: days && days.length ? days : null,
+        recurrence_end_type: endType,
+        recurrence_end_date: endType === 'on_date' ? (els.scRepeatEndDate.value || null) : null,
+        recurrence_end_count: endType === 'after_count' ? (Number(els.scRepeatEndCount.value) || null) : null,
+      };
+    }
+    function scResetForm() {
+      state.editingScId = null;
+      state.editingScOccurrenceDate = null;
+      els.scFormView.reset();
+      els.scDate.value = state.sc.currentDay || todayStr();
+      els.scFormTitle.textContent = 'New calendar entry';
+      els.scDelete.hidden = true;
+      scApplyRepeatToForm({});
+    }
+    function scStartNew() { scResetForm(); scShowForm(); }
+    function scStartEdit(id: string, occurrenceDate?: string) {
+      const item = state.scEvents.find((x: any) => x.id === id);
+      if (!item) return;
+      state.editingScId = id;
+      state.editingScOccurrenceDate = occurrenceDate || item.event_date;
+      els.scTitle.value = item.title;
+      els.scDate.value = item.event_date;
+      els.scTime.value = item.event_time || '';
+      els.scTimeEnd.value = item.event_end_time || '';
+      els.scNotes.value = item.notes || '';
+      els.scFormTitle.textContent = 'Editing entry';
+      els.scDelete.hidden = false;
+      scApplyRepeatToForm(item);
+      scShowForm();
+    }
+    function scRenderDayList(dateStr: string) {
+      const items = scItemsForDate(dateStr);
+      els.scDayList.innerHTML = items.length ? items.map(scDayItemRowHTML).join('') : '<p class="ws-empty" style="padding:1rem 0">Nothing on the calendar this day.</p>';
+      bindScDayItemActions(els.scDayList);
+    }
+    function scOpenDay(dateStr: string) {
+      state.sc.currentDay = dateStr;
+      const d = parseDateStr(dateStr);
+      els.scDayHeader.textContent = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}, ${d.getFullYear()}`;
+      scShowList();
+      els.scDayOverlay.removeAttribute('hidden');
+    }
+    function scCloseDay() {
+      els.scDayOverlay.setAttribute('hidden', '');
+      state.sc.currentDay = null;
+    }
+    function scOpenCustomPopup() {
+      scFillCustomPopup(state.editingScId ? (state.scEvents.find((x: any) => x.id === state.editingScId) || {}) : {});
+      els.scCustomOverlay.removeAttribute('hidden');
+    }
+    async function scDeleteSeries(id: string) {
+      const { error } = await db.from('shared_calendar_events').delete().eq('id', id);
+      if (error) { console.error(error); showToast('Could not delete.'); return false; }
+      return true;
+    }
+    async function scDeleteOccurrence(id: string, dateStr: string) {
+      const item = state.scEvents.find((x: any) => x.id === id);
+      if (!item) return false;
+      const exceptions = Array.from(new Set([...(item.recurrence_exceptions || []), dateStr]));
+      const { error } = await db.from('shared_calendar_events').update({ recurrence_exceptions: exceptions }).eq('id', id);
+      if (error) { console.error(error); showToast('Could not delete.'); return false; }
+      return true;
+    }
+    function bindSharedCalForm() {
+      els.scPrev.addEventListener('click', () => scStep(-1));
+      els.scNext.addEventListener('click', () => scStep(1));
+      els.scToday.addEventListener('click', () => { state.sc.anchor = new Date(); scRenderView(); });
+      document.querySelectorAll('[data-sc-view]').forEach((btn: any) => {
+        btn.addEventListener('click', () => scSetView(btn.dataset.scView));
+      });
+      els.scAddBtn.addEventListener('click', () => scOpenDay(todayStr()));
+      els.scDayClose.addEventListener('click', scCloseDay);
+      els.scDayAdd.addEventListener('click', scStartNew);
+      els.scFormBack.addEventListener('click', scShowList);
+
+      // "Custom…" opens its own popup instead of revealing inline
+      // fields — Cancel reverts the select to whatever it was before.
+      let scRepeatPrevValue = 'none';
+      els.scRepeat.addEventListener('focus', () => { scRepeatPrevValue = els.scRepeat.value; });
+      els.scRepeat.addEventListener('change', () => {
+        if (els.scRepeat.value === 'custom') scOpenCustomPopup();
+      });
+      els.scWeekdayToggle.querySelectorAll('button').forEach((btn: any) => {
+        btn.addEventListener('click', () => btn.classList.toggle('ws-sc-weekday--active'));
+      });
+      els.scRepeatUnit.addEventListener('change', () => {
+        els.scRepeatDays.toggleAttribute('hidden', els.scRepeatUnit.value !== 'week');
+      });
+      els.scCustomCancel.addEventListener('click', () => {
+        els.scRepeat.value = scRepeatPrevValue;
+        els.scCustomOverlay.setAttribute('hidden', '');
+      });
+      els.scCustomDone.addEventListener('click', () => {
+        els.scRepeat.value = 'custom';
+        els.scCustomOverlay.setAttribute('hidden', '');
+      });
+
+      els.scFormView.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const title = els.scTitle.value.trim();
+        const date = els.scDate.value;
+        if (!title || !date) { showToast('Title and date are required.'); return; }
+        const payload: any = {
+          title, event_date: date, event_time: els.scTime.value || null, event_end_time: els.scTimeEnd.value || null,
+          notes: els.scNotes.value.trim() || null, ...scRepeatFieldsFromForm(),
+        };
+        let error;
+        if (state.editingScId) {
+          payload.updated_at = new Date().toISOString();
+          ({ error } = await db.from('shared_calendar_events').update(payload).eq('id', state.editingScId));
+        } else {
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ error } = await db.from('shared_calendar_events').insert(payload));
+        }
+        if (error) { console.error(error); showToast('Could not save.'); return; }
+        await loadSharedCal();
+        scShowList();
+      });
+      els.scDelete.addEventListener('click', () => {
+        if (!state.editingScId) return;
+        const item = state.scEvents.find((x: any) => x.id === state.editingScId);
+        if (item && item.recurrence_unit) {
+          els.scDeleteChoiceOverlay.removeAttribute('hidden');
+        } else if (confirm('Delete this calendar entry?')) {
+          scDeleteSeries(state.editingScId).then((ok) => { if (ok) { loadSharedCal(); scShowList(); } });
+        }
+      });
+      els.scDeleteChoiceCancel.addEventListener('click', () => els.scDeleteChoiceOverlay.setAttribute('hidden', ''));
+      els.scDeleteChoiceOk.addEventListener('click', async () => {
+        const scope = els.scDeleteChoicePanel.querySelector('input[name="sc-delete-scope"]:checked')?.value || 'this';
+        els.scDeleteChoiceOverlay.setAttribute('hidden', '');
+        const ok = scope === 'all'
+          ? await scDeleteSeries(state.editingScId)
+          : await scDeleteOccurrence(state.editingScId, state.editingScOccurrenceDate || els.scDate.value);
+        if (ok) { await loadSharedCal(); scShowList(); }
+      });
     }
 
     // ---------- Overview (the 5 troops) -------------------------------------
@@ -2519,6 +3366,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function loadActiveTabData() {
       const tab = state.activeTab;
       if (tab === 'overview') loadOverview();
+      if (tab === 'sharedcal') loadSharedCal();
       if (tab === 'finance') { loadFinanceKpis(); loadFinancePeriod(); compareReconcile(); loadReconcileHistory(); loadAdjustmentEntries(); }
       if (tab === 'curriculum') loadCurriculum();
       if (tab === 'music') loadMusicDashboard();
@@ -2602,6 +3450,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindReports();
         bindLibraryUpload();
         bindSharedVendorForm();
+        bindSharedCalForm();
         els.finMonth.addEventListener('change', loadFinancePeriod);
         els.finYear.addEventListener('change', loadFinancePeriod);
         els.rosterGroup.innerHTML = '<option value="">All Groups</option>' + GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
