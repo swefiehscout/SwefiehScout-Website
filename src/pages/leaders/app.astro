@@ -6305,11 +6305,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       // Center on now (or a reasonable default when today isn't in
       // view) so opening the timeline never starts scrolled to
       // midnight — every hour is still one scroll away either way.
+      // The day-header row is sticky and covers the top of the
+      // viewport, so the centering has to leave room for it — otherwise
+      // a dead-center target can land right behind the header instead
+      // of visibly below it.
       const hourGridEl = container.querySelector('.ws-sc-tl-hourgrid');
       if (hourGridEl) {
         const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
         const targetTopRem = nowInView ? nowTop : 8 * SC_ROW_H;
-        container.scrollTop = Math.max(0, hourGridEl.offsetTop + targetTopRem * remPx - container.clientHeight / 2);
+        const headerH = (container.querySelector('.ws-sc-tl-head-row') as any)?.offsetHeight || 0;
+        const contentY = hourGridEl.offsetTop + targetTopRem * remPx;
+        container.scrollTop = Math.max(0, contentY - container.clientHeight / 2 - headerH / 2);
       }
       container.querySelectorAll('[data-date]').forEach((cell: any) => {
         cell.addEventListener('click', (e: Event) => {
