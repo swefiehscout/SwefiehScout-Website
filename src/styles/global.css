@@ -5632,15 +5632,21 @@ body.ws-scroll-locked { overflow: hidden; }
   .ws-table--compact-row td[data-label="Paid"]::before {
     content: none;
   }
-  .ws-table--compact-row td.ws-row-num { order: 1; }
+  /* width:auto cancels the base rule's width:100% on every .ws-table td
+     above — left as 100%, it becomes each flex item's used flex-basis
+     (since these all resolve to flex-basis:auto) and every "inline"
+     cell claims the full row width and wraps onto its own line anyway. */
+  .ws-table--compact-row td.ws-row-num { order: 1; width: auto; }
   .ws-table--compact-row td[data-label="Member ID"] {
     order: 2;
+    width: auto;
     color: var(--color-muted);
     font-size: 0.78rem;
     white-space: nowrap;
   }
   .ws-table--compact-row td[data-label="Name"] {
     order: 3;
+    width: auto;
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
@@ -5651,6 +5657,7 @@ body.ws-scroll-locked { overflow: hidden; }
   .ws-table--compact-row td[data-label="Present"],
   .ws-table--compact-row td[data-label="Paid"] {
     order: 4;
+    width: auto;
     flex: 0 0 auto;
     margin-left: auto;
   }
@@ -5663,7 +5670,7 @@ body.ws-scroll-locked { overflow: hidden; }
      Contacts, Allergies, Notes, and the Edit/Archive/Delete buttons.
      See initCollapsibleRows() in row-numbers.ts for the tap handler. */
   .ws-table--collapsible tbody tr { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.5rem; cursor: pointer; }
-  .ws-table--collapsible tbody tr td { flex: 0 0 auto; }
+  .ws-table--collapsible tbody tr td { flex: 0 0 auto; width: auto; }
   .ws-table--collapsible tbody tr td:not(.ws-row-num):not([data-label="Name"]) { flex-basis: 100%; }
   .ws-table--collapsible tbody tr:not(.ws-row--expanded) td:not(.ws-row-num):not([data-label="Name"]):not(.ws-empty) {
     display: none;
