@@ -286,6 +286,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Member ID</th>
                   <th>Phone</th>
                   <th>Email</th>
                   <th>National ID</th>
@@ -315,6 +316,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Member ID</th>
                   <th>Phone</th>
                   <th>Email</th>
                   <th>National ID</th>
@@ -385,7 +387,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-table-wrap">
                 <table class="ws-table" data-att-table>
                   <thead>
-                    <tr><th>Name</th><th>Present</th></tr>
+                    <tr><th>Name</th><th>Member ID</th><th>Present</th></tr>
                   </thead>
                   <tbody data-att-body></tbody>
                 </table>
@@ -414,7 +416,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <div class="ws-table-wrap">
             <table class="ws-table" data-fee-table>
               <thead>
-                <tr><th>Name</th><th>Paid</th><th>Amount</th><th>Paid on</th></tr>
+                <tr><th>Name</th><th>Member ID</th><th>Paid</th><th>Amount</th><th>Paid on</th></tr>
               </thead>
               <tbody data-fee-body></tbody>
             </table>
@@ -1917,6 +1919,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
     import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY } from '../../lib/curriculum/constants';
+    import { initRowNumbering } from '../../lib/workspace/row-numbers';
 
     // Loose alias for actual query calls below — supabaseConfigured is
     // checked once in init() before any of this runs, so by the time these
@@ -2500,6 +2503,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       return `
         <tr data-member-id="${m.id}">
           <td data-label="Name">${escapeHtml(m.full_name)}${m.archived_reason === 'inactive' ? ' <span class="ws-allergy-badge" title="Auto-archived: no attendance recorded in 3+ months">Auto-archived</span>' : ''}</td>
+          <td data-label="Member ID">${escapeHtml(m.member_code || '—')}</td>
           <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
           <td data-label="Email">${escapeHtml(m.email || '—')}</td>
           <td data-label="National ID">${escapeHtml(m.national_id || '—')}</td>
@@ -2557,7 +2561,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderRoster() {
       const active = state.members.filter((m: any) => m.active);
       if (!active.length) {
-        els.rosterBody.innerHTML = '<tr><td colspan="10" class="ws-empty">No members yet, add the first one below.</td></tr>';
+        els.rosterBody.innerHTML = '<tr><td colspan="12" class="ws-empty">No members yet, add the first one below.</td></tr>';
         return;
       }
       els.rosterBody.innerHTML = active.map((m: any) => memberRowHTML(m, `
@@ -2577,7 +2581,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderArchive() {
       const archived = state.members.filter((m: any) => !m.active);
       if (!archived.length) {
-        els.archiveBody.innerHTML = '<tr><td colspan="10" class="ws-empty">No archived members.</td></tr>';
+        els.archiveBody.innerHTML = '<tr><td colspan="12" class="ws-empty">No archived members.</td></tr>';
         return;
       }
       els.archiveBody.innerHTML = archived.map((m: any) => memberRowHTML(m, `
@@ -2624,7 +2628,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderApprovals() {
       if (!state.approvals.length) {
-        els.approvalsBody.innerHTML = '<tr><td colspan="10" class="ws-empty">No pending requests.</td></tr>';
+        els.approvalsBody.innerHTML = '<tr><td colspan="11" class="ws-empty">No pending requests.</td></tr>';
         return;
       }
       els.approvalsBody.innerHTML = state.approvals.map((r: any) => `
@@ -2833,7 +2837,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderAttendance(active: any[], map: Map<string, any>, date: string) {
       if (!active.length) {
-        els.attBody.innerHTML = '<tr><td colspan="2" class="ws-empty">No active members in this group yet.</td></tr>';
+        els.attBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No active members in this group yet.</td></tr>';
         els.attSummary.textContent = '';
         return;
       }
@@ -2844,6 +2848,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         return `
           <tr data-member-id="${m.id}">
             <td data-label="Name">${escapeHtml(m.full_name)}</td>
+            <td data-label="Member ID">${escapeHtml(m.member_code || '—')}</td>
             <td data-label="Present"><input type="checkbox" data-att-present ${rec && rec.present ? 'checked' : ''} /></td>
           </tr>`;
       }).join('');
@@ -2995,7 +3000,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderFees(active: any[], map: Map<string, any>, period: string) {
       const defaultAmount = els.feeDefault.value ? Number(els.feeDefault.value) : null;
       if (!active.length) {
-        els.feeBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No active members in this group yet.</td></tr>';
+        els.feeBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No active members in this group yet.</td></tr>';
         els.feeSummary.textContent = '';
         return;
       }
@@ -3008,6 +3013,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         return `
           <tr data-member-id="${m.id}" data-paid-on="${paidOn}">
             <td data-label="Name">${escapeHtml(m.full_name)}</td>
+            <td data-label="Member ID">${escapeHtml(m.member_code || '—')}</td>
             <td data-label="Paid"><input type="checkbox" data-fee-paid ${rec && rec.paid ? 'checked' : ''} /></td>
             <td data-label="Amount"><input type="number" step="0.01" min="0" class="ws-inline-amount" data-fee-amount value="${amount}" /></td>
             <td data-label="Paid on">${paidOn ? escapeHtml(paidOn) : '—'}</td>
@@ -3211,7 +3217,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       `;
 
       if (!state.finEntries.length) {
-        els.finBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No entries this month.</td></tr>';
+        els.finBody.innerHTML = '<tr><td colspan="8" class="ws-empty">No entries this month.</td></tr>';
         return;
       }
       els.finBody.innerHTML = state.finEntries.map((e: any) => `
@@ -3397,7 +3403,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderInventoryItems() {
       if (!state.inventoryItems.length) {
-        els.invBody.innerHTML = '<tr><td colspan="9" class="ws-empty">No items yet.</td></tr>';
+        els.invBody.innerHTML = '<tr><td colspan="10" class="ws-empty">No items yet.</td></tr>';
         return;
       }
       const lastMaint = lastMaintenanceByItem();
@@ -3536,7 +3542,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const filterId = els.invMaintFilter.value;
       const rows = filterId ? state.maintenanceLog.filter((l: any) => l.item_id === filterId) : state.maintenanceLog;
       if (!rows.length) {
-        els.invMaintBody.innerHTML = '<tr><td colspan="8" class="ws-empty">No maintenance logged yet.</td></tr>';
+        els.invMaintBody.innerHTML = '<tr><td colspan="9" class="ws-empty">No maintenance logged yet.</td></tr>';
         return;
       }
       els.invMaintBody.innerHTML = rows.map((log: any) => {
@@ -4010,8 +4016,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td class="ws-row-actions"><button type="button" class="ws-edit-btn" data-evt-dash-open>Open</button></td>
         </tr>
       `;
-      els.evtTodoBody.innerHTML = todo.length ? todo.map(rowHtml).join('') : '<tr><td colspan="5" class="ws-empty">Nothing pending.</td></tr>';
-      els.evtUpcomingBody.innerHTML = upcoming.length ? upcoming.map(rowHtml).join('') : '<tr><td colspan="5" class="ws-empty">Nothing booked yet.</td></tr>';
+      els.evtTodoBody.innerHTML = todo.length ? todo.map(rowHtml).join('') : '<tr><td colspan="6" class="ws-empty">Nothing pending.</td></tr>';
+      els.evtUpcomingBody.innerHTML = upcoming.length ? upcoming.map(rowHtml).join('') : '<tr><td colspan="6" class="ws-empty">Nothing booked yet.</td></tr>';
       [els.evtTodoBody, els.evtUpcomingBody].forEach((body: any) => {
         body.querySelectorAll('[data-evt-dash-open]').forEach((btn: any) => {
           btn.addEventListener('click', () => {
@@ -4260,7 +4266,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <button type="button" class="ws-row-del" data-evt-cost-del>×</button>
           </td>
         </tr>
-      `).join('') : '<tr><td colspan="6" class="ws-empty">No extra costs logged.</td></tr>';
+      `).join('') : '<tr><td colspan="7" class="ws-empty">No extra costs logged.</td></tr>';
       els.evtCostBody.querySelectorAll('[data-evt-cost-edit]').forEach((btn: any) => {
         btn.addEventListener('click', () => startEditEventCost(btn.closest('tr').dataset.costId));
       });
@@ -4456,7 +4462,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderSharedVendors() {
       if (!els.vendorSharedBody) return;
       if (!state.sharedVendors.length) {
-        els.vendorSharedBody.innerHTML = '<tr><td colspan="7" class="ws-empty">Nothing shared into this group yet.</td></tr>';
+        els.vendorSharedBody.innerHTML = '<tr><td colspan="8" class="ws-empty">Nothing shared into this group yet.</td></tr>';
         return;
       }
       els.vendorSharedBody.innerHTML = state.sharedVendors.map((v: any) => `
@@ -4495,7 +4501,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderVendors() {
       if (!state.vendors.length) {
-        els.vendorBody.innerHTML = '<tr><td colspan="8" class="ws-empty">No vendors yet.</td></tr>';
+        els.vendorBody.innerHTML = '<tr><td colspan="9" class="ws-empty">No vendors yet.</td></tr>';
         return;
       }
       els.vendorBody.innerHTML = state.vendors.map((v: any) => `
@@ -4675,7 +4681,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const SPONSOR_STATUS_BADGE_CLASS: Record<string, string> = { active: 'ws-badge--good', past: 'ws-badge--fair', prospective: 'ws-badge--fair' };
     function renderSponsors() {
       if (!state.sponsors.length) {
-        els.sponsorBody.innerHTML = '<tr><td colspan="10" class="ws-empty">No sponsors yet.</td></tr>';
+        els.sponsorBody.innerHTML = '<tr><td colspan="11" class="ws-empty">No sponsors yet.</td></tr>';
         return;
       }
       els.sponsorBody.innerHTML = state.sponsors.map((s: any) => `
@@ -4765,7 +4771,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderPrContacts() {
       if (!state.prContacts.length) {
-        els.prcBody.innerHTML = '<tr><td colspan="10" class="ws-empty">No contacts yet.</td></tr>';
+        els.prcBody.innerHTML = '<tr><td colspan="11" class="ws-empty">No contacts yet.</td></tr>';
         return;
       }
       els.prcBody.innerHTML = state.prContacts.map((c: any) => `
@@ -4834,7 +4840,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // before, so this is its first use of it.
     function renderPRLibrary() {
       if (!state.prDocs.length) {
-        els.prlibBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No documents yet.</td></tr>';
+        els.prlibBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No documents yet.</td></tr>';
         return;
       }
       els.prlibBody.innerHTML = state.prDocs.map((d: any) => `
@@ -5278,7 +5284,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderCredentials() {
       if (!state.credentials.length) {
-        els.credBody.innerHTML = '<tr><td colspan="8" class="ws-empty">No logins saved yet.</td></tr>';
+        els.credBody.innerHTML = '<tr><td colspan="9" class="ws-empty">No logins saved yet.</td></tr>';
         return;
       }
       els.credBody.innerHTML = state.credentials.map((c: any) => `
@@ -5374,7 +5380,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderLibrary() {
       if (!state.docs.length) {
-        els.libBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No documents yet.</td></tr>';
+        els.libBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No documents yet.</td></tr>';
         return;
       }
       els.libBody.innerHTML = state.docs.map((d: any) => `
@@ -5443,7 +5449,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const docs = (data || []).map((r: any) => r.shared_documents).filter(Boolean)
         .sort((a: any, b: any) => (a.uploaded_at < b.uploaded_at ? 1 : -1));
       if (!docs.length) {
-        els.libSharedBody.innerHTML = '<tr><td colspan="5" class="ws-empty">Nothing shared into this group yet.</td></tr>';
+        els.libSharedBody.innerHTML = '<tr><td colspan="6" class="ws-empty">Nothing shared into this group yet.</td></tr>';
         return;
       }
       els.libSharedBody.innerHTML = docs.map((d: any) => `
@@ -5640,12 +5646,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           });
           const rows = active.map((m: any) => {
             const s = byMember.get(m.id) || { months: 0, total: 0 };
-            return [m.full_name, `${s.months} / ${monthCount}`, s.total.toFixed(2)];
+            return [m.full_name, m.member_code || '—', `${s.months} / ${monthCount}`, s.total.toFixed(2)];
           });
           const grandTotal = active.reduce((sum: number, m: any) => sum + (byMember.get(m.id)?.total || 0), 0);
           const y = pdfHeader(doc, isYear ? 'Yearly Fees Summary' : 'Fees Summary', `${label}, ${grandTotal.toFixed(2)} collected total`);
           pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-            head: [['Member', 'Months Paid', 'Total']], body: rows.length ? rows : [['No data available', '', '']] });
+            head: [['Member', 'Member ID', 'Months Paid', 'Total']], body: rows.length ? rows : [['No data available', '', '', '']] });
           doc.save(pdfFilename(isYear ? 'Yearly-Fees' : 'Fees-Summary', label));
         } else {
           const { data, error } = await db.from('fee_payments').select('*').eq('group_key', state.activeGroup).eq('period', period);
@@ -5655,11 +5661,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           const rows = active.map((m: any) => {
             const rec = map.get(m.id);
             if (rec && rec.paid) { collected += Number(rec.amount || 0); paidCount++; }
-            return [m.full_name, rec && rec.paid ? 'Paid' : 'Unpaid', rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'];
+            return [m.full_name, m.member_code || '—', rec && rec.paid ? 'Paid' : 'Unpaid', rec && rec.amount != null ? Number(rec.amount).toFixed(2) : '—'];
           });
           const y = pdfHeader(doc, 'Monthly Fees', `${label}, ${paidCount} of ${active.length} paid, ${collected.toFixed(2)} collected`);
           pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-            head: [['Member', 'Status', 'Amount']], body: rows.length ? rows : [['No data available', '', '']] });
+            head: [['Member', 'Member ID', 'Status', 'Amount']], body: rows.length ? rows : [['No data available', '', '', '']] });
           doc.save(pdfFilename('Monthly-Fees', label));
         }
       } catch (err) {
@@ -5681,12 +5687,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const bodyRows = active.map((m: any) => {
           const present = presentByMember.get(m.id) || 0;
           const rate = totalSessions ? Math.round((present / totalSessions) * 100) : 0;
-          return [m.full_name, `${present} / ${totalSessions}`, `${rate}%`];
+          return [m.full_name, m.member_code || '—', `${present} / ${totalSessions}`, `${rate}%`];
         });
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Attendance', `${label}, ${totalSessions} meeting${totalSessions === 1 ? '' : 's'} held`);
         pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          head: [['Member', 'Present', 'Rate']], body: bodyRows.length ? bodyRows : [['No data available', '', '']] });
+          head: [['Member', 'Member ID', 'Present', 'Rate']], body: bodyRows.length ? bodyRows : [['No data available', '', '', '']] });
         doc.save(pdfFilename('Attendance', label));
       } catch (err) {
         console.error('attendance report failed', err);
@@ -5734,13 +5740,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const y = pdfHeader(doc, 'Roster', `${rows.length} active member${rows.length === 1 ? '' : 's'}`);
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
-          head: [['Name', 'Phone', 'Email', 'National ID', 'DOB', 'Emergency Contact 1', 'Emergency Contact 2', 'Allergy', 'Notes']],
+          head: [['Name', 'Member ID', 'Phone', 'Email', 'National ID', 'DOB', 'Emergency Contact 1', 'Emergency Contact 2', 'Allergy', 'Notes']],
           body: rows.length ? rows.map((m: any) => [
-            m.full_name, m.phone || '—', m.email || '—', m.national_id || '—', m.birth_date || '—',
+            m.full_name, m.member_code || '—', m.phone || '—', m.email || '—', m.national_id || '—', m.birth_date || '—',
             m.guardian1_relation ? `${m.guardian1_relation}: ${m.guardian1_phone || '—'}` : '—',
             m.guardian2_relation ? `${m.guardian2_relation}: ${m.guardian2_phone || '—'}` : '—',
             m.has_allergies ? (m.allergy_detail || 'Yes') : '—', m.notes || '—',
-          ]) : [['No members found', '', '', '', '', '', '', '', '']],
+          ]) : [['No members found', '', '', '', '', '', '', '', '', '']],
         });
         doc.save(pdfFilename('Roster', new Date().toISOString().slice(0, 10)));
       } catch (err) {
@@ -6161,7 +6167,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Status">${r.status === 'open' ? '<span class="ws-badge ws-badge--fair">Open</span>' : '<span class="ws-badge ws-badge--good">Resolved</span>'}</td>
           <td class="ws-row-actions">${r.status === 'open' ? '<button type="button" class="ws-edit-btn" data-sc-resolve>Mark resolved</button>' : ''}</td>
         </tr>
-      `).join('') : '<tr><td colspan="6" class="ws-empty">No change requests.</td></tr>';
+      `).join('') : '<tr><td colspan="7" class="ws-empty">No change requests.</td></tr>';
       els.scRequestsBody.querySelectorAll('[data-sc-resolve]').forEach((btn: any) => {
         btn.addEventListener('click', async () => {
           const id = btn.closest('tr').dataset.scRequestId;
@@ -6941,7 +6947,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <td data-label="Notes">${escapeHtml(r.notes || '—')}</td>
             </tr>
           `).join('')
-        : '<tr><td colspan="5" class="ws-empty">Nothing planned yet this month.</td></tr>';
+        : '<tr><td colspan="6" class="ws-empty">Nothing planned yet this month.</td></tr>';
     }
     function currSetPlanView(view: string) {
       document.querySelectorAll('[data-plan-view]').forEach((b: any) => b.classList.toggle('curr-view-btn--active', b.dataset.planView === view));
@@ -7730,6 +7736,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     let boundPendingOnce = false;
     async function init() {
       cacheEls();
+      initRowNumbering();
       if (!supabaseConfigured) { showToast('Not connected to the database.'); return; }
 
       const session = await getSession();
