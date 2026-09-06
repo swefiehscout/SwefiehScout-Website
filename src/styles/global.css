@@ -3691,8 +3691,12 @@ main.wide {
 
 /* ---- Shared Calendar's Repeat controls (in the day-overlay form) ---- */
 .ws-sc-repeat-every { display: flex; gap: 0.5rem; }
-.ws-sc-repeat-every input { width: 4rem; flex: 0 0 auto; }
-.ws-sc-repeat-every select { flex: 1; }
+/* .curr-day-field input/select both set width:100% at equal
+   specificity — !important is the only way this compact spinner wins
+   that fight (it was previously losing and shoving the unit <select>
+   off the row entirely). */
+.ws-sc-repeat-every input { width: 4rem !important; flex: 0 0 auto; }
+.ws-sc-repeat-every select { flex: 1; width: auto !important; }
 .ws-sc-weekday-toggle { display: flex; gap: 0.35rem; flex-wrap: wrap; }
 .ws-sc-weekday-toggle button {
   width: 2.1rem; height: 2.1rem;
