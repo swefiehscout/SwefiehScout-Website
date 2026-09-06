@@ -3633,7 +3633,15 @@ main.wide {
 .ws-sc-tl-now-line { position: absolute; left: 0; right: 0; height: 2px; background: #d64545; z-index: 2; pointer-events: none; }
 .ws-sc-tl-now-line::before { content: ''; position: absolute; left: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: #d64545; }
 .ws-sc-tl-head-row, .ws-sc-tl-allday-row { display: grid; grid-template-columns: 3.75rem repeat(var(--sc-days, 1), 1fr); }
-.ws-sc-tl-head-row { border-bottom: 1px solid var(--color-border); }
+.ws-sc-tl-head-row {
+  border-bottom: 1px solid var(--color-border);
+  /* Stays put while the hour grid scrolls underneath it — .ws-sc-tl-wrap
+     is the scrollable ancestor, so `sticky` pins relative to it. */
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--color-surface);
+}
 .ws-sc-tl-allday-row { border-bottom: 1px solid var(--color-border); }
 .ws-sc-tl-head-spacer { border-right: 1px solid var(--color-border); }
 .ws-sc-tl-head-day { padding: 0.5rem 0.4rem; text-align: center; border-right: 1px solid var(--color-border); }
