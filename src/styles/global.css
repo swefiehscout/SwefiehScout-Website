@@ -3564,6 +3564,15 @@ main.wide {
    from the bank, adding a custom activity, and removing/duration-editing
    existing ones all save instantly; Theme/Notes wait for Save. */
 .curr-day-overlay[hidden] { display: none !important; }
+/* Set on <body> whenever any .curr-day-overlay is open (see
+   bindOverlayScrollLock() in app.astro/admin.astro) — every popup in
+   the workspace shares that one class, so this one rule locks the
+   page behind any of them: Curriculum, Event Calendar, Content
+   Calendar, Shared Calendar's day view, Custom recurrence, Delete
+   choice, all of it. Without this the background page scrolls freely
+   while a modal is open and the footer ends up visible mid-scroll,
+   looking like it's floating in front of the popup. */
+body.ws-scroll-locked { overflow: hidden; }
 .curr-day-overlay {
   position: fixed;
   inset: 0;

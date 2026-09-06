@@ -1967,6 +1967,23 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         });
       });
     }
+    // Every popup in the workspace (Curriculum, Event Calendar, Content
+    // Calendar, Shared Calendar's day view/Custom recurrence/Delete
+    // choice) is built from the same .curr-day-overlay shell, opened
+    // and closed by toggling its `hidden` attribute — so a single
+    // MutationObserver watching all of them covers every popup without
+    // each one's own open/close code needing to know about scroll
+    // locking. Without this the background page scrolls freely behind
+    // an open popup and the footer ends up visible mid-scroll.
+    function bindOverlayScrollLock() {
+      const overlays = Array.from(document.querySelectorAll('.curr-day-overlay'));
+      const update = () => {
+        document.body.classList.toggle('ws-scroll-locked', overlays.some((el: any) => !el.hasAttribute('hidden')));
+      };
+      const observer = new MutationObserver(update);
+      overlays.forEach((el) => observer.observe(el, { attributes: true, attributeFilter: ['hidden'] }));
+      update();
+    }
     function cryptoRandomId() {
       return (typeof crypto !== 'undefined' && crypto.randomUUID)
         ? crypto.randomUUID()
@@ -7774,6 +7791,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
       if (!boundOnce) {
         boundOnce = true;
+        bindOverlayScrollLock();
         els.accountBtn.addEventListener('click', () => {
           els.accountMenu.toggleAttribute('hidden');
         });
