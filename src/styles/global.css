@@ -4205,9 +4205,6 @@ body.ws-scroll-locked { overflow: hidden; }
 }
 .ws-device-info { min-width: 0; }
 .ws-device-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--color-text);
@@ -4216,7 +4213,8 @@ body.ws-scroll-locked { overflow: hidden; }
   text-overflow: ellipsis;
 }
 .ws-device-badge {
-  flex: none;
+  display: inline-block;
+  margin-top: 0.25rem;
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.02em;

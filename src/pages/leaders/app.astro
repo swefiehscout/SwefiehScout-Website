@@ -1973,8 +1973,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.devices.innerHTML = sessions.map((d: any) => `
         <div class="ws-device-row" data-device-id="${d.id}">
           <div class="ws-device-info">
-            <div class="ws-device-label">${escapeHtml(d.device_label)}${d.id === mine ? '<span class="ws-device-badge">This device</span>' : ''}</div>
+            <div class="ws-device-label">${escapeHtml(d.device_label)}</div>
             <div class="ws-device-meta">${formatRelativeTime(d.last_seen_at)}</div>
+            ${d.id === mine ? '<span class="ws-device-badge">This device</span>' : ''}
           </div>
           <button type="button" class="ws-device-kick" data-kick-device="${d.id}">Sign out</button>
         </div>
