@@ -59,10 +59,10 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'roster', label: 'Roster', icon: 'star',
-    intro: 'Everyone currently in your group.',
+    intro: 'Everyone currently in your group. Troops and Music only, Social Media and General don\'t keep one.',
     lines: [
       "Add a member, only their name is required, though their own phone and an emergency contact are worth adding too.",
-      "In Music, Social Media, or General, check people off from a troop's roster instead of retyping them, most band members, content creators, and board members are already scouts somewhere.",
+      "In Music, check people off from a troop's roster instead of retyping them, most band members are already scouts somewhere.",
       'Search to find someone quickly.',
       'Edit to update their details, or Archive when they leave.',
     ],
@@ -105,6 +105,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     lines: [
       'Tap a date to plan that meeting.',
       'Add a theme and pick or type activities.',
+      "Once the date passes, check off each activity you actually got to, and add a note on how it actually went — the month view shows a quick done-count for every past meeting.",
       "Download a PDF of the plan from the Reports tab anytime.",
     ],
   },
@@ -114,6 +115,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     lines: [
       'Add an item, its category, quantity, and condition.',
       "Assign it to a band member, and log maintenance when it needs fixing.",
+      "Quantity changed, lost, damaged, restocked, recounted? Log it on the Adjustments subtab instead of just editing the number, it keeps a dated history of what changed and why.",
     ],
   },
   {
@@ -179,9 +181,9 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     intro: 'Download a clean PDF summary anytime, tailored to your own group.',
     lines: [
       'Troops: Income Statement, Monthly Fees, Attendance, Curriculum, Roster, Vendors.',
-      'Music: Music Finance Report, Inventory, Music Event Report, Maintenance, Roster, Vendors.',
-      'Social Media: Social Media Finance Report, Content Calendar, Credentials, Roster, Vendors.',
-      'General: Income Statement, Sponsors, Community & Church Contacts, Roster, Vendors.',
+      'Music: Music Finance Report, Inventory, Inventory Adjustments, Music Event Report, Maintenance, Roster, Vendors.',
+      'Social Media: Social Media Finance Report, Content Calendar, Credentials, Vendors.',
+      'General: Income Statement, Sponsors, Community & Church Contacts, Vendors.',
       "Pick a single month, a whole year, or a custom range spanning several months, whichever a report needs. Roster and Vendors (and Sponsors/Contacts/Credentials where they apply) aren't tied to a date at all.",
     ],
   },

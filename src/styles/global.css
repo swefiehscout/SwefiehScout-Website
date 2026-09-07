@@ -3257,6 +3257,12 @@ main.wide {
   text-transform: uppercase;
   opacity: 0.75;
 }
+/* Join form's age hint under each group button — quieter than
+   .portal-picker-en so the group name still reads first. */
+.portal-picker-age {
+  font-size: 0.66rem;
+  opacity: 0.6;
+}
 @media (max-width: 720px) {
   .portal-picker { padding: 1.3rem 1.1rem 1.2rem; }
   .portal-picker-grid { grid-template-columns: 1fr; }
@@ -3538,6 +3544,8 @@ main.wide {
   cursor: pointer; line-height: 1; flex-shrink: 0; padding: 0.1rem 0.2rem;
 }
 .curr-item-del:hover { color: var(--color-brand-light); }
+.curr-item-done { flex-shrink: 0; width: 1rem; height: 1rem; accent-color: var(--color-accent); cursor: pointer; }
+.curr-item--done .curr-item-en { color: var(--color-muted); text-decoration: line-through; }
 .curr-empty { font-size: 0.78rem; color: var(--color-muted); padding: 0.5rem; text-align: center; }
 
 .curr-year-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; }
@@ -3881,6 +3889,14 @@ body.ws-scroll-locked { overflow: hidden; }
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-brand-dark);
+}
+/* The "(fill in after the meeting)" aside on "How it actually went" —
+   same label, just not shouting as loud as the rest of it. */
+.curr-day-section-hint {
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--color-muted);
 }
 /* Shared by "Select from the activity bank" (a <select>) and "Or add a
    custom activity" (a text <input>) — same row shape either way, one

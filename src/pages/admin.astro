@@ -347,6 +347,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <button type="button" class="btn-primary" data-report-main-music-maintenance>Download PDF</button>
             </div>
             <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Inventory Adjustments Report</h3>
+              <p class="ws-report-desc">Every dated quantity change Music logged in the period — item, before/after count, reason, and who logged it.</p>
+              <button type="button" class="btn-primary" data-report-main-music-adjustments>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
               <h3 class="ws-admin-h3">Content Calendar Report</h3>
               <p class="ws-report-desc">Every piece of Social Media content scheduled or posted in the period — title, platform, type, status, and who it's assigned to.</p>
               <button type="button" class="btn-primary" data-report-main-sm-content>Download PDF</button>
@@ -2592,7 +2597,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       try {
         const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
         const troopKeys = TROOP_GROUPS.map((g) => g.key);
-        const { data, error } = await db.from('curriculum_meetings').select('group_key, date, theme, notes, materials_needed, activities')
+        const { data, error } = await db.from('curriculum_meetings').select('group_key, date, theme, notes, materials_needed, activities, actual_notes')
           .in('group_key', troopKeys).gte('date', start).lte('date', end).order('date', { ascending: true });
         if (error) throw error;
         const rows = data || [];
@@ -2601,13 +2606,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           .map((m: any) => {
             const d = new Date(m.date + 'T00:00:00');
             const dateLabel = `${WEEKDAYS[d.getDay()].en} ${d.getDate()} ${MONTHS[d.getMonth()].en} ${d.getFullYear()}`;
-            const activitiesText = (m.activities || []).map((a: any) => a.en + (a.duration ? ` (${a.duration} min)` : '')).join('\n');
-            return [dateLabel, m.theme || '—', activitiesText || '—', m.materials_needed || '—', m.notes || '—'];
+            const activities = m.activities || [];
+            const activitiesText = activities.map((a: any) => a.en + (a.duration ? ` (${a.duration} min)` : '')).join('\n');
+            // Only meaningful once the date has passed — a future meeting's
+            // activities are never marked done, same gate as the checkbox
+            // itself in the Leaders Workspace (see currActivityRowHTML).
+            const donePast = activities.length && m.date <= todayStr();
+            const doneLabel = donePast ? `${activities.filter((a: any) => a.done).length}/${activities.length}` : '—';
+            return [dateLabel, m.theme || '—', activitiesText || '—', doneLabel, m.materials_needed || '—', m.notes || '—', m.actual_notes || '—'];
           });
         const tableOpts = {
           theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9, valign: 'top' },
-          columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 32 } },
-          head: [['Date', 'Theme', 'Activities', 'Materials Needed', 'Notes']],
+          columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 28 }, 3: { cellWidth: 14, halign: 'center' } },
+          head: [['Date', 'Theme', 'Activities', 'Done', 'Materials Needed', 'Notes', 'Actual Notes']],
         };
 
         const doc = new jsPDF();
@@ -2627,7 +2638,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             y = 31;
           }
           const body = meetingRows(rows.filter((r: any) => r.group_key === g.key));
-          pdfTable(doc, { ...tableOpts, startY: y, body: body.length ? body : [['No data', '', '', '', '']] });
+          pdfTable(doc, { ...tableOpts, startY: y, body: body.length ? body : [['No data', '', '', '', '', '', '']] });
         });
         doc.save(pdfFilename('Curriculum', label));
       } catch (err) {
@@ -2764,6 +2775,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       el('[data-report-main-music-finance]').addEventListener('click', () => downloadMusicFinanceReport(els.reportMonth, els.reportYear));
       el('[data-report-main-music-events]').addEventListener('click', () => downloadMusicEventReport(els.reportMonth, els.reportYear));
       el('[data-report-main-music-maintenance]').addEventListener('click', () => downloadMusicMaintenanceReport(els.reportMonth, els.reportYear));
+      el('[data-report-main-music-adjustments]').addEventListener('click', () => downloadMusicAdjustmentsReport(els.reportMonth, els.reportYear));
       el('[data-report-main-sm-content]').addEventListener('click', () => downloadContentCalendarReport(els.reportMonth, els.reportYear));
       el('[data-report-main-sm-finance]').addEventListener('click', () => downloadSocialMediaFinanceReport(els.reportMonth, els.reportYear));
       el('[data-report-main-sm-credentials]').addEventListener('click', downloadSocialMediaCredentialsReport);
@@ -3022,6 +3034,24 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         doc.save(pdfFilename('Maintenance', label));
       } catch (err) {
         console.error('maintenance report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    async function downloadMusicAdjustmentsReport(monthEl?: any, yearEl?: any) {
+      try {
+        const { start, end, label } = periodRange(monthEl || els.musicReportMonth, yearEl || els.musicReportYear);
+        const { data } = await db.from('inventory_adjustments').select('*, inventory_items(name)').eq('group_key', MUSIC_GROUP_KEY).gte('adjusted_on', start).lte('adjusted_on', end).order('adjusted_on', { ascending: true });
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Inventory Adjustments Report', `${label}, ${rows.length} change${rows.length === 1 ? '' : 's'} logged`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['As of', 'Item', 'Before', 'After', 'Reason', 'Logged by']],
+          body: rows.length ? rows.map((r: any) => [r.adjusted_on, r.inventory_items?.name || '—', String(r.previous_quantity), String(r.new_quantity), r.reason, r.created_by_name || '—']) : [['No changes logged this period', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Inventory-Adjustments', label));
+      } catch (err) {
+        console.error('inventory adjustments report failed', err);
         showToast('Could not generate the report, check your connection and try again.');
       }
     }

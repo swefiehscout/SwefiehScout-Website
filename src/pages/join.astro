@@ -6,7 +6,18 @@
 // only, by request — unlike the rest of the public site, this form
 // doesn't pair English/Arabic.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
+import { JOINABLE_GROUPS, type GroupKey } from '../lib/curriculum/constants';
+
+// Age guidance for parents picking a group — Music has no age band (it's
+// skill-based, not age-based), so it's left off the map and just shows
+// no age line below.
+const AGE_RANGES: Partial<Record<GroupKey, string>> = {
+  'Baraem': '4–6',
+  'Ashbal-Zahrat': '6–10',
+  'Mubtadi': '11–15',
+  'Mutaqaddim': '15–18',
+  'Jawalah': '18+',
+};
 ---
 <BaseLayout title="Join a Group" bare>
   <section class="page-hero" data-animate>
@@ -25,6 +36,7 @@ import { JOINABLE_GROUPS } from '../lib/curriculum/constants';
         {JOINABLE_GROUPS.map((g) => (
           <button type="button" class="portal-picker-btn" data-join-group={g.key}>
             <span class="portal-picker-en">{g.en}</span>
+            {AGE_RANGES[g.key] && <span class="portal-picker-age">Ages {AGE_RANGES[g.key]}</span>}
           </button>
         ))}
       </div>

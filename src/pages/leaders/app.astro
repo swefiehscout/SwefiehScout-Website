@@ -598,6 +598,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <section class="ws-panel" data-panel="inventory" hidden>
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="inventory" data-subtab="items">Items</button>
+            <button type="button" class="ws-subtab" data-subtabs="inventory" data-subtab="adjustments">Adjustments</button>
             <button type="button" class="ws-subtab" data-subtabs="inventory" data-subtab="maintenance">Maintenance Log</button>
             <button type="button" class="ws-subtab" data-subtabs="inventory" data-subtab="categories">Categories</button>
           </div>
@@ -653,9 +654,69 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-table-wrap">
               <table class="ws-table" data-inv-table>
                 <thead>
-                  <tr><th>Name</th><th>Category</th><th>Qty</th><th>Condition</th><th>Assigned to</th><th>Last Maintenance</th><th>Notes</th><th>Added by</th><th></th></tr>
+                  <tr><th>Name</th><th>Category</th><th>Qty</th><th>Qty as of</th><th>Condition</th><th>Assigned to</th><th>Last Maintenance</th><th>Notes</th><th>Added by</th><th></th></tr>
                 </thead>
                 <tbody data-inv-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="inventory:adjustments" hidden>
+            <form class="ws-member-form" data-inv-adj-form>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Log a quantity change</p>
+              <p class="ws-att-hint">Use this instead of editing an item's quantity directly whenever it's worth remembering when and why it changed — lost, damaged, restocked, a recount, whatever it was.</p>
+              <div class="ws-form-grid ws-form-grid--4">
+                <label class="ws-field">
+                  <span>Item *</span>
+                  <select data-inv-adj-item required></select>
+                </label>
+                <label class="ws-field">
+                  <span>As of *</span>
+                  <input type="date" data-inv-adj-date required />
+                </label>
+                <label class="ws-field">
+                  <span>New quantity *</span>
+                  <input type="number" step="1" min="0" data-inv-adj-qty required />
+                </label>
+                <label class="ws-field">
+                  <span>Reason *</span>
+                  <select data-inv-adj-reason required>
+                    <option value="Purchased/Added">Purchased / Added</option>
+                    <option value="Lost">Lost</option>
+                    <option value="Damaged/Written off">Damaged / Written off</option>
+                    <option value="Found">Found</option>
+                    <option value="Correction">Correction (recount)</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
+              </div>
+              <div class="ws-form-grid">
+                <label class="ws-field ws-field--full">
+                  <span>Notes</span>
+                  <input type="text" data-inv-adj-notes />
+                </label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary" data-inv-adj-submit>Log change</button>
+              </div>
+            </form>
+
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline">
+                <span>Item</span>
+                <select data-inv-adj-filter>
+                  <option value="">All items</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-inv-adj-table>
+                <thead>
+                  <tr><th>As of</th><th>Item</th><th>Before</th><th>After</th><th>Reason</th><th>Notes</th><th>Logged by</th><th></th></tr>
+                </thead>
+                <tbody data-inv-adj-body></tbody>
               </table>
             </div>
           </div>
@@ -1352,7 +1413,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <p class="ws-report-desc">The meeting plan, theme, notes, and activities for each date in the period.</p>
               <button type="button" class="btn-primary" data-report-curriculum>Download PDF</button>
             </div>
-            <div class="ws-report-card">
+            <div class="ws-report-card" data-roster-report>
               <h3 class="ws-admin-h3">Roster</h3>
               <p class="ws-report-desc">Every active member in this group, with full contact and emergency-contact info. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-roster>Download PDF</button>
@@ -1376,6 +1437,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <h3 class="ws-admin-h3">Maintenance</h3>
               <p class="ws-report-desc">Every maintenance record logged in the period — item, vendor, cost, and who logged it.</p>
               <button type="button" class="btn-primary" data-report-maintenance>Download PDF</button>
+            </div>
+            <div class="ws-report-card" data-music-only hidden>
+              <h3 class="ws-admin-h3">Inventory Adjustments</h3>
+              <p class="ws-report-desc">Every dated quantity change logged in the period — item, before/after count, reason, and who logged it.</p>
+              <button type="button" class="btn-primary" data-report-adjustments>Download PDF</button>
             </div>
             <div class="ws-report-card" data-social-only hidden>
               <h3 class="ws-admin-h3">Content Calendar</h3>
@@ -1514,6 +1580,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
       <p class="curr-day-section-label">This meeting</p>
       <div class="curr-day-list" data-curr-day-list></div>
+
+      <!-- Only shown once the date has passed — checking off a future
+           meeting's activities as "done" makes no sense. Toggled in
+           currOpenDayPanel(). -->
+      <div data-curr-actual-block hidden>
+        <p class="curr-day-section-label">How it actually went <span class="curr-day-section-hint">(fill in after the meeting)</span></p>
+        <label class="curr-day-field">
+          <textarea data-day-actual-notes rows="2" placeholder="What actually happened, any changes from the plan…"></textarea>
+        </label>
+      </div>
 
       <div class="curr-day-actions">
         <button type="button" class="ws-edit-btn" data-curr-day-clear>Clear day</button>
@@ -1938,7 +2014,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const state: any = {
       session: null, profile: null, availableGroups: [], activeGroup: null, activeTab: 'dashboard',
       members: [], approvals: [], finEntries: [], docs: [], ovMembers: [], editingMemberId: null,
-      inventoryItems: [], maintenanceLog: [], editingInventoryItemId: null,
+      inventoryItems: [], maintenanceLog: [], inventoryAdjustments: [], editingInventoryItemId: null,
       editingFinEntryId: null, editingMaintenanceLogId: null,
       events: [], eventCosts: [], editingEventId: null, editingEventCostId: null,
       vendors: [], sharedVendors: [], editingVendorId: null,
@@ -2204,6 +2280,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.currDayNotes = el('[data-day-notes]');
       els.currDayMaterials = el('[data-day-materials]');
       els.currDayList = el('[data-curr-day-list]');
+      els.currActualBlock = el('[data-curr-actual-block]');
+      els.currDayActualNotes = el('[data-day-actual-notes]');
       els.currAttachmentCurrent = el('[data-curr-attachment-current]');
       els.currAttachmentLink = el('[data-curr-attachment-link]');
       els.currAttachmentRemove = el('[data-curr-attachment-remove]');
@@ -2253,6 +2331,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.invCatInput = el('[data-inv-cat-input]');
       els.invCatAdd = el('[data-inv-cat-add]');
       els.invCatList = el('[data-inv-cat-list]');
+      els.invAdjForm = el('[data-inv-adj-form]');
+      els.invAdjItem = el('[data-inv-adj-item]');
+      els.invAdjDate = el('[data-inv-adj-date]');
+      els.invAdjQty = el('[data-inv-adj-qty]');
+      els.invAdjReason = el('[data-inv-adj-reason]');
+      els.invAdjNotes = el('[data-inv-adj-notes]');
+      els.invAdjSubmit = el('[data-inv-adj-submit]');
+      els.invAdjFilter = el('[data-inv-adj-filter]');
+      els.invAdjBody = el('[data-inv-adj-body]');
       els.invMaintForm = el('[data-inv-maint-form]');
       els.invMaintFormTitle = el('[data-inv-maint-form-title]');
       els.invMaintCancel = el('[data-inv-maint-cancel]');
@@ -3412,16 +3499,20 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       await ensureVendorsLoaded();
       updateInvAssignedOptions();
       updateInvVendorOptions();
-      const [itemsRes, logsRes] = await Promise.all([
+      const [itemsRes, logsRes, adjRes] = await Promise.all([
         db.from('inventory_items').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true }),
         db.from('inventory_maintenance').select('*').eq('group_key', state.activeGroup).order('performed_on', { ascending: false }),
+        db.from('inventory_adjustments').select('*').eq('group_key', state.activeGroup).order('adjusted_on', { ascending: false }),
       ]);
-      if (itemsRes.error || logsRes.error) { console.error(itemsRes.error || logsRes.error); showToast('Could not load inventory.'); return; }
+      if (itemsRes.error || logsRes.error || adjRes.error) { console.error(itemsRes.error || logsRes.error || adjRes.error); showToast('Could not load inventory.'); return; }
       state.inventoryItems = itemsRes.data || [];
       state.maintenanceLog = logsRes.data || [];
+      state.inventoryAdjustments = adjRes.data || [];
       updateInvItemOptions();
       renderInventoryItems();
       renderMaintenanceLog();
+      renderAdjustments();
+      if (els.invAdjDate && !els.invAdjDate.value) els.invAdjDate.value = todayStr();
     }
     function updateInvAssignedOptions() {
       const active = state.members.filter((m: any) => m.active);
@@ -3448,20 +3539,35 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
       return map;
     }
+    // Same reasoning as "Last Maintenance" — the newest adjusted_on
+    // across that item's own Adjustments log, never stored on the item
+    // itself so it can't drift. An item with no adjustments logged yet
+    // (quantity only ever set from the Items form) just shows "—".
+    function lastAdjustmentByItem() {
+      const map = new Map<string, string>();
+      state.inventoryAdjustments.forEach((adj: any) => {
+        const cur = map.get(adj.item_id);
+        if (!cur || adj.adjusted_on > cur) map.set(adj.item_id, adj.adjusted_on);
+      });
+      return map;
+    }
     function renderInventoryItems() {
       if (!state.inventoryItems.length) {
-        els.invBody.innerHTML = '<tr><td colspan="10" class="ws-empty">No items yet.</td></tr>';
+        els.invBody.innerHTML = '<tr><td colspan="11" class="ws-empty">No items yet.</td></tr>';
         return;
       }
       const lastMaint = lastMaintenanceByItem();
+      const lastAdj = lastAdjustmentByItem();
       els.invBody.innerHTML = state.inventoryItems.map((item: any) => {
         const assigned = item.assigned_to ? state.members.find((m: any) => m.id === item.assigned_to) : null;
         const last = lastMaint.get(item.id);
+        const asOf = lastAdj.get(item.id);
         return `
           <tr data-item-id="${item.id}">
             <td data-label="Name">${escapeHtml(item.name)}</td>
             <td data-label="Category">${escapeHtml(item.category || '—')}</td>
             <td data-label="Qty">${item.quantity}</td>
+            <td data-label="Qty as of">${asOf ? escapeHtml(asOf) : '—'}</td>
             <td data-label="Condition">${conditionBadge(item.condition)}</td>
             <td data-label="Assigned to">${assigned ? escapeHtml(assigned.full_name) : '<span class="ws-empty" style="padding:0">Unassigned</span>'}</td>
             <td data-label="Last Maintenance">${last ? escapeHtml(last) : '—'}</td>
@@ -3584,6 +3690,20 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const filterVal = els.invMaintFilter.value;
       els.invMaintFilter.innerHTML = '<option value="">All items</option>' + opts;
       els.invMaintFilter.value = filterVal;
+      const adjItemVal = els.invAdjItem.value;
+      els.invAdjItem.innerHTML = opts || '<option value="">Add an item first</option>';
+      if (adjItemVal) els.invAdjItem.value = adjItemVal;
+      fillInvAdjQtyFromItem();
+      const adjFilterVal = els.invAdjFilter.value;
+      els.invAdjFilter.innerHTML = '<option value="">All items</option>' + opts;
+      els.invAdjFilter.value = adjFilterVal;
+    }
+    // Prefills "New quantity" with the selected item's current count, so
+    // logging a small correction is just nudging one number instead of
+    // retyping it from scratch.
+    function fillInvAdjQtyFromItem() {
+      const item = state.inventoryItems.find((i: any) => i.id === els.invAdjItem.value);
+      els.invAdjQty.value = item ? item.quantity : '';
     }
     function renderMaintenanceLog() {
       const filterId = els.invMaintFilter.value;
@@ -3749,6 +3869,78 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         await syncMaintenanceToFinance(logRow);
         els.invMaintSubmit.disabled = false;
         resetMaintenanceForm();
+        await loadInventory();
+      });
+    }
+
+    // ---------- Inventory: dated quantity adjustments -------------------
+    // Deliberately simpler than the Maintenance Log: add and delete only,
+    // no edit. An item's quantity is always whatever's on inventory_items
+    // (the Items form can still change it directly for a quick fix) —
+    // this log is purely a dated audit trail of "as of this day, it
+    // changed to N and here's why", so there's no correct "undo" for a
+    // delete to attempt (replaying every other log in date order to
+    // recompute a past quantity is more machinery than this needs).
+    function renderAdjustments() {
+      const filterId = els.invAdjFilter.value;
+      const rows = filterId ? state.inventoryAdjustments.filter((a: any) => a.item_id === filterId) : state.inventoryAdjustments;
+      if (!rows.length) {
+        els.invAdjBody.innerHTML = '<tr><td colspan="8" class="ws-empty">No quantity changes logged yet.</td></tr>';
+        return;
+      }
+      els.invAdjBody.innerHTML = rows.map((adj: any) => {
+        const item = state.inventoryItems.find((i: any) => i.id === adj.item_id);
+        return `
+          <tr data-adj-id="${adj.id}">
+            <td data-label="As of">${adj.adjusted_on}</td>
+            <td data-label="Item">${escapeHtml(item ? item.name : 'Deleted item')}</td>
+            <td data-label="Before">${adj.previous_quantity}</td>
+            <td data-label="After">${adj.new_quantity}</td>
+            <td data-label="Reason">${escapeHtml(adj.reason)}</td>
+            <td data-label="Notes">${escapeHtml(adj.notes || '—')}</td>
+            <td data-label="Logged by">${escapeHtml(adj.created_by_name || '—')}</td>
+            <td class="ws-row-actions">
+              <button type="button" class="ws-row-del" data-inv-adj-del>×</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      els.invAdjBody.querySelectorAll('[data-inv-adj-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.closest('tr').dataset.adjId;
+          if (!confirm('Delete this logged change? The item\'s current quantity is not affected.')) return;
+          const { error } = await db.from('inventory_adjustments').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          await loadInventory();
+        });
+      });
+    }
+    function bindAdjustmentsForm() {
+      els.invAdjFilter.addEventListener('change', renderAdjustments);
+      els.invAdjItem.addEventListener('change', fillInvAdjQtyFromItem);
+      els.invAdjForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const itemId = els.invAdjItem.value;
+        const date = els.invAdjDate.value;
+        const qtyRaw = els.invAdjQty.value;
+        const reason = els.invAdjReason.value;
+        const notes = els.invAdjNotes.value.trim();
+        if (!itemId || !date || qtyRaw === '' || !reason) { showToast('Item, date, new quantity, and reason are required.'); return; }
+        const item = state.inventoryItems.find((i: any) => i.id === itemId);
+        if (!item) { showToast('That item no longer exists.'); return; }
+        const newQuantity = Number(qtyRaw);
+        els.invAdjSubmit.disabled = true;
+        const { error: adjError } = await db.from('inventory_adjustments').insert({
+          group_key: state.activeGroup, item_id: itemId, adjusted_on: date,
+          previous_quantity: item.quantity, new_quantity: newQuantity, reason, notes: notes || null,
+          created_by: state.session.user.id, created_by_name: state.profile?.name || null,
+        });
+        if (adjError) { console.error(adjError); showToast('Could not log the change.'); els.invAdjSubmit.disabled = false; return; }
+        const { error: itemError } = await db.from('inventory_items').update({ quantity: newQuantity, updated_at: new Date().toISOString() }).eq('id', itemId);
+        els.invAdjSubmit.disabled = false;
+        if (itemError) { console.error(itemError); showToast('Logged, but could not update the item\'s quantity.'); }
+        els.invAdjForm.reset();
+        els.invAdjDate.value = todayStr();
         await loadInventory();
       });
     }
@@ -5991,6 +6183,28 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
+    // Period-dependent — this group's own quantity-adjustment log (Music
+    // only). Mirrors Admin's own Inventory Adjustments Report.
+    async function downloadAdjustmentsReportCard() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const { data, error } = await db.from('inventory_adjustments').select('*, inventory_items(name)').eq('group_key', state.activeGroup)
+          .gte('adjusted_on', start).lte('adjusted_on', end).order('adjusted_on', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Inventory Adjustments', `${label}, ${rows.length} change${rows.length === 1 ? '' : 's'} logged`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          head: [['As of', 'Item', 'Before', 'After', 'Reason', 'Notes', 'Logged by']],
+          body: rows.length ? rows.map((r: any) => [r.adjusted_on, r.inventory_items?.name || '—', String(r.previous_quantity), String(r.new_quantity), r.reason, r.notes || '—', r.created_by_name || '—']) : [['No changes logged this period', '', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Inventory-Adjustments', label));
+      } catch (err) {
+        console.error('inventory adjustments report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
     // Music-only — a flat dated ledger (not grouped by category like the
     // generic Income Statement) since Band Payouts/Transport read better
     // as line items than a category summary. Mirrors Admin's own Music
@@ -6058,6 +6272,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       el('[data-report-inventory]').addEventListener('click', downloadInventoryReport);
       el('[data-report-events]').addEventListener('click', downloadEventCalendarReport);
       el('[data-report-maintenance]').addEventListener('click', downloadMaintenanceReportCard);
+      el('[data-report-adjustments]').addEventListener('click', downloadAdjustmentsReportCard);
       el('[data-report-music-finance]').addEventListener('click', downloadMusicFinanceReportCard);
       el('[data-report-sm-finance]').addEventListener('click', downloadSocialMediaFinanceReportCard);
       el('[data-report-content]').addEventListener('click', downloadContentReport);
@@ -6741,7 +6956,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function currGetOrCreateMeeting(dateStr: string) {
       let m = state.curr.meetings.get(dateStr);
       if (!m) {
-        m = { group_key: state.activeGroup, date: dateStr, theme: null, notes: null, materials_needed: null, activities: [], created_by: state.profile?.name || null };
+        m = { group_key: state.activeGroup, date: dateStr, theme: null, notes: null, materials_needed: null, activities: [], actual_notes: null, created_by: state.profile?.name || null };
         state.curr.meetings.set(dateStr, m);
       }
       return m;
@@ -6749,7 +6964,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function currPersistMeeting(dateStr: string) {
       const m = state.curr.meetings.get(dateStr);
       if (!m) return;
-      const isEmpty = (!m.activities || m.activities.length === 0) && !m.theme && !m.notes && !m.materials_needed && !m.attachment_path;
+      const isEmpty = (!m.activities || m.activities.length === 0) && !m.theme && !m.notes && !m.materials_needed && !m.attachment_path && !m.actual_notes;
       try {
         if (isEmpty) {
           if (m.id) await db.from('curriculum_meetings').delete().eq('id', m.id);
@@ -6760,7 +6975,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const payload: any = {
           group_key: m.group_key, date: m.date, theme: m.theme || null, notes: m.notes || null,
           materials_needed: m.materials_needed || null,
-          activities: m.activities, attachment_path: m.attachment_path || null, updated_by: state.profile?.name || null,
+          activities: m.activities, attachment_path: m.attachment_path || null, actual_notes: m.actual_notes || null,
+          updated_by: state.profile?.name || null,
         };
         if (!m.id) payload.created_by = m.created_by || state.profile?.name || null;
         const { data, error } = await db.from('curriculum_meetings').upsert(payload, { onConflict: 'group_key,date' }).select().single();
@@ -6792,9 +7008,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         currRenderActivityList(els.currDayList, state.curr.currentDay);
       }
     }
-    function currActivityRowHTML(a: any) {
+    // showDone: only meaningful once the meeting date has passed — you
+    // can't have actually done a future activity yet, so the checkbox
+    // (and its strike-through styling) only shows up for today/past
+    // days. See currRenderActivityList()'s caller for the date check.
+    function currActivityRowHTML(a: any, showDone: boolean) {
       return `
-        <div class="curr-item" data-activity-id="${a.id}">
+        <div class="curr-item${a.done ? ' curr-item--done' : ''}" data-activity-id="${a.id}">
+          ${showDone ? `<input type="checkbox" class="curr-item-done" data-done="${a.id}" ${a.done ? 'checked' : ''} title="Mark as actually done" />` : ''}
           <span class="curr-item-text"><span class="curr-item-en">${escapeHtml(a.en)}</span></span>
           <input type="number" min="0" step="5" class="curr-item-duration" placeholder="min"
                  value="${a.duration != null ? a.duration : ''}" data-duration="${a.id}" />
@@ -6805,8 +7026,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!container) return;
       const m = state.curr.meetings.get(dateStr);
       const activities = m ? m.activities : [];
+      const showDone = dateStr <= todayStr();
       container.innerHTML = activities.length
-        ? activities.map(currActivityRowHTML).join('')
+        ? activities.map((a: any) => currActivityRowHTML(a, showDone)).join('')
         : '<p class="curr-empty">No activities yet, pick one from the bank or add a custom one below.</p>';
       container.querySelectorAll('[data-del]').forEach((btn: any) => {
         btn.addEventListener('click', () => {
@@ -6824,6 +7046,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           const act = mm.activities.find((a: any) => a.id === inp.dataset.duration);
           if (!act) return;
           act.duration = inp.value ? Number(inp.value) : null;
+          currPersistMeeting(dateStr);
+        });
+      });
+      container.querySelectorAll('[data-done]').forEach((cb: any) => {
+        cb.addEventListener('change', () => {
+          const mm = state.curr.meetings.get(dateStr);
+          if (!mm) return;
+          const act = mm.activities.find((a: any) => a.id === cb.dataset.done);
+          if (!act) return;
+          act.done = cb.checked;
+          currRefreshUI();
           currPersistMeeting(dateStr);
         });
       });
@@ -6854,6 +7087,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const acts = meeting ? meeting.activities : [];
         const shown = acts.slice(0, 3);
         const extra = acts.length - shown.length;
+        // Once a day has passed, show how much of the plan actually got
+        // done at a glance — a green chip if everything was ticked off,
+        // amber otherwise — so admins don't have to open every past day
+        // to see what was actually achieved.
+        const isPast = acts.length > 0 && dateStr <= today;
+        const doneCount = isPast ? acts.filter((a: any) => a.done).length : 0;
         html += `<div class="curr-day-cell${inMonth ? '' : ' curr-day-cell--out'}${dateStr === today ? ' curr-day-cell--today' : ''}${acts.length ? ' curr-day-cell--has' : ''}" data-date="${dateStr}">
           <span class="curr-day-num">${d.getDate()}</span>
           ${meeting && meeting.theme ? `<span class="curr-day-theme">${escapeHtml(meeting.theme)}</span>` : ''}
@@ -6861,6 +7100,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             ${shown.map((a: any) => `<span class="curr-mini-chip">${escapeHtml(a.en)}</span>`).join('')}
             ${extra > 0 ? `<span class="curr-mini-more">+${extra}</span>` : ''}
           </div>
+          ${isPast ? `<span class="curr-mini-chip curr-mini-chip--${doneCount === acts.length ? 'completed' : 'upcoming'}">${doneCount}/${acts.length} done</span>` : ''}
         </div>`;
         d = addDays(d, 1);
       }
@@ -6890,6 +7130,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.currDayTheme.value = (m && m.theme) || '';
       els.currDayNotes.value = (m && m.notes) || '';
       els.currDayMaterials.value = (m && m.materials_needed) || '';
+      els.currDayActualNotes.value = (m && m.actual_notes) || '';
+      els.currActualBlock.toggleAttribute('hidden', dateStr > todayStr());
       currRenderActivityList(els.currDayList, dateStr);
       currRenderAttachment(m);
       els.currDayOverlay.removeAttribute('hidden');
@@ -6912,6 +7154,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       m.theme = els.currDayTheme.value.trim() || null;
       m.notes = els.currDayNotes.value.trim() || null;
       m.materials_needed = els.currDayMaterials.value.trim() || null;
+      if (!els.currActualBlock.hidden) m.actual_notes = els.currDayActualNotes.value.trim() || null;
       currPersistMeeting(state.curr.currentDay);
       currRenderMonth();
       currCloseDayPanel();
@@ -6930,7 +7173,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!m) { currCloseDayPanel(); return; }
       if (!confirm('Clear this day’s plan? Its theme, activities, and attachment are all removed.')) return;
       const oldAttachment = m.attachment_path;
-      m.theme = null; m.notes = null; m.materials_needed = null; m.activities = []; m.attachment_path = null;
+      m.theme = null; m.notes = null; m.materials_needed = null; m.activities = []; m.attachment_path = null; m.actual_notes = null;
       currPersistMeeting(dateStr).then(() => {
         if (oldAttachment) db.storage.from('documents').remove([oldAttachment]);
       });
@@ -7628,15 +7871,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Archive/Approvals/Attendance/Fees/Curriculum/Dashboard don't apply
     // to any of them (each gets its own dashboard-equivalent in the
     // Admin console instead — see loadMusicDashboard()-style tabs
-    // there). All 3 still get Roster: Music's is band members,
-    // General's is the board of directors/leadership, Social Media's is
-    // whoever's on the team. Runs on every group switch, not just once,
-    // so leaving one restores every other tab.
+    // there). Music still gets Roster (band members); General and
+    // Social Media don't — by request, since neither's "membership" (the
+    // board, the social media team) needs a tracked roster the way a
+    // troop or the band does. Existing member rows for those two groups
+    // aren't deleted (Admin's Full Roster report still lists them), they
+    // just have no Workspace tab to add/edit from anymore. Runs on every
+    // group switch, not just once, so leaving one restores every other
+    // tab.
     const NON_TROOP_GROUP_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY];
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
       [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
-      [GENERAL_GROUP_KEY]: ['roster', 'finance', 'vendors', 'pr', 'reports', 'sharedcal'],
-      [SOCIAL_MEDIA_GROUP_KEY]: ['roster', 'finance', 'vendors', 'reports', 'library', 'content', 'credentials', 'sharedcal'],
+      [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'reports', 'sharedcal'],
+      [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'content', 'credentials', 'sharedcal'],
     };
     // Inventory/Event Calendar are Music-only, Public Relations is
     // General-only, Content Calendar/Credentials are Social-Media-only —
@@ -7682,6 +7929,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
       document.querySelectorAll('[data-general-only]').forEach((el: any) => {
         el.toggleAttribute('hidden', state.activeGroup !== GENERAL_GROUP_KEY);
+      });
+      // The Reports tab's own Roster card — hidden in lockstep with the
+      // Roster tab itself (General/Social Media no longer get either).
+      document.querySelectorAll('[data-roster-report]').forEach((el: any) => {
+        el.toggleAttribute('hidden', isTabHidden('roster'));
       });
       // Music and Social Media get their own custom-named finance report
       // instead of the generic Income Statement (Troops/General keep it).
@@ -7889,6 +8141,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindFinanceForm();
         bindInventoryForm();
         bindInventoryCategories();
+        bindAdjustmentsForm();
         bindMaintenanceForm();
         bindEventForm();
         bindEventCategories();
