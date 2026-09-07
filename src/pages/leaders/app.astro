@@ -1520,15 +1520,37 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
              members/attendance tables — see each function's own comment
              for why. ==================== -->
         <section class="ws-panel" data-panel="leaderdashboard" hidden>
-          <p class="ws-att-hint">Every leader's attendance record, org-wide — logged from the Attendance tab (Leaders Meetings and each troop's own meeting). Sorted worst-first so anyone who needs a nudge is easy to spot.</p>
-          <div class="ws-dash-kpis" data-ldash-kpis></div>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-ldash-table>
-              <thead>
-                <tr><th>Name</th><th>Role</th><th>Attended</th><th>Rate</th><th>Last attended</th></tr>
-              </thead>
-              <tbody data-ldash-body></tbody>
-            </table>
+          <div class="ws-dash">
+            <div class="ws-dash-hero">
+              <div class="ws-dash-hero-text">
+                <span class="ws-dash-eyebrow">Leaders</span>
+                <h2 class="ws-dash-title">Attendance performance</h2>
+                <p class="ws-dash-sub">Every leader's own record, org-wide — logged from the Attendance tab, Leaders Meetings and each troop's own meeting combined.</p>
+              </div>
+            </div>
+
+            <div class="ws-dash-kpis" data-ldash-kpis></div>
+
+            <div class="ws-dash-grid">
+              <div class="ws-dash-card ws-dash-card--wide">
+                <div class="ws-dash-card-head">
+                  <h3>Leader attendance</h3>
+                  <span class="ws-dash-card-sub">Sorted worst-first</span>
+                </div>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-ldash-table>
+                    <thead>
+                      <tr><th>Name</th><th>Role</th><th>Attended</th><th>Rate</th><th>Last attended</th></tr>
+                    </thead>
+                    <tbody data-ldash-body></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Needs attention</h3></div>
+                <div data-ldash-attention></div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -2331,6 +2353,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.attSummary = el('[data-att-summary]');
       els.ldashKpis = el('[data-ldash-kpis]');
       els.ldashBody = el('[data-ldash-body]');
+      els.ldashAttention = el('[data-ldash-attention]');
       els.lrosterSearch = el('[data-lroster-search]');
       els.lrosterBody = el('[data-lroster-body]');
       els.lattCalendar = el('[data-latt-calendar]');
@@ -5641,6 +5664,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       withRates.sort((a: any, b: any) => (a.rate ?? -1) - (b.rate ?? -1));
       if (!withRates.length) {
         els.ldashBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No approved leaders yet.</td></tr>';
+        els.ldashAttention.innerHTML = '<p class="ws-dash-empty-mini">No approved leaders yet.</p>';
         return;
       }
       els.ldashBody.innerHTML = withRates.map((r: any) => `
@@ -5652,6 +5676,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Last attended">${r.last || '—'}</td>
         </tr>
       `).join('');
+      // Already sorted worst-first above — this is just the below-70%
+      // prefix of that same list, so it stays in sync for free.
+      const attention = withRates.filter((r: any) => r.rate != null && r.rate < 70);
+      els.ldashAttention.innerHTML = attention.length
+        ? attention.map((r: any) => `<div class="ws-dash-attn-row">${escapeHtml(r.p.name)} <span>${r.rate}%</span></div>`).join('')
+        : `<p class="ws-dash-empty-mini">${totalMeetings ? 'Everyone is at 70% or above.' : 'Nothing logged yet.'}</p>`;
     }
 
     // ---------- Content Calendar (Social Media only): a calendar + board
