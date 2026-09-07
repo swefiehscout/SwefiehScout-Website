@@ -8427,14 +8427,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function renderGroupBanner() {
       const g = GROUPS.find((x: any) => x.key === state.activeGroup);
-      els.groupBannerName.textContent = g ? g.en : 'No group assigned yet';
+      els.groupBannerName.textContent = g ? g.en : 'Support Leader';
     }
     function renderGroupSwitch() {
       renderGroupBanner();
       updateTabVisibility();
       if (state.availableGroups.length <= 1) {
         const g = GROUPS.find((x) => x.key === state.availableGroups[0]);
-        els.groupSwitch.innerHTML = `<span class="ws-single-group">${g ? escapeHtml(g.en) : 'No group — Shared Calendar only'}</span>`;
+        els.groupSwitch.innerHTML = `<span class="ws-single-group">${g ? escapeHtml(g.en) : 'Support Leader'}</span>`;
         return;
       }
       els.groupSwitch.innerHTML = state.availableGroups.map((key: any) => {
@@ -8516,7 +8516,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderattendance'];
     function isTabHidden(tab: string) {
       // A leader approved with no group at all (see the People tab's
-      // "Shared Calendar only" option) — Shared Calendar is the one tab
+      // "Support Leader" option) — Shared Calendar is the one tab
       // that's genuinely ungated at the database level (is_approved_leader(),
       // no group_key column on it whatsoever), so it's the only thing
       // that can ever make sense to show with no group selected. Without

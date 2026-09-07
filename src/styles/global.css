@@ -4944,7 +4944,7 @@ body.ws-scroll-locked { overflow: hidden; }
   border-radius: 999px;
   background: var(--color-bg);
 }
-/* The People tab's "or: Shared Calendar only" option — same pill shape
+/* The People tab's "or: Support Leader" option — same pill shape
    as a real group check, styled distinctly (dashed, brand-colored) so
    it doesn't read as one more group to pick, and the little divider
    before it that says so in words too. */
