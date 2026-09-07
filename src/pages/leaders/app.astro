@@ -5648,6 +5648,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const belowThreshold = withHistory.filter((r: any) => r.rate < 70).length;
       els.ldashKpis.innerHTML = `
         <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Approved leaders</span></div>
+          <span class="ws-dash-kpi-num">${state.allLeaders.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">☰</span><span class="ws-dash-kpi-label">Meetings logged</span></div>
           <span class="ws-dash-kpi-num">${totalMeetings}</span>
         </div>
