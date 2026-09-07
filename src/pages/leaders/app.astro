@@ -53,7 +53,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <span class="ws-logo">Leaders Workspace</span>
         </div>
         <div class="ws-header-right">
-          <div class="ws-group-switch" data-ws-group-switch></div>
           <a class="ws-guide-link" href="/admin" data-admin-only hidden title="Admin, access, org-wide reports, and the accounting system">
             <Icon name="pin" size={14} strokeWidth={1.8} /> Admin
           </a>
@@ -72,6 +71,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </div>
           </div>
         </div>
+        <!-- A direct sibling of .ws-header-right, not nested inside it —
+             .ws-group-switch's own flex-basis:100% (below) always forces
+             it onto its own full-width row under Logo/Admin/Guide/Account,
+             so however many group pills there are (9 now, more later),
+             the account avatar can never get dragged onto a wrapped line
+             of its own and land at the wrong edge — see the bug this
+             fixed: with enough groups to wrap, the account button used to
+             end up stranded at the row's left edge instead of staying in
+             the top-right corner. -->
+        <div class="ws-group-switch" data-ws-group-switch></div>
       </header>
 
       <nav class="ws-tabs" data-ws-tabs>

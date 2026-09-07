@@ -4088,7 +4088,13 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-logo-mark { width: 2rem; height: 2rem; object-fit: contain; }
 .ws-logo { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--color-brand); }
 .ws-header-right { position: relative; z-index: 1; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-.ws-group-switch { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+/* A direct flex item of .ws-header itself (not nested in .ws-header-right
+   — see that markup's own comment), always claiming the full row width
+   so it wraps its own pills on its own line under Logo/Admin/Guide/
+   Account instead of ever competing with them for space on row 1 — that
+   competition was what let the account avatar get stranded at the wrong
+   edge once there were enough groups to wrap. */
+.ws-group-switch { display: flex; gap: 0.4rem; flex-wrap: wrap; flex-basis: 100%; }
 .ws-single-group {
   font-weight: 700;
   color: #fff;
@@ -5547,13 +5553,14 @@ body.ws-scroll-locked { overflow: hidden; }
    the tab bar wraps into even rows instead of scrolling). */
 @media (max-width: 640px) {
   /* ----- Header: the logo and account avatar share one row; the group
-     switcher gets a full row of its own below. Built with real flex flow
-     (not guessed pixel offsets) so it can't overlap: .ws-header-right's
-     own box is dissolved with display:contents, promoting its two
-     children (switcher, account) to be direct flex items of .ws-header
-     itself alongside the logo — account keeps row 1 via margin-inline-
-     start:auto, the switcher is forced onto its own row 2 via
-     flex-basis:100%. ----- */
+     switcher gets a full row of its own below (it's a direct sibling of
+     .ws-header-right in the markup already, always flex-basis:100% at
+     every width — see that rule's own comment). Built with real flex
+     flow (not guessed pixel offsets) so it can't overlap:
+     .ws-header-right's own box is dissolved with display:contents,
+     promoting its remaining children (Admin/Guide links, account) to be
+     direct flex items of .ws-header itself alongside the logo — account
+     keeps row 1 via margin-inline-start:auto. ----- */
   .ws-header {
     padding: 0.85rem 1rem;
     flex-direction: row;
