@@ -4182,6 +4182,78 @@ body.ws-scroll-locked { overflow: hidden; }
 }
 .ws-account-signout:hover { background: var(--color-bg); }
 
+/* ----- Account menu: device sessions ----- */
+.ws-account-menu { min-width: 16.5rem; max-width: 20rem; }
+.ws-account-subhead {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0 0 0.5rem;
+}
+.ws-devices { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.75rem; }
+.ws-devices-empty { font-size: 0.8rem; color: var(--color-muted); padding: 0.3rem 0; }
+.ws-device-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: var(--radius);
+  background: var(--color-bg);
+}
+.ws-device-info { min-width: 0; }
+.ws-device-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ws-device-badge {
+  flex: none;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--color-brand);
+  border-radius: 999px;
+  padding: 0.08rem 0.4rem;
+}
+.ws-device-meta { font-size: 0.7rem; color: var(--color-muted); margin-top: 0.1rem; }
+.ws-device-kick {
+  flex: none;
+  border: none;
+  background: none;
+  color: var(--color-brand-light);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+}
+.ws-device-kick:hover { text-decoration: underline; }
+.ws-account-signout-others {
+  width: 100%;
+  padding: 0.4rem 0.7rem;
+  border: none;
+  background: none;
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: start;
+  margin-bottom: 0.4rem;
+}
+.ws-account-signout-others:hover { color: var(--color-brand-light); text-decoration: underline; }
+
 /* ----- Tabs: filled pill segmented control, icon + label ----- */
 .ws-tabs {
   /* A grid with a JS-computed, balanced column count (see balanceTabs()

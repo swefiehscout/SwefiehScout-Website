@@ -268,6 +268,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       if (window.location.search.includes('expired=1')) {
         showNotice('You were signed out after 3 hours, sign in again to continue.');
+      } else if (window.location.search.includes('revoked=1')) {
+        showNotice('You were signed out from another device.');
       }
 
       if (supabaseConfigured && supabase) {

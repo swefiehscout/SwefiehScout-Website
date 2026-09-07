@@ -46,7 +46,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <button type="button" class="ws-account-btn" data-ws-account-btn></button>
             <div class="ws-account-menu" data-ws-account-menu hidden>
               <div class="ws-account-info" data-ws-who></div>
-              <button type="button" class="ws-account-signout" data-ws-signout>Sign out</button>
+              <p class="ws-account-subhead">Signed in on</p>
+              <div class="ws-devices" data-ws-devices></div>
+              <button type="button" class="ws-account-signout-others" data-ws-signout-others>Sign out of all other devices</button>
+              <button type="button" class="ws-account-signout" data-ws-signout>Sign out of this device</button>
+              <button type="button" class="ws-account-signout-others" data-ws-signout-everywhere>Sign out everywhere, including this device</button>
             </div>
           </div>
         </div>
@@ -818,7 +822,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
   <script>
     import {
-      supabase, supabaseConfigured, getSession, isSessionExpired, msUntilSessionExpiry, signOut,
+      supabase, supabaseConfigured, getSession, isSessionExpired, msUntilSessionExpiry, signOut, signOutEverywhere,
+      registerDeviceSession, listMyDeviceSessions, currentDeviceSessionId, signOutDevice, signOutOtherDevices,
+      checkThisDeviceStillActive, formatRelativeTime,
     } from '../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
@@ -848,6 +854,41 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as any)[c]
       ));
     }
+    // Renders the "Signed in on" device list inside the account menu, and
+    // wires each row's Sign out button (delegation, since the rows get
+    // rebuilt every time this runs). Called when the menu opens rather
+    // than on a timer — it's a DB read, no reason to poll it.
+    async function renderDevices() {
+      const mine = currentDeviceSessionId();
+      const sessions = await listMyDeviceSessions();
+      if (!sessions.length) {
+        els.devices.innerHTML = '<p class="ws-devices-empty">This device only.</p>';
+        return;
+      }
+      els.devices.innerHTML = sessions.map((d: any) => `
+        <div class="ws-device-row" data-device-id="${d.id}">
+          <div class="ws-device-info">
+            <div class="ws-device-label">${escapeHtml(d.device_label)}${d.id === mine ? '<span class="ws-device-badge">This device</span>' : ''}</div>
+            <div class="ws-device-meta">${formatRelativeTime(d.last_seen_at)}</div>
+          </div>
+          <button type="button" class="ws-device-kick" data-kick-device="${d.id}">Sign out</button>
+        </div>
+      `).join('');
+    }
+    function bindDeviceKicks() {
+      els.devices.addEventListener('click', async (e: any) => {
+        const btn = e.target.closest('[data-kick-device]');
+        if (!btn) return;
+        const id = btn.dataset.kickDevice;
+        const wasThisDevice = id === currentDeviceSessionId();
+        btn.disabled = true;
+        btn.textContent = '…';
+        await signOutDevice(id);
+        if (wasThisDevice) { window.location.replace('/leaders'); return; }
+        await renderDevices();
+      });
+    }
+
     let toastTimer: any;
     function showToast(msg: any) {
       let t = document.querySelector('.curr-toast');
@@ -1043,7 +1084,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.accountBtn = el('[data-ws-account-btn]');
       els.accountMenu = el('[data-ws-account-menu]');
       els.who = el('[data-ws-who]');
+      els.devices = el('[data-ws-devices]');
       els.signout = el('[data-ws-signout]');
+      els.signoutOthers = el('[data-ws-signout-others]');
+      els.signoutEverywhere = el('[data-ws-signout-everywhere]');
       els.signoutDenied = el('[data-ws-signout-denied]');
       els.tabs = el('[data-ws-tabs]');
 
@@ -3698,17 +3742,39 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const initials = (profile.name || '?').trim().split(/\s+/).map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
       els.accountBtn.textContent = initials || '?';
       els.who.innerHTML = `<span class="ws-account-name">${escapeHtml(profile.name)}</span><span class="ws-account-role">admin</span>`;
+      registerDeviceSession();
 
       if (!boundOnce) {
         boundOnce = true;
         bindOverlayScrollLock();
-        els.accountBtn.addEventListener('click', () => els.accountMenu.toggleAttribute('hidden'));
+        bindDeviceKicks();
+        els.accountBtn.addEventListener('click', () => {
+          const opening = els.accountMenu.hidden;
+          els.accountMenu.toggleAttribute('hidden');
+          if (opening) renderDevices();
+        });
         document.addEventListener('click', (e: any) => {
           if (els.accountMenu.hidden) return;
           if (e.target.closest('.ws-account')) return;
           els.accountMenu.setAttribute('hidden', '');
         });
         els.signout.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
+        els.signoutOthers.addEventListener('click', async () => {
+          els.signoutOthers.disabled = true;
+          els.signoutOthers.textContent = 'Signing out other devices…';
+          await signOutOtherDevices();
+          await renderDevices();
+          els.signoutOthers.disabled = false;
+          els.signoutOthers.textContent = 'Sign out of all other devices';
+        });
+        els.signoutEverywhere.addEventListener('click', async () => { await signOutEverywhere(); window.location.replace('/leaders'); });
+        setInterval(async () => {
+          if (!(await checkThisDeviceStillActive())) window.location.replace('/leaders?revoked=1');
+        }, 45000);
+        document.addEventListener('visibilitychange', async () => {
+          if (document.visibilityState !== 'visible') return;
+          if (!(await checkThisDeviceStillActive())) window.location.replace('/leaders?revoked=1');
+        });
         bindEnglishOnlyInputs();
 
         bindTabs();
