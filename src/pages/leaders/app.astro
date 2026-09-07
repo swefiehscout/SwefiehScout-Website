@@ -88,6 +88,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="events"><Icon name="heart" size={16} strokeWidth={1.8} /> Event Calendar<span class="ws-tab-badge" data-events-badge hidden></span></button>
         <button type="button" class="ws-tab" data-tab="vendors"><Icon name="phone" size={16} strokeWidth={1.8} /> Vendors</button>
         <button type="button" class="ws-tab" data-tab="pr"><Icon name="megaphone" size={16} strokeWidth={1.8} /> Public Relations</button>
+        <button type="button" class="ws-tab" data-tab="meetingnotes"><Icon name="flag" size={16} strokeWidth={1.8} /> Meeting Notes</button>
         <button type="button" class="ws-tab" data-tab="content"><Icon name="sparkle" size={16} strokeWidth={1.8} /> Content Calendar</button>
         <button type="button" class="ws-tab" data-tab="credentials"><Icon name="lock" size={16} strokeWidth={1.8} /> Credentials</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
@@ -1192,6 +1193,43 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         </section>
 
+        <section class="ws-panel" data-panel="meetingnotes" hidden>
+          <p class="ws-att-hint">A record of what the board actually discussed and decided at each meeting — separate from Shared Calendar, which is just for scheduling one.</p>
+          <form class="ws-member-form" data-mn-form>
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title" data-mn-form-title>Add meeting notes</p>
+            <div class="ws-form-grid">
+              <label class="ws-field">
+                <span>Date *</span>
+                <input type="date" data-mn-date required />
+              </label>
+              <label class="ws-field">
+                <span>Title *</span>
+                <input type="text" data-mn-title placeholder="e.g. Monthly Board Meeting" required />
+              </label>
+            </div>
+            <label class="ws-field ws-field--full">
+              <span>Notes *</span>
+              <textarea data-mn-notes rows="4" placeholder="What was discussed, decided, and who's doing what next…" required></textarea>
+            </label>
+            <div class="ws-form-actions">
+              <button type="submit" class="btn-primary" data-mn-submit>Add notes</button>
+              <button type="button" class="ws-form-cancel" data-mn-cancel hidden>Cancel edit</button>
+            </div>
+          </form>
+
+          <input type="search" class="ws-search" data-mn-search placeholder="Search meeting notes…" />
+
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-mn-table>
+              <thead>
+                <tr><th>Date</th><th>Title</th><th>Notes</th><th>Added by</th><th></th></tr>
+              </thead>
+              <tbody data-mn-body></tbody>
+            </table>
+          </div>
+        </section>
+
         <section class="ws-panel" data-panel="content" hidden>
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="content" data-subtab="items">Content</button>
@@ -1462,6 +1500,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <h3 class="ws-admin-h3">Community &amp; Church Contacts</h3>
               <p class="ws-report-desc">Every clergy, organization, school, media, and government contact on file. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-prcontacts>Download PDF</button>
+            </div>
+            <div class="ws-report-card" data-general-only hidden>
+              <h3 class="ws-admin-h3">Meeting Notes</h3>
+              <p class="ws-report-desc">Every board meeting logged in the period, with its title and full notes.</p>
+              <button type="button" class="btn-primary" data-report-meetingnotes>Download PDF</button>
             </div>
           </div>
         </section>
@@ -2020,6 +2063,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       vendors: [], sharedVendors: [], editingVendorId: null,
       sponsors: [], editingSponsorId: null, prContacts: [], editingPrContactId: null, prDocs: [],
       contentItems: [], editingContentId: null, credentials: [], editingCredentialId: null,
+      meetingNotes: [], editingMeetingNoteId: null,
       evt: { anchor: new Date(), currentDay: null },
       content: { anchor: new Date(), currentDay: null, view: 'calendar' },
       attAnchor: new Date(), attSelected: todayStr(), attDatesWithRecords: null,
@@ -2412,6 +2456,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.prlibCatInput = el('[data-prlib-cat-input]');
       els.prlibCatAdd = el('[data-prlib-cat-add]');
       els.prlibCatList = el('[data-prlib-cat-list]');
+      els.mnForm = el('[data-mn-form]');
+      els.mnFormTitle = el('[data-mn-form-title]');
+      els.mnDate = el('[data-mn-date]');
+      els.mnTitle = el('[data-mn-title]');
+      els.mnNotes = el('[data-mn-notes]');
+      els.mnSubmit = el('[data-mn-submit]');
+      els.mnCancel = el('[data-mn-cancel]');
+      els.mnSearch = el('[data-mn-search]');
+      els.mnBody = el('[data-mn-body]');
       els.contentPrev = el('[data-content-prev]');
       els.contentNext = el('[data-content-next]');
       els.contentToday = el('[data-content-today]');
@@ -5157,6 +5210,95 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
+    // ---------- Meeting Notes (General only): what the board actually
+    // discussed and decided at a meeting — date, title, free-text notes.
+    // Separate from Shared Calendar (which only schedules a meeting) and
+    // from Curriculum's own "actual notes" (troops only, tied to a
+    // planned activity list General doesn't have).
+    async function loadMeetingNotes() {
+      if (!state.activeGroup) return;
+      const { data, error } = await db.from('meeting_notes').select('*').eq('group_key', state.activeGroup).order('meeting_date', { ascending: false });
+      if (error) { console.error(error); showToast('Could not load meeting notes.'); return; }
+      state.meetingNotes = data || [];
+      renderMeetingNotes();
+    }
+    function resetMeetingNoteForm() {
+      state.editingMeetingNoteId = null;
+      els.mnForm.reset();
+      els.mnFormTitle.textContent = 'Add meeting notes';
+      els.mnSubmit.textContent = 'Add notes';
+      els.mnCancel.hidden = true;
+    }
+    function startEditMeetingNote(id: string) {
+      const n = state.meetingNotes.find((x: any) => x.id === id);
+      if (!n) return;
+      state.editingMeetingNoteId = id;
+      els.mnDate.value = n.meeting_date;
+      els.mnTitle.value = n.title;
+      els.mnNotes.value = n.notes;
+      els.mnFormTitle.textContent = `Editing ${n.title}`;
+      els.mnSubmit.textContent = 'Save changes';
+      els.mnCancel.hidden = false;
+      els.mnForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function renderMeetingNotes() {
+      if (!state.meetingNotes.length) {
+        els.mnBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No meeting notes yet.</td></tr>';
+        return;
+      }
+      els.mnBody.innerHTML = state.meetingNotes.map((n: any) => `
+        <tr data-mn-id="${n.id}">
+          <td data-label="Date">${n.meeting_date}</td>
+          <td data-label="Title">${escapeHtml(n.title)}</td>
+          <td data-label="Notes" class="ws-cell-wrap">${escapeHtml(n.notes)}</td>
+          <td data-label="Added by">${escapeHtml(n.created_by_name || '—')}</td>
+          <td class="ws-row-actions">
+            <button type="button" class="ws-edit-btn" data-mn-edit>Edit</button>
+            <button type="button" class="ws-row-del" data-mn-del>×</button>
+          </td>
+        </tr>
+      `).join('');
+      els.mnBody.querySelectorAll('[data-mn-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => startEditMeetingNote(btn.closest('tr').dataset.mnId));
+      });
+      els.mnBody.querySelectorAll('[data-mn-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.closest('tr').dataset.mnId;
+          if (!confirm('Delete these meeting notes?')) return;
+          const { error } = await db.from('meeting_notes').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          if (state.editingMeetingNoteId === id) resetMeetingNoteForm();
+          await loadMeetingNotes();
+        });
+      });
+    }
+    function bindMeetingNoteForm() {
+      els.mnCancel.addEventListener('click', resetMeetingNoteForm);
+      els.mnForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const date = els.mnDate.value;
+        const title = els.mnTitle.value.trim();
+        const notes = els.mnNotes.value.trim();
+        if (!date || !title || !notes) { showToast('Date, title, and notes are all required.'); return; }
+        els.mnSubmit.disabled = true;
+        const payload: any = { meeting_date: date, title, notes };
+        let error;
+        if (state.editingMeetingNoteId) {
+          payload.updated_at = new Date().toISOString();
+          ({ error } = await db.from('meeting_notes').update(payload).eq('id', state.editingMeetingNoteId));
+        } else {
+          payload.group_key = state.activeGroup;
+          payload.created_by = state.session.user.id;
+          payload.created_by_name = state.profile?.name || null;
+          ({ error } = await db.from('meeting_notes').insert(payload));
+        }
+        els.mnSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not save meeting notes.'); return; }
+        resetMeetingNoteForm();
+        await loadMeetingNotes();
+      });
+    }
+
     // ---------- Content Calendar (Social Media only): a calendar + board
     // view over the same content_items, plus its own category Settings --
     const DEFAULT_CONTENT_PLATFORM_CATEGORIES = ['Instagram', 'Facebook', 'TikTok', 'X (Twitter)', 'YouTube', 'Other'];
@@ -6112,6 +6254,29 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
+    // Period-dependent — every board meeting logged in the period,
+    // notes in full since that's the whole point of the report (General only).
+    async function downloadMeetingNotesReport() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const { data, error } = await db.from('meeting_notes').select('*').eq('group_key', state.activeGroup)
+          .gte('meeting_date', start).lte('meeting_date', end).order('meeting_date', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Meeting Notes', `${label}, ${rows.length} meeting${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9, valign: 'top' },
+          columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 40 } },
+          head: [['Date', 'Title', 'Notes']],
+          body: rows.length ? rows.map((n: any) => [n.meeting_date, n.title, n.notes]) : [['No meetings logged this period', '', '']],
+        });
+        doc.save(pdfFilename('Meeting-Notes', label));
+      } catch (err) {
+        console.error('meeting notes report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
     // Not period-dependent — every inventory item this group owns (Music only).
     async function downloadInventoryReport() {
       try {
@@ -6279,6 +6444,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       el('[data-report-credentials]').addEventListener('click', downloadCredentialsReport);
       el('[data-report-sponsors]').addEventListener('click', downloadSponsorsReport);
       el('[data-report-prcontacts]').addEventListener('click', downloadPrContactsReport);
+      el('[data-report-meetingnotes]').addEventListener('click', downloadMeetingNotesReport);
     }
 
     // ---------- Shared Calendar (org-wide — not scoped to
@@ -7882,7 +8048,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const NON_TROOP_GROUP_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY];
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
       [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
-      [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'reports', 'sharedcal'],
+      [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'meetingnotes', 'reports', 'sharedcal'],
       [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'content', 'credentials', 'sharedcal'],
     };
     // Inventory/Event Calendar are Music-only, Public Relations is
@@ -7893,7 +8059,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // every troop gets it too, same as Roster/Finance, so it isn't in
     // this list at all.
     const MUSIC_ONLY_TABS = ['inventory', 'events'];
-    const GENERAL_ONLY_TABS = ['pr'];
+    const GENERAL_ONLY_TABS = ['pr', 'meetingnotes'];
     const SOCIAL_MEDIA_ONLY_TABS = ['content', 'credentials'];
     function isTabHidden(tab: string) {
       const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
@@ -7955,6 +8121,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'events') loadEvents();
       if (tab === 'vendors') loadVendors();
       if (tab === 'pr') loadPR();
+      if (tab === 'meetingnotes') loadMeetingNotes();
       if (tab === 'content') loadContent();
       if (tab === 'credentials') loadCredentials();
       if (tab === 'library') loadLibrary();
@@ -8150,6 +8317,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindPrContactForm();
         bindPRLibraryUpload();
         bindPRCategories();
+        bindMeetingNoteForm();
         bindContentForm();
         bindContentCategories();
         bindCredForm();
@@ -8165,6 +8333,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindTableSearch(els.vendorSearch, els.vendorBody);
         bindTableSearch(els.sponsorSearch, els.sponsorBody);
         bindTableSearch(els.prcSearch, els.prcBody);
+        bindTableSearch(els.mnSearch, els.mnBody);
         bindTableSearch(els.credSearch, els.credBody);
         currBindStatics();
         bindAttendance();

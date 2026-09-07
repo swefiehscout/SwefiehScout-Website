@@ -376,6 +376,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <p class="ws-report-desc">Every clergy, organization, school, media, and government contact General has on file. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-main-prcontacts>Download PDF</button>
             </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Meeting Notes Report</h3>
+              <p class="ws-report-desc">Every board meeting General logged in the period, with its title and full notes.</p>
+              <button type="button" class="btn-primary" data-report-main-meetingnotes>Download PDF</button>
+            </div>
           </div>
         </section>
 
@@ -2718,6 +2723,28 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
+    // Period-dependent — every board meeting General logged in the period.
+    async function downloadMeetingNotesReportMain() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const { data, error } = await db.from('meeting_notes').select('*').eq('group_key', GENERAL_GROUP_KEY)
+          .gte('meeting_date', start).lte('meeting_date', end).order('meeting_date', { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Meeting Notes', `${label}, ${rows.length} meeting${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9, valign: 'top' },
+          columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 40 } },
+          head: [['Date', 'Title', 'Notes']],
+          body: rows.length ? rows.map((n: any) => [n.meeting_date, n.title, n.notes]) : [['No meetings logged this period', '', '']],
+        });
+        doc.save(pdfFilename('Meeting-Notes', label));
+      } catch (err) {
+        console.error('meeting notes report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
     // Not period-dependent — every group's own vendors, plus every
     // shared vendor (labeled with which group(s) it's shared into).
     async function downloadVendorReport() {
@@ -2781,6 +2808,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       el('[data-report-main-sm-credentials]').addEventListener('click', downloadSocialMediaCredentialsReport);
       el('[data-report-main-sponsors]').addEventListener('click', downloadSponsorsReportMain);
       el('[data-report-main-prcontacts]').addEventListener('click', downloadPrContactsReportMain);
+      el('[data-report-main-meetingnotes]').addEventListener('click', downloadMeetingNotesReportMain);
     }
 
     // ---------- Curriculum: next meeting per troop --------------------------

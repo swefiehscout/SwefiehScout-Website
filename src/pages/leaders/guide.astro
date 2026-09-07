@@ -137,6 +137,16 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     ],
   },
   {
+    id: 'meetingnotes', label: 'Meeting Notes', icon: 'flag',
+    intro: "What the board actually discussed and decided at a meeting. General only.",
+    lines: [
+      "Log a date, a title, and the notes, discussion, decisions, who's doing what next.",
+      "Separate from Shared Calendar, which only schedules a meeting, not what happened at it.",
+      'Search to find an old one, Edit to fix it up, or delete it.',
+      "Download a PDF of a period's meetings from the Reports tab anytime.",
+    ],
+  },
+  {
     id: 'content', label: 'Content Calendar', icon: 'sparkle',
     intro: "Plan what gets posted and when. Social Media only.",
     lines: [
@@ -183,7 +193,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       'Troops: Income Statement, Monthly Fees, Attendance, Curriculum, Roster, Vendors.',
       'Music: Music Finance Report, Inventory, Inventory Adjustments, Music Event Report, Maintenance, Roster, Vendors.',
       'Social Media: Social Media Finance Report, Content Calendar, Credentials, Vendors.',
-      'General: Income Statement, Sponsors, Community & Church Contacts, Vendors.',
+      'General: Income Statement, Sponsors, Community & Church Contacts, Meeting Notes, Vendors.',
       "Pick a single month, a whole year, or a custom range spanning several months, whichever a report needs. Roster and Vendors (and Sponsors/Contacts/Credentials where they apply) aren't tied to a date at all.",
     ],
   },

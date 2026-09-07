@@ -4834,6 +4834,10 @@ body.ws-scroll-locked { overflow: hidden; }
 }
 .ws-table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--color-border); vertical-align: middle; white-space: nowrap; }
 .ws-table tr:last-child td { border-bottom: 0; }
+/* Opt out of the default nowrap for a cell that can genuinely run long
+   (Meeting Notes' own free-text Notes column, several sentences rather
+   than the short one-liners most other Notes columns hold). */
+.ws-table td.ws-cell-wrap { white-space: normal; min-width: 16rem; }
 .ws-table tbody tr:hover { background: var(--color-bg); }
 /* Live row position (1, 2, 3...), added to every .ws-table by
    initRowNumbering() — see src/lib/workspace/row-numbers.ts. Narrow and
