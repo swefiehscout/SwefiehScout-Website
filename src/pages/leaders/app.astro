@@ -93,6 +93,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="credentials"><Icon name="lock" size={16} strokeWidth={1.8} /> Credentials</button>
         <button type="button" class="ws-tab" data-tab="library"><Icon name="diamond" size={16} strokeWidth={1.8} /> Library</button>
         <button type="button" class="ws-tab" data-tab="reports"><Icon name="envelope" size={16} strokeWidth={1.8} /> Reports</button>
+        <!-- Leaders group only (see LEADERS_GROUP_KEY) — admin-only in
+             practice, see that constant's own comment for how. -->
+        <button type="button" class="ws-tab" data-tab="leaderdashboard"><Icon name="compass" size={16} strokeWidth={1.8} /> Dashboard</button>
+        <button type="button" class="ws-tab" data-tab="leaderroster"><Icon name="star" size={16} strokeWidth={1.8} /> Roster</button>
+        <button type="button" class="ws-tab" data-tab="leaderattendance"><Icon name="calendar" size={16} strokeWidth={1.8} /> Attendance</button>
       </nav>
 
       <!-- Shown above every tab's content (not just the header switcher up
@@ -1509,6 +1514,76 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         </section>
 
+        <!-- ================= Leaders (admin-only — see LEADERS_GROUP_KEY)
+             Attendance, Roster, and a performance Dashboard, all sourced
+             from `profiles`/leader_attendance rather than a troop's own
+             members/attendance tables — see each function's own comment
+             for why. ==================== -->
+        <section class="ws-panel" data-panel="leaderdashboard" hidden>
+          <p class="ws-att-hint">Every leader's attendance record, org-wide — logged from the Attendance tab (Leaders Meetings and each troop's own meeting). Sorted worst-first so anyone who needs a nudge is easy to spot.</p>
+          <div class="ws-dash-kpis" data-ldash-kpis></div>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-ldash-table>
+              <thead>
+                <tr><th>Name</th><th>Role</th><th>Attended</th><th>Rate</th><th>Last attended</th></tr>
+              </thead>
+              <tbody data-ldash-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="leaderroster" hidden>
+          <p class="ws-att-hint">Every approved leader across every group, read-only here — roles and group access are still only ever changed from <a href="/admin">Admin → People</a>.</p>
+          <input type="search" class="ws-search" data-lroster-search placeholder="Search leaders…" />
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-lroster-table>
+              <thead>
+                <tr><th>Name</th><th>Role</th><th>Groups</th><th>Member since</th></tr>
+              </thead>
+              <tbody data-lroster-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="leaderattendance" hidden>
+          <div class="ws-att-layout">
+            <div class="ws-att-calendar">
+              <div class="curr-nav">
+                <button type="button" class="curr-nav-btn" data-latt-prev aria-label="Previous month">‹</button>
+                <button type="button" class="curr-nav-btn" data-latt-next aria-label="Next month">›</button>
+              </div>
+              <p class="curr-nav-label" data-latt-month-label></p>
+              <div class="curr-weekday-row" data-latt-weekday-row></div>
+              <div class="curr-month-cells" data-latt-calendar></div>
+            </div>
+            <div class="ws-att-list">
+              <div class="ws-att-date-banner">
+                <button type="button" class="ws-att-day-nav" data-latt-day-prev aria-label="Previous day">‹</button>
+                <span class="ws-att-date-banner-text">
+                  <span class="ws-att-date-banner-label">Taking attendance for</span>
+                  <p class="ws-att-date-banner-value" data-latt-date-label></p>
+                </span>
+                <button type="button" class="ws-att-day-nav" data-latt-day-next aria-label="Next day">›</button>
+                <span class="ws-inline-summary" data-latt-summary></span>
+              </div>
+              <label class="ws-field ws-field--inline">
+                <span>Meeting</span>
+                <select data-latt-type></select>
+              </label>
+              <p class="ws-att-hint">Click any date on the calendar, past or future, to view or edit it. Switch "Meeting" to log a different meeting on the same day.</p>
+              <input type="search" class="ws-search" data-latt-search placeholder="Search leaders…" />
+              <div class="ws-table-wrap">
+                <table class="ws-table ws-table--compact-row" data-latt-table>
+                  <thead>
+                    <tr><th>Name</th><th>Role</th><th>Present</th></tr>
+                  </thead>
+                  <tbody data-latt-body></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- ================= Shared Calendar (every group + Admin) =====
              One calendar, org-wide — not scoped to state.activeGroup at
              all. Anyone approved can add to it; Music's own Event
@@ -2045,7 +2120,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     } from '../../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
-    import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY } from '../../lib/curriculum/constants';
+    import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES } from '../../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../../lib/workspace/row-numbers';
 
     // Loose alias for actual query calls below — supabaseConfigured is
@@ -2067,6 +2142,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       evt: { anchor: new Date(), currentDay: null },
       content: { anchor: new Date(), currentDay: null, view: 'calendar' },
       attAnchor: new Date(), attSelected: todayStr(), attDatesWithRecords: null,
+      allLeaders: [],
+      lattAnchor: new Date(), lattSelected: todayStr(), lattType: LEADER_MEETING_TYPES[0], lattDatesWithRecords: null,
       curr: { anchor: new Date(), meetings: new Map(), currentDay: null, channel: null },
       sc: { view: 'month', anchor: new Date(), currentDay: null },
       scEvents: [], scMusicEvents: [], editingScId: null, editingScOccurrenceDate: null, scRequests: [],
@@ -2252,6 +2329,22 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.attBody = el('[data-att-body]');
       els.attSearch = el('[data-att-search]');
       els.attSummary = el('[data-att-summary]');
+      els.ldashKpis = el('[data-ldash-kpis]');
+      els.ldashBody = el('[data-ldash-body]');
+      els.lrosterSearch = el('[data-lroster-search]');
+      els.lrosterBody = el('[data-lroster-body]');
+      els.lattCalendar = el('[data-latt-calendar]');
+      els.lattWeekdayRow = el('[data-latt-weekday-row]');
+      els.lattMonthLabel = el('[data-latt-month-label]');
+      els.lattDateLabel = el('[data-latt-date-label]');
+      els.lattPrev = el('[data-latt-prev]');
+      els.lattNext = el('[data-latt-next]');
+      els.lattDayPrev = el('[data-latt-day-prev]');
+      els.lattDayNext = el('[data-latt-day-next]');
+      els.lattType = el('[data-latt-type]');
+      els.lattBody = el('[data-latt-body]');
+      els.lattSearch = el('[data-latt-search]');
+      els.lattSummary = el('[data-latt-summary]');
       els.feeMonth = el('[data-fee-month]');
       els.feeYear = el('[data-fee-year]');
       els.feeDefault = el('[data-fee-default]');
@@ -5299,6 +5392,268 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
+    // ---------- Leaders (admin-only — see LEADERS_GROUP_KEY): every
+    // approved leader's account, org-wide, not scoped to any one group.
+    // Roster is a read-only view of `profiles` (role leader/admin) — no
+    // add/edit here at all, that still only ever happens from Admin's
+    // own People tab (peopleGroupsCellHTML). Attendance and the
+    // Dashboard both key off that same list plus leader_attendance.
+    async function fetchAllLeaders() {
+      const { data, error } = await db.from('profiles').select('*').in('role', ['leader', 'admin']).order('name', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load leaders.'); return []; }
+      return data || [];
+    }
+    // Lazy-cached the same way ensureVendorsLoaded() is — Attendance and
+    // the Dashboard both need the list but don't need to force a fresh
+    // fetch every time the way Roster's own load does.
+    async function ensureAllLeadersLoaded() {
+      if (state.allLeaders.length) return;
+      state.allLeaders = await fetchAllLeaders();
+    }
+
+    // ---- Roster (read-only) ----
+    async function loadLeaderRoster() {
+      state.allLeaders = await fetchAllLeaders();
+      renderLeaderRoster();
+    }
+    function leaderGroupsLabel(p: any) {
+      if (p.role === 'admin') return 'All groups (admin)';
+      if (!p.groups || !p.groups.length) return '—';
+      return p.groups.map((k: string) => GROUPS.find((g: any) => g.key === k)?.en || k).join(', ');
+    }
+    function renderLeaderRoster() {
+      if (!state.allLeaders.length) {
+        els.lrosterBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No approved leaders yet.</td></tr>';
+        return;
+      }
+      els.lrosterBody.innerHTML = state.allLeaders.map((p: any) => `
+        <tr>
+          <td data-label="Name">${escapeHtml(p.name)}</td>
+          <td data-label="Role">${p.role === 'admin' ? 'Admin' : 'Leader'}</td>
+          <td data-label="Groups">${escapeHtml(leaderGroupsLabel(p))}</td>
+          <td data-label="Member since">${p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ---- Attendance — same calendar + tick-to-mark-present pattern as
+    // the troops' own Attendance tab (see loadAttendance()), keyed by
+    // (meeting_type, date) instead of just (group_key, date) so more
+    // than one kind of meeting can be logged on the same day — pick
+    // "Leaders Meeting" for a general leadership meeting, or one of the
+    // 5 troop names to mark whether that troop's own leader showed up to
+    // run it. See LEADER_MEETING_TYPES. ----
+    async function loadLeaderAttendance() {
+      await ensureAllLeadersLoaded();
+      if (!els.lattType.children.length) {
+        els.lattType.innerHTML = LEADER_MEETING_TYPES.map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+      }
+      els.lattType.value = state.lattType;
+      if (!els.lattWeekdayRow.children.length) {
+        els.lattWeekdayRow.innerHTML = WEEKDAYS.map((w) => `<div class="curr-weekday">${w.en}</div>`).join('');
+      }
+      const first = new Date(state.lattAnchor.getFullYear(), state.lattAnchor.getMonth(), 1);
+      const last = new Date(state.lattAnchor.getFullYear(), state.lattAnchor.getMonth() + 1, 0);
+      const gridStart = startOfWeek(first);
+      const gridEnd = addDays(startOfWeek(last), 6);
+      const { data, error } = await db.from('leader_attendance').select('date').eq('group_key', LEADERS_GROUP_KEY).eq('meeting_type', state.lattType)
+        .gte('date', toDateStr(gridStart)).lte('date', toDateStr(gridEnd));
+      if (error) { console.error(error); showToast('Could not load attendance.'); return; }
+      state.lattDatesWithRecords = new Set((data || []).map((r: any) => r.date));
+      renderLattCalendar();
+      await loadLattDay();
+    }
+    function renderLattCalendar() {
+      const anchor = state.lattAnchor;
+      const y = anchor.getFullYear(), mo = anchor.getMonth();
+      const first = new Date(y, mo, 1);
+      const last = new Date(y, mo + 1, 0);
+      const start = startOfWeek(first);
+      const end = addDays(startOfWeek(last), 6);
+      const today = todayStr();
+      els.lattMonthLabel.textContent = `${MONTHS[mo].en} ${y}`;
+      let html = '';
+      let d = new Date(start);
+      while (d <= end) {
+        const dateStr = toDateStr(d);
+        const inMonth = d.getMonth() === mo;
+        const cls = [
+          'curr-day-cell',
+          !inMonth && 'curr-day-cell--out',
+          dateStr === today && 'curr-day-cell--today',
+          dateStr === state.lattSelected && 'curr-day-cell--selected',
+          state.lattDatesWithRecords?.has(dateStr) && 'curr-day-cell--has',
+        ].filter(Boolean).join(' ');
+        const hasRecords = state.lattDatesWithRecords?.has(dateStr);
+        html += `<div class="${cls}" data-date="${dateStr}" style="min-height:auto;cursor:pointer;">
+          <span class="curr-day-num">${d.getDate()}</span>
+          ${hasRecords ? '<span class="ws-att-dot" aria-hidden="true"></span>' : ''}
+        </div>`;
+        d = addDays(d, 1);
+      }
+      els.lattCalendar.innerHTML = html;
+      els.lattCalendar.querySelectorAll('.curr-day-cell').forEach((cell: any) => {
+        cell.addEventListener('click', () => {
+          state.lattSelected = cell.dataset.date;
+          renderLattCalendar();
+          loadLattDay();
+        });
+      });
+    }
+    async function loadLattDay() {
+      const date = state.lattSelected;
+      const d = parseDateStr(date);
+      els.lattDateLabel.textContent = `${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}, ${d.getFullYear()}`;
+      const { data, error } = await db.from('leader_attendance').select('*').eq('group_key', LEADERS_GROUP_KEY).eq('meeting_type', state.lattType).eq('date', date);
+      if (error) { console.error(error); showToast('Could not load attendance.'); return; }
+      const map: Map<string, any> = new Map((data || []).map((r: any) => [r.leader_id, r]));
+      renderLattList(map, date);
+    }
+    function renderLattList(map: Map<string, any>, date: string) {
+      if (!state.allLeaders.length) {
+        els.lattBody.innerHTML = '<tr><td colspan="3" class="ws-empty">No approved leaders yet.</td></tr>';
+        els.lattSummary.textContent = '';
+        return;
+      }
+      let presentCount = 0;
+      els.lattBody.innerHTML = state.allLeaders.map((p: any) => {
+        const rec: any = map.get(p.id);
+        if (rec && rec.present) presentCount++;
+        return `
+          <tr data-leader-id="${p.id}">
+            <td data-label="Name">${escapeHtml(p.name)}</td>
+            <td data-label="Role">${p.role === 'admin' ? 'Admin' : 'Leader'}</td>
+            <td data-label="Present"><input type="checkbox" data-latt-present ${rec && rec.present ? 'checked' : ''} /></td>
+          </tr>`;
+      }).join('');
+      els.lattSummary.textContent = `${presentCount} of ${state.allLeaders.length} present`;
+      els.lattBody.querySelectorAll('tr').forEach((row: any) => {
+        const leaderId = row.dataset.leaderId;
+        row.querySelector('[data-latt-present]').addEventListener('change', () => {
+          saveLeaderAttendance(leaderId, date, row.querySelector('[data-latt-present]').checked);
+        });
+      });
+    }
+    // Same unchecked-means-no-record convention as saveAttendance() —
+    // see its own comment for why (no phantom present:false rows).
+    async function saveLeaderAttendance(leaderId: string, date: string, present: boolean) {
+      const meetingType = state.lattType;
+      const error = present
+        ? (await db.from('leader_attendance').upsert({
+            group_key: LEADERS_GROUP_KEY, meeting_type: meetingType, date, leader_id: leaderId, present,
+            updated_by: state.session.user.id,
+          }, { onConflict: 'group_key,meeting_type,date,leader_id' })).error
+        : (await db.from('leader_attendance').delete()
+            .eq('group_key', LEADERS_GROUP_KEY).eq('meeting_type', meetingType).eq('date', date).eq('leader_id', leaderId)).error;
+      if (error) { console.error(error); showToast('Could not save attendance.'); return; }
+      if (!state.lattDatesWithRecords) state.lattDatesWithRecords = new Set();
+      const stillHasRecords = els.lattBody.querySelectorAll('[data-latt-present]:checked').length > 0;
+      if (stillHasRecords) state.lattDatesWithRecords.add(date); else state.lattDatesWithRecords.delete(date);
+      renderLattCalendar();
+      const total = els.lattBody.querySelectorAll('[data-latt-present]').length;
+      const presentNow = els.lattBody.querySelectorAll('[data-latt-present]:checked').length;
+      els.lattSummary.textContent = `${presentNow} of ${total} present`;
+    }
+    function bindLeaderAttendance() {
+      els.lattPrev.addEventListener('click', () => {
+        state.lattAnchor = new Date(state.lattAnchor.getFullYear(), state.lattAnchor.getMonth() - 1, 1);
+        loadLeaderAttendance();
+      });
+      els.lattNext.addEventListener('click', () => {
+        state.lattAnchor = new Date(state.lattAnchor.getFullYear(), state.lattAnchor.getMonth() + 1, 1);
+        loadLeaderAttendance();
+      });
+      const stepDay = (n: number) => {
+        const next = addDays(parseDateStr(state.lattSelected), n);
+        state.lattSelected = toDateStr(next);
+        if (next.getMonth() !== state.lattAnchor.getMonth() || next.getFullYear() !== state.lattAnchor.getFullYear()) {
+          state.lattAnchor = new Date(next.getFullYear(), next.getMonth(), 1);
+          loadLeaderAttendance();
+        } else {
+          renderLattCalendar();
+          loadLattDay();
+        }
+      };
+      els.lattDayPrev.addEventListener('click', () => stepDay(-1));
+      els.lattDayNext.addEventListener('click', () => stepDay(1));
+      els.lattType.addEventListener('change', () => {
+        state.lattType = els.lattType.value;
+        loadLeaderAttendance();
+      });
+    }
+
+    // ---- Dashboard — "assess their performance": each leader's own
+    // attendance rate against every meeting logged in leader_attendance
+    // (any type, all-time). Only present rows are ever stored (see
+    // saveLeaderAttendance()), so a meeting's own total attendee count
+    // isn't recoverable from a single leader's rows — totalMeetings is
+    // the count of distinct (date, meeting_type) pairs across the whole
+    // table instead, i.e. "how many meetings has anyone been logged at".
+    // A leader who joined after some of those meetings just has a lower
+    // count to work with, same as a troop member who joined mid-year on
+    // the org-wide Overview's own attendance rate. ----
+    function leaderAttendanceRateBadgeClass(rate: number | null) {
+      if (rate == null) return 'ws-badge--fair';
+      if (rate >= 90) return 'ws-badge--good';
+      if (rate >= 70) return 'ws-badge--fair';
+      return 'ws-badge--poor';
+    }
+    async function loadLeaderDashboard() {
+      await ensureAllLeadersLoaded();
+      const { data, error } = await db.from('leader_attendance').select('leader_id, date, meeting_type, present').eq('group_key', LEADERS_GROUP_KEY);
+      if (error) { console.error(error); showToast('Could not load the dashboard.'); return; }
+      const rows = data || [];
+      const totalMeetings = new Set(rows.map((r: any) => `${r.meeting_type}|${r.date}`)).size;
+      const byLeader = new Map<string, { attended: number; last: string | null }>();
+      rows.forEach((r: any) => {
+        if (!r.present) return;
+        const cur = byLeader.get(r.leader_id) || { attended: 0, last: null };
+        cur.attended += 1;
+        if (!cur.last || r.date > cur.last) cur.last = r.date;
+        byLeader.set(r.leader_id, cur);
+      });
+      renderLeaderDashboard(totalMeetings, byLeader);
+    }
+    function renderLeaderDashboard(totalMeetings: number, byLeader: Map<string, { attended: number; last: string | null }>) {
+      const withRates = state.allLeaders.map((p: any) => {
+        const rec = byLeader.get(p.id) || { attended: 0, last: null };
+        const rate = totalMeetings ? Math.round((rec.attended / totalMeetings) * 100) : null;
+        return { p, attended: rec.attended, last: rec.last, rate };
+      });
+      const withHistory = withRates.filter((r: any) => r.rate != null);
+      const avgRate = withHistory.length ? Math.round(withHistory.reduce((s: number, r: any) => s + r.rate, 0) / withHistory.length) : null;
+      const belowThreshold = withHistory.filter((r: any) => r.rate < 70).length;
+      els.ldashKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">☰</span><span class="ws-dash-kpi-label">Meetings logged</span></div>
+          <span class="ws-dash-kpi-num">${totalMeetings}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⟳</span><span class="ws-dash-kpi-label">Avg. attendance rate</span></div>
+          <span class="ws-dash-kpi-num">${avgRate != null ? avgRate + '%' : '—'}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">!</span><span class="ws-dash-kpi-label">Below 70%</span></div>
+          <span class="ws-dash-kpi-num">${belowThreshold}</span>
+        </div>
+      `;
+      // Worst-first so whoever needs a nudge is the first thing an admin sees.
+      withRates.sort((a: any, b: any) => (a.rate ?? -1) - (b.rate ?? -1));
+      if (!withRates.length) {
+        els.ldashBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No approved leaders yet.</td></tr>';
+        return;
+      }
+      els.ldashBody.innerHTML = withRates.map((r: any) => `
+        <tr>
+          <td data-label="Name">${escapeHtml(r.p.name)}</td>
+          <td data-label="Role">${r.p.role === 'admin' ? 'Admin' : 'Leader'}</td>
+          <td data-label="Attended">${r.attended} / ${totalMeetings}</td>
+          <td data-label="Rate"><span class="ws-badge ${leaderAttendanceRateBadgeClass(r.rate)}">${r.rate != null ? r.rate + '%' : '—'}</span></td>
+          <td data-label="Last attended">${r.last || '—'}</td>
+        </tr>
+      `).join('');
+    }
+
     // ---------- Content Calendar (Social Media only): a calendar + board
     // view over the same content_items, plus its own category Settings --
     const DEFAULT_CONTENT_PLATFORM_CATEGORIES = ['Instagram', 'Facebook', 'TikTok', 'X (Twitter)', 'YouTube', 'Other'];
@@ -8016,16 +8371,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           renderGroupSwitch();
           refreshApprovalsBadge();
           refreshEventsBadge();
-          // Music/General only show a cut-down tab set —
+          // Music/General/Leaders only show a cut-down tab set —
           // updateTabVisibility() (called from renderGroupSwitch()) already
           // hid the rest, so a switch that leaves an invalid tab active
           // needs to land somewhere visible instead of just reloading a
-          // now-hidden panel.
-          // Inventory is Music-only (see MUSIC_ONLY_TABS below) on top of
-          // the NON_TROOP_TAB_VISIBILITY inclusion list, since troops
-          // aren't in that map at all — isTabHidden() covers both.
+          // now-hidden panel. Landing on the new group's own first visible
+          // tab (rather than a hardcoded 'finance') matters now that
+          // Leaders doesn't have a Finance tab at all — 'finance' would've
+          // silently un-hidden that panel's content regardless of its nav
+          // button being hidden, since setTab() only ever looks at
+          // dataset.panel, never isTabHidden().
           if (isTabHidden(state.activeTab)) {
-            setTab('finance');
+            const firstVisible = els.tabs.querySelector('.ws-tab:not([hidden]):not([data-admin-only])');
+            setTab(firstVisible ? (firstVisible as any).dataset.tab : 'finance');
           } else {
             loadActiveTabData();
           }
@@ -8046,25 +8404,35 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // group switch, not just once, so leaving one restores every other
     // tab.
     const NON_TROOP_GROUP_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY];
+    // Leaders (see LEADERS_GROUP_KEY) is deliberately left out of the
+    // list above — it has no `members` roster or fee-collecting members
+    // at all (its own Roster/Attendance read from profiles/
+    // leader_attendance instead), so copyMemberBlock/feesTabHint/
+    // data-troop-only never apply to it either way; those all live
+    // inside panels (roster/fees/library) that isTabHidden() already
+    // hides entirely for Leaders, so it doesn't need to be in this list
+    // for any of that to behave correctly.
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
       [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
       [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'meetingnotes', 'reports', 'sharedcal'],
       [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'content', 'credentials', 'sharedcal'],
+      [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderattendance', 'sharedcal'],
     };
     // Inventory/Event Calendar are Music-only, Public Relations is
-    // General-only, Content Calendar/Credentials are Social-Media-only —
-    // troops aren't in NON_TROOP_TAB_VISIBILITY at all, so each group's
-    // own inclusion list above doesn't hide anything for them; this
-    // covers that case for all 3. Vendors, unlike those, is universal —
-    // every troop gets it too, same as Roster/Finance, so it isn't in
-    // this list at all.
+    // General-only, Content Calendar/Credentials are Social-Media-only,
+    // the leaderX tabs are Leaders-only — troops aren't in
+    // NON_TROOP_TAB_VISIBILITY at all, so each group's own inclusion
+    // list above doesn't hide anything for them; this covers that case
+    // for all 4. Vendors, unlike those, is universal — every troop gets
+    // it too, same as Roster/Finance, so it isn't in this list at all.
     const MUSIC_ONLY_TABS = ['inventory', 'events'];
     const GENERAL_ONLY_TABS = ['pr', 'meetingnotes'];
     const SOCIAL_MEDIA_ONLY_TABS = ['content', 'credentials'];
+    const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderattendance'];
     function isTabHidden(tab: string) {
       const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
       if (visible) return !visible.includes(tab);
-      return MUSIC_ONLY_TABS.includes(tab) || GENERAL_ONLY_TABS.includes(tab) || SOCIAL_MEDIA_ONLY_TABS.includes(tab);
+      return MUSIC_ONLY_TABS.includes(tab) || GENERAL_ONLY_TABS.includes(tab) || SOCIAL_MEDIA_ONLY_TABS.includes(tab) || LEADERS_ONLY_TABS.includes(tab);
     }
     function updateTabVisibility() {
       els.tabs.querySelectorAll('.ws-tab:not([data-admin-only])').forEach((btn: any) => {
@@ -8127,6 +8495,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'library') loadLibrary();
       if (tab === 'curriculum') currStart();
       if (tab === 'sharedcal') loadSharedCal();
+      if (tab === 'leaderdashboard') loadLeaderDashboard();
+      if (tab === 'leaderroster') loadLeaderRoster();
+      if (tab === 'leaderattendance') loadLeaderAttendance();
     }
 
     function setTab(tab: any) {
@@ -8335,8 +8706,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindTableSearch(els.prcSearch, els.prcBody);
         bindTableSearch(els.mnSearch, els.mnBody);
         bindTableSearch(els.credSearch, els.credBody);
+        bindTableSearch(els.lrosterSearch, els.lrosterBody);
+        bindTableSearch(els.lattSearch, els.lattBody);
         currBindStatics();
         bindAttendance();
+        bindLeaderAttendance();
         els.feeMonth.addEventListener('change', loadFees);
         els.feeYear.addEventListener('change', loadFees);
         els.feeDefault.addEventListener('blur', saveDefaultFee);

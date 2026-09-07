@@ -838,7 +838,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     } from '../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
-    import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY } from '../lib/curriculum/constants';
+    import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY } from '../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../lib/workspace/row-numbers';
 
     const db: any = supabase;
@@ -3667,9 +3667,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (error) { console.error(error); showToast('Could not load people.'); return; }
       renderPeople(data || []);
     }
+    // Leaders (see LEADERS_GROUP_KEY) is left off this checklist on
+    // purpose — that's the entire enforcement mechanism keeping it
+    // admin-only: an admin already gets every group automatically (see
+    // setupGroups() in leaders/app.astro), and there's simply no way to
+    // check a leader profile into a group that's never offered here.
+    const ASSIGNABLE_GROUPS = GROUPS.filter((g) => g.key !== LEADERS_GROUP_KEY);
     function peopleGroupsCellHTML(groups: string[], isAdmin: boolean) {
       if (isAdmin) return '<p class="ws-admin-note">All groups (admin)</p>';
-      return GROUPS.map((g) => `
+      return ASSIGNABLE_GROUPS.map((g) => `
         <label class="ws-group-check">
           <input type="checkbox" value="${g.key}" ${groups.includes(g.key) ? 'checked' : ''} />
           ${escapeHtml(g.en)}

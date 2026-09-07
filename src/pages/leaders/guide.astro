@@ -36,6 +36,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       "The bar under the tabs always shows which group you're viewing.",
       "The 5 troops (Baraem, Ashbal & Zahrat, Mubtadi, Mutaqaddim, Jawalah) get the full set of tabs below.",
       "Music, Social Media, and General aren't scout troops, so each sees its own smaller, tailored set of tabs instead — no Dashboard, Attendance, Fees, or Curriculum for any of them.",
+      "Leaders is a 4th one like that, admin-only — see its own section below.",
     ],
   },
   {
@@ -195,6 +196,15 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       'Social Media: Social Media Finance Report, Content Calendar, Credentials, Vendors.',
       'General: Income Statement, Sponsors, Community & Church Contacts, Meeting Notes, Vendors.',
       "Pick a single month, a whole year, or a custom range spanning several months, whichever a report needs. Roster and Vendors (and Sponsors/Contacts/Credentials where they apply) aren't tied to a date at all.",
+    ],
+  },
+  {
+    id: 'leaders', label: 'Leaders', icon: 'star', adminOnly: true,
+    intro: "A way to assess every leader's own attendance, admin-only — nobody else's profile can ever be set to see this group.",
+    lines: [
+      "Roster: every approved leader across every group, read-only — roles and group access are still only ever changed from Admin → People.",
+      'Attendance: log who showed up, same as a troop\'s own Attendance tab, but pick the "Meeting" first — a general Leaders Meeting, or one of the 5 troops\' own meetings (was that troop\'s leader there?).',
+      "Dashboard: each leader's attendance rate against every meeting logged, sorted worst-first so anyone who needs a nudge is easy to spot.",
     ],
   },
   {
