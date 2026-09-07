@@ -4887,6 +4887,26 @@ body.ws-scroll-locked { overflow: hidden; }
   cursor: pointer;
 }
 .ws-edit-btn:hover { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+/* Roster's own "Move to another troop" — the destination picker that
+   replaces a row's action buttons in place while it's open (see
+   startMoveMember()). Sized to sit inline with .ws-edit-btn/.ws-row-del
+   in the same actions cell instead of looking like a stray form field. */
+.ws-move-select {
+  padding: 0.28rem 1.6rem 0.28rem 0.55rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b5048' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 0.55rem;
+}
 .ws-allergy-badge {
   display: inline-block;
   padding: 0.2rem 0.55rem;

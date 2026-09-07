@@ -2151,7 +2151,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     } from '../../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
-    import { GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES } from '../../lib/curriculum/constants';
+    import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES } from '../../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../../lib/workspace/row-numbers';
 
     // Loose alias for actual query calls below — supabaseConfigured is
@@ -2870,14 +2870,24 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       await loadRoster();
     }
 
+    // Moving between troops (Baraem → Ashbal & Zahrat → Mubtadi →
+    // Mutaqaddim → Jawalah as a scout ages up) only makes sense for the
+    // 5 troops — Music/General/Social Media/Leaders already have their
+    // own "copy from another group's roster" flow instead (a duplicate,
+    // not a move — someone can be a scout AND a band member at once).
+    function isTroopGroup(key: string) {
+      return TROOP_GROUPS.some((g) => g.key === key);
+    }
     function renderRoster() {
       const active = state.members.filter((m: any) => m.active);
+      const canMove = isTroopGroup(state.activeGroup);
       if (!active.length) {
         els.rosterBody.innerHTML = '<tr><td colspan="12" class="ws-empty">No members yet, add the first one below.</td></tr>';
         return;
       }
       els.rosterBody.innerHTML = active.map((m: any) => memberRowHTML(m, `
         <button type="button" class="ws-edit-btn" data-edit-member>Edit</button>
+        ${canMove ? '<button type="button" class="ws-edit-btn" data-move-member>Move</button>' : ''}
         <button type="button" class="ws-edit-btn" data-archive-member>Archive</button>
         <button type="button" class="ws-row-del" data-del-member title="Delete permanently">×</button>
       `)).join('');
@@ -2885,8 +2895,40 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.rosterBody.querySelectorAll('tr').forEach((row: any) => {
         const id = row.dataset.memberId;
         row.querySelector('[data-edit-member]').addEventListener('click', () => startEditMember(id));
+        if (canMove) row.querySelector('[data-move-member]').addEventListener('click', () => startMoveMember(id));
         row.querySelector('[data-archive-member]').addEventListener('click', () => archiveMember(id));
         row.querySelector('[data-del-member]').addEventListener('click', () => deleteMemberForever(id));
+      });
+    }
+    // Swaps that one row's own actions cell for a destination picker,
+    // in place — no separate modal, no re-render of the rest of the
+    // table needed. Cancel (or a successful move, via loadRoster()) is
+    // what puts renderRoster()'s normal buttons back.
+    function startMoveMember(id: string) {
+      const m = state.members.find((x: any) => x.id === id);
+      if (!m) return;
+      const row = els.rosterBody.querySelector(`tr[data-member-id="${id}"]`);
+      const cell = row?.querySelector('.ws-row-actions');
+      if (!cell) return;
+      const destinations = TROOP_GROUPS.filter((g) => g.key !== state.activeGroup);
+      cell.innerHTML = `
+        <select class="ws-move-select" data-move-target>
+          ${destinations.map((g: any) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('')}
+        </select>
+        <button type="button" class="ws-edit-btn" data-move-confirm>Move</button>
+        <button type="button" class="ws-form-cancel" data-move-cancel>Cancel</button>
+      `;
+      cell.querySelector('[data-move-cancel]').addEventListener('click', renderRoster);
+      cell.querySelector('[data-move-confirm]').addEventListener('click', async () => {
+        const targetKey = cell.querySelector('[data-move-target]').value;
+        const from = GROUPS.find((g: any) => g.key === state.activeGroup);
+        const to = GROUPS.find((g: any) => g.key === targetKey);
+        if (!confirm(`Move ${m.full_name} from ${from?.en} to ${to?.en}? Their attendance and fee history up to today stays with ${from?.en} — anything logged from now on goes under ${to?.en} instead.`)) return;
+        const { error } = await db.from('members').update({ group_key: targetKey }).eq('id', id);
+        if (error) { console.error(error); showToast('Could not move, check your connection.'); return; }
+        if (state.editingMemberId === id) resetMemberForm();
+        showToast(`${m.full_name} moved to ${to?.en}.`);
+        await loadRoster();
       });
     }
 
