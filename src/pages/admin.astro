@@ -3673,14 +3673,48 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // setupGroups() in leaders/app.astro), and there's simply no way to
     // check a leader profile into a group that's never offered here.
     const ASSIGNABLE_GROUPS = GROUPS.filter((g) => g.key !== LEADERS_GROUP_KEY);
+    // A leader can also be given no real group at all — someone with no
+    // troop/committee of their own who still needs an account (to show
+    // up on the admin-only Leaders Dashboard, and/or to use Shared
+    // Calendar, the one feature that's genuinely ungated by group — see
+    // isTabHidden() in leaders/app.astro). That's just `groups: []`,
+    // same value an unconfigured brand-new leader already has — this
+    // checkbox is purely a friendlier, explicit way to set and see that
+    // state rather than leaving every box unchecked and looking
+    // unfinished. It isn't its own flag: checking it clears the real
+    // group boxes (bindPeopleGroupCheckboxes()), and its own checked
+    // state here just mirrors "no real group is checked" on render.
     function peopleGroupsCellHTML(groups: string[], isAdmin: boolean) {
       if (isAdmin) return '<p class="ws-admin-note">All groups (admin)</p>';
-      return ASSIGNABLE_GROUPS.map((g) => `
+      const realChecks = ASSIGNABLE_GROUPS.map((g) => `
         <label class="ws-group-check">
           <input type="checkbox" value="${g.key}" ${groups.includes(g.key) ? 'checked' : ''} />
           ${escapeHtml(g.en)}
         </label>
       `).join('');
+      return realChecks + `
+        <span class="ws-group-check-divider">or</span>
+        <label class="ws-group-check ws-group-check--special">
+          <input type="checkbox" data-calendar-only-check ${groups.length === 0 ? 'checked' : ''} />
+          Shared Calendar only
+        </label>
+      `;
+    }
+    // Wired up after every innerHTML assignment to a Groups cell (initial
+    // render and the role-switch re-render both call this) — the two
+    // checkbox kinds stay mutually exclusive by clearing whichever side
+    // wasn't just clicked, since "some real groups" and "no group at
+    // all" can't both be true.
+    function bindPeopleGroupCheckboxes(groupsCell: any) {
+      const calendarOnly = groupsCell.querySelector('[data-calendar-only-check]');
+      if (!calendarOnly) return; // admin row — just the "All groups" note, nothing to bind
+      const realChecks = groupsCell.querySelectorAll('.ws-group-check input:not([data-calendar-only-check])');
+      calendarOnly.addEventListener('change', () => {
+        if (calendarOnly.checked) realChecks.forEach((i: any) => { i.checked = false; });
+      });
+      realChecks.forEach((i: any) => {
+        i.addEventListener('change', () => { if (i.checked) calendarOnly.checked = false; });
+      });
     }
     function renderPeople(profiles: any) {
       els.peopleBody.innerHTML = profiles.map((p: any) => `
@@ -3707,15 +3741,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const id = row.dataset.profileId;
         const name = row.querySelector('[data-label="Name"]').textContent;
         const groupsCell = row.querySelector('.ws-admin-groups');
+        bindPeopleGroupCheckboxes(groupsCell);
         row.querySelector('[data-people-role]').addEventListener('change', (e: any) => {
           const savedGroups = (groupsCell.dataset.groups || '').split(',').filter(Boolean);
           groupsCell.innerHTML = peopleGroupsCellHTML(savedGroups, e.target.value === 'admin');
+          bindPeopleGroupCheckboxes(groupsCell);
         });
         row.querySelector('[data-people-save]').addEventListener('click', async () => {
           const role = row.querySelector('[data-people-role]').value;
           const groups = role === 'admin'
             ? []
-            : Array.from(row.querySelectorAll('.ws-group-check input:checked')).map((i: any) => i.value);
+            : Array.from(row.querySelectorAll('.ws-group-check input:checked:not([data-calendar-only-check])')).map((i: any) => i.value);
           const { error } = await db.from('profiles').update({ role, groups }).eq('id', id);
           if (error) { console.error(error); showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return; }
           showToast('Saved.');

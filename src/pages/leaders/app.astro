@@ -8434,7 +8434,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       updateTabVisibility();
       if (state.availableGroups.length <= 1) {
         const g = GROUPS.find((x) => x.key === state.availableGroups[0]);
-        els.groupSwitch.innerHTML = g ? `<span class="ws-single-group">${escapeHtml(g.en)}</span>` : '';
+        els.groupSwitch.innerHTML = `<span class="ws-single-group">${g ? escapeHtml(g.en) : 'No group — Shared Calendar only'}</span>`;
         return;
       }
       els.groupSwitch.innerHTML = state.availableGroups.map((key: any) => {
@@ -8515,6 +8515,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const SOCIAL_MEDIA_ONLY_TABS = ['content', 'credentials'];
     const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderattendance'];
     function isTabHidden(tab: string) {
+      // A leader approved with no group at all (see the People tab's
+      // "Shared Calendar only" option) — Shared Calendar is the one tab
+      // that's genuinely ungated at the database level (is_approved_leader(),
+      // no group_key column on it whatsoever), so it's the only thing
+      // that can ever make sense to show with no group selected. Without
+      // this check, a null activeGroup fell through to the *_ONLY_TABS
+      // fallback below and — since none of those name troop tabs like
+      // Roster/Attendance/Dashboard — wrongly left them all visible,
+      // even though nothing in them can load without a real group_key.
+      if (!state.activeGroup) return tab !== 'sharedcal';
       const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
       if (visible) return !visible.includes(tab);
       return MUSIC_ONLY_TABS.includes(tab) || GENERAL_ONLY_TABS.includes(tab) || SOCIAL_MEDIA_ONLY_TABS.includes(tab) || LEADERS_ONLY_TABS.includes(tab);
@@ -8807,8 +8817,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       refreshApprovalsBadge();
       refreshEventsBadge();
       {
+        // A groupless leader has no Dashboard (or anything else) to land
+        // on — Shared Calendar is the only tab isTabHidden() ever shows
+        // them, so it's the only sane landing spot.
         const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
-        setTab(visible && !visible.includes('dashboard') ? visible[0] : 'dashboard');
+        const landing = !state.activeGroup ? 'sharedcal' : (visible && !visible.includes('dashboard') ? visible[0] : 'dashboard');
+        setTab(landing);
       }
     }
 
