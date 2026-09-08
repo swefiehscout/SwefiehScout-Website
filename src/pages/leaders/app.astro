@@ -1880,14 +1880,46 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-dash-hero">
               <div class="ws-dash-hero-text">
                 <span class="ws-dash-eyebrow" data-sov-date></span>
-                <h2 class="ws-dash-title">Organization overview</h2>
-                <p class="ws-dash-sub">A read-only look at the whole organization — who leads what, and what's coming up.</p>
+                <h2 class="ws-dash-title" data-sov-greeting>Welcome back</h2>
+                <p class="ws-dash-sub">A look at the whole organization — who leads what, and what's coming up.</p>
               </div>
             </div>
+
+            <div class="band-marquee ws-dash-marquee" aria-label="Troop photos">
+              <div class="band-marquee-track" style={`--n: ${workspaceMarqueePhotos.length}`}>
+                {dashMarqueePhotos.map((src, i) => (
+                  <div class="band-marquee-slide">
+                    <img src={src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
+                  </div>
+                ))}
+              </div>
+              <div class="band-marquee-fade band-marquee-fade--start" aria-hidden="true"></div>
+              <div class="band-marquee-fade band-marquee-fade--end" aria-hidden="true"></div>
+            </div>
+
             <div class="ws-dash-kpis" data-sov-kpis></div>
+
+            <div class="ws-dash-grid">
+              <div class="ws-dash-card ws-dash-card--wide">
+                <div class="ws-dash-card-head">
+                  <h3>Groups</h3>
+                  <span class="ws-dash-card-sub">Who leads each one</span>
+                </div>
+                <div class="ws-dash-grid ws-dash-grid--3" data-sov-groups></div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Next up</h3></div>
+                <div data-sov-next></div>
+              </div>
+            </div>
+
             <div class="ws-dash-card ws-dash-card--full">
-              <div class="ws-dash-card-head"><h3>Groups</h3><span class="ws-dash-card-sub">Who leads each one</span></div>
-              <div class="ws-dash-grid ws-dash-grid--3" data-sov-groups></div>
+              <div class="ws-dash-card-head">
+                <h3>Upcoming on the calendar</h3>
+                <span class="ws-dash-card-sub" data-sov-cal-sub></span>
+              </div>
+              <div data-sov-calendar></div>
+              <button type="button" class="ws-dash-mini-link" data-sov-goto-calendar>Open Shared Calendar →</button>
             </div>
           </div>
         </section>
@@ -2721,8 +2753,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.lfuncCancel = el('[data-lfunc-cancel]');
       els.lfuncBody = el('[data-lfunc-body]');
       els.sovDate = el('[data-sov-date]');
+      els.sovGreeting = el('[data-sov-greeting]');
       els.sovKpis = el('[data-sov-kpis]');
       els.sovGroups = el('[data-sov-groups]');
+      els.sovNext = el('[data-sov-next]');
+      els.sovCalSub = el('[data-sov-cal-sub]');
+      els.sovCalendar = el('[data-sov-calendar]');
+      els.sovGotoCalendar = el('[data-sov-goto-calendar]');
       els.nmBody = el('[data-nm-body]');
       els.feeMonth = el('[data-fee-month]');
       els.feeYear = el('[data-fee-year]');
@@ -6617,9 +6654,21 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function loadSupportOverview() {
       await ensureAllLeadersLoaded();
       els.sovDate.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-      const { data, error } = await db.rpc('org_next_meetings');
-      if (error) console.error(error);
-      const meetings = data || [];
+      els.sovGreeting.textContent = dashGreeting();
+      const [meetingsRes, calRes] = await Promise.all([
+        db.rpc('org_next_meetings'),
+        // Raw event_date only — a recurring series' true next occurrence
+        // needs the same client-side expansion the Shared Calendar tab
+        // itself does (scDateMatchesRecurrence()), too heavy for a
+        // glance card; this is "what's on the books soon", the Shared
+        // Calendar tab (linked below) is the authoritative full schedule.
+        db.from('shared_calendar_events').select('id, title, event_date, event_time, event_end_time')
+          .gte('event_date', todayStr()).order('event_date', { ascending: true }).limit(6),
+      ]);
+      if (meetingsRes.error) console.error(meetingsRes.error);
+      if (calRes.error) console.error(calRes.error);
+      const meetings = meetingsRes.data || [];
+      const calEvents = calRes.data || [];
       const weekOut = toDateStr(addDays(new Date(), 7));
       const thisWeek = meetings.filter((m: any) => m.date <= weekOut).length;
       const troopCount = TROOP_GROUPS.length;
@@ -6651,6 +6700,37 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <p class="ws-dash-empty-mini">${groupLeaders.length ? escapeHtml(groupLeaders.map((p: any) => p.name).join(', ')) : 'No leader assigned yet.'}</p>
           </div>`;
       }).join('');
+      const soonest = meetings.length ? meetings.reduce((a: any, b: any) => (a.date <= b.date ? a : b)) : null;
+      if (soonest) {
+        const d = parseDateStr(soonest.date);
+        const g = GROUPS.find((x: any) => x.key === soonest.group_key);
+        els.sovNext.innerHTML = `
+          <p class="ws-dash-mini-date">${WEEKDAYS[d.getDay()].en}, ${MONTHS[d.getMonth()].en} ${d.getDate()}</p>
+          <p class="ws-dash-mini-theme">${escapeHtml(g ? g.en : soonest.group_key)}</p>
+          <p class="ws-dash-mini-sub">${escapeHtml(soonest.theme || 'Theme not set yet')}</p>
+        `;
+      } else {
+        els.sovNext.innerHTML = '<p class="ws-dash-empty-mini">Nothing planned yet.</p>';
+      }
+      els.sovCalSub.textContent = calEvents.length ? `Next ${calEvents.length}` : '';
+      els.sovCalendar.innerHTML = calEvents.length
+        ? calEvents.map((ev: any) => {
+            const d = parseDateStr(ev.event_date);
+            const dateLabel = `${MONTHS[d.getMonth()].en.slice(0, 3)} ${d.getDate()}`;
+            const timeLabel = ev.event_time ? scTimeRangeLabel(ev) : 'All day';
+            return `
+              <div class="ws-dash-feed-row">
+                <span class="ws-dash-feed-dot ws-dash-feed-dot--curriculum"></span>
+                <span class="ws-dash-feed-text">
+                  <span class="ws-dash-feed-title">${escapeHtml(ev.title)}</span>
+                  <span class="ws-dash-feed-date">${dateLabel} · ${timeLabel}</span>
+                </span>
+              </div>`;
+          }).join('')
+        : '<p class="ws-dash-empty-mini">Nothing on the calendar yet.</p>';
+    }
+    function bindSupportOverview() {
+      els.sovGotoCalendar.addEventListener('click', () => setTab('sharedcal'));
     }
     async function loadNextMeetings() {
       const { data, error } = await db.rpc('org_next_meetings');
@@ -9780,6 +9860,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindLeaderAttendance();
         bindLeaderDashboardRange();
         bindLeaderRosterForm();
+        bindSupportOverview();
         bindLeaderProfile();
         bindLeaderAssessment();
         bindLeaderFunctionForm();
