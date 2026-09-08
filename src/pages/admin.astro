@@ -3766,14 +3766,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // up on the admin-only Leaders Dashboard, and/or to use Shared
     // Calendar, the one feature that's genuinely ungated by group — see
     // isTabHidden() in leaders/app.astro). That's just `groups: []`,
-    // same value an unconfigured brand-new leader already has — this
-    // checkbox is purely a friendlier, explicit way to set and see that
-    // state rather than leaving every box unchecked and looking
-    // unfinished. It isn't its own flag: checking it clears the real
-    // group boxes (bindPeopleGroupCheckboxes()), and its own checked
-    // state here just mirrors "no real group is checked" on render.
-    function peopleGroupsCellHTML(groups: string[], isAdmin: boolean) {
-      if (isAdmin) return '<p class="ws-admin-note">All groups (admin)</p>';
+    // same value an unconfigured brand-new leader already has — which is
+    // exactly why this checkbox never pre-checks itself from `groups`
+    // being empty: a pending signup and a deliberate Support Leader
+    // share that same empty value, so mirroring it would preselect
+    // Support Leader for every still-pending person too. Instead this is
+    // a pure manual toggle — an admin ticks it themselves once they've
+    // actually decided someone is Support Leader — and it isn't its own
+    // flag either way: checking it just clears the real group boxes
+    // (bindPeopleGroupCheckboxes()), same as before.
+    function peopleGroupsCellHTML(groups: string[], role: string) {
+      if (role === 'admin') return '<p class="ws-admin-note">All groups (admin)</p>';
       const realChecks = ASSIGNABLE_GROUPS.map((g) => `
         <label class="ws-group-check">
           <input type="checkbox" value="${g.key}" ${groups.includes(g.key) ? 'checked' : ''} />
@@ -3783,7 +3786,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       return realChecks + `
         <span class="ws-group-check-divider">or</span>
         <label class="ws-group-check ws-group-check--special">
-          <input type="checkbox" data-calendar-only-check ${groups.length === 0 ? 'checked' : ''} />
+          <input type="checkbox" data-calendar-only-check />
           Support Leader
         </label>
       `;
@@ -3816,7 +3819,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </select>
           </td>
           <td class="ws-admin-groups" data-label="Groups" data-groups="${p.groups.join(',')}">
-            ${peopleGroupsCellHTML(p.groups, p.role === 'admin')}
+            ${peopleGroupsCellHTML(p.groups, p.role)}
           </td>
           <td class="ws-row-actions">
             <button type="button" class="btn-primary" data-people-save>Save</button>
@@ -3832,7 +3835,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindPeopleGroupCheckboxes(groupsCell);
         row.querySelector('[data-people-role]').addEventListener('change', (e: any) => {
           const savedGroups = (groupsCell.dataset.groups || '').split(',').filter(Boolean);
-          groupsCell.innerHTML = peopleGroupsCellHTML(savedGroups, e.target.value === 'admin');
+          groupsCell.innerHTML = peopleGroupsCellHTML(savedGroups, e.target.value);
           bindPeopleGroupCheckboxes(groupsCell);
         });
         row.querySelector('[data-people-save]').addEventListener('click', async () => {
