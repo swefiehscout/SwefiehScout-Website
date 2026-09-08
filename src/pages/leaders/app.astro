@@ -109,6 +109,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="leaderattendance"><Icon name="calendar" size={16} strokeWidth={1.8} /> Attendance</button>
         <button type="button" class="ws-tab" data-tab="leaderprofile"><Icon name="user" size={16} strokeWidth={1.8} /> Leader Profile</button>
         <button type="button" class="ws-tab" data-tab="leaderassessment"><Icon name="diamond" size={16} strokeWidth={1.8} /> Assessment</button>
+        <!-- Support Leader (an approved leader with no group at all,
+             activeGroup null — see SUPPORT_LEADER_TABS) — 2 tabs new to
+             them, plus the existing leaderroster button above (opened up
+             to them too, see isTabHidden()) and Shared Calendar below. -->
+        <button type="button" class="ws-tab" data-tab="supportoverview"><Icon name="compass" size={16} strokeWidth={1.8} /> Overview</button>
+        <button type="button" class="ws-tab" data-tab="nextmeetings"><Icon name="calendar" size={16} strokeWidth={1.8} /> Next Meetings</button>
       </nav>
 
       <!-- Shown above every tab's content (not just the header switcher up
@@ -1765,6 +1771,48 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         </section>
 
+        <!-- ================= Support Leader Overview (no group at all —
+             activeGroup null, see SUPPORT_LEADER_TABS): org-wide,
+             read-only. Every field here comes from a table/function any
+             approved leader can already read (profiles,
+             shared_calendar_events, org_next_meetings()) — see
+             support_leader_overview_schema.sql for the RLS this needed.
+             No member counts anywhere on this tab on purpose — `members`
+             stays behind each group's own has_group_access(), real scout
+             PII isn't part of this. ==================== -->
+        <section class="ws-panel" data-panel="supportoverview" hidden>
+          <div class="ws-dash">
+            <div class="ws-dash-hero">
+              <div class="ws-dash-hero-text">
+                <span class="ws-dash-eyebrow" data-sov-date></span>
+                <h2 class="ws-dash-title">Organization overview</h2>
+                <p class="ws-dash-sub">A read-only look at the whole organization — who leads what, and what's coming up.</p>
+              </div>
+            </div>
+            <div class="ws-dash-kpis" data-sov-kpis></div>
+            <div class="ws-dash-card ws-dash-card--full">
+              <div class="ws-dash-card-head"><h3>Groups</h3><span class="ws-dash-card-sub">Who leads each one</span></div>
+              <div class="ws-dash-grid ws-dash-grid--3" data-sov-groups></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= Next Meetings (Support Leader — see
+             SUPPORT_LEADER_TABS): the soonest planned meeting per group,
+             date + theme only — org_next_meetings() in
+             support_leader_overview_schema.sql deliberately leaves out
+             notes/materials/attachments, those stay behind that group's
+             own Curriculum tab. ==================== -->
+        <section class="ws-panel" data-panel="nextmeetings" hidden>
+          <p class="ws-att-hint">The next planned meeting for each group, date and theme only — the full curriculum plan stays inside that group's own workspace.</p>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-nm-table>
+              <thead><tr><th>Group</th><th>Date</th><th>Theme</th></tr></thead>
+              <tbody data-nm-body></tbody>
+            </table>
+          </div>
+        </section>
+
         <!-- ================= Shared Calendar (every group + Admin) =====
              One calendar, org-wide — not scoped to state.activeGroup at
              all. Anyone approved can add to it; Music's own Event
@@ -2560,6 +2608,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.lfuncSubmit = el('[data-lfunc-submit]');
       els.lfuncCancel = el('[data-lfunc-cancel]');
       els.lfuncBody = el('[data-lfunc-body]');
+      els.sovDate = el('[data-sov-date]');
+      els.sovKpis = el('[data-sov-kpis]');
+      els.sovGroups = el('[data-sov-groups]');
+      els.nmBody = el('[data-nm-body]');
       els.feeMonth = el('[data-fee-month]');
       els.feeYear = el('[data-fee-year]');
       els.feeDefault = el('[data-fee-default]');
@@ -6290,6 +6342,76 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
+    // ---------- Support Leader Overview + Next Meetings: an approved
+    // leader with no group at all (activeGroup null) used to land on
+    // Shared Calendar with nothing else to look at — these 2 tabs, plus
+    // the existing Leaders Roster tab opened up to them via profiles'
+    // own RLS, give them a real read-only look at the org instead. No
+    // member counts or financials anywhere here — `members` stays
+    // behind each group's own has_group_access(), only
+    // org_next_meetings() and profiles/shared_calendar are read (see
+    // support_leader_overview_schema.sql for exactly what that opened up
+    // and why it's safe: profiles has no PII beyond name/role/groups,
+    // and the meetings function returns date + theme only).
+    const OVERVIEW_GROUPS = GROUPS.filter((g: any) => g.key !== LEADERS_GROUP_KEY);
+    async function loadSupportOverview() {
+      await ensureAllLeadersLoaded();
+      els.sovDate.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      const { data, error } = await db.rpc('org_next_meetings');
+      if (error) console.error(error);
+      const meetings = data || [];
+      const weekOut = toDateStr(addDays(new Date(), 7));
+      const thisWeek = meetings.filter((m: any) => m.date <= weekOut).length;
+      const troopCount = TROOP_GROUPS.length;
+      const committeeCount = OVERVIEW_GROUPS.length - troopCount;
+      els.sovKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Approved leaders</span></div>
+          <span class="ws-dash-kpi-num">${state.allLeaders.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⛺</span><span class="ws-dash-kpi-label">Troops</span></div>
+          <span class="ws-dash-kpi-num">${troopCount}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">◆</span><span class="ws-dash-kpi-label">Committees</span></div>
+          <span class="ws-dash-kpi-num">${committeeCount}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">☰</span><span class="ws-dash-kpi-label">Meetings this week</span></div>
+          <span class="ws-dash-kpi-num">${thisWeek}</span>
+        </div>
+      `;
+      els.sovGroups.innerHTML = OVERVIEW_GROUPS.map((g: any) => {
+        const leaders = state.allLeaders.filter((p: any) => p.role === 'leader' && (p.groups || []).includes(g.key));
+        return `
+          <div class="ws-dash-card">
+            <div class="ws-dash-card-head"><h3>${escapeHtml(g.en)}</h3></div>
+            <p class="ws-dash-empty-mini">${leaders.length ? escapeHtml(leaders.map((p: any) => p.name).join(', ')) : 'No leader assigned yet.'}</p>
+          </div>`;
+      }).join('');
+    }
+    async function loadNextMeetings() {
+      const { data, error } = await db.rpc('org_next_meetings');
+      if (error) { console.error(error); showToast('Could not load next meetings.'); return; }
+      const byGroup = new Map((data || []).map((m: any) => [m.group_key, m]));
+      const rows = OVERVIEW_GROUPS.map((g: any) => ({ group: g, m: byGroup.get(g.key) || null }));
+      // Soonest-first; groups with nothing planned sink to the bottom.
+      rows.sort((a: any, b: any) => {
+        if (a.m && b.m) return a.m.date < b.m.date ? -1 : a.m.date > b.m.date ? 1 : 0;
+        if (a.m) return -1;
+        if (b.m) return 1;
+        return 0;
+      });
+      els.nmBody.innerHTML = rows.map(({ group, m }: any) => `
+        <tr>
+          <td data-label="Group">${escapeHtml(group.en)}</td>
+          <td data-label="Date">${m ? m.date : '—'}</td>
+          <td data-label="Theme">${m ? escapeHtml(m.theme || 'Theme not set yet') : 'Nothing planned yet'}</td>
+        </tr>
+      `).join('');
+    }
+
     // ---------- Content Calendar (Social Media only): a calendar + board
     // view over the same content_items, plus its own category Settings --
     const DEFAULT_CONTENT_PLATFORM_CATEGORIES = ['Instagram', 'Facebook', 'TikTok', 'X (Twitter)', 'YouTube', 'Other'];
@@ -9065,20 +9187,30 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const GENERAL_ONLY_TABS = ['pr', 'meetingnotes'];
     const SOCIAL_MEDIA_ONLY_TABS = ['content', 'credentials'];
     const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderattendance', 'leaderprofile', 'leaderassessment'];
+    // A leader approved with no group at all (see the People tab's
+    // "Support Leader" option): 4 tabs make sense with no group_key to
+    // scope to — Shared Calendar (genuinely ungated at the database
+    // level, is_approved_leader(), no group_key column on it
+    // whatsoever), the same org-wide Leaders Roster the Leaders group
+    // gets (opened up to them via profiles' own RLS — see
+    // support_leader_overview_schema.sql), and 2 read-only, org-wide
+    // views built specifically for them: Overview and Next Meetings.
+    const SUPPORT_LEADER_TABS = ['supportoverview', 'leaderroster', 'nextmeetings', 'sharedcal'];
+    // supportoverview/nextmeetings only ever make sense with no group
+    // selected — named here so a real group (troop, Music, General,
+    // Social Media) correctly hides them via the *_ONLY_TABS fallback
+    // below, same as leaderX is Leaders-only.
+    const SUPPORT_ONLY_TABS = ['supportoverview', 'nextmeetings'];
     function isTabHidden(tab: string) {
-      // A leader approved with no group at all (see the People tab's
-      // "Support Leader" option) — Shared Calendar is the one tab
-      // that's genuinely ungated at the database level (is_approved_leader(),
-      // no group_key column on it whatsoever), so it's the only thing
-      // that can ever make sense to show with no group selected. Without
-      // this check, a null activeGroup fell through to the *_ONLY_TABS
-      // fallback below and — since none of those name troop tabs like
-      // Roster/Attendance/Dashboard — wrongly left them all visible,
-      // even though nothing in them can load without a real group_key.
-      if (!state.activeGroup) return tab !== 'sharedcal';
+      // Without this check, a null activeGroup fell through to the
+      // *_ONLY_TABS fallback below and — since none of those name troop
+      // tabs like Roster/Attendance/Dashboard — wrongly left them all
+      // visible, even though nothing in them can load without a real
+      // group_key.
+      if (!state.activeGroup) return !SUPPORT_LEADER_TABS.includes(tab);
       const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
       if (visible) return !visible.includes(tab);
-      return MUSIC_ONLY_TABS.includes(tab) || GENERAL_ONLY_TABS.includes(tab) || SOCIAL_MEDIA_ONLY_TABS.includes(tab) || LEADERS_ONLY_TABS.includes(tab);
+      return MUSIC_ONLY_TABS.includes(tab) || GENERAL_ONLY_TABS.includes(tab) || SOCIAL_MEDIA_ONLY_TABS.includes(tab) || LEADERS_ONLY_TABS.includes(tab) || SUPPORT_ONLY_TABS.includes(tab);
     }
     function updateTabVisibility() {
       els.tabs.querySelectorAll('.ws-tab:not([data-admin-only])').forEach((btn: any) => {
@@ -9146,6 +9278,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'leaderattendance') loadLeaderAttendance();
       if (tab === 'leaderprofile') loadLeaderProfileTab();
       if (tab === 'leaderassessment') loadLeaderAssessmentTab();
+      if (tab === 'supportoverview') loadSupportOverview();
+      if (tab === 'nextmeetings') loadNextMeetings();
     }
 
     function setTab(tab: any) {
@@ -9374,11 +9508,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       refreshApprovalsBadge();
       refreshEventsBadge();
       {
-        // A groupless leader has no Dashboard (or anything else) to land
-        // on — Shared Calendar is the only tab isTabHidden() ever shows
-        // them, so it's the only sane landing spot.
+        // A groupless leader has no Dashboard to land on — Overview
+        // (see SUPPORT_LEADER_TABS) is their landing spot instead now.
         const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
-        const landing = !state.activeGroup ? 'sharedcal' : (visible && !visible.includes('dashboard') ? visible[0] : 'dashboard');
+        const landing = !state.activeGroup ? 'supportoverview' : (visible && !visible.includes('dashboard') ? visible[0] : 'dashboard');
         setTab(landing);
       }
     }
