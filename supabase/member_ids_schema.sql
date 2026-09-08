@@ -1,49 +1,62 @@
--- Swefieh Scout — permanent-but-reusable member IDs. Run this AFTER
--- schema.sql (it alters the `members` table defined there). Safe to
--- re-run.
+-- Swefieh Scout — permanent member IDs. Run this AFTER schema.sql (it
+-- alters the `members` table defined there). Safe to re-run.
 --
 -- member_code: a human-readable ID per member — "TGOS&G-0001",
 -- "TGOS&G-0002", ... — from one org-wide numbering pool shared by
 -- every group/troop. Assigned once, on insert, and kept until that
--- member row is deleted; deleting a member frees their number back
--- into the pool, and the next member created takes the smallest free
--- number rather than the count always climbing. Separate from `id`,
--- the internal uuid every other table still references.
+-- member row is deleted. Separate from `id`, the internal uuid every
+-- other table still references.
+--
+-- Previously the "next" number was the smallest one not currently in
+-- use (a deleted member's number went back into the pool for reuse) —
+-- computed by scanning existing codes under an advisory lock meant to
+-- serialize concurrent inserts. In production that still let two
+-- leaders adding at nearly the same moment both land on the same
+-- number (see the members_member_code_key 23505 errors this caused —
+-- git blame this file for the incident). Switched to a real Postgres
+-- sequence instead: nextval() is atomic by construction, so a
+-- collision is now structurally impossible no matter how many inserts
+-- land at once — no lock, no retry, nothing to get subtly wrong. The
+-- one behavior change: a deleted member's number is gone for good
+-- instead of going back into the pool, so codes only ever climb.
 -- ============================================================
-
--- Smallest positive number not currently used by any member.
-create or replace function next_member_code()
-returns text as $$
-declare
-  next_num int;
-begin
-  select min(candidate) into next_num
-  from generate_series(
-    1,
-    (select coalesce(max(split_part(member_code, '-', 2)::int), 0) from members) + 1
-  ) as candidate
-  where candidate not in (
-    select split_part(member_code, '-', 2)::int from members where member_code is not null
-  );
-  return 'TGOS&G-' || lpad(next_num::text, 4, '0');
-end;
-$$ language plpgsql;
 
 alter table members add column if not exists member_code text;
 
+create sequence if not exists member_code_seq;
+
+-- Prime the sequence so the next value continues after the highest
+-- number already assigned — only has any effect the first time this
+-- runs; harmless to re-run afterward (never moves it backward, since
+-- the numbers already handed out only grow).
+select setval(
+  'member_code_seq',
+  greatest(
+    coalesce((select max(split_part(member_code, '-', 2)::int) from members), 0),
+    coalesce((select last_value from member_code_seq), 0)
+  )
+);
+
+-- security definer: nextval() needs USAGE/UPDATE on the sequence, which
+-- the leader's own (RLS-scoped) role was never granted — same reasoning
+-- as is_admin()/has_group_access() in schema.sql, just for a sequence
+-- instead of bypassing RLS.
+create or replace function next_member_code()
+returns text language plpgsql security definer as $$
+begin
+  return 'TGOS&G-' || lpad(nextval('member_code_seq')::text, 4, '0');
+end;
+$$;
+
 create or replace function set_member_code()
-returns trigger as $$
+returns trigger language plpgsql security definer as $$
 begin
   if new.member_code is null then
-    -- Serialize concurrent inserts so two leaders adding a member at
-    -- the same moment can't both land on the same "smallest free
-    -- number" before either row is visible to the other.
-    perform pg_advisory_xact_lock(hashtext('member_code'));
     new.member_code := next_member_code();
   end if;
   return new;
 end;
-$$ language plpgsql;
+$$;
 
 drop trigger if exists set_member_code on members;
 create trigger set_member_code before insert on members
