@@ -111,8 +111,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="leaderassessment"><Icon name="diamond" size={16} strokeWidth={1.8} /> Assessment</button>
         <!-- Support Leader (an approved leader with no group at all,
              activeGroup null — see SUPPORT_LEADER_TABS) — 2 tabs new to
-             them, plus the existing leaderroster button above (opened up
-             to them too, see isTabHidden()) and Shared Calendar below. -->
+             them, plus Shared Calendar below. -->
         <button type="button" class="ws-tab" data-tab="supportoverview"><Icon name="compass" size={16} strokeWidth={1.8} /> Overview</button>
         <button type="button" class="ws-tab" data-tab="nextmeetings"><Icon name="calendar" size={16} strokeWidth={1.8} /> Next Meetings</button>
       </nav>
@@ -6344,15 +6343,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
     // ---------- Support Leader Overview + Next Meetings: an approved
     // leader with no group at all (activeGroup null) used to land on
-    // Shared Calendar with nothing else to look at — these 2 tabs, plus
-    // the existing Leaders Roster tab opened up to them via profiles'
-    // own RLS, give them a real read-only look at the org instead. No
-    // member counts or financials anywhere here — `members` stays
-    // behind each group's own has_group_access(), only
-    // org_next_meetings() and profiles/shared_calendar are read (see
-    // support_leader_overview_schema.sql for exactly what that opened up
-    // and why it's safe: profiles has no PII beyond name/role/groups,
-    // and the meetings function returns date + theme only).
+    // Shared Calendar with nothing else to look at — these 2 tabs give
+    // them a real read-only look at the org instead (Overview's own
+    // per-group directory doubles as a Leaders Roster, so there's no
+    // separate tab for that). No member counts or financials anywhere
+    // here — `members` stays behind each group's own
+    // has_group_access(), only org_next_meetings() and profiles/
+    // shared_calendar are read (see support_leader_overview_schema.sql
+    // for exactly what that opened up and why it's safe: profiles has
+    // no PII beyond name/role/groups, and the meetings function returns
+    // date + theme only).
     const OVERVIEW_GROUPS = GROUPS.filter((g: any) => g.key !== LEADERS_GROUP_KEY);
     async function loadSupportOverview() {
       await ensureAllLeadersLoaded();
@@ -9188,14 +9188,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const SOCIAL_MEDIA_ONLY_TABS = ['content', 'credentials'];
     const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderattendance', 'leaderprofile', 'leaderassessment'];
     // A leader approved with no group at all (see the People tab's
-    // "Support Leader" option): 4 tabs make sense with no group_key to
+    // "Support Leader" option): 3 tabs make sense with no group_key to
     // scope to — Shared Calendar (genuinely ungated at the database
     // level, is_approved_leader(), no group_key column on it
-    // whatsoever), the same org-wide Leaders Roster the Leaders group
-    // gets (opened up to them via profiles' own RLS — see
-    // support_leader_overview_schema.sql), and 2 read-only, org-wide
-    // views built specifically for them: Overview and Next Meetings.
-    const SUPPORT_LEADER_TABS = ['supportoverview', 'leaderroster', 'nextmeetings', 'sharedcal'];
+    // whatsoever), and 2 read-only, org-wide views built specifically
+    // for them: Overview (which already includes a leader-per-group
+    // directory, so there's no separate Leaders Roster tab here — see
+    // support_leader_overview_schema.sql for why profiles' own RLS still
+    // needed opening up regardless, that directory reads from it) and
+    // Next Meetings.
+    const SUPPORT_LEADER_TABS = ['supportoverview', 'nextmeetings', 'sharedcal'];
     // supportoverview/nextmeetings only ever make sense with no group
     // selected — named here so a real group (troop, Music, General,
     // Social Media) correctly hides them via the *_ONLY_TABS fallback

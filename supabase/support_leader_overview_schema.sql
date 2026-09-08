@@ -5,11 +5,10 @@
 -- leaders/app.astro hid every other tab since none of them make sense
 -- without a group_key to scope to. This gives them 2 more, read-only,
 -- org-wide views: Overview (org-wide KPIs + a leader-per-group
--- directory) and Next Meetings (soonest upcoming meeting per group).
--- The 3rd new-to-them tab, Leaders Roster, is the existing leaderroster
--- tab/panel in leaders/app.astro, unchanged — it just needed opening up
--- at the RLS level below. Run this AFTER schema.sql, curriculum's own
--- table (curriculum_meetings, already exists — see schema.sql) and
+-- directory — this doubles as their leader roster, there's no separate
+-- Leaders Roster tab for them) and Next Meetings (soonest upcoming
+-- meeting per group). Run this AFTER schema.sql, curriculum's own table
+-- (curriculum_meetings, already exists — see schema.sql) and
 -- shared_calendar_schema.sql (for is_approved_leader()). Safe to re-run.
 
 -- ============================================================
@@ -18,11 +17,11 @@
 -- has no other columns, no phone/email/DOB, nothing sensitive). Keeps
 -- the original "own row" clause too — a still-pending signup has to
 -- read their own row to see the "waiting for approval" screen, and
--- is_approved_leader() alone wouldn't cover them. This is what makes
--- the existing Leaders Roster tab (loadLeaderRoster() in
--- leaders/app.astro) work once it's opened up to Support Leaders; every
--- other leader incidentally gets the same directory now too, which is
--- a reasonable thing for anyone approved to see.
+-- is_approved_leader() alone wouldn't cover them. This is what
+-- Overview's per-group leader cards read (loadSupportOverview() in
+-- leaders/app.astro) once opened up to Support Leaders; every other
+-- leader incidentally gets the same read access now too, which is a
+-- reasonable thing for anyone approved to see.
 -- ============================================================
 drop policy if exists "read own or admin" on profiles;
 drop policy if exists "read own or approved leader" on profiles;
