@@ -4785,6 +4785,14 @@ body.ws-scroll-locked { overflow: hidden; }
   color: var(--color-text);
   transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
+/* A field like Leaders Roster's Email — shown, not editable here (it's
+   sourced from their account, see leader_email_from_auth_schema.sql) —
+   reads as filled-in-but-inert rather than a plain editable box. */
+.ws-field input[readonly] {
+  background: var(--color-bg);
+  color: var(--color-muted);
+  cursor: default;
+}
 /* Safari renders a date input's native controls (segments + calendar
    icon) at their own intrinsic width unless appearance is reset —
    width:100% above doesn't reliably override that on its own, so the

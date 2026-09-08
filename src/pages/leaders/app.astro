@@ -1632,7 +1632,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               </label>
               <label class="ws-field">
                 <span>Email</span>
-                <input type="email" data-lm-email />
+                <input type="email" data-lm-email readonly title="Their sign-up email — not editable here" />
               </label>
               <label class="ws-field">
                 <span>Date of birth</span>
@@ -6077,7 +6077,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const payload = {
           name,
           phone: els.lmPhone.value.trim() || null,
-          email: els.lmEmail.value.trim() || null,
+          // Email isn't in this payload on purpose — it's read-only,
+          // auto-filled from auth.users.email at signup (see
+          // leader_email_from_auth_schema.sql), not something this
+          // form can change.
           birth_date: els.lmDob.value || null,
           national_id: els.lmNid.value.trim() || null,
           emergency_contact_relation: els.lmEcRel.value.trim() || null,
