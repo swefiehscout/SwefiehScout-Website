@@ -9374,10 +9374,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         if (!payload) { showToast('Full name is required.'); return; }
         if (state.editingMemberId) {
           const { error } = await db.from('members').update(payload).eq('id', state.editingMemberId);
-          if (error) { console.error(error); showToast('Could not save member.'); return; }
+          if (error) { console.error(error); showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return; }
         } else {
           const { error } = await db.from('members').insert({ ...payload, created_by: state.session.user.id });
-          if (error) { console.error(error); showToast('Could not add member.'); return; }
+          if (error) { console.error(error); showToast('Could not add, ' + (error.message || 'unknown error') + '.'); return; }
         }
         resetMemberForm();
         await loadRoster();
