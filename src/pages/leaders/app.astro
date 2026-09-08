@@ -9387,13 +9387,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             // smallest number not currently in use — two leaders (or two
             // troops) adding a member within the same instant can both land
             // on that same number before either row is visible to the other,
-            // so the second insert fails with a 23505 unique_violation on
+            // so the insert fails with a 23505 unique_violation on
             // members_member_code_key. That's a transient collision, not a
-            // real problem — the retry recomputes against the now-committed
-            // first row and gets the next number instead.
-            let error = (await db.from('members').insert({ ...payload, created_by: state.session.user.id })).error;
-            if (error && error.code === '23505' && (error.message || '').includes('member_code')) {
+            // real problem — each retry recomputes against whatever's now
+            // committed. A single retry turned out not to be enough during
+            // a burst of several leaders adding at once, hence a few
+            // attempts with a short random backoff so they don't just
+            // re-collide with each other again immediately.
+            let error;
+            for (let attempt = 0; attempt < 5; attempt++) {
               error = (await db.from('members').insert({ ...payload, created_by: state.session.user.id })).error;
+              if (!error || error.code !== '23505' || !(error.message || '').includes('member_code')) break;
+              await new Promise((r) => setTimeout(r, 150 + Math.random() * 250));
             }
             if (error) { console.error(error); showToast('Could not add, ' + (error.message || 'unknown error') + '.'); return; }
           }
