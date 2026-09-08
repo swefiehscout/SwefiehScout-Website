@@ -184,11 +184,26 @@ export async function registerDeviceSession(): Promise<void> {
   if (!error && data) setDeviceSessionId(data.id);
 }
 
+// Explicitly scoped to the caller's own user_id, not just left to RLS —
+// device_sessions' SELECT policy also grants admins read access to
+// EVERY row (device_sessions_select_admin, for Admin's own People >
+// Activity Log subtab, see that table's schema file), so without this
+// filter an admin calling this would get back every leader's device
+// sessions mixed into what's supposed to be "my own devices" here in
+// the Account menu — sign-out policy is still correctly own-row-only,
+// so those foreign rows would just silently fail to revoke on top of
+// showing up in the first place. Never rely on RLS alone to scope a
+// "give me my own stuff" query when the table might also grant broader
+// read access for an unrelated reason elsewhere.
 export async function listMyDeviceSessions(): Promise<DeviceSession[]> {
   if (!supabase) return [];
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
+  if (!user) return [];
   const { data, error } = await supabase
     .from('device_sessions')
     .select('id, device_label, created_at, last_seen_at')
+    .eq('user_id', user.id)
     .is('revoked_at', null)
     .order('last_seen_at', { ascending: false });
   if (error) { console.error('listMyDeviceSessions failed', error); return []; }
@@ -206,7 +221,16 @@ export function currentDeviceSessionId(): string | null {
 export async function signOutDevice(sessionId: string): Promise<void> {
   if (!supabase) return;
   const isThisDevice = sessionId === getDeviceSessionId();
-  await supabase.from('device_sessions').update({ revoked_at: new Date().toISOString() }).eq('id', sessionId);
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
+  if (!user) return;
+  // .eq('user_id', ...) here too — belt-and-suspenders alongside the
+  // update-own RLS policy, same reasoning as listMyDeviceSessions()
+  // above. Logged (not just silently ignored) since a blocked update
+  // here means 0 rows changed and no error — the same failure mode
+  // that made this look broken in the first place.
+  const { error } = await supabase.from('device_sessions').update({ revoked_at: new Date().toISOString() }).eq('id', sessionId).eq('user_id', user.id);
+  if (error) console.error('signOutDevice failed', error);
   if (isThisDevice) await signOut();
 }
 
@@ -215,10 +239,14 @@ export async function signOutDevice(sessionId: string): Promise<void> {
 // scope:'others' sign-out on top of marking the rows revoked.
 export async function signOutOtherDevices(): Promise<void> {
   if (!supabase) return;
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
+  if (!user) return;
   const id = getDeviceSessionId();
-  let query = supabase.from('device_sessions').update({ revoked_at: new Date().toISOString() }).is('revoked_at', null);
+  let query = supabase.from('device_sessions').update({ revoked_at: new Date().toISOString() }).eq('user_id', user.id).is('revoked_at', null);
   if (id) query = query.neq('id', id);
-  await query;
+  const { error } = await query;
+  if (error) console.error('signOutOtherDevices failed', error);
   await supabase.auth.signOut({ scope: 'others' });
 }
 
