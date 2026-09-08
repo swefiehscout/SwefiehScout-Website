@@ -9372,15 +9372,36 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         e.preventDefault();
         const payload = readMemberForm();
         if (!payload) { showToast('Full name is required.'); return; }
-        if (state.editingMemberId) {
-          const { error } = await db.from('members').update(payload).eq('id', state.editingMemberId);
-          if (error) { console.error(error); showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return; }
-        } else {
-          const { error } = await db.from('members').insert({ ...payload, created_by: state.session.user.id });
-          if (error) { console.error(error); showToast('Could not add, ' + (error.message || 'unknown error') + '.'); return; }
+        // Belt-and-braces against double submits (a slow connection makes
+        // "did that go through?" double-clicks common) — those send two
+        // inserts back to back and are the easiest way to reproduce the
+        // member_code race below on their own.
+        els.formSubmit.disabled = true;
+        try {
+          if (state.editingMemberId) {
+            const { error } = await db.from('members').update(payload).eq('id', state.editingMemberId);
+            if (error) { console.error(error); showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return; }
+          } else {
+            // member_code is auto-assigned server-side (next free "TGOS&G-####"
+            // in the shared pool, see member_ids_schema.sql) by picking the
+            // smallest number not currently in use — two leaders (or two
+            // troops) adding a member within the same instant can both land
+            // on that same number before either row is visible to the other,
+            // so the second insert fails with a 23505 unique_violation on
+            // members_member_code_key. That's a transient collision, not a
+            // real problem — the retry recomputes against the now-committed
+            // first row and gets the next number instead.
+            let error = (await db.from('members').insert({ ...payload, created_by: state.session.user.id })).error;
+            if (error && error.code === '23505' && (error.message || '').includes('member_code')) {
+              error = (await db.from('members').insert({ ...payload, created_by: state.session.user.id })).error;
+            }
+            if (error) { console.error(error); showToast('Could not add, ' + (error.message || 'unknown error') + '.'); return; }
+          }
+          resetMemberForm();
+          await loadRoster();
+        } finally {
+          els.formSubmit.disabled = false;
         }
-        resetMemberForm();
-        await loadRoster();
       });
     }
 
