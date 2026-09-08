@@ -445,7 +445,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= Roster ================= -->
         <section class="ws-panel" data-panel="roster" hidden>
-          <p class="ws-att-hint">Every group's roster together, including Music and General, filter down to what you need.</p>
+          <p class="ws-att-hint">Every group's roster together, including Music and General, plus every approved leader/admin from the Leaders Roster — filter down to what you need.</p>
           <div class="ws-toolbar-row">
             <label class="ws-field ws-field--inline">
               <span>Group</span>
@@ -463,7 +463,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <input type="search" class="ws-search" data-roster-search placeholder="Search members…" />
           <div class="ws-table-wrap">
             <table class="ws-table ws-table--collapsible" data-roster-table>
-              <thead><tr><th>Member ID</th><th>Name</th><th>Group</th><th>Phone</th><th>Email</th><th>National ID</th><th>DOB</th><th>Emergency Contact 1</th><th>Emergency Contact 2</th><th>Allergies</th><th>Notes</th><th>Status</th></tr></thead>
+              <thead><tr><th>Member ID</th><th>Name</th><th>Type</th><th>Group</th><th>Phone</th><th>Email</th><th>National ID</th><th>DOB</th><th>Emergency Contact 1</th><th>Emergency Contact 2</th><th>Allergies</th><th>Notes</th><th>Status</th></tr></thead>
               <tbody data-roster-body></tbody>
             </table>
           </div>
@@ -874,6 +874,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       activeTab: 'overview',
       settings: null,
       ovMembers: [],
+      ovLeaders: [],
       recSystemBalance: 0,
       recDiff: null,
       editingSharedVendorId: null,
@@ -3442,28 +3443,71 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    // ---------- Roster: the 5 troops' full roster, with filters -------------
+    // ---------- Roster: the 5 troops' (+ Music) full roster, with
+    // filters — plus every approved leader/admin from the Leaders
+    // Roster tab (leaders/app.astro), normalized into the same row
+    // shape (see leaderRosterRows() below) so one table/filter set
+    // covers both. Editing still only ever happens from each one's own
+    // home (a troop's own Roster tab, or Leaders Roster for people) —
+    // this stays read-only, same as before.
     async function loadRoster() {
-      const { data, error } = await db.from('members').select('*').order('full_name', { ascending: true });
-      if (error) { console.error(error); showToast('Could not load the roster.'); return; }
-      state.ovMembers = data || [];
+      const [memRes, leaderRes] = await Promise.all([
+        db.from('members').select('*').order('full_name', { ascending: true }),
+        db.from('profiles').select('*').in('role', ['leader', 'admin']).order('name', { ascending: true }),
+      ]);
+      if (memRes.error) { console.error(memRes.error); showToast('Could not load the roster.'); return; }
+      if (leaderRes.error) console.error(leaderRes.error);
+      state.ovMembers = memRes.data || [];
+      state.ovLeaders = leaderRes.data || [];
       renderRoster();
+    }
+    // One row per group a leader actually belongs to (so filtering by
+    // "Baraem" surfaces Baraem's own leader alongside its members) —
+    // except an admin (implicitly every group, profiles.groups is
+    // always [] for them, see admin's own Save handler above) or a
+    // Support Leader (approved, no group at all), who both get a single
+    // row filed under the Leaders group filter option instead of one
+    // per troop, so they don't appear duplicated 8 times over.
+    function leaderRosterRows(leaders: any[]): any[] {
+      const rows: any[] = [];
+      leaders.forEach((p: any) => {
+        const base = {
+          member_code: null, full_name: p.name, phone: p.phone, email: p.email,
+          national_id: p.national_id, birth_date: p.birth_date,
+          guardian1_relation: p.emergency_contact_relation, guardian1_phone: p.emergency_contact_phone,
+          guardian2_relation: null, guardian2_phone: null,
+          has_allergies: p.has_allergies, allergy_detail: p.allergy_detail,
+          notes: p.notes, active: p.active !== false, archived_reason: null,
+          _type: p.role === 'admin' ? 'Admin' : 'Leader',
+        };
+        if (p.role === 'admin' || !p.groups || !p.groups.length) {
+          rows.push({ ...base, group_key: LEADERS_GROUP_KEY, _groupLabel: p.role === 'admin' ? 'All groups (admin)' : '—' });
+        } else {
+          p.groups.forEach((gk: string) => rows.push({ ...base, group_key: gk, _groupLabel: null }));
+        }
+      });
+      return rows;
     }
     function renderRoster() {
       const groupFilter = els.rosterGroup.value;
       const statusFilter = els.rosterStatus.value;
-      let rows = state.ovMembers;
+      let rows: any[] = [
+        ...state.ovMembers.map((m: any) => ({ ...m, _type: 'Member', _groupLabel: null })),
+        ...leaderRosterRows(state.ovLeaders),
+      ];
       if (groupFilter) rows = rows.filter((m: any) => m.group_key === groupFilter);
       if (statusFilter === 'active') rows = rows.filter((m: any) => m.active);
       else if (statusFilter === 'archived') rows = rows.filter((m: any) => !m.active);
-      if (!rows.length) { els.rosterBody.innerHTML = '<tr><td colspan="13" class="ws-empty">No members match these filters.</td></tr>'; return; }
+      if (!rows.length) { els.rosterBody.innerHTML = '<tr><td colspan="13" class="ws-empty">No one matches these filters.</td></tr>'; return; }
       els.rosterBody.innerHTML = rows.map((m: any) => {
         const g = GROUPS.find((x) => x.key === m.group_key);
+        const groupLabel = m._groupLabel || (g ? g.en : m.group_key);
         return `
           <tr>
             <td data-label="Member ID">${escapeHtml(m.member_code || '—')}</td>
             <td data-label="Name">${escapeHtml(m.full_name)}</td>
-            <td data-label="Group">${escapeHtml(g ? g.en : m.group_key)}</td>
+            <td data-label="Type">${m._type}</td>
+            <td data-label="Group">${escapeHtml(groupLabel)}</td>
             <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
             <td data-label="Email">${escapeHtml(m.email || '—')}</td>
             <td data-label="National ID">${escapeHtml(m.national_id || '—')}</td>

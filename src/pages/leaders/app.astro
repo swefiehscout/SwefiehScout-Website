@@ -1899,7 +1899,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
              notes/materials/attachments, those stay behind that group's
              own Curriculum tab. ==================== -->
         <section class="ws-panel" data-panel="nextmeetings" hidden>
-          <p class="ws-att-hint">The next planned meeting for each group, date and theme only — the full curriculum plan stays inside that group's own workspace.</p>
           <div class="ws-table-wrap">
             <table class="ws-table" data-nm-table>
               <thead><tr><th>Group</th><th>Date</th><th>Theme</th></tr></thead>
@@ -1918,7 +1917,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <p class="ws-att-hint">One calendar for the whole organization — anyone can add a meeting, deadline, or reminder here, and it shows up the same way no matter which group you're viewing it from. Music's own Event Calendar bookings show up too, as a read-only marker — edit those from Music's own tab instead.</p>
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="sharedcal" data-subtab="calendar">Calendar</button>
-            <button type="button" class="ws-subtab" data-subtabs="sharedcal" data-subtab="requests">Change Requests<span class="ws-tab-badge" data-sc-requests-badge hidden></span></button>
+            <button type="button" class="ws-subtab" data-subtabs="sharedcal" data-subtab="requests" data-sc-requests-tab>Change Requests<span class="ws-tab-badge" data-sc-requests-badge hidden></span></button>
           </div>
 
           <div data-subpanel="sharedcal:calendar">
@@ -6657,7 +6656,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const { data, error } = await db.rpc('org_next_meetings');
       if (error) { console.error(error); showToast('Could not load next meetings.'); return; }
       const byGroup = new Map((data || []).map((m: any) => [m.group_key, m]));
-      const rows = OVERVIEW_GROUPS.map((g: any) => ({ group: g, m: byGroup.get(g.key) || null }));
+      // Troops only — Music/General/Social Media never get curriculum_
+      // meetings rows at all (no Curriculum tab for them, see
+      // NON_TROOP_TAB_VISIBILITY), so they'd only ever show "Nothing
+      // planned yet" here, forever.
+      const rows = TROOP_GROUPS.map((g: any) => ({ group: g, m: byGroup.get(g.key) || null }));
       // Soonest-first; groups with nothing planned sink to the bottom.
       rows.sort((a: any, b: any) => {
         if (a.m && b.m) return a.m.date < b.m.date ? -1 : a.m.date > b.m.date ? 1 : 0;
@@ -7831,6 +7834,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function scCanManage(item: any) {
       return item.created_by === state.session.user.id || state.profile?.role === 'admin';
     }
+    // Support Leader (an approved leader with no group at all) gets
+    // view-only Shared Calendar — matches can_edit_shared_calendar() in
+    // support_leader_calendar_readonly_schema.sql, which is the real
+    // enforcement; this just keeps the UI from offering a button RLS
+    // would reject anyway.
+    function canEditSharedCal(): boolean {
+      return state.profile?.role === 'admin' || !!(state.profile?.groups && state.profile.groups.length);
+    }
     // Recurrence is never materialized as rows — one event row is the
     // whole series, and occurrences are computed on the fly for
     // whatever range is currently on screen. 'never'/'on_date' end
@@ -8055,7 +8066,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <div class="ws-evt-day-item-actions">
             ${canManage
               ? '<button type="button" class="ws-edit-btn" data-sc-day-edit>Edit</button><button type="button" class="ws-row-del" data-sc-day-delete title="Delete">×</button>'
-              : '<button type="button" class="ws-edit-btn" data-sc-day-request>Request a change</button>'}
+              : canEditSharedCal()
+                ? '<button type="button" class="ws-edit-btn" data-sc-day-request>Request a change</button>'
+                : '<span class="ws-badge ws-badge--fair">View only</span>'}
           </div>
         </div>`;
     }
@@ -9670,6 +9683,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       registerDeviceSession();
       if (profile.role === 'admin') {
         document.querySelectorAll('[data-admin-only]').forEach((elm) => elm.removeAttribute('hidden'));
+      }
+      if (!canEditSharedCal()) {
+        els.scAddBtn.hidden = true;
+        els.scDayAdd.hidden = true;
+        // Nothing they filed and nothing they own — this subtab would
+        // only ever be empty for them.
+        el('[data-sc-requests-tab]')?.setAttribute('hidden', '');
       }
       // Re-measured every load (not just once) since admin-only visibility
       // — and so the tab count itself — can differ between loads.
