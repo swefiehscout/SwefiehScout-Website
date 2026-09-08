@@ -102,3 +102,24 @@ export const MONTHS: { en: string; ar: string }[] = [
   { en: 'November',  ar: 'تشرين الثاني' },
   { en: 'December',  ar: 'كانون الأول' },
 ];
+
+// Shared Calendar event colors — a small fixed palette rather than a
+// free-form picker, so every entry stays legible against the white
+// text its month/timeline chips already use (see .ws-sc-month-chip /
+// .ws-sc-tl-event in global.css). Stored on the row as `key`, not the
+// raw color, so the actual shades can be retuned later without
+// touching existing data; `brand` (no key saved) is the pre-existing
+// look, kept as the default so events made before this feature don't
+// visually change.
+export const SC_EVENT_COLORS: { key: string; label: string; value: string }[] = [
+  { key: 'brand',  label: 'Default', value: 'var(--color-brand)' },
+  { key: 'green',  label: 'Green',   value: '#15803d' },
+  { key: 'blue',   label: 'Blue',    value: '#1d4ed8' },
+  { key: 'purple', label: 'Purple',  value: '#7e22ce' },
+  { key: 'orange', label: 'Orange',  value: '#b45309' },
+  { key: 'teal',   label: 'Teal',    value: '#0f766e' },
+  { key: 'pink',   label: 'Pink',    value: '#be185d' },
+];
+export function scEventColorValue(key: string | null | undefined): string {
+  return SC_EVENT_COLORS.find((c) => c.key === key)?.value || 'var(--color-brand)';
+}

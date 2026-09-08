@@ -213,7 +213,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-form-grid ws-form-grid--4">
               <label class="ws-field">
                 <span>Full name *</span>
-                <input type="text" data-m-name required />
+                <input type="text" data-m-name data-titlecase required />
               </label>
               <label class="ws-field">
                 <span>Phone</span>
@@ -500,7 +500,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <p class="ws-member-form-title">Add to the activity bank</p>
               <label class="ws-field">
                 <span>Name *</span>
-                <input type="text" data-bank-add-en required />
+                <input type="text" data-bank-add-en data-titlecase required />
               </label>
               <div class="ws-form-actions">
                 <button type="submit" class="btn-primary">Add to bank</button>
@@ -633,7 +633,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-form-grid ws-form-grid--4">
                 <label class="ws-field">
                   <span>Name *</span>
-                  <input type="text" data-inv-name required />
+                  <input type="text" data-inv-name data-titlecase required />
                 </label>
                 <label class="ws-field">
                   <span>Category *</span>
@@ -779,7 +779,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                     <div class="ws-form-grid">
                       <label class="ws-field">
                         <span>Vendor name *</span>
-                        <input type="text" data-inv-maint-vendor-name />
+                        <input type="text" data-inv-maint-vendor-name data-titlecase />
                       </label>
                       <label class="ws-field">
                         <span>Vendor phone *</span>
@@ -963,7 +963,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-form-grid ws-form-grid--4">
                 <label class="ws-field">
                   <span>Name *</span>
-                  <input type="text" data-vendor-name required />
+                  <input type="text" data-vendor-name data-titlecase required />
                 </label>
                 <label class="ws-field">
                   <span>Category</span>
@@ -1043,7 +1043,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-form-grid ws-form-grid--4">
                 <label class="ws-field">
                   <span>Name / Organization *</span>
-                  <input type="text" data-sponsor-name required />
+                  <input type="text" data-sponsor-name data-titlecase required />
                 </label>
                 <label class="ws-field">
                   <span>Contact person</span>
@@ -1102,11 +1102,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-form-grid ws-form-grid--4">
                 <label class="ws-field">
                   <span>Name *</span>
-                  <input type="text" data-prc-name required />
+                  <input type="text" data-prc-name data-titlecase required />
                 </label>
                 <label class="ws-field">
                   <span>Role / Title</span>
-                  <input type="text" data-prc-role placeholder="e.g. Parish Priest" />
+                  <input type="text" data-prc-role data-titlecase placeholder="e.g. Parish Priest" />
                 </label>
                 <label class="ws-field">
                   <span>Organization</span>
@@ -1161,7 +1161,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 </label>
                 <label class="ws-field">
                   <span>Title (optional)</span>
-                  <input type="text" data-prlib-title placeholder="Defaults to the file name" />
+                  <input type="text" data-prlib-title data-titlecase placeholder="Defaults to the file name" />
                 </label>
                 <label class="ws-field">
                   <span>Category</span>
@@ -1227,7 +1227,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               </label>
               <label class="ws-field">
                 <span>Title *</span>
-                <input type="text" data-mn-title placeholder="e.g. Monthly Board Meeting" required />
+                <input type="text" data-mn-title data-titlecase placeholder="e.g. Monthly Board Meeting" required />
               </label>
             </div>
             <label class="ws-field ws-field--full">
@@ -1374,7 +1374,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 </label>
                 <label class="ws-field">
                   <span>Title (optional)</span>
-                  <input type="text" data-lib-title placeholder="Defaults to the file name" />
+                  <input type="text" data-lib-title data-titlecase placeholder="Defaults to the file name" />
                 </label>
               </div>
               <div class="ws-form-actions">
@@ -1624,7 +1624,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-form-grid ws-form-grid--4">
               <label class="ws-field">
                 <span>Full name *</span>
-                <input type="text" data-lm-name required />
+                <input type="text" data-lm-name data-titlecase required />
               </label>
               <label class="ws-field">
                 <span>Phone</span>
@@ -1874,7 +1874,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <p class="ws-member-form-title" data-lfunc-form-title>Add a function</p>
               <label class="ws-field ws-field--full">
                 <span>Name *</span>
-                <input type="text" data-lfunc-name required placeholder="e.g. Curriculum planning" />
+                <input type="text" data-lfunc-name data-titlecase required placeholder="e.g. Curriculum planning" />
               </label>
               <label class="ws-field ws-field--full">
                 <span>Description</span>
@@ -2127,11 +2127,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <div class="curr-day-field-row">
           <label class="curr-day-field">
             <span>First name *</span>
-            <input type="text" data-evt-first-name required />
+            <input type="text" data-evt-first-name data-titlecase required />
           </label>
           <label class="curr-day-field">
             <span>Last name *</span>
-            <input type="text" data-evt-last-name required />
+            <input type="text" data-evt-last-name data-titlecase required />
           </label>
         </div>
         <div class="curr-day-field-row">
@@ -2274,7 +2274,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <div class="curr-day-field-row">
           <label class="curr-day-field">
             <span>Title *</span>
-            <input type="text" data-content-title required />
+            <input type="text" data-content-title data-titlecase required />
           </label>
           <label class="curr-day-field">
             <span>Status</span>
@@ -2372,7 +2372,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <p class="curr-day-section-label" data-sc-form-title>New calendar entry</p>
         <label class="curr-day-field">
           <span>Title *</span>
-          <input type="text" data-sc-title required placeholder="e.g. Weekly Leaders Meeting" />
+          <input type="text" data-sc-title data-titlecase data-allow-non-latin dir="auto" required placeholder="e.g. Weekly Leaders Meeting" />
         </label>
         <label class="curr-day-field">
           <span>Date *</span>
@@ -2390,8 +2390,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </div>
         <label class="curr-day-field">
           <span>Description</span>
-          <textarea data-sc-notes rows="2"></textarea>
+          <textarea data-sc-notes data-allow-non-latin dir="auto" rows="2"></textarea>
         </label>
+
+        <div class="curr-day-field">
+          <span>Color</span>
+          <div class="ws-sc-color-picker" data-sc-color-picker></div>
+        </div>
 
         <label class="curr-day-field">
           <span>Repeat</span>
@@ -2503,7 +2508,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     } from '../../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
-    import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES } from '../../lib/curriculum/constants';
+    import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES, SC_EVENT_COLORS, scEventColorValue } from '../../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../../lib/workspace/row-numbers';
     import { fetchLeaderActivity, formatActivityWhen, type LeaderActivityItem } from '../../lib/leader-activity';
 
@@ -2620,15 +2625,23 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         ? crypto.randomUUID()
         : 'a' + Math.random().toString(36).slice(2) + Date.now();
     }
-    // "joy blah" / "JOY BLAH" → "Joy Blah" — applied on blur to name
-    // fields so leaders don't have to think about capitalization while
-    // typing. Capitalizes after spaces, hyphens, and apostrophes too, so
-    // hyphenated/O'-style names still come out right.
+    // "joy blah" / "JOY BLAH" → "Joy Blah" — applied on blur to every
+    // Name/Title-style field tagged data-titlecase, so leaders don't
+    // have to think about capitalization while typing. Capitalizes
+    // after spaces, hyphens, and apostrophes too, so hyphenated/O'-style
+    // names still come out right; a no-op on Arabic (no case to change)
+    // so it's harmless to also tag Shared Calendar's Title. One
+    // delegated listener (capture phase — blur doesn't bubble) instead
+    // of wiring each field, same pattern as bindEnglishOnlyInputs().
     function titleCase(s: string) {
       return s.trim().replace(/\s+/g, ' ').toLowerCase().replace(/(^|[\s'-])\p{L}/gu, (c) => c.toUpperCase());
     }
-    function bindTitleCase(input: any) {
-      input.addEventListener('blur', () => { if (input.value.trim()) input.value = titleCase(input.value); });
+    function bindTitleCaseInputs() {
+      document.addEventListener('blur', (e: any) => {
+        const t = e.target;
+        if (!(t instanceof HTMLInputElement) || !t.hasAttribute('data-titlecase')) return;
+        if (t.value.trim()) t.value = titleCase(t.value);
+      }, true);
     }
     // English-only, everywhere in the workspace — Arabic (or any other
     // non-Latin script) typed into a Notes/Description-style field is
@@ -2638,11 +2651,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // just what a report happens to show. One delegated listener catches
     // every text input/textarea already on the page or added later
     // (dynamically-rendered rows included), rather than wiring each one.
+    // data-allow-non-latin opts a field out — currently just Shared
+    // Calendar's Title/Description, which never go into a PDF report.
     function bindEnglishOnlyInputs() {
       document.addEventListener('input', (e: any) => {
         const t = e.target;
         if (!(t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement)) return;
         if (t instanceof HTMLInputElement && !['text', 'search', 'tel', 'email', 'url', ''].includes(t.type)) return;
+        if (t.hasAttribute('data-allow-non-latin')) return;
         const filtered = t.value.replace(/[^\x00-\x7F]/g, '');
         if (filtered === t.value) return;
         const pos = t.selectionStart ?? t.value.length;
@@ -2848,6 +2864,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.scTime = el('[data-sc-time]');
       els.scTimeEnd = el('[data-sc-time-end]');
       els.scNotes = el('[data-sc-notes]');
+      els.scColorPicker = el('[data-sc-color-picker]');
       els.scDelete = el('[data-sc-delete]');
       els.currPrev = el('[data-curr-prev]');
       els.currNext = el('[data-curr-next]');
@@ -5751,7 +5768,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function startRenamePrDoc(row: any, id: string) {
       const titleCell = row.querySelector('[data-label="Title"]');
       const current = titleCell.textContent;
-      titleCell.innerHTML = `<input type="text" class="ws-inline-amount" value="${escapeHtml(current)}" data-doc-rename-input />`;
+      titleCell.innerHTML = `<input type="text" class="ws-inline-amount" value="${escapeHtml(current)}" data-doc-rename-input data-titlecase />`;
       const input = titleCell.querySelector('[data-doc-rename-input]');
       input.focus();
       input.select();
@@ -6048,7 +6065,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       await loadLeaderRoster();
     }
     function bindLeaderRosterForm() {
-      bindTitleCase(els.lmName);
       els.lmAllergyAdd.addEventListener('click', () => showLmAllergy());
       els.lmAllergyRemove.addEventListener('click', () => hideLmAllergy());
       els.lmCancel.addEventListener('click', resetLeaderRosterForm);
@@ -7303,7 +7319,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function startRenameDoc(row: any, id: string) {
       const titleCell = row.querySelector('[data-label="Title"]');
       const current = titleCell.textContent;
-      titleCell.innerHTML = `<input type="text" class="ws-inline-amount" value="${escapeHtml(current)}" data-doc-rename-input />`;
+      titleCell.innerHTML = `<input type="text" class="ws-inline-amount" value="${escapeHtml(current)}" data-doc-rename-input data-titlecase />`;
       const input = titleCell.querySelector('[data-doc-rename-input]');
       input.focus();
       input.select();
@@ -8349,7 +8365,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }
       const canManage = scCanManage(item);
       return `
-        <div class="ws-evt-day-item" data-sc-event-id="${item.id}" data-sc-occurrence-date="${item.occurrence_date || item.event_date}">
+        <div class="ws-evt-day-item" style="--sc-item-color:${scEventColorValue(item.color)}" data-sc-event-id="${item.id}" data-sc-occurrence-date="${item.occurrence_date || item.event_date}">
           <div class="ws-evt-day-item-main">
             <span class="ws-evt-day-item-title">${escapeHtml(item.title)}${item.recurrence_unit ? ' <span class="ws-sc-repeat-mark" title="Repeats">↻</span>' : ''}</span>
             <span class="ws-evt-day-item-sub">${scTimeRangeLabel(item)}${item.notes ? ' · ' + escapeHtml(item.notes) : ''} · Added by ${escapeHtml(item.created_by_name || '—')}</span>
@@ -8477,15 +8493,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // all-day strip, which has no time axis to position against.
     function scTimelineChipHTML(item: any, positioned: boolean): string {
       const label = item.event_time ? `${scTimeRangeLabel(item)} ${item.title}` : item.title;
+      // Music's own bookings keep their plain muted look (--music) —
+      // they have no `color` of their own to apply, and an inline
+      // background would win over that class's anyway.
       const cls = `ws-sc-tl-event${item.kind === 'music' ? ' ws-sc-tl-event--music' : ''}`;
+      const colorStyle = item.kind === 'music' ? '' : `background:${scEventColorValue(item.color)};`;
       if (!positioned || !item.event_time) {
-        return `<div class="${cls}" style="position:static" data-sc-chip-id="${item.id}" title="${escapeHtml(label)}">${escapeHtml(label)}</div>`;
+        return `<div class="${cls}" style="position:static;${colorStyle}" data-sc-chip-id="${item.id}" title="${escapeHtml(label)}">${escapeHtml(label)}</div>`;
       }
       const startH = scTimeToHours(item.event_time);
       const endH = item.event_end_time ? Math.max(startH + 0.25, scTimeToHours(item.event_end_time)) : startH + 0.75;
       const top = startH * SC_ROW_H;
       const height = (endH - startH) * SC_ROW_H;
-      return `<div class="${cls}" style="top:${top}rem;height:${height}rem" data-sc-chip-id="${item.id}" title="${escapeHtml(label)}">${escapeHtml(label)}</div>`;
+      return `<div class="${cls}" style="top:${top}rem;height:${height}rem;${colorStyle}" data-sc-chip-id="${item.id}" title="${escapeHtml(label)}">${escapeHtml(label)}</div>`;
     }
     function scRenderDay() {
       scRenderTimelineGrid(els.scDayAgenda, [state.sc.anchor]);
@@ -8514,7 +8534,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         html += `<div class="curr-day-cell${inMonth ? '' : ' curr-day-cell--out'}${dateStr === today ? ' curr-day-cell--today' : ''}${items.length ? ' curr-day-cell--has' : ''}" data-date="${dateStr}">
           <span class="curr-day-num">${d.getDate()}</span>
           <div class="curr-day-mini">
-            ${shown.map((it: any) => `<span class="ws-sc-month-chip${it.kind === 'music' ? ' ws-sc-month-chip--music' : ''}">${escapeHtml(it.title)}</span>`).join('')}
+            ${shown.map((it: any) => `<span class="ws-sc-month-chip${it.kind === 'music' ? ' ws-sc-month-chip--music' : ''}"${it.kind === 'music' ? '' : ` style="background:${scEventColorValue(it.color)}"`}>${escapeHtml(it.title)}</span>`).join('')}
             ${extra > 0 ? `<span class="curr-mini-more">+${extra}</span>` : ''}
           </div>
         </div>`;
@@ -8640,6 +8660,24 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         recurrence_end_count: endType === 'after_count' ? (Number(els.scRepeatEndCount.value) || null) : null,
       };
     }
+    // Fixed palette (SC_EVENT_COLORS, constants.ts), not a free-form
+    // picker — swatches are built once from that list; picking one just
+    // moves which button carries --sc-color-swatch--active, tracked in
+    // state.scSelectedColor rather than re-rendering the whole picker.
+    function scColorSwatchesHTML(): string {
+      return SC_EVENT_COLORS.map((c) => `<button type="button" class="ws-sc-color-swatch" data-sc-color="${c.key}" style="--swatch:${c.value}" title="${escapeHtml(c.label)}" aria-label="${escapeHtml(c.label)}"></button>`).join('');
+    }
+    function scSetColorPicker(key: string | null | undefined) {
+      state.scSelectedColor = key || 'brand';
+      els.scColorPicker.querySelectorAll('[data-sc-color]').forEach((b: any) => b.classList.toggle('ws-sc-color-swatch--active', b.dataset.scColor === state.scSelectedColor));
+    }
+    function bindScColorPicker() {
+      els.scColorPicker.innerHTML = scColorSwatchesHTML();
+      els.scColorPicker.addEventListener('click', (e: any) => {
+        const btn = e.target.closest('[data-sc-color]');
+        if (btn) scSetColorPicker(btn.dataset.scColor);
+      });
+    }
     function scResetForm() {
       state.editingScId = null;
       state.editingScOccurrenceDate = null;
@@ -8648,6 +8686,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.scFormTitle.textContent = 'New calendar entry';
       els.scDelete.hidden = true;
       scApplyRepeatToForm({});
+      scSetColorPicker(null);
     }
     function scStartNew() { scResetForm(); scShowForm(); }
     function scStartEdit(id: string, occurrenceDate?: string) {
@@ -8663,6 +8702,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.scFormTitle.textContent = 'Editing entry';
       els.scDelete.hidden = false;
       scApplyRepeatToForm(item);
+      scSetColorPicker(item.color);
       scShowForm();
     }
     function scRenderDayList(dateStr: string) {
@@ -8714,6 +8754,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }
     }
     function bindSharedCalForm() {
+      bindScColorPicker();
       els.scPrev.addEventListener('click', () => scStep(-1));
       els.scNext.addEventListener('click', () => scStep(1));
       els.scToday.addEventListener('click', () => { state.sc.anchor = new Date(); scRenderView(); });
@@ -8754,7 +8795,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         if (!title || !date) { showToast('Title and date are required.'); return; }
         const payload: any = {
           title, event_date: date, event_time: els.scTime.value || null, event_end_time: els.scTimeEnd.value || null,
-          notes: els.scNotes.value.trim() || null, ...scRepeatFieldsFromForm(),
+          notes: els.scNotes.value.trim() || null, color: state.scSelectedColor === 'brand' ? null : state.scSelectedColor,
+          ...scRepeatFieldsFromForm(),
         };
         let error;
         if (state.editingScId) {
@@ -9358,7 +9400,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.rosterForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     function bindRosterForm() {
-      bindTitleCase(els.mName);
       els.g2Add.addEventListener('click', () => showG2());
       els.g2Remove.addEventListener('click', () => hideG2());
       els.allergyAdd.addEventListener('click', () => showAllergy());
@@ -10065,6 +10106,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           if (!(await checkThisDeviceStillActive())) window.location.replace('/leaders?revoked=1');
         });
         bindEnglishOnlyInputs();
+        bindTitleCaseInputs();
 
         bindTabs();
         bindTabsResize();

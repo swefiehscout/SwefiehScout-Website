@@ -55,13 +55,16 @@ create table if not exists shared_calendar_events (
   recurrence_end_date date,
   recurrence_end_count integer,
   recurrence_exceptions date[] not null default '{}',
+  -- One of SC_EVENT_COLORS' keys (src/lib/curriculum/constants.ts) —
+  -- null means the original default look, not "no color".
+  color text,
   created_by uuid references auth.users(id),
   created_by_name text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 -- In case shared_calendar_events already existed from an earlier run
--- of this file, before end time/recurrence were added.
+-- of this file, before end time/recurrence/color were added.
 alter table shared_calendar_events add column if not exists event_end_time time;
 alter table shared_calendar_events add column if not exists recurrence_unit text check (recurrence_unit in ('day', 'week', 'month', 'year'));
 alter table shared_calendar_events add column if not exists recurrence_interval integer not null default 1;
@@ -70,6 +73,7 @@ alter table shared_calendar_events add column if not exists recurrence_end_type 
 alter table shared_calendar_events add column if not exists recurrence_end_date date;
 alter table shared_calendar_events add column if not exists recurrence_end_count integer;
 alter table shared_calendar_events add column if not exists recurrence_exceptions date[] not null default '{}';
+alter table shared_calendar_events add column if not exists color text;
 
 alter table shared_calendar_events enable row level security;
 
