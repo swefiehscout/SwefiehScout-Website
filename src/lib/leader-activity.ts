@@ -141,3 +141,21 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
   items.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   return items;
 }
+
+// `date` above is deliberately mixed — a real timestamp for most types
+// (updated_at/created_at, stored in UTC) but a plain 'YYYY-MM-DD' for
+// finance's entry_date and the date-only fallbacks (no time-of-day
+// exists to show for those). Both callers display it through here so
+// it always reads in Amman local time instead of the raw UTC clock
+// value the string carries — that was the actual bug: the old callers
+// just sliced the ISO string as text, showing UTC hours unconverted.
+export function formatActivityWhen(value: string): string {
+  if (!value) return '';
+  if (!value.includes('T')) return value; // plain date column — nothing to convert
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value.replace('T', ' ').slice(0, 16);
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Amman', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(d).reduce((acc: Record<string, string>, p) => { acc[p.type] = p.value; return acc; }, {});
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
+}

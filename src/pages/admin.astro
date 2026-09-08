@@ -863,7 +863,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import autoTable from 'jspdf-autotable';
     import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY } from '../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../lib/workspace/row-numbers';
-    import { fetchLeaderActivity, type LeaderActivityItem } from '../lib/leader-activity';
+    import { fetchLeaderActivity, formatActivityWhen, type LeaderActivityItem } from '../lib/leader-activity';
 
     const db: any = supabase;
 
@@ -2320,7 +2320,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Bank Balance">${fmt(r.statement_balance)}</td>
           <td data-label="System Balance">${fmt(r.system_balance)}</td>
           <td data-label="Adjustment">${r.adjustment_entry_id ? fmt(r.difference) : '—'}</td>
-          <td data-label="Saved">${new Date(r.created_at).toLocaleDateString()}</td>
+          <td data-label="Saved">${new Date(r.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' })}</td>
           <td data-label="By">${escapeHtml(r.created_by_name || '—')}</td>
         </tr>
       `).join('');
@@ -3262,7 +3262,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         ${recentCreds.length ? recentCreds.slice(0, 5).map((c: any) => `
           <div class="ws-dash-feed-row">
             <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${escapeHtml(c.service_name)}</span></span>
-            <span class="ws-dash-feed-amount">${new Date(c.created_at).toLocaleDateString()}</span>
+            <span class="ws-dash-feed-amount">${new Date(c.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' })}</span>
           </div>
         `).join('') : '<p class="ws-dash-empty-mini">Nothing saved yet.</p>'}
       `;
@@ -3388,10 +3388,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </div>
       `).join('') : '<p class="ws-dash-empty-mini">No sponsors logged yet.</p>';
       els.genSponsorsBody.innerHTML = sponsors.length
-        ? sponsors.slice(0, 8).map((s: any) => `<tr><td data-label="Name">${escapeHtml(s.name)}</td><td data-label="Status">${SPONSOR_STATUS_LABELS[s.status] || s.status}</td><td data-label="Added">${s.created_at ? new Date(s.created_at).toLocaleDateString() : '—'}</td></tr>`).join('')
+        ? sponsors.slice(0, 8).map((s: any) => `<tr><td data-label="Name">${escapeHtml(s.name)}</td><td data-label="Status">${SPONSOR_STATUS_LABELS[s.status] || s.status}</td><td data-label="Added">${s.created_at ? new Date(s.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' }) : '—'}</td></tr>`).join('')
         : '<tr><td colspan="4" class="ws-empty">No sponsors yet.</td></tr>';
       els.genContactsBody.innerHTML = contacts.length
-        ? contacts.slice(0, 8).map((c: any) => `<tr><td data-label="Name">${escapeHtml(c.name)}</td><td data-label="Category">${escapeHtml(c.category || '—')}</td><td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td></tr>`).join('')
+        ? contacts.slice(0, 8).map((c: any) => `<tr><td data-label="Name">${escapeHtml(c.name)}</td><td data-label="Category">${escapeHtml(c.category || '—')}</td><td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' }) : '—'}</td></tr>`).join('')
         : '<tr><td colspan="4" class="ws-empty">No contacts yet.</td></tr>';
     }
     async function downloadContentCalendarReport(monthEl?: any, yearEl?: any) {
@@ -3446,7 +3446,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
           head: [['Service', 'Username', 'Password', 'URL', 'Notes', 'Added']],
-          body: rows.length ? rows.map((c: any) => [c.service_name, c.username || '—', c.password || '—', c.url || '—', c.notes || '—', c.created_at ? new Date(c.created_at).toLocaleDateString() : '—']) : [['No credentials saved yet', '', '', '', '', '']],
+          body: rows.length ? rows.map((c: any) => [c.service_name, c.username || '—', c.password || '—', c.url || '—', c.notes || '—', c.created_at ? new Date(c.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' }) : '—']) : [['No credentials saved yet', '', '', '', '', '']],
         });
         doc.save(pdfFilename('Credentials', new Date().toISOString().slice(0, 10)));
       } catch (err) {
@@ -3557,7 +3557,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <td data-label="Title">${escapeHtml(d.title)}</td>
             <td class="ws-admin-groups" data-label="Groups">${groupChecks}</td>
             <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
-            <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
+            <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' })}</td>
             <td data-label="Uploaded by">${escapeHtml(d.uploaded_by_name || '—')}</td>
             <td class="ws-row-actions">
               <button type="button" class="ws-edit-btn" data-doc-download>Download</button>
@@ -3893,7 +3893,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!items.length) { els.alogBody.innerHTML = '<tr><td colspan="4" class="ws-empty">Nothing logged for this filter yet.</td></tr>'; return; }
       els.alogBody.innerHTML = items.slice(0, 200).map((it) => `
         <tr>
-          <td data-label="When">${escapeHtml(String(it.date).replace('T', ' ').slice(0, 16))}</td>
+          <td data-label="When">${escapeHtml(formatActivityWhen(it.date))}</td>
           <td data-label="Who">${escapeHtml(it.leaderName)}</td>
           <td data-label="Type"><span class="ws-badge ws-badge--fair">${ACTIVITY_TYPE_LABELS[it.type] || it.type}</span></td>
           <td data-label="Details">${escapeHtml(it.text)}</td>

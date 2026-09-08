@@ -2505,7 +2505,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import autoTable from 'jspdf-autotable';
     import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES } from '../../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../../lib/workspace/row-numbers';
-    import { fetchLeaderActivity, type LeaderActivityItem } from '../../lib/leader-activity';
+    import { fetchLeaderActivity, formatActivityWhen, type LeaderActivityItem } from '../../lib/leader-activity';
 
     // Loose alias for actual query calls below — supabaseConfigured is
     // checked once in init() before any of this runs, so by the time these
@@ -5566,7 +5566,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Type">${escapeHtml(s.type || '—')}</td>
           <td data-label="Status"><span class="ws-badge ${SPONSOR_STATUS_BADGE_CLASS[s.status]}">${SPONSOR_STATUS_LABELS[s.status]}</span></td>
           <td data-label="Notes">${escapeHtml(s.notes || '—')}</td>
-          <td data-label="Added">${s.created_at ? new Date(s.created_at).toLocaleDateString() : '—'}</td>
+          <td data-label="Added">${s.created_at ? new Date(s.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' }) : '—'}</td>
           <td data-label="Added by">${escapeHtml(s.created_by_name || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-sponsor-edit>Edit</button>
@@ -5656,7 +5656,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Phone">${escapeHtml(c.phone)}</td>
           <td data-label="Email">${escapeHtml(c.email || '—')}</td>
           <td data-label="Notes">${escapeHtml(c.notes || '—')}</td>
-          <td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td>
+          <td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' }) : '—'}</td>
           <td data-label="Added by">${escapeHtml(c.created_by_name || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-prc-edit>Edit</button>
@@ -5721,7 +5721,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Title">${escapeHtml(d.title)}</td>
           <td data-label="Category">${escapeHtml(d.category && d.category !== 'general' ? d.category : '—')}</td>
           <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
-          <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
+          <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' })}</td>
           <td data-label="Uploaded by">${escapeHtml(d.uploaded_by_name || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-doc-rename>Rename</button>
@@ -6398,7 +6398,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <span class="ws-dash-feed-dot ws-dash-feed-dot--${it.type}"></span>
           <span class="ws-dash-feed-text">
             <span class="ws-dash-feed-title">${escapeHtml(it.text)}</span>
-            <span class="ws-dash-feed-date">${escapeHtml(String(it.date).slice(0, 10))}</span>
+            <span class="ws-dash-feed-date">${escapeHtml(formatActivityWhen(it.date).slice(0, 10))}</span>
           </span>
         </div>
       `).join('');
@@ -7180,7 +7180,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           ` : '—'}</td>
           <td data-label="URL">${c.url ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${escapeHtml(c.url)}</a>` : '—'}</td>
           <td data-label="Notes">${escapeHtml(c.notes || '—')}</td>
-          <td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td>
+          <td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' }) : '—'}</td>
           <td data-label="Updated by">${escapeHtml(c.updated_by_name || c.created_by_name || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-cred-edit>Edit</button>
@@ -7269,7 +7269,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <tr data-doc-id="${d.id}" data-doc-path="${escapeHtml(d.file_path)}">
           <td data-label="Title">${escapeHtml(d.title)}</td>
           <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
-          <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
+          <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' })}</td>
           <td data-label="Uploaded by">${escapeHtml(d.uploaded_by_name || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-doc-rename>Rename</button>
@@ -7338,7 +7338,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <tr data-doc-path="${escapeHtml(d.file_path)}">
           <td data-label="Title">${escapeHtml(d.title)}</td>
           <td data-label="Type">${escapeHtml(d.file_type || '—')}</td>
-          <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString()}</td>
+          <td data-label="Uploaded">${new Date(d.uploaded_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' })}</td>
           <td data-label="Uploaded by">${escapeHtml(d.uploaded_by_name || '—')}</td>
           <td class="ws-row-actions"><button type="button" class="ws-edit-btn" data-doc-download>Download</button></td>
         </tr>
