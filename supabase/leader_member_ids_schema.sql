@@ -10,40 +10,49 @@
 -- 'pending' (handle_new_user(), schema.sql), so there's nothing to
 -- number yet at that point. Run this AFTER schema.sql and
 -- member_ids_schema.sql. Safe to re-run.
+--
+-- Numbers come from a real Postgres sequence, same reasoning as
+-- member_ids_schema.sql's member_code_seq (see that file's header for
+-- the incident that prompted it) — nextval() can't hand out the same
+-- value twice no matter how many approvals land at once, unlike the
+-- previous scan-for-smallest-free-number approach. Trade-off: a
+-- removed leader's old number isn't recycled, codes only climb.
 
 alter table profiles add column if not exists member_code text;
 
--- Smallest positive number not currently used by any leader code —
--- same approach as next_member_code(), scoped to the "TGOS&G-L-%"
--- prefix so it never looks at plain member codes at all.
+create sequence if not exists leader_code_seq;
+
+-- Prime the sequence so the next value continues after the highest
+-- leader number already assigned — only has any effect the first time
+-- this runs; harmless to re-run afterward (never moves it backward).
+select setval(
+  'leader_code_seq',
+  greatest(
+    coalesce((select max(split_part(member_code, '-', 3)::int) from profiles where member_code like 'TGOS&G-L-%'), 0),
+    coalesce((select last_value from leader_code_seq), 0)
+  )
+);
+
+-- security definer: nextval() needs USAGE/UPDATE on the sequence, which
+-- a leader's own (RLS-scoped) role was never granted — same reasoning
+-- as is_admin()/has_group_access() in schema.sql, just for a sequence
+-- instead of bypassing RLS.
 create or replace function next_leader_code()
-returns text as $$
-declare
-  next_num int;
+returns text language plpgsql security definer as $$
 begin
-  select min(candidate) into next_num
-  from generate_series(
-    1,
-    (select coalesce(max(split_part(member_code, '-', 3)::int), 0) from profiles where member_code like 'TGOS&G-L-%') + 1
-  ) as candidate
-  where candidate not in (
-    select split_part(member_code, '-', 3)::int from profiles where member_code like 'TGOS&G-L-%'
-  );
-  return 'TGOS&G-L-' || lpad(next_num::text, 4, '0');
+  return 'TGOS&G-L-' || lpad(nextval('leader_code_seq')::text, 4, '0');
 end;
-$$ language plpgsql;
+$$;
 
 create or replace function set_leader_code()
-returns trigger as $$
+returns trigger language plpgsql security definer as $$
 begin
   if new.member_code is null and new.role in ('leader', 'admin') then
-    -- Same serialize-concurrent-approvals reasoning as set_member_code().
-    perform pg_advisory_xact_lock(hashtext('leader_member_code'));
     new.member_code := next_leader_code();
   end if;
   return new;
 end;
-$$ language plpgsql;
+$$;
 
 -- Two triggers, same function: INSERT covers the (currently
 -- impossible, but harmless) case of a row created already
