@@ -1587,7 +1587,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <div class="ws-table-wrap">
                   <table class="ws-table" data-ldash-table>
                     <thead>
-                      <tr><th>Member ID</th><th>Name</th><th>Role</th><th>Attended</th><th>Rate</th><th>Last attended</th></tr>
+                      <tr><th>Leader ID</th><th>Name</th><th>Role</th><th>Attended</th><th>Rate</th><th>Last attended</th></tr>
                     </thead>
                     <tbody data-ldash-body></tbody>
                   </table>
@@ -1653,6 +1653,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <span>Emergency contact phone</span>
                 <input type="tel" data-lm-ec-phone />
               </label>
+              <label class="ws-field">
+                <span>Member since</span>
+                <input type="date" data-lm-member-since />
+              </label>
             </div>
 
             <div class="ws-optional-block" data-lm-allergy-block>
@@ -1682,7 +1686,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <table class="ws-table ws-table--collapsible" data-lroster-table>
               <thead>
                 <tr>
-                  <th>Member ID</th><th>Name</th><th>Role</th><th>Groups</th><th>Phone</th><th>Email</th>
+                  <th>Leader ID</th><th>Name</th><th>Role</th><th>Groups</th><th>Phone</th><th>Email</th>
                   <th>National ID</th><th>DOB</th><th>Emergency Contact</th><th>Allergies</th>
                   <th>Notes</th><th>Member since</th><th></th>
                 </tr>
@@ -1699,7 +1703,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <table class="ws-table ws-table--collapsible" data-larchive-table>
               <thead>
                 <tr>
-                  <th>Member ID</th><th>Name</th><th>Role</th><th>Groups</th><th>Phone</th><th>Email</th>
+                  <th>Leader ID</th><th>Name</th><th>Role</th><th>Groups</th><th>Phone</th><th>Email</th>
                   <th>National ID</th><th>DOB</th><th>Emergency Contact</th><th>Allergies</th>
                   <th>Notes</th><th>Member since</th><th></th>
                 </tr>
@@ -1739,7 +1743,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-table-wrap">
                 <table class="ws-table ws-table--compact-row" data-latt-table>
                   <thead>
-                    <tr><th>Member ID</th><th>Name</th><th>Role</th><th>Present</th></tr>
+                    <tr><th>Leader ID</th><th>Name</th><th>Role</th><th>Present</th></tr>
                   </thead>
                   <tbody data-latt-body></tbody>
                 </table>
@@ -2731,6 +2735,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.lmNid = el('[data-lm-nid]');
       els.lmEcRel = el('[data-lm-ec-rel]');
       els.lmEcPhone = el('[data-lm-ec-phone]');
+      els.lmMemberSince = el('[data-lm-member-since]');
       els.lmAllergyAdd = el('[data-lm-allergy-add]');
       els.lmAllergyRemove = el('[data-lm-allergy-remove]');
       els.lmAllergyFields = el('[data-lm-allergy-fields]');
@@ -5916,10 +5921,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!p.groups || !p.groups.length) return '—';
       return p.groups.map((k: string) => GROUPS.find((g: any) => g.key === k)?.en || k).join(', ');
     }
+    // profiles.created_at is when their login was created, not
+    // necessarily when they actually joined as a leader — member_since
+    // is a separate, admin-editable date for that (see the Leaders
+    // Roster edit form), falling back to the account date until someone
+    // sets the real one.
+    function leaderMemberSince(p: any): string | null {
+      return p.member_since || (p.created_at ? String(p.created_at).slice(0, 10) : null);
+    }
     function leaderRowHTML(p: any, actionsHTML: string) {
       return `
         <tr data-leader-id="${p.id}">
-          <td data-label="Member ID">${escapeHtml(p.member_code || '—')}</td>
+          <td data-label="Leader ID">${escapeHtml(p.member_code || '—')}</td>
           <td data-label="Name">${escapeHtml(p.name)}</td>
           <td data-label="Role">${p.role === 'admin' ? 'Admin' : 'Leader'}</td>
           <td data-label="Groups">${escapeHtml(leaderGroupsLabel(p))}</td>
@@ -5930,7 +5943,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Emergency Contact">${p.emergency_contact_relation || p.emergency_contact_phone ? `${escapeHtml(p.emergency_contact_relation || '—')}: ${escapeHtml(p.emergency_contact_phone || '—')}` : '—'}</td>
           <td data-label="Allergies">${p.has_allergies ? `<span class="ws-allergy-badge">${p.allergy_detail ? escapeHtml(p.allergy_detail) : 'Yes'}</span>` : '—'}</td>
           <td data-label="Notes">${escapeHtml(p.notes || '—')}</td>
-          <td data-label="Member since">${p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}</td>
+          <td data-label="Member since">${leaderMemberSince(p) || '—'}</td>
           <td class="ws-row-actions">${actionsHTML}</td>
         </tr>`;
     }
@@ -5997,6 +6010,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.lmNid.value = p.national_id || '';
       els.lmEcRel.value = p.emergency_contact_relation || '';
       els.lmEcPhone.value = p.emergency_contact_phone || '';
+      els.lmMemberSince.value = leaderMemberSince(p) || '';
       if (p.has_allergies) { showLmAllergy(false); els.lmAllergyDetail.value = p.allergy_detail || ''; } else { hideLmAllergy(); }
       els.lmNotes.value = p.notes || '';
       els.lmFormTitle.textContent = `Editing ${p.name}`;
@@ -6052,6 +6066,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           national_id: els.lmNid.value.trim() || null,
           emergency_contact_relation: els.lmEcRel.value.trim() || null,
           emergency_contact_phone: els.lmEcPhone.value.trim() || null,
+          member_since: els.lmMemberSince.value || null,
           has_allergies: hasAllergies,
           allergy_detail: hasAllergies ? els.lmAllergyDetail.value.trim() || null : null,
           notes: els.lmNotes.value.trim() || null,
@@ -6151,7 +6166,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         if (rec && rec.present) presentCount++;
         return `
           <tr data-leader-id="${p.id}">
-            <td data-label="Member ID">${escapeHtml(p.member_code || '—')}</td>
+            <td data-label="Leader ID">${escapeHtml(p.member_code || '—')}</td>
             <td data-label="Name">${escapeHtml(p.name)}</td>
             <td data-label="Role">${p.role === 'admin' ? 'Admin' : 'Leader'}</td>
             <td data-label="Present"><input type="checkbox" data-latt-present ${rec && rec.present ? 'checked' : ''} /></td>
@@ -6314,7 +6329,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }
       els.ldashBody.innerHTML = withRates.map((r: any) => `
         <tr>
-          <td data-label="Member ID">${escapeHtml(r.p.member_code || '—')}</td>
+          <td data-label="Leader ID">${escapeHtml(r.p.member_code || '—')}</td>
           <td data-label="Name">${escapeHtml(r.p.name)}</td>
           <td data-label="Role">${r.p.role === 'admin' ? 'Admin' : 'Leader'}</td>
           <td data-label="Attended">${r.attended} / ${totalMeetings}</td>
@@ -6339,7 +6354,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Attendance', `${label}, ${totalMeetings} meeting${totalMeetings === 1 ? '' : 's'} logged, avg rate ${avgRate != null ? avgRate + '%' : '—'}`);
         pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          head: [['Member ID', 'Name', 'Role', 'Attended', 'Rate', 'Last attended']],
+          head: [['Leader ID', 'Name', 'Role', 'Attended', 'Rate', 'Last attended']],
           body: withRates.length ? withRates.map((r: any) => [r.p.member_code || '—', r.p.name, r.p.role === 'admin' ? 'Admin' : 'Leader', `${r.attended} / ${totalMeetings}`, r.rate != null ? `${r.rate}%` : '—', r.last || '—']) : [['', 'No data available', '', '', '', '']] });
         doc.save(pdfFilename('Attendance', label));
       } catch (err) {
@@ -6418,7 +6433,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Member since</span></div>
-          <span class="ws-dash-kpi-num" style="font-size:1.3rem">${leader.created_at ? String(leader.created_at).slice(0, 10) : '—'}</span>
+          <span class="ws-dash-kpi-num" style="font-size:1.3rem">${leaderMemberSince(leader) || '—'}</span>
         </div>
       `;
       const items = await fetchLeaderActivity(db, { leaderId, leaderName: leader.name, limitPerType: 25 });
@@ -7635,7 +7650,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const y = pdfHeader(doc, 'Roster', `${leaders.length} approved leader${leaders.length === 1 ? '' : 's'}`, 'Leaders');
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
-          head: [['Member ID', 'Name', 'Role', 'Groups', 'Phone', 'Email', 'National ID', 'DOB', 'Emergency Contact', 'Allergy', 'Notes']],
+          head: [['Leader ID', 'Name', 'Role', 'Groups', 'Phone', 'Email', 'National ID', 'DOB', 'Emergency Contact', 'Allergy', 'Notes']],
           body: leaders.length ? leaders.map((p: any) => [
             p.member_code || '—', p.name, p.role === 'admin' ? 'Admin' : 'Leader', leaderGroupsLabel(p), p.phone || '—', p.email || '—', p.national_id || '—', p.birth_date || '—',
             p.emergency_contact_relation || p.emergency_contact_phone ? `${p.emergency_contact_relation || '—'}: ${p.emergency_contact_phone || '—'}` : '—',
@@ -7674,7 +7689,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Attendance', `${label}, ${totalMeetings} meeting${totalMeetings === 1 ? '' : 's'} held`, 'Leaders');
         pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          head: [['Member ID', 'Name', 'Role', 'Attended', 'Rate', 'Last attended']], body: bodyRows.length ? bodyRows : [['', 'No data available', '', '', '', '']] });
+          head: [['Leader ID', 'Name', 'Role', 'Attended', 'Rate', 'Last attended']], body: bodyRows.length ? bodyRows : [['', 'No data available', '', '', '', '']] });
         doc.save(pdfFilename('Attendance', label, 'Leaders'));
       } catch (err) {
         console.error('leader attendance report failed', err);
@@ -7719,7 +7734,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
         head: [['Field', 'Value']],
         body: [
-          ['Member ID', leader.member_code || '—'],
+          ['Leader ID', leader.member_code || '—'],
           ['Role', leader.role === 'admin' ? 'Admin' : 'Leader'],
           ['Groups', leaderGroupsLabel(leader)],
           ['Phone', leader.phone || '—'],
@@ -7729,7 +7744,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           ['Emergency contact', leader.emergency_contact_relation || leader.emergency_contact_phone ? `${leader.emergency_contact_relation || '—'}: ${leader.emergency_contact_phone || '—'}` : '—'],
           ['Allergies', leader.has_allergies ? (leader.allergy_detail || 'Yes') : '—'],
           ['Notes', leader.notes || '—'],
-          ['Member since', leader.created_at ? String(leader.created_at).slice(0, 10) : '—'],
+          ['Member since', leaderMemberSince(leader) || '—'],
           ['Attendance (all-time)', att.rate != null ? `${att.rate}% (${att.attended} / ${att.totalMeetings})` : 'No meetings logged yet'],
           ['Last attended', att.last || '—'],
         ],
