@@ -106,6 +106,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
              practice, see that constant's own comment for how. -->
         <button type="button" class="ws-tab" data-tab="leaderdashboard"><Icon name="compass" size={16} strokeWidth={1.8} /> Dashboard</button>
         <button type="button" class="ws-tab" data-tab="leaderroster"><Icon name="star" size={16} strokeWidth={1.8} /> Roster</button>
+        <button type="button" class="ws-tab" data-tab="leaderarchive"><Icon name="fleur" size={16} strokeWidth={1.8} /> Archive</button>
         <button type="button" class="ws-tab" data-tab="leaderattendance"><Icon name="calendar" size={16} strokeWidth={1.8} /> Attendance</button>
         <button type="button" class="ws-tab" data-tab="leaderprofile"><Icon name="user" size={16} strokeWidth={1.8} /> Leader Profile</button>
         <button type="button" class="ws-tab" data-tab="leaderassessment"><Icon name="diamond" size={16} strokeWidth={1.8} /> Assessment</button>
@@ -1576,15 +1577,110 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         </section>
 
+        <!-- ================= Leaders Roster (admin-only — see
+             LEADERS_GROUP_KEY): every approved leader, org-wide, editable
+             here — but only their own personal-info fields (see
+             leader_profile_fields_schema.sql); role and group access are
+             still only ever changed from Admin → People, same as
+             before. Archive/Restore mirrors a troop's own Roster/Archive
+             tabs exactly (see archiveMember()/restoreMember()) —
+             leaderarchive below is this same table, just the inactive
+             half. "Remove access" is a 3rd action a troop member's own
+             roster doesn't have at all, since a member isn't a login —
+             it's the same profiles.update({role:'pending', groups:[]})
+             /admin's People tab already does, just reachable here too.
+             ==================== -->
         <section class="ws-panel" data-panel="leaderroster" hidden>
-          <p class="ws-att-hint">Every approved leader across every group, read-only here — roles and group access are still only ever changed from <a href="/admin">Admin → People</a>.</p>
+          <p class="ws-att-hint">Every approved leader across every group. Edit fixes up what signup didn't collect (a last name, phone, DOB, …) — role and group access are still only ever changed from <a href="/admin">Admin → People</a>.</p>
+
+          <form class="ws-member-form" data-lm-form hidden>
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title" data-lm-form-title>Editing</p>
+
+            <div class="ws-form-grid ws-form-grid--4">
+              <label class="ws-field">
+                <span>Full name *</span>
+                <input type="text" data-lm-name required />
+              </label>
+              <label class="ws-field">
+                <span>Phone</span>
+                <input type="tel" data-lm-phone />
+              </label>
+              <label class="ws-field">
+                <span>Email</span>
+                <input type="email" data-lm-email />
+              </label>
+              <label class="ws-field">
+                <span>Date of birth</span>
+                <input type="date" data-lm-dob />
+              </label>
+            </div>
+
+            <div class="ws-form-grid ws-form-grid--4">
+              <label class="ws-field">
+                <span>National ID</span>
+                <input type="text" data-lm-nid />
+              </label>
+              <label class="ws-field">
+                <span>Emergency contact relationship</span>
+                <input type="text" data-lm-ec-rel placeholder="e.g. Spouse" />
+              </label>
+              <label class="ws-field">
+                <span>Emergency contact phone</span>
+                <input type="tel" data-lm-ec-phone />
+              </label>
+            </div>
+
+            <div class="ws-optional-block" data-lm-allergy-block>
+              <button type="button" class="ws-add-link" data-lm-allergy-add>+ Add allergy info</button>
+              <div class="ws-optional-fields" data-lm-allergy-fields hidden>
+                <label class="ws-field">
+                  <span>What allergy?</span>
+                  <input type="text" data-lm-allergy-detail placeholder="e.g. peanuts" />
+                </label>
+                <button type="button" class="ws-remove-link" data-lm-allergy-remove>Remove</button>
+              </div>
+            </div>
+
+            <label class="ws-field ws-field--full">
+              <span>Notes</span>
+              <textarea data-lm-notes rows="1"></textarea>
+            </label>
+
+            <div class="ws-form-actions">
+              <button type="submit" class="btn-primary" data-lm-submit>Save changes</button>
+              <button type="button" class="ws-form-cancel" data-lm-cancel>Cancel</button>
+            </div>
+          </form>
+
           <input type="search" class="ws-search" data-lroster-search placeholder="Search leaders…" />
           <div class="ws-table-wrap">
-            <table class="ws-table" data-lroster-table>
+            <table class="ws-table ws-table--collapsible" data-lroster-table>
               <thead>
-                <tr><th>Name</th><th>Role</th><th>Groups</th><th>Member since</th></tr>
+                <tr>
+                  <th>Name</th><th>Role</th><th>Groups</th><th>Phone</th><th>Email</th>
+                  <th>National ID</th><th>DOB</th><th>Emergency Contact</th><th>Allergies</th>
+                  <th>Notes</th><th>Member since</th><th></th>
+                </tr>
               </thead>
               <tbody data-lroster-body></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="ws-panel" data-panel="leaderarchive" hidden>
+          <p class="ws-att-hint">Archived leaders are hidden from the Dashboard, Leader Profile, Assessment, and Overview going forward, but nothing already on record for them changes and their role/login access isn't touched — restore them any time to bring them back.</p>
+          <input type="search" class="ws-search" data-larchive-search placeholder="Search leaders…" />
+          <div class="ws-table-wrap">
+            <table class="ws-table ws-table--collapsible" data-larchive-table>
+              <thead>
+                <tr>
+                  <th>Name</th><th>Role</th><th>Groups</th><th>Phone</th><th>Email</th>
+                  <th>National ID</th><th>DOB</th><th>Emergency Contact</th><th>Allergies</th>
+                  <th>Notes</th><th>Member since</th><th></th>
+                </tr>
+              </thead>
+              <tbody data-larchive-body></tbody>
             </table>
           </div>
         </section>
@@ -2373,7 +2469,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       attAnchor: new Date(), attSelected: todayStr(), attDatesWithRecords: null,
       allLeaders: [],
       lattAnchor: new Date(), lattSelected: todayStr(), lattType: LEADER_MEETING_TYPES[0], lattDatesWithRecords: null,
-      lprofLeaderId: null,
+      lprofLeaderId: null, editingLeaderId: null,
       leaderFunctions: [], leaderFunctionsLoaded: false, editingFunctionId: null,
       lassessLeaderId: null, lassessRating: 0,
       curr: { anchor: new Date(), meetings: new Map(), currentDay: null, channel: null },
@@ -2569,6 +2665,24 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.ldashExport = el('[data-ldash-export]');
       els.lrosterSearch = el('[data-lroster-search]');
       els.lrosterBody = el('[data-lroster-body]');
+      els.larchiveSearch = el('[data-larchive-search]');
+      els.larchiveBody = el('[data-larchive-body]');
+      els.lmForm = el('[data-lm-form]');
+      els.lmFormTitle = el('[data-lm-form-title]');
+      els.lmName = el('[data-lm-name]');
+      els.lmPhone = el('[data-lm-phone]');
+      els.lmEmail = el('[data-lm-email]');
+      els.lmDob = el('[data-lm-dob]');
+      els.lmNid = el('[data-lm-nid]');
+      els.lmEcRel = el('[data-lm-ec-rel]');
+      els.lmEcPhone = el('[data-lm-ec-phone]');
+      els.lmAllergyAdd = el('[data-lm-allergy-add]');
+      els.lmAllergyRemove = el('[data-lm-allergy-remove]');
+      els.lmAllergyFields = el('[data-lm-allergy-fields]');
+      els.lmAllergyDetail = el('[data-lm-allergy-detail]');
+      els.lmNotes = el('[data-lm-notes]');
+      els.lmSubmit = el('[data-lm-submit]');
+      els.lmCancel = el('[data-lm-cancel]');
       els.lattCalendar = el('[data-latt-calendar]');
       els.lattWeekdayRow = el('[data-latt-weekday-row]');
       els.lattMonthLabel = el('[data-latt-month-label]');
@@ -5702,10 +5816,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
     // ---------- Leaders (admin-only — see LEADERS_GROUP_KEY): every
     // approved leader's account, org-wide, not scoped to any one group.
-    // Roster is a read-only view of `profiles` (role leader/admin) — no
-    // add/edit here at all, that still only ever happens from Admin's
-    // own People tab (peopleGroupsCellHTML). Attendance and the
-    // Dashboard both key off that same list plus leader_attendance.
+    // fetchAllLeaders() always returns everyone regardless of `active`
+    // (same as members — see loadRoster()'s own comment) so callers that
+    // need the full picture (Roster+Archive's own render split, and
+    // Assessment's "Assessed by" name lookups, which have to resolve a
+    // name even for someone since archived) still can; activeLeaders()
+    // below is what every other consumer (Dashboard, Attendance,
+    // Leader Profile/Assessment pickers, Support Overview) should read
+    // instead, so an archived leader drops out of all of those at once.
     async function fetchAllLeaders() {
       const { data, error } = await db.from('profiles').select('*').in('role', ['leader', 'admin']).order('name', { ascending: true });
       if (error) { console.error(error); showToast('Could not load leaders.'); return []; }
@@ -5718,30 +5836,171 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (state.allLeaders.length) return;
       state.allLeaders = await fetchAllLeaders();
     }
+    function activeLeaders(): any[] {
+      return state.allLeaders.filter((p: any) => p.active !== false);
+    }
 
-    // ---- Roster (read-only) ----
+    // ---- Roster + Archive: editable personal-info fields (see
+    // leader_profile_fields_schema.sql) plus Archive/Restore, same
+    // pattern as a troop's own Roster/Archive (archiveMember()/
+    // restoreMember() above) — role and group access still only ever
+    // change from Admin → People, this form never touches either. ----
     async function loadLeaderRoster() {
       state.allLeaders = await fetchAllLeaders();
       renderLeaderRoster();
+      renderLeaderArchive();
     }
     function leaderGroupsLabel(p: any) {
       if (p.role === 'admin') return 'All groups (admin)';
       if (!p.groups || !p.groups.length) return '—';
       return p.groups.map((k: string) => GROUPS.find((g: any) => g.key === k)?.en || k).join(', ');
     }
-    function renderLeaderRoster() {
-      if (!state.allLeaders.length) {
-        els.lrosterBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No approved leaders yet.</td></tr>';
-        return;
-      }
-      els.lrosterBody.innerHTML = state.allLeaders.map((p: any) => `
-        <tr>
+    function leaderRowHTML(p: any, actionsHTML: string) {
+      return `
+        <tr data-leader-id="${p.id}">
           <td data-label="Name">${escapeHtml(p.name)}</td>
           <td data-label="Role">${p.role === 'admin' ? 'Admin' : 'Leader'}</td>
           <td data-label="Groups">${escapeHtml(leaderGroupsLabel(p))}</td>
+          <td data-label="Phone">${escapeHtml(p.phone || '—')}</td>
+          <td data-label="Email">${escapeHtml(p.email || '—')}</td>
+          <td data-label="National ID">${escapeHtml(p.national_id || '—')}</td>
+          <td data-label="DOB">${escapeHtml(p.birth_date || '—')}</td>
+          <td data-label="Emergency Contact">${p.emergency_contact_relation || p.emergency_contact_phone ? `${escapeHtml(p.emergency_contact_relation || '—')}: ${escapeHtml(p.emergency_contact_phone || '—')}` : '—'}</td>
+          <td data-label="Allergies">${p.has_allergies ? `<span class="ws-allergy-badge">${p.allergy_detail ? escapeHtml(p.allergy_detail) : 'Yes'}</span>` : '—'}</td>
+          <td data-label="Notes">${escapeHtml(p.notes || '—')}</td>
           <td data-label="Member since">${p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}</td>
-        </tr>
-      `).join('');
+          <td class="ws-row-actions">${actionsHTML}</td>
+        </tr>`;
+    }
+    function renderLeaderRoster() {
+      const active = activeLeaders();
+      if (!active.length) {
+        els.lrosterBody.innerHTML = '<tr><td colspan="12" class="ws-empty">No approved leaders yet.</td></tr>';
+        return;
+      }
+      els.lrosterBody.innerHTML = active.map((p: any) => leaderRowHTML(p, `
+        <button type="button" class="ws-edit-btn" data-lm-edit>Edit</button>
+        <button type="button" class="ws-edit-btn" data-lm-archive>Archive</button>
+        <button type="button" class="ws-row-del" data-lm-remove title="Remove access">×</button>
+      `)).join('');
+      els.lrosterBody.querySelectorAll('tr').forEach((row: any) => {
+        const id = row.dataset.leaderId;
+        row.querySelector('[data-lm-edit]').addEventListener('click', () => startEditLeaderRoster(id));
+        row.querySelector('[data-lm-archive]').addEventListener('click', () => archiveLeader(id));
+        row.querySelector('[data-lm-remove]').addEventListener('click', () => removeLeaderAccess(id));
+      });
+    }
+    function renderLeaderArchive() {
+      const archived = state.allLeaders.filter((p: any) => p.active === false);
+      if (!archived.length) {
+        els.larchiveBody.innerHTML = '<tr><td colspan="12" class="ws-empty">No archived leaders.</td></tr>';
+        return;
+      }
+      els.larchiveBody.innerHTML = archived.map((p: any) => leaderRowHTML(p, `
+        <button type="button" class="ws-edit-btn" data-lm-edit>Edit</button>
+        <button type="button" class="ws-edit-btn" data-lm-restore>Restore</button>
+        <button type="button" class="ws-row-del" data-lm-remove title="Remove access">×</button>
+      `)).join('');
+      els.larchiveBody.querySelectorAll('tr').forEach((row: any) => {
+        const id = row.dataset.leaderId;
+        row.querySelector('[data-lm-edit]').addEventListener('click', () => startEditLeaderRoster(id));
+        row.querySelector('[data-lm-restore]').addEventListener('click', () => restoreLeader(id));
+        row.querySelector('[data-lm-remove]').addEventListener('click', () => removeLeaderAccess(id));
+      });
+    }
+    function showLmAllergy(focus = true) {
+      els.lmAllergyFields.hidden = false;
+      els.lmAllergyAdd.hidden = true;
+      if (focus) els.lmAllergyDetail.focus();
+    }
+    function hideLmAllergy() {
+      els.lmAllergyFields.hidden = true;
+      els.lmAllergyAdd.hidden = false;
+      els.lmAllergyDetail.value = '';
+    }
+    function resetLeaderRosterForm() {
+      state.editingLeaderId = null;
+      els.lmForm.reset();
+      hideLmAllergy();
+      els.lmForm.hidden = true;
+    }
+    function startEditLeaderRoster(id: string) {
+      const p = state.allLeaders.find((x: any) => x.id === id);
+      if (!p) return;
+      state.editingLeaderId = id;
+      els.lmName.value = p.name || '';
+      els.lmPhone.value = p.phone || '';
+      els.lmEmail.value = p.email || '';
+      els.lmDob.value = p.birth_date || '';
+      els.lmNid.value = p.national_id || '';
+      els.lmEcRel.value = p.emergency_contact_relation || '';
+      els.lmEcPhone.value = p.emergency_contact_phone || '';
+      if (p.has_allergies) { showLmAllergy(false); els.lmAllergyDetail.value = p.allergy_detail || ''; } else { hideLmAllergy(); }
+      els.lmNotes.value = p.notes || '';
+      els.lmFormTitle.textContent = `Editing ${p.name}`;
+      els.lmForm.hidden = false;
+      els.lmForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    async function archiveLeader(id: string) {
+      const p = state.allLeaders.find((x: any) => x.id === id);
+      if (!confirm(`Archive ${p ? p.name : 'this leader'}? They'll drop off the Dashboard, Leader Profile, Assessment, and Overview going forward — their role and login access aren't touched, and you can restore them any time from here.`)) return;
+      const { error } = await db.from('profiles').update({ active: false }).eq('id', id);
+      if (error) { console.error(error); showToast('Could not archive.'); return; }
+      if (state.editingLeaderId === id) resetLeaderRosterForm();
+      await loadLeaderRoster();
+    }
+    async function restoreLeader(id: string) {
+      const { error } = await db.from('profiles').update({ active: true }).eq('id', id);
+      if (error) { console.error(error); showToast('Could not restore.'); return; }
+      await loadLeaderRoster();
+    }
+    // Same action as /admin's People tab "Remove access" button
+    // (peopleGroupsCellHTML's row) — sets role back to 'pending' and
+    // clears groups. Not a delete: their profiles row and login stay
+    // intact, they just land back on the "waiting for approval" screen
+    // until re-approved. A true account deletion isn't something this
+    // client-only app can safely do at all (would need Supabase's Admin
+    // API / a service-role key to remove the underlying auth.users row,
+    // not just profiles).
+    async function removeLeaderAccess(id: string) {
+      const p = state.allLeaders.find((x: any) => x.id === id);
+      if (!confirm(`Remove ${p ? p.name : 'this leader'}'s access? They'll be signed out of every group and land back on the "waiting for approval" screen — you can re-approve them any time from Admin → People. This doesn't delete their account.`)) return;
+      const { error } = await db.from('profiles').update({ role: 'pending', groups: [] }).eq('id', id);
+      if (error) { console.error(error); showToast('Could not remove access, ' + (error.message || 'unknown error') + '.'); return; }
+      if (state.editingLeaderId === id) resetLeaderRosterForm();
+      showToast(`${p ? p.name + "'s" : "Their"} access removed.`);
+      await loadLeaderRoster();
+    }
+    function bindLeaderRosterForm() {
+      bindTitleCase(els.lmName);
+      els.lmAllergyAdd.addEventListener('click', () => showLmAllergy());
+      els.lmAllergyRemove.addEventListener('click', () => hideLmAllergy());
+      els.lmCancel.addEventListener('click', resetLeaderRosterForm);
+      els.lmForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        if (!state.editingLeaderId) return;
+        const name = els.lmName.value.trim();
+        if (!name) { showToast('Full name is required.'); return; }
+        const hasAllergies = !els.lmAllergyFields.hidden;
+        const payload = {
+          name,
+          phone: els.lmPhone.value.trim() || null,
+          email: els.lmEmail.value.trim() || null,
+          birth_date: els.lmDob.value || null,
+          national_id: els.lmNid.value.trim() || null,
+          emergency_contact_relation: els.lmEcRel.value.trim() || null,
+          emergency_contact_phone: els.lmEcPhone.value.trim() || null,
+          has_allergies: hasAllergies,
+          allergy_detail: hasAllergies ? els.lmAllergyDetail.value.trim() || null : null,
+          notes: els.lmNotes.value.trim() || null,
+        };
+        els.lmSubmit.disabled = true;
+        const { error } = await db.from('profiles').update(payload).eq('id', state.editingLeaderId);
+        els.lmSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not save.'); return; }
+        resetLeaderRosterForm();
+        await loadLeaderRoster();
+      });
     }
 
     // ---- Attendance — same calendar + tick-to-mark-present pattern as
@@ -5818,13 +6077,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       renderLattList(map, date);
     }
     function renderLattList(map: Map<string, any>, date: string) {
-      if (!state.allLeaders.length) {
+      const leaders = activeLeaders();
+      if (!leaders.length) {
         els.lattBody.innerHTML = '<tr><td colspan="3" class="ws-empty">No approved leaders yet.</td></tr>';
         els.lattSummary.textContent = '';
         return;
       }
       let presentCount = 0;
-      els.lattBody.innerHTML = state.allLeaders.map((p: any) => {
+      els.lattBody.innerHTML = leaders.map((p: any) => {
         const rec: any = map.get(p.id);
         if (rec && rec.present) presentCount++;
         return `
@@ -5834,7 +6094,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <td data-label="Present"><input type="checkbox" data-latt-present ${rec && rec.present ? 'checked' : ''} /></td>
           </tr>`;
       }).join('');
-      els.lattSummary.textContent = `${presentCount} of ${state.allLeaders.length} present`;
+      els.lattSummary.textContent = `${presentCount} of ${leaders.length} present`;
       els.lattBody.querySelectorAll('tr').forEach((row: any) => {
         const leaderId = row.dataset.leaderId;
         row.querySelector('[data-latt-present]').addEventListener('change', () => {
@@ -5928,21 +6188,22 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         if (!cur.last || r.date > cur.last) cur.last = r.date;
         byLeader.set(r.leader_id, cur);
       });
-      const withRates = state.allLeaders.map((p: any) => {
+      const leaders = activeLeaders();
+      const withRates = leaders.map((p: any) => {
         const rec = byLeader.get(p.id) || { attended: 0, last: null };
         const rate = totalMeetings ? Math.round((rec.attended / totalMeetings) * 100) : null;
         return { p, attended: rec.attended, last: rec.last, rate };
       });
       withRates.sort((a: any, b: any) => (a.rate ?? -1) - (b.rate ?? -1));
-      const admins = state.allLeaders.filter((p: any) => p.role === 'admin').length;
-      const newInRange = state.allLeaders.filter((p: any) => p.created_at && String(p.created_at).slice(0, 10) >= from && String(p.created_at).slice(0, 10) <= to).length;
-      return { totalMeetings, withRates, label, admins, newInRange };
+      const admins = leaders.filter((p: any) => p.role === 'admin').length;
+      const newInRange = leaders.filter((p: any) => p.created_at && String(p.created_at).slice(0, 10) >= from && String(p.created_at).slice(0, 10) <= to).length;
+      return { totalMeetings, withRates, label, admins, newInRange, leaderCount: leaders.length };
     }
     async function loadLeaderDashboard() {
       const data = await computeLeaderDashboardData();
-      if (data) renderLeaderDashboard(data.totalMeetings, data.withRates, data.label, data.admins, data.newInRange);
+      if (data) renderLeaderDashboard(data.totalMeetings, data.withRates, data.label, data.admins, data.newInRange, data.leaderCount);
     }
-    function renderLeaderDashboard(totalMeetings: number, withRates: any[], rangeLabel: string, admins: number, newInRange: number) {
+    function renderLeaderDashboard(totalMeetings: number, withRates: any[], rangeLabel: string, admins: number, newInRange: number, leaderCount: number) {
       const withHistory = withRates.filter((r: any) => r.rate != null);
       const avgRate = withHistory.length ? Math.round(withHistory.reduce((s: number, r: any) => s + r.rate, 0) / withHistory.length) : null;
       const belowThreshold = withHistory.filter((r: any) => r.rate < 70).length;
@@ -5951,7 +6212,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.ldashKpis.innerHTML = `
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Approved leaders</span></div>
-          <span class="ws-dash-kpi-num">${state.allLeaders.length}</span>
+          <span class="ws-dash-kpi-num">${leaderCount}</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">☰</span><span class="ws-dash-kpi-label">Meetings logged</span></div>
@@ -6044,7 +6305,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     async function loadLeaderProfileTab() {
       await ensureAllLeadersLoaded();
-      populateLeaderSelect(els.lprofSelect, state.allLeaders);
+      populateLeaderSelect(els.lprofSelect, activeLeaders());
       if (state.lprofLeaderId) {
         els.lprofSelect.value = state.lprofLeaderId;
         await renderLeaderProfile(state.lprofLeaderId);
@@ -6153,7 +6414,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       // eagerly together, same as Finance's own subtabs) — this both
       // refreshes state.leaderFunctions and renders its list.
       await loadLeaderFunctionsSettings();
-      populateLeaderSelect(els.lassessSelect, state.allLeaders);
+      populateLeaderSelect(els.lassessSelect, activeLeaders());
       syncAssessmentFunctionOptions();
       if (!els.lassessDate.value) els.lassessDate.value = todayStr();
       if (state.lassessLeaderId) {
@@ -6364,10 +6625,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const thisWeek = meetings.filter((m: any) => m.date <= weekOut).length;
       const troopCount = TROOP_GROUPS.length;
       const committeeCount = OVERVIEW_GROUPS.length - troopCount;
+      const leaders = activeLeaders();
       els.sovKpis.innerHTML = `
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Approved leaders</span></div>
-          <span class="ws-dash-kpi-num">${state.allLeaders.length}</span>
+          <span class="ws-dash-kpi-num">${leaders.length}</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⛺</span><span class="ws-dash-kpi-label">Troops</span></div>
@@ -6383,11 +6645,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </div>
       `;
       els.sovGroups.innerHTML = OVERVIEW_GROUPS.map((g: any) => {
-        const leaders = state.allLeaders.filter((p: any) => p.role === 'leader' && (p.groups || []).includes(g.key));
+        const groupLeaders = leaders.filter((p: any) => p.role === 'leader' && (p.groups || []).includes(g.key));
         return `
           <div class="ws-dash-card">
             <div class="ws-dash-card-head"><h3>${escapeHtml(g.en)}</h3></div>
-            <p class="ws-dash-empty-mini">${leaders.length ? escapeHtml(leaders.map((p: any) => p.name).join(', ')) : 'No leader assigned yet.'}</p>
+            <p class="ws-dash-empty-mini">${groupLeaders.length ? escapeHtml(groupLeaders.map((p: any) => p.name).join(', ')) : 'No leader assigned yet.'}</p>
           </div>`;
       }).join('');
     }
@@ -9174,7 +9436,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
       [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'meetingnotes', 'reports', 'sharedcal'],
       [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'content', 'credentials', 'sharedcal'],
-      [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'sharedcal'],
+      [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderarchive', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'sharedcal'],
     };
     // Inventory/Event Calendar are Music-only, Public Relations is
     // General-only, Content Calendar/Credentials are Social-Media-only,
@@ -9186,7 +9448,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const MUSIC_ONLY_TABS = ['inventory', 'events'];
     const GENERAL_ONLY_TABS = ['pr', 'meetingnotes'];
     const SOCIAL_MEDIA_ONLY_TABS = ['content', 'credentials'];
-    const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderattendance', 'leaderprofile', 'leaderassessment'];
+    const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderarchive', 'leaderattendance', 'leaderprofile', 'leaderassessment'];
     // A leader approved with no group at all (see the People tab's
     // "Support Leader" option): 3 tabs make sense with no group_key to
     // scope to — Shared Calendar (genuinely ungated at the database
@@ -9276,7 +9538,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'curriculum') currStart();
       if (tab === 'sharedcal') loadSharedCal();
       if (tab === 'leaderdashboard') loadLeaderDashboard();
-      if (tab === 'leaderroster') loadLeaderRoster();
+      if (tab === 'leaderroster' || tab === 'leaderarchive') loadLeaderRoster();
       if (tab === 'leaderattendance') loadLeaderAttendance();
       if (tab === 'leaderprofile') loadLeaderProfileTab();
       if (tab === 'leaderassessment') loadLeaderAssessmentTab();
@@ -9491,11 +9753,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindTableSearch(els.mnSearch, els.mnBody);
         bindTableSearch(els.credSearch, els.credBody);
         bindTableSearch(els.lrosterSearch, els.lrosterBody);
+        bindTableSearch(els.larchiveSearch, els.larchiveBody);
         bindTableSearch(els.lattSearch, els.lattBody);
         currBindStatics();
         bindAttendance();
         bindLeaderAttendance();
         bindLeaderDashboardRange();
+        bindLeaderRosterForm();
         bindLeaderProfile();
         bindLeaderAssessment();
         bindLeaderFunctionForm();
