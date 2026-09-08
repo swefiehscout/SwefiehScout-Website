@@ -48,3 +48,16 @@ create policy "device_sessions_update_own" on device_sessions
 -- re-run it by hand whenever, or wire it to pg_cron/Supabase's own
 -- scheduler if that's ever set up for this project.
 -- delete from device_sessions where coalesce(revoked_at, last_seen_at) < now() - interval '90 days';
+
+-- Admin's own People > Activity Log subtab needs to show every leader's
+-- sign-ins, not just the viewing admin's own — this ADDS admin
+-- visibility as a second, permissive SELECT policy (Postgres RLS ORs
+-- multiple permissive policies together for the same command), it does
+-- not touch "device_sessions_select_own" above, so a leader still only
+-- ever sees and manages their own devices from their own Account menu.
+-- Deliberate, explicitly requested change from this table's original
+-- "not an org-wide surveillance tool" design — see fetchLeaderActivity()
+-- in src/lib/leader-activity.ts for what actually reads this.
+drop policy if exists "device_sessions_select_admin" on device_sessions;
+create policy "device_sessions_select_admin" on device_sessions
+  for select using (is_admin());

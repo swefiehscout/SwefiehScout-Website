@@ -27,7 +27,9 @@ interface Props {
     | 'sun'
     | 'box'
     | 'megaphone'
-    | 'lock';
+    | 'lock'
+    | 'user'
+    | 'sliders';
   size?: number | string;
   strokeWidth?: number;
   class?: string;
@@ -208,6 +210,25 @@ const sw = strokeWidth;
     <>
       <rect x="4" y="11" width="16" height="10" rx="2" />
       <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </>
+  )}
+  {name === 'user' && (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+    </>
+  )}
+  {name === 'sliders' && (
+    <>
+      <path d="M4 6h10" />
+      <path d="M18 6h2" />
+      <circle cx="16" cy="6" r="2" />
+      <path d="M4 12h2" />
+      <path d="M10 12h10" />
+      <circle cx="8" cy="12" r="2" />
+      <path d="M4 18h10" />
+      <path d="M18 18h2" />
+      <circle cx="16" cy="18" r="2" />
     </>
   )}
 </svg>

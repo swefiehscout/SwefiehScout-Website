@@ -107,6 +107,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="leaderdashboard"><Icon name="compass" size={16} strokeWidth={1.8} /> Dashboard</button>
         <button type="button" class="ws-tab" data-tab="leaderroster"><Icon name="star" size={16} strokeWidth={1.8} /> Roster</button>
         <button type="button" class="ws-tab" data-tab="leaderattendance"><Icon name="calendar" size={16} strokeWidth={1.8} /> Attendance</button>
+        <button type="button" class="ws-tab" data-tab="leaderprofile"><Icon name="user" size={16} strokeWidth={1.8} /> Leader Profile</button>
+        <button type="button" class="ws-tab" data-tab="leaderassessment"><Icon name="diamond" size={16} strokeWidth={1.8} /> Assessment</button>
+        <button type="button" class="ws-tab" data-tab="leadersettings"><Icon name="sliders" size={16} strokeWidth={1.8} /> Settings</button>
       </nav>
 
       <!-- Shown above every tab's content (not just the header switcher up
@@ -1538,13 +1541,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               </div>
             </div>
 
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline"><span>From</span><input type="date" data-ldash-from /></label>
+              <label class="ws-field ws-field--inline"><span>To</span><input type="date" data-ldash-to /></label>
+              <button type="button" class="btn-primary" data-ldash-export>Export PDF</button>
+            </div>
+
             <div class="ws-dash-kpis" data-ldash-kpis></div>
 
             <div class="ws-dash-grid">
               <div class="ws-dash-card ws-dash-card--wide">
                 <div class="ws-dash-card-head">
                   <h3>Leader attendance</h3>
-                  <span class="ws-dash-card-sub">Sorted worst-first</span>
+                  <span class="ws-dash-card-sub" data-ldash-table-sub>Sorted worst-first</span>
                 </div>
                 <div class="ws-table-wrap">
                   <table class="ws-table" data-ldash-table>
@@ -1612,6 +1621,141 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 </table>
               </div>
             </div>
+          </div>
+        </section>
+
+        <!-- ================= Leader Profile (admin-only — see
+             LEADERS_GROUP_KEY): pick one leader from the org-wide list
+             and see their own KPIs plus a real activity feed of what
+             they've actually done in the workspace (attendance taken,
+             curriculum planned, finance logged, fees recorded, roster
+             members added) — pulled straight from each table's own
+             created_by/updated_by, not a separate audit log. ==================== -->
+        <section class="ws-panel" data-panel="leaderprofile" hidden>
+          <div class="ws-dash">
+            <div class="ws-dash-hero">
+              <div class="ws-dash-hero-text">
+                <span class="ws-dash-eyebrow">Leaders</span>
+                <h2 class="ws-dash-title">Leader profile</h2>
+                <p class="ws-dash-sub">Pick a leader to see their own attendance record and what they've been doing across the workspace.</p>
+              </div>
+            </div>
+            <label class="ws-field ws-field--inline">
+              <span>Leader</span>
+              <select data-lprof-select><option value="">Choose a leader…</option></select>
+            </label>
+            <p class="ws-dash-empty-mini" data-lprof-empty>Choose a leader above to see their profile.</p>
+            <div data-lprof-root hidden>
+              <div class="ws-dash-kpis" data-lprof-kpis></div>
+              <div class="ws-dash-card ws-dash-card--full">
+                <div class="ws-dash-card-head">
+                  <h3>Recent activity</h3>
+                  <span class="ws-dash-card-sub" data-lprof-activity-sub></span>
+                </div>
+                <div data-lprof-activity></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= Assessment (admin-only — see
+             LEADERS_GROUP_KEY): rate a leader 1-5 stars against every
+             function on file (managed from the Settings tab below), one
+             dated entry per rating rather than a single overwritten
+             value — so re-assessing someone builds a history instead of
+             losing the last one. Never surfaced to the leader being
+             rated anywhere else in the app. ==================== -->
+        <section class="ws-panel" data-panel="leaderassessment" hidden>
+          <div class="ws-dash">
+            <div class="ws-dash-hero">
+              <div class="ws-dash-hero-text">
+                <span class="ws-dash-eyebrow">Leaders</span>
+                <h2 class="ws-dash-title">Assessment</h2>
+                <p class="ws-dash-sub">Rate a leader against every function on file — admin-only, never shown to the leader being rated. Manage the function list itself from Settings.</p>
+              </div>
+            </div>
+            <label class="ws-field ws-field--inline">
+              <span>Leader</span>
+              <select data-lassess-select><option value="">Choose a leader…</option></select>
+            </label>
+            <p class="ws-dash-empty-mini" data-lassess-empty>Choose a leader above to rate them.</p>
+            <div data-lassess-root hidden>
+              <div class="ws-dash-kpis" data-lassess-kpis></div>
+
+              <div class="ws-dash-card ws-dash-card--full">
+                <div class="ws-dash-card-head"><h3>Rate a function</h3></div>
+                <p class="ws-att-hint" data-lassess-no-functions hidden>No functions on file yet — add some from the Settings tab first.</p>
+                <form class="ws-member-form" data-lassess-form>
+                  <div class="ws-member-form-bar" aria-hidden="true"></div>
+                  <div class="ws-form-grid">
+                    <label class="ws-field">
+                      <span>Function *</span>
+                      <select data-lassess-function required></select>
+                    </label>
+                    <label class="ws-field">
+                      <span>Date</span>
+                      <input type="date" data-lassess-date />
+                    </label>
+                  </div>
+                  <label class="ws-field ws-field--full">
+                    <span>Rating *</span>
+                    <div class="ws-star-input" data-lassess-stars></div>
+                  </label>
+                  <label class="ws-field ws-field--full">
+                    <span>Notes</span>
+                    <textarea data-lassess-notes rows="2" placeholder="What stood out, good or bad"></textarea>
+                  </label>
+                  <div class="ws-form-actions">
+                    <button type="submit" class="btn-primary" data-lassess-submit>Save assessment</button>
+                  </div>
+                </form>
+              </div>
+
+              <div class="ws-dash-card ws-dash-card--full">
+                <div class="ws-dash-card-head"><h3>Function ratings</h3><span class="ws-dash-card-sub">Latest per function</span></div>
+                <div data-lassess-summary></div>
+              </div>
+
+              <div class="ws-table-wrap">
+                <table class="ws-table" data-lassess-table>
+                  <thead>
+                    <tr><th>Date</th><th>Function</th><th>Rating</th><th>Notes</th><th>Assessed by</th><th></th></tr>
+                  </thead>
+                  <tbody data-lassess-body></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= Leaders Settings (admin-only — see
+             LEADERS_GROUP_KEY): the function rubric Assessment rates
+             leaders against. Deleting a function doesn't touch ratings
+             already logged against it — see leader_assessment_schema.sql's
+             own comment on the function_name snapshot. ==================== -->
+        <section class="ws-panel" data-panel="leadersettings" hidden>
+          <p class="ws-att-hint">The functions leaders get assessed against, in the Assessment tab. Add, rename, or retire them here — existing ratings on a retired function stay on record.</p>
+          <form class="ws-member-form" data-lfunc-form>
+            <div class="ws-member-form-bar" aria-hidden="true"></div>
+            <p class="ws-member-form-title" data-lfunc-form-title>Add a function</p>
+            <label class="ws-field ws-field--full">
+              <span>Name *</span>
+              <input type="text" data-lfunc-name required placeholder="e.g. Curriculum planning" />
+            </label>
+            <label class="ws-field ws-field--full">
+              <span>Description</span>
+              <textarea data-lfunc-desc rows="2" placeholder="What good looks like for this function"></textarea>
+            </label>
+            <div class="ws-form-actions">
+              <button type="submit" class="btn-primary" data-lfunc-submit>Add function</button>
+              <button type="button" class="ws-form-cancel" data-lfunc-cancel hidden>Cancel edit</button>
+            </div>
+          </form>
+          <div class="ws-table-wrap">
+            <table class="ws-table" data-lfunc-table>
+              <thead><tr><th>Name</th><th>Description</th><th></th></tr></thead>
+              <tbody data-lfunc-body></tbody>
+            </table>
           </div>
         </section>
 
@@ -2153,6 +2297,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import autoTable from 'jspdf-autotable';
     import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES } from '../../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../../lib/workspace/row-numbers';
+    import { fetchLeaderActivity, type LeaderActivityItem } from '../../lib/leader-activity';
 
     // Loose alias for actual query calls below — supabaseConfigured is
     // checked once in init() before any of this runs, so by the time these
@@ -2175,6 +2320,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       attAnchor: new Date(), attSelected: todayStr(), attDatesWithRecords: null,
       allLeaders: [],
       lattAnchor: new Date(), lattSelected: todayStr(), lattType: LEADER_MEETING_TYPES[0], lattDatesWithRecords: null,
+      lprofLeaderId: null,
+      leaderFunctions: [], leaderFunctionsLoaded: false, editingFunctionId: null,
+      lassessLeaderId: null, lassessRating: 0,
       curr: { anchor: new Date(), meetings: new Map(), currentDay: null, channel: null },
       sc: { view: 'month', anchor: new Date(), currentDay: null },
       scEvents: [], scMusicEvents: [], editingScId: null, editingScOccurrenceDate: null, scRequests: [],
@@ -2363,6 +2511,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.ldashKpis = el('[data-ldash-kpis]');
       els.ldashBody = el('[data-ldash-body]');
       els.ldashAttention = el('[data-ldash-attention]');
+      els.ldashFrom = el('[data-ldash-from]');
+      els.ldashTo = el('[data-ldash-to]');
+      els.ldashExport = el('[data-ldash-export]');
       els.lrosterSearch = el('[data-lroster-search]');
       els.lrosterBody = el('[data-lroster-body]');
       els.lattCalendar = el('[data-latt-calendar]');
@@ -2377,6 +2528,32 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.lattBody = el('[data-latt-body]');
       els.lattSearch = el('[data-latt-search]');
       els.lattSummary = el('[data-latt-summary]');
+      els.lprofSelect = el('[data-lprof-select]');
+      els.lprofEmpty = el('[data-lprof-empty]');
+      els.lprofRoot = el('[data-lprof-root]');
+      els.lprofKpis = el('[data-lprof-kpis]');
+      els.lprofActivity = el('[data-lprof-activity]');
+      els.lprofActivitySub = el('[data-lprof-activity-sub]');
+      els.lassessSelect = el('[data-lassess-select]');
+      els.lassessEmpty = el('[data-lassess-empty]');
+      els.lassessRoot = el('[data-lassess-root]');
+      els.lassessKpis = el('[data-lassess-kpis]');
+      els.lassessNoFunctions = el('[data-lassess-no-functions]');
+      els.lassessForm = el('[data-lassess-form]');
+      els.lassessFunction = el('[data-lassess-function]');
+      els.lassessDate = el('[data-lassess-date]');
+      els.lassessStars = el('[data-lassess-stars]');
+      els.lassessNotes = el('[data-lassess-notes]');
+      els.lassessSubmit = el('[data-lassess-submit]');
+      els.lassessSummary = el('[data-lassess-summary]');
+      els.lassessBody = el('[data-lassess-body]');
+      els.lfuncForm = el('[data-lfunc-form]');
+      els.lfuncFormTitle = el('[data-lfunc-form-title]');
+      els.lfuncName = el('[data-lfunc-name]');
+      els.lfuncDesc = el('[data-lfunc-desc]');
+      els.lfuncSubmit = el('[data-lfunc-submit]');
+      els.lfuncCancel = el('[data-lfunc-cancel]');
+      els.lfuncBody = el('[data-lfunc-body]');
       els.feeMonth = el('[data-fee-month]');
       els.feeYear = el('[data-fee-year]');
       els.feeDefault = el('[data-fee-default]');
@@ -5658,24 +5835,32 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
     // ---- Dashboard — "assess their performance": each leader's own
     // attendance rate against every meeting logged in leader_attendance
-    // (any type, all-time). Only present rows are ever stored (see
-    // saveLeaderAttendance()), so a meeting's own total attendee count
-    // isn't recoverable from a single leader's rows — totalMeetings is
-    // the count of distinct (date, meeting_type) pairs across the whole
-    // table instead, i.e. "how many meetings has anyone been logged at".
-    // A leader who joined after some of those meetings just has a lower
-    // count to work with, same as a troop member who joined mid-year on
-    // the org-wide Overview's own attendance rate. ----
+    // within the From/To range above the KPIs (defaults to the last 90
+    // days, see bindLeaderDashboardRange()). Only present rows are ever
+    // stored (see saveLeaderAttendance()), so a meeting's own total
+    // attendee count isn't recoverable from a single leader's rows —
+    // totalMeetings is the count of distinct (date, meeting_type) pairs
+    // in range instead, i.e. "how many meetings has anyone been logged
+    // at in this window". A leader who joined partway through the range
+    // just has a lower count to work with, same as a troop member who
+    // joined mid-year on the org-wide Overview's own attendance rate. ----
     function leaderAttendanceRateBadgeClass(rate: number | null) {
       if (rate == null) return 'ws-badge--fair';
       if (rate >= 90) return 'ws-badge--good';
       if (rate >= 70) return 'ws-badge--fair';
       return 'ws-badge--poor';
     }
-    async function loadLeaderDashboard() {
+    function ldashRange(): { from: string; to: string; label: string } {
+      const from = els.ldashFrom.value || toDateStr(addDays(new Date(), -90));
+      const to = els.ldashTo.value || todayStr();
+      return { from, to, label: `${from} to ${to}` };
+    }
+    async function computeLeaderDashboardData() {
       await ensureAllLeadersLoaded();
-      const { data, error } = await db.from('leader_attendance').select('leader_id, date, meeting_type, present').eq('group_key', LEADERS_GROUP_KEY);
-      if (error) { console.error(error); showToast('Could not load the dashboard.'); return; }
+      const { from, to, label } = ldashRange();
+      const { data, error } = await db.from('leader_attendance').select('leader_id, date, meeting_type, present')
+        .eq('group_key', LEADERS_GROUP_KEY).gte('date', from).lte('date', to);
+      if (error) { console.error(error); showToast('Could not load the dashboard.'); return null; }
       const rows = data || [];
       const totalMeetings = new Set(rows.map((r: any) => `${r.meeting_type}|${r.date}`)).size;
       const byLeader = new Map<string, { attended: number; last: string | null }>();
@@ -5686,17 +5871,24 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         if (!cur.last || r.date > cur.last) cur.last = r.date;
         byLeader.set(r.leader_id, cur);
       });
-      renderLeaderDashboard(totalMeetings, byLeader);
-    }
-    function renderLeaderDashboard(totalMeetings: number, byLeader: Map<string, { attended: number; last: string | null }>) {
       const withRates = state.allLeaders.map((p: any) => {
         const rec = byLeader.get(p.id) || { attended: 0, last: null };
         const rate = totalMeetings ? Math.round((rec.attended / totalMeetings) * 100) : null;
         return { p, attended: rec.attended, last: rec.last, rate };
       });
+      withRates.sort((a: any, b: any) => (a.rate ?? -1) - (b.rate ?? -1));
+      return { totalMeetings, withRates, label };
+    }
+    async function loadLeaderDashboard() {
+      const data = await computeLeaderDashboardData();
+      if (data) renderLeaderDashboard(data.totalMeetings, data.withRates, data.label);
+    }
+    function renderLeaderDashboard(totalMeetings: number, withRates: any[], rangeLabel: string) {
       const withHistory = withRates.filter((r: any) => r.rate != null);
       const avgRate = withHistory.length ? Math.round(withHistory.reduce((s: number, r: any) => s + r.rate, 0) / withHistory.length) : null;
       const belowThreshold = withHistory.filter((r: any) => r.rate < 70).length;
+      const perfect = withHistory.filter((r: any) => r.rate === 100 && r.attended > 0).length;
+      const noShows = withHistory.filter((r: any) => r.rate === 0).length;
       els.ldashKpis.innerHTML = `
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Approved leaders</span></div>
@@ -5714,9 +5906,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">!</span><span class="ws-dash-kpi-label">Below 70%</span></div>
           <span class="ws-dash-kpi-num">${belowThreshold}</span>
         </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Perfect attendance</span></div>
+          <span class="ws-dash-kpi-num">${perfect}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✕</span><span class="ws-dash-kpi-label">No-shows this range</span></div>
+          <span class="ws-dash-kpi-num">${noShows}</span>
+        </div>
       `;
-      // Worst-first so whoever needs a nudge is the first thing an admin sees.
-      withRates.sort((a: any, b: any) => (a.rate ?? -1) - (b.rate ?? -1));
+      if (els.ldashTableSub) els.ldashTableSub.textContent = `${rangeLabel} · Sorted worst-first`;
       if (!withRates.length) {
         els.ldashBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No approved leaders yet.</td></tr>';
         els.ldashAttention.innerHTML = '<p class="ws-dash-empty-mini">No approved leaders yet.</p>';
@@ -5737,6 +5936,329 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.ldashAttention.innerHTML = attention.length
         ? attention.map((r: any) => `<div class="ws-dash-attn-row">${escapeHtml(r.p.name)} <span>${r.rate}%</span></div>`).join('')
         : `<p class="ws-dash-empty-mini">${totalMeetings ? 'Everyone is at 70% or above.' : 'Nothing logged yet.'}</p>`;
+    }
+    async function downloadLeaderDashboardPdf() {
+      try {
+        const data = await computeLeaderDashboardData();
+        if (!data) return;
+        const { totalMeetings, withRates, label } = data;
+        const withHistory = withRates.filter((r: any) => r.rate != null);
+        const avgRate = withHistory.length ? Math.round(withHistory.reduce((s: number, r: any) => s + r.rate, 0) / withHistory.length) : null;
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Attendance', `${label}, ${totalMeetings} meeting${totalMeetings === 1 ? '' : 's'} logged, avg rate ${avgRate != null ? avgRate + '%' : '—'}`);
+        pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+          head: [['Name', 'Role', 'Attended', 'Rate', 'Last attended']],
+          body: withRates.length ? withRates.map((r: any) => [r.p.name, r.p.role === 'admin' ? 'Admin' : 'Leader', `${r.attended} / ${totalMeetings}`, r.rate != null ? `${r.rate}%` : '—', r.last || '—']) : [['', 'No data available', '', '', '']] });
+        doc.save(pdfFilename('Attendance', label));
+      } catch (err) {
+        console.error('leaders attendance report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    function bindLeaderDashboardRange() {
+      els.ldashTableSub = el('[data-ldash-table-sub]');
+      if (!els.ldashFrom.value) els.ldashFrom.value = toDateStr(addDays(new Date(), -90));
+      if (!els.ldashTo.value) els.ldashTo.value = todayStr();
+      els.ldashFrom.addEventListener('change', loadLeaderDashboard);
+      els.ldashTo.addEventListener('change', loadLeaderDashboard);
+      els.ldashExport.addEventListener('click', downloadLeaderDashboardPdf);
+    }
+
+    // ---- Leader Profile: pick one leader and see their own KPIs plus a
+    // real activity feed of what they've done (see fetchLeaderActivity()
+    // in src/lib/leader-activity.ts for exactly what that does and does
+    // not cover). Attendance rate here is genuinely all-time (unlike the
+    // ranged Dashboard above), same all-time convention the original
+    // Leader Dashboard used before the range picker was added.
+    function populateLeaderSelect(selectEl: any, leaders: any[]) {
+      const cur = selectEl.value;
+      selectEl.innerHTML = '<option value="">Choose a leader…</option>' + leaders.map((p: any) => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+      if (cur) selectEl.value = cur;
+    }
+    async function loadLeaderProfileTab() {
+      await ensureAllLeadersLoaded();
+      populateLeaderSelect(els.lprofSelect, state.allLeaders);
+      if (state.lprofLeaderId) {
+        els.lprofSelect.value = state.lprofLeaderId;
+        await renderLeaderProfile(state.lprofLeaderId);
+      }
+    }
+    function renderLeaderActivity(container: any, sub: any, items: LeaderActivityItem[]) {
+      if (sub) sub.textContent = items.length ? `${items.length} recent action${items.length === 1 ? '' : 's'}` : '';
+      if (!items.length) { container.innerHTML = '<p class="ws-dash-empty-mini">Nothing logged for this leader yet.</p>'; return; }
+      container.innerHTML = items.slice(0, 40).map((it) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-dot ws-dash-feed-dot--${it.type}"></span>
+          <span class="ws-dash-feed-text">
+            <span class="ws-dash-feed-title">${escapeHtml(it.text)}</span>
+            <span class="ws-dash-feed-date">${escapeHtml(String(it.date).slice(0, 10))}</span>
+          </span>
+        </div>
+      `).join('');
+    }
+    async function renderLeaderProfile(leaderId: string) {
+      const leader = state.allLeaders.find((p: any) => p.id === leaderId);
+      if (!leader) return;
+      els.lprofEmpty.hidden = true;
+      els.lprofRoot.hidden = false;
+      els.lprofKpis.innerHTML = '<p class="ws-dash-empty-mini">Loading…</p>';
+      els.lprofActivity.innerHTML = '';
+      const { data: attRows, error } = await db.from('leader_attendance').select('leader_id, date, meeting_type, present').eq('group_key', LEADERS_GROUP_KEY);
+      if (error) { console.error(error); showToast('Could not load this leader.'); return; }
+      const rows = attRows || [];
+      const totalMeetings = new Set(rows.map((r: any) => `${r.meeting_type}|${r.date}`)).size;
+      const own = rows.filter((r: any) => r.leader_id === leaderId && r.present);
+      const attended = own.length;
+      const last = own.reduce((acc: string | null, r: any) => (!acc || r.date > acc ? r.date : acc), null as string | null);
+      const rate = totalMeetings ? Math.round((attended / totalMeetings) * 100) : null;
+      els.lprofKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⟳</span><span class="ws-dash-kpi-label">Attendance rate (all-time)</span></div>
+          <span class="ws-dash-kpi-num">${rate != null ? rate + '%' : '—'}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">☰</span><span class="ws-dash-kpi-label">Meetings attended</span></div>
+          <span class="ws-dash-kpi-num">${attended} / ${totalMeetings}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Last attended</span></div>
+          <span class="ws-dash-kpi-num" style="font-size:1.3rem">${last || '—'}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Member since</span></div>
+          <span class="ws-dash-kpi-num" style="font-size:1.3rem">${leader.created_at ? String(leader.created_at).slice(0, 10) : '—'}</span>
+        </div>
+      `;
+      const items = await fetchLeaderActivity(db, { leaderId, leaderName: leader.name, limitPerType: 25 });
+      renderLeaderActivity(els.lprofActivity, els.lprofActivitySub, items);
+    }
+    function bindLeaderProfile() {
+      els.lprofSelect.addEventListener('change', async () => {
+        state.lprofLeaderId = els.lprofSelect.value || null;
+        if (!state.lprofLeaderId) { els.lprofRoot.hidden = true; els.lprofEmpty.hidden = false; return; }
+        await renderLeaderProfile(state.lprofLeaderId);
+      });
+    }
+
+    // ---- Assessment: rate one leader against every function on file,
+    // 1-5 stars, one dated row per rating (leader_assessments) rather
+    // than a single overwritten value — see leader_assessment_schema.sql.
+    // Functions themselves are managed from the Settings tab below.
+    async function ensureLeaderFunctionsLoaded() {
+      if (state.leaderFunctionsLoaded) return;
+      const { data, error } = await db.from('leader_functions').select('*').order('created_at', { ascending: true });
+      if (error) { console.error(error); showToast('Could not load functions.'); return; }
+      state.leaderFunctions = data || [];
+      state.leaderFunctionsLoaded = true;
+    }
+    function renderStarInputControl() {
+      els.lassessStars.innerHTML = [1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" aria-label="${n} star${n === 1 ? '' : 's'}">★</button>`).join('');
+      els.lassessStars.querySelectorAll('button').forEach((btn: any) => {
+        btn.addEventListener('click', () => {
+          state.lassessRating = Number(btn.dataset.star);
+          paintStarInput();
+        });
+      });
+    }
+    function paintStarInput() {
+      els.lassessStars.querySelectorAll('button').forEach((btn: any) => {
+        btn.classList.toggle('ws-star-input--active', Number(btn.dataset.star) <= state.lassessRating);
+      });
+    }
+    function starDisplay(rating: number): string {
+      return '<span class="ws-star-display">' + [1, 2, 3, 4, 5].map((n) => `<span class="${n <= rating ? '' : 'ws-star-display--empty'}">★</span>`).join('') + '</span>';
+    }
+    async function loadLeaderAssessmentTab() {
+      await ensureAllLeadersLoaded();
+      await ensureLeaderFunctionsLoaded();
+      populateLeaderSelect(els.lassessSelect, state.allLeaders);
+      els.lassessFunction.innerHTML = state.leaderFunctions.map((f: any) => `<option value="${f.id}">${escapeHtml(f.name)}</option>`).join('');
+      els.lassessNoFunctions.toggleAttribute('hidden', state.leaderFunctions.length > 0);
+      els.lassessForm.querySelectorAll('input, select, textarea, button[type="submit"]').forEach((elm: any) => { elm.disabled = !state.leaderFunctions.length; });
+      if (!els.lassessDate.value) els.lassessDate.value = todayStr();
+      if (state.lassessLeaderId) {
+        els.lassessSelect.value = state.lassessLeaderId;
+        await renderLeaderAssessment(state.lassessLeaderId);
+      }
+    }
+    async function renderLeaderAssessment(leaderId: string) {
+      els.lassessEmpty.hidden = true;
+      els.lassessRoot.hidden = false;
+      const namesById = new Map(state.allLeaders.map((p: any) => [p.id, p.name]));
+      const { data, error } = await db.from('leader_assessments').select('*').eq('leader_id', leaderId).order('assessed_date', { ascending: false }).order('created_at', { ascending: false });
+      if (error) { console.error(error); showToast('Could not load assessments.'); return; }
+      const rows = data || [];
+      // Latest row per function_id — the current rubric's own summary
+      // cards below only cover functions still on file; retired ones
+      // (function_id null after a Settings delete) still show up in the
+      // history table further down, just not summarized here.
+      const latestByFunction = new Map<string, any>();
+      rows.forEach((r: any) => { if (r.function_id && !latestByFunction.has(r.function_id)) latestByFunction.set(r.function_id, r); });
+      const ratedCount = state.leaderFunctions.filter((f: any) => latestByFunction.has(f.id)).length;
+      const overallAvg = latestByFunction.size
+        ? Math.round((Array.from(latestByFunction.values()).reduce((s: number, r: any) => s + r.rating, 0) / latestByFunction.size) * 10) / 10
+        : null;
+      const lastAssessed = rows.length ? rows[0].assessed_date : null;
+      els.lassessKpis.innerHTML = `
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">☰</span><span class="ws-dash-kpi-label">Functions rated</span></div>
+          <span class="ws-dash-kpi-num">${ratedCount} / ${state.leaderFunctions.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Overall average</span></div>
+          <span class="ws-dash-kpi-num">${overallAvg != null ? overallAvg + ' / 5' : '—'}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Last assessed</span></div>
+          <span class="ws-dash-kpi-num" style="font-size:1.3rem">${lastAssessed || '—'}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">⟳</span><span class="ws-dash-kpi-label">Assessments logged</span></div>
+          <span class="ws-dash-kpi-num">${rows.length}</span>
+        </div>
+      `;
+      els.lassessSummary.innerHTML = state.leaderFunctions.length
+        ? state.leaderFunctions.map((f: any) => {
+            const r = latestByFunction.get(f.id);
+            return `
+              <div class="ws-dash-attn-row" style="cursor:default">
+                <span>${escapeHtml(f.name)}</span>
+                <span>${r ? starDisplay(r.rating) : '<span class="ws-dash-empty-mini">Not yet rated</span>'}</span>
+              </div>`;
+          }).join('')
+        : '<p class="ws-dash-empty-mini">No functions on file yet — add some from the Settings tab.</p>';
+      els.lassessBody.innerHTML = rows.length
+        ? rows.map((r: any) => `
+            <tr data-assessment-id="${r.id}">
+              <td data-label="Date">${r.assessed_date}</td>
+              <td data-label="Function">${escapeHtml(r.function_name)}</td>
+              <td data-label="Rating">${starDisplay(r.rating)}</td>
+              <td data-label="Notes">${escapeHtml(r.notes || '—')}</td>
+              <td data-label="Assessed by">${escapeHtml(namesById.get(r.assessed_by) || '—')}</td>
+              <td class="ws-row-actions"><button type="button" class="ws-row-del" data-lassess-del>×</button></td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="6" class="ws-empty">No assessments logged yet.</td></tr>';
+      els.lassessBody.querySelectorAll('[data-lassess-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Delete this assessment entry?')) return;
+          const id = btn.closest('tr').dataset.assessmentId;
+          const { error: delError } = await db.from('leader_assessments').delete().eq('id', id);
+          if (delError) { showToast('Could not delete.'); return; }
+          await renderLeaderAssessment(leaderId);
+        });
+      });
+    }
+    function bindLeaderAssessment() {
+      renderStarInputControl();
+      els.lassessSelect.addEventListener('change', async () => {
+        state.lassessLeaderId = els.lassessSelect.value || null;
+        state.lassessRating = 0;
+        paintStarInput();
+        els.lassessForm.reset();
+        if (els.lassessDate) els.lassessDate.value = todayStr();
+        if (!state.lassessLeaderId) { els.lassessRoot.hidden = true; els.lassessEmpty.hidden = false; return; }
+        await renderLeaderAssessment(state.lassessLeaderId);
+      });
+      els.lassessForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        if (!state.lassessLeaderId) return;
+        const functionId = els.lassessFunction.value;
+        const fn = state.leaderFunctions.find((f: any) => f.id === functionId);
+        if (!fn) { showToast('Choose a function.'); return; }
+        if (!state.lassessRating) { showToast('Pick a star rating.'); return; }
+        els.lassessSubmit.disabled = true;
+        const { error } = await db.from('leader_assessments').insert({
+          leader_id: state.lassessLeaderId, function_id: fn.id, function_name: fn.name,
+          rating: state.lassessRating, notes: els.lassessNotes.value.trim() || null,
+          assessed_date: els.lassessDate.value || todayStr(), assessed_by: state.session.user.id,
+        });
+        els.lassessSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not save assessment.'); return; }
+        state.lassessRating = 0;
+        paintStarInput();
+        els.lassessNotes.value = '';
+        await renderLeaderAssessment(state.lassessLeaderId);
+      });
+    }
+
+    // ---- Leaders Settings: the function rubric Assessment rates
+    // leaders against — CRUD over leader_functions, same add/edit form +
+    // table pattern as PR Contacts (startEditPrContact() etc.).
+    function resetLeaderFunctionForm() {
+      state.editingFunctionId = null;
+      els.lfuncForm.reset();
+      els.lfuncFormTitle.textContent = 'Add a function';
+      els.lfuncSubmit.textContent = 'Add function';
+      els.lfuncCancel.hidden = true;
+    }
+    function startEditLeaderFunction(id: string) {
+      const f = state.leaderFunctions.find((x: any) => x.id === id);
+      if (!f) return;
+      state.editingFunctionId = id;
+      els.lfuncName.value = f.name;
+      els.lfuncDesc.value = f.description || '';
+      els.lfuncFormTitle.textContent = `Editing ${f.name}`;
+      els.lfuncSubmit.textContent = 'Save changes';
+      els.lfuncCancel.hidden = false;
+      els.lfuncForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function renderLeaderFunctionsList() {
+      els.lfuncBody.innerHTML = state.leaderFunctions.length
+        ? state.leaderFunctions.map((f: any) => `
+            <tr data-function-id="${f.id}">
+              <td data-label="Name">${escapeHtml(f.name)}</td>
+              <td data-label="Description">${escapeHtml(f.description || '—')}</td>
+              <td class="ws-row-actions">
+                <button type="button" class="ws-edit-btn" data-lfunc-edit>Edit</button>
+                <button type="button" class="ws-row-del" data-lfunc-del>×</button>
+              </td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="3" class="ws-empty">No functions yet — add the first one above.</td></tr>';
+      els.lfuncBody.querySelectorAll('[data-lfunc-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => startEditLeaderFunction(btn.closest('tr').dataset.functionId));
+      });
+      els.lfuncBody.querySelectorAll('[data-lfunc-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Delete this function? Ratings already logged against it stay on record.')) return;
+          const id = btn.closest('tr').dataset.functionId;
+          const { error } = await db.from('leader_functions').delete().eq('id', id);
+          if (error) { showToast('Could not delete.'); return; }
+          if (state.editingFunctionId === id) resetLeaderFunctionForm();
+          state.leaderFunctionsLoaded = false;
+          await ensureLeaderFunctionsLoaded();
+          renderLeaderFunctionsList();
+        });
+      });
+    }
+    async function loadLeaderFunctionsSettings() {
+      state.leaderFunctionsLoaded = false;
+      await ensureLeaderFunctionsLoaded();
+      renderLeaderFunctionsList();
+    }
+    function bindLeaderFunctionForm() {
+      els.lfuncCancel.addEventListener('click', resetLeaderFunctionForm);
+      els.lfuncForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const name = els.lfuncName.value.trim();
+        if (!name) { showToast('Name is required.'); return; }
+        els.lfuncSubmit.disabled = true;
+        const payload: any = { name, description: els.lfuncDesc.value.trim() || null };
+        let error;
+        if (state.editingFunctionId) {
+          ({ error } = await db.from('leader_functions').update(payload).eq('id', state.editingFunctionId));
+        } else {
+          payload.created_by = state.session.user.id;
+          ({ error } = await db.from('leader_functions').insert(payload));
+        }
+        els.lfuncSubmit.disabled = false;
+        if (error) { console.error(error); showToast('Could not save function.'); return; }
+        resetLeaderFunctionForm();
+        state.leaderFunctionsLoaded = false;
+        await ensureLeaderFunctionsLoaded();
+        renderLeaderFunctionsList();
+      });
     }
 
     // ---------- Content Calendar (Social Media only): a calendar + board
@@ -8501,7 +9023,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
       [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'meetingnotes', 'reports', 'sharedcal'],
       [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'content', 'credentials', 'sharedcal'],
-      [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderattendance', 'sharedcal'],
+      [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'leadersettings', 'sharedcal'],
     };
     // Inventory/Event Calendar are Music-only, Public Relations is
     // General-only, Content Calendar/Credentials are Social-Media-only,
@@ -8513,7 +9035,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const MUSIC_ONLY_TABS = ['inventory', 'events'];
     const GENERAL_ONLY_TABS = ['pr', 'meetingnotes'];
     const SOCIAL_MEDIA_ONLY_TABS = ['content', 'credentials'];
-    const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderattendance'];
+    const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'leadersettings'];
     function isTabHidden(tab: string) {
       // A leader approved with no group at all (see the People tab's
       // "Support Leader" option) — Shared Calendar is the one tab
@@ -8593,6 +9115,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'leaderdashboard') loadLeaderDashboard();
       if (tab === 'leaderroster') loadLeaderRoster();
       if (tab === 'leaderattendance') loadLeaderAttendance();
+      if (tab === 'leaderprofile') loadLeaderProfileTab();
+      if (tab === 'leaderassessment') loadLeaderAssessmentTab();
+      if (tab === 'leadersettings') loadLeaderFunctionsSettings();
     }
 
     function setTab(tab: any) {
@@ -8806,6 +9331,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         currBindStatics();
         bindAttendance();
         bindLeaderAttendance();
+        bindLeaderDashboardRange();
+        bindLeaderProfile();
+        bindLeaderAssessment();
+        bindLeaderFunctionForm();
         els.feeMonth.addEventListener('change', loadFees);
         els.feeYear.addEventListener('change', loadFees);
         els.feeDefault.addEventListener('blur', saveDefaultFee);

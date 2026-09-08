@@ -669,13 +669,36 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= People ================= -->
         <section class="ws-panel" data-panel="people" hidden>
-          <p class="ws-att-hint">Approve who gets into the Leaders Workspace and which groups they can access, Music and General included, same as any troop. Admin is the one flag that also grants full access here and to the accounting system on the Finance tab.</p>
-          <h3 class="ws-admin-h3">People</h3>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-people-table>
-              <thead><tr><th>Name</th><th>Role</th><th>Groups</th><th></th></tr></thead>
-              <tbody data-people-body></tbody>
-            </table>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="people" data-subtab="roster">People</button>
+            <button type="button" class="ws-subtab" data-subtabs="people" data-subtab="activitylog">Activity Log</button>
+          </div>
+
+          <div data-subpanel="people:roster">
+            <p class="ws-att-hint">Approve who gets into the Leaders Workspace and which groups they can access, Music and General included, same as any troop. Admin is the one flag that also grants full access here and to the accounting system on the Finance tab.</p>
+            <h3 class="ws-admin-h3">People</h3>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-people-table>
+                <thead><tr><th>Name</th><th>Role</th><th>Groups</th><th></th></tr></thead>
+                <tbody data-people-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-subpanel="people:activitylog" hidden>
+            <p class="ws-att-hint">Every login and logged action across the workspace, inferred from each table's own record of who last touched it — not every possible click, but every meaningful change: attendance taken, curriculum planned, finance logged, fee payments recorded, roster members added, and sign-ins.</p>
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline"><span>Leader</span><select data-alog-leader><option value="">All leaders</option></select></label>
+              <label class="ws-field ws-field--inline"><span>From</span><input type="date" data-alog-from /></label>
+              <label class="ws-field ws-field--inline"><span>To</span><input type="date" data-alog-to /></label>
+              <button type="button" class="btn-primary" data-alog-refresh>Refresh</button>
+            </div>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-alog-table>
+                <thead><tr><th>When</th><th>Who</th><th>Type</th><th>Details</th></tr></thead>
+                <tbody data-alog-body></tbody>
+              </table>
+            </div>
           </div>
         </section>
       </div>
@@ -840,6 +863,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import autoTable from 'jspdf-autotable';
     import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY } from '../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../lib/workspace/row-numbers';
+    import { fetchLeaderActivity, type LeaderActivityItem } from '../lib/leader-activity';
 
     const db: any = supabase;
 
@@ -853,6 +877,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       recSystemBalance: 0,
       recDiff: null,
       editingSharedVendorId: null,
+      people: [],
       sc: { view: 'month', anchor: new Date(), currentDay: null },
       scEvents: [], scMusicEvents: [], editingScId: null, editingScOccurrenceDate: null, scRequests: [],
     };
@@ -1197,6 +1222,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.svendorBody = el('[data-svendor-body]');
 
       els.peopleBody = el('[data-people-body]');
+      els.alogLeader = el('[data-alog-leader]');
+      els.alogFrom = el('[data-alog-from]');
+      els.alogTo = el('[data-alog-to]');
+      els.alogRefresh = el('[data-alog-refresh]');
+      els.alogBody = el('[data-alog-body]');
 
       els.scPrev = el('[data-sc-prev]');
       els.scNext = el('[data-sc-next]');
@@ -3665,7 +3695,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function loadPeople() {
       const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
       if (error) { console.error(error); showToast('Could not load people.'); return; }
-      renderPeople(data || []);
+      state.people = data || [];
+      renderPeople(state.people);
+      populateActivityLogLeaderSelect();
+      await loadActivityLog();
     }
     // Leaders (see LEADERS_GROUP_KEY) is left off this checklist on
     // purpose — that's the entire enforcement mechanism keeping it
@@ -3770,6 +3803,45 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           await loadPeople();
         });
       });
+    }
+
+    // ---------- Activity Log (People's own subtab): org-wide, every
+    // leader — see fetchLeaderActivity() in src/lib/leader-activity.ts
+    // for what's actually covered and how each row's "who" is resolved.
+    // Logins are only visible here because of the admin SELECT policy
+    // added on device_sessions specifically for this — that table's own
+    // schema comment covers the tradeoff.
+    const ACTIVITY_TYPE_LABELS: Record<string, string> = { attendance: 'Attendance', curriculum: 'Curriculum', finance: 'Finance', fee: 'Fees', roster: 'Roster', login: 'Sign-in' };
+    function populateActivityLogLeaderSelect() {
+      const cur = els.alogLeader.value;
+      els.alogLeader.innerHTML = '<option value="">All leaders</option>' + state.people
+        .filter((p: any) => p.role !== 'pending')
+        .map((p: any) => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+      if (cur) els.alogLeader.value = cur;
+    }
+    async function loadActivityLog() {
+      const namesById = new Map(state.people.map((p: any) => [p.id, p.name]));
+      const leaderId = els.alogLeader.value || null;
+      const leaderName = leaderId ? namesById.get(leaderId) || null : null;
+      els.alogBody.innerHTML = '<tr><td colspan="4" class="ws-empty">Loading…</td></tr>';
+      const items: LeaderActivityItem[] = await fetchLeaderActivity(db, {
+        leaderId, leaderName,
+        from: els.alogFrom.value || null, to: els.alogTo.value || null,
+        limitPerType: 40, namesById, includeLogins: true,
+      });
+      if (!items.length) { els.alogBody.innerHTML = '<tr><td colspan="4" class="ws-empty">Nothing logged for this filter yet.</td></tr>'; return; }
+      els.alogBody.innerHTML = items.slice(0, 200).map((it) => `
+        <tr>
+          <td data-label="When">${escapeHtml(String(it.date).replace('T', ' ').slice(0, 16))}</td>
+          <td data-label="Who">${escapeHtml(it.leaderName)}</td>
+          <td data-label="Type"><span class="ws-badge ws-badge--fair">${ACTIVITY_TYPE_LABELS[it.type] || it.type}</span></td>
+          <td data-label="Details">${escapeHtml(it.text)}</td>
+        </tr>
+      `).join('');
+    }
+    function bindActivityLog() {
+      els.alogLeader.addEventListener('change', loadActivityLog);
+      els.alogRefresh.addEventListener('click', loadActivityLog);
     }
 
     // ---------- Tabs -------------------------------------------------------
@@ -3880,6 +3952,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         bindTabs();
         bindSubtabs();
+        bindActivityLog();
         bindOpeningBalanceForm();
         bindTransactionForm();
         bindReconcile();
