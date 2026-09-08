@@ -109,7 +109,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <button type="button" class="ws-tab" data-tab="leaderattendance"><Icon name="calendar" size={16} strokeWidth={1.8} /> Attendance</button>
         <button type="button" class="ws-tab" data-tab="leaderprofile"><Icon name="user" size={16} strokeWidth={1.8} /> Leader Profile</button>
         <button type="button" class="ws-tab" data-tab="leaderassessment"><Icon name="diamond" size={16} strokeWidth={1.8} /> Assessment</button>
-        <button type="button" class="ws-tab" data-tab="leadersettings"><Icon name="sliders" size={16} strokeWidth={1.8} /> Settings</button>
       </nav>
 
       <!-- Shown above every tab's content (not just the header switcher up
@@ -1660,102 +1659,109 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= Assessment (admin-only — see
              LEADERS_GROUP_KEY): rate a leader 1-5 stars against every
-             function on file (managed from the Settings tab below), one
+             function on file (managed from the Settings subtab), one
              dated entry per rating rather than a single overwritten
              value — so re-assessing someone builds a history instead of
              losing the last one. Never surfaced to the leader being
              rated anywhere else in the app. ==================== -->
         <section class="ws-panel" data-panel="leaderassessment" hidden>
-          <div class="ws-dash">
-            <div class="ws-dash-hero">
-              <div class="ws-dash-hero-text">
-                <span class="ws-dash-eyebrow">Leaders</span>
-                <h2 class="ws-dash-title">Assessment</h2>
-                <p class="ws-dash-sub">Rate a leader against every function on file — admin-only, never shown to the leader being rated. Manage the function list itself from Settings.</p>
-              </div>
-            </div>
-            <label class="ws-field ws-field--inline">
-              <span>Leader</span>
-              <select data-lassess-select><option value="">Choose a leader…</option></select>
-            </label>
-            <p class="ws-dash-empty-mini" data-lassess-empty>Choose a leader above to rate them.</p>
-            <div data-lassess-root hidden>
-              <div class="ws-dash-kpis" data-lassess-kpis></div>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="leaderassessment" data-subtab="rate">Rate</button>
+            <button type="button" class="ws-subtab" data-subtabs="leaderassessment" data-subtab="settings">Settings</button>
+          </div>
 
-              <div class="ws-dash-card ws-dash-card--full">
-                <div class="ws-dash-card-head"><h3>Rate a function</h3></div>
-                <p class="ws-att-hint" data-lassess-no-functions hidden>No functions on file yet — add some from the Settings tab first.</p>
-                <form class="ws-member-form" data-lassess-form>
-                  <div class="ws-member-form-bar" aria-hidden="true"></div>
-                  <div class="ws-form-grid">
-                    <label class="ws-field">
-                      <span>Function *</span>
-                      <select data-lassess-function required></select>
+          <div data-subpanel="leaderassessment:rate">
+            <div class="ws-dash">
+              <div class="ws-dash-hero">
+                <div class="ws-dash-hero-text">
+                  <span class="ws-dash-eyebrow">Leaders</span>
+                  <h2 class="ws-dash-title">Assessment</h2>
+                  <p class="ws-dash-sub">Rate a leader against every function on file — admin-only, never shown to the leader being rated. Manage the function list itself from the Settings subtab.</p>
+                </div>
+              </div>
+              <label class="ws-field ws-field--inline">
+                <span>Leader</span>
+                <select data-lassess-select><option value="">Choose a leader…</option></select>
+              </label>
+              <p class="ws-dash-empty-mini" data-lassess-empty>Choose a leader above to rate them.</p>
+              <div data-lassess-root hidden>
+                <div class="ws-dash-kpis" data-lassess-kpis></div>
+
+                <div class="ws-dash-card ws-dash-card--full">
+                  <div class="ws-dash-card-head"><h3>Rate a function</h3></div>
+                  <p class="ws-att-hint" data-lassess-no-functions hidden>No functions on file yet — add some from the Settings subtab first.</p>
+                  <form class="ws-member-form" data-lassess-form>
+                    <div class="ws-member-form-bar" aria-hidden="true"></div>
+                    <div class="ws-form-grid">
+                      <label class="ws-field">
+                        <span>Function *</span>
+                        <select data-lassess-function required></select>
+                      </label>
+                      <label class="ws-field">
+                        <span>Date</span>
+                        <input type="date" data-lassess-date />
+                      </label>
+                    </div>
+                    <label class="ws-field ws-field--full">
+                      <span>Rating *</span>
+                      <div class="ws-star-input" data-lassess-stars></div>
                     </label>
-                    <label class="ws-field">
-                      <span>Date</span>
-                      <input type="date" data-lassess-date />
+                    <label class="ws-field ws-field--full">
+                      <span>Notes</span>
+                      <textarea data-lassess-notes rows="2" placeholder="What stood out, good or bad"></textarea>
                     </label>
-                  </div>
-                  <label class="ws-field ws-field--full">
-                    <span>Rating *</span>
-                    <div class="ws-star-input" data-lassess-stars></div>
-                  </label>
-                  <label class="ws-field ws-field--full">
-                    <span>Notes</span>
-                    <textarea data-lassess-notes rows="2" placeholder="What stood out, good or bad"></textarea>
-                  </label>
-                  <div class="ws-form-actions">
-                    <button type="submit" class="btn-primary" data-lassess-submit>Save assessment</button>
-                  </div>
-                </form>
-              </div>
+                    <div class="ws-form-actions">
+                      <button type="submit" class="btn-primary" data-lassess-submit>Save assessment</button>
+                    </div>
+                  </form>
+                </div>
 
-              <div class="ws-dash-card ws-dash-card--full">
-                <div class="ws-dash-card-head"><h3>Function ratings</h3><span class="ws-dash-card-sub">Latest per function</span></div>
-                <div data-lassess-summary></div>
-              </div>
+                <div class="ws-dash-card ws-dash-card--full">
+                  <div class="ws-dash-card-head"><h3>Function ratings</h3><span class="ws-dash-card-sub">Latest per function</span></div>
+                  <div data-lassess-summary></div>
+                </div>
 
-              <div class="ws-table-wrap">
-                <table class="ws-table" data-lassess-table>
-                  <thead>
-                    <tr><th>Date</th><th>Function</th><th>Rating</th><th>Notes</th><th>Assessed by</th><th></th></tr>
-                  </thead>
-                  <tbody data-lassess-body></tbody>
-                </table>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-lassess-table>
+                    <thead>
+                      <tr><th>Date</th><th>Function</th><th>Rating</th><th>Notes</th><th>Assessed by</th><th></th></tr>
+                    </thead>
+                    <tbody data-lassess-body></tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
-        </section>
 
-        <!-- ================= Leaders Settings (admin-only — see
-             LEADERS_GROUP_KEY): the function rubric Assessment rates
-             leaders against. Deleting a function doesn't touch ratings
-             already logged against it — see leader_assessment_schema.sql's
-             own comment on the function_name snapshot. ==================== -->
-        <section class="ws-panel" data-panel="leadersettings" hidden>
-          <p class="ws-att-hint">The functions leaders get assessed against, in the Assessment tab. Add, rename, or retire them here — existing ratings on a retired function stay on record.</p>
-          <form class="ws-member-form" data-lfunc-form>
-            <div class="ws-member-form-bar" aria-hidden="true"></div>
-            <p class="ws-member-form-title" data-lfunc-form-title>Add a function</p>
-            <label class="ws-field ws-field--full">
-              <span>Name *</span>
-              <input type="text" data-lfunc-name required placeholder="e.g. Curriculum planning" />
-            </label>
-            <label class="ws-field ws-field--full">
-              <span>Description</span>
-              <textarea data-lfunc-desc rows="2" placeholder="What good looks like for this function"></textarea>
-            </label>
-            <div class="ws-form-actions">
-              <button type="submit" class="btn-primary" data-lfunc-submit>Add function</button>
-              <button type="button" class="ws-form-cancel" data-lfunc-cancel hidden>Cancel edit</button>
+          <!-- ---- Settings subtab: the function rubric the Rate subtab
+               rates leaders against. Deleting a function doesn't touch
+               ratings already logged against it — see
+               leader_assessment_schema.sql's own comment on the
+               function_name snapshot. ---- -->
+          <div data-subpanel="leaderassessment:settings" hidden>
+            <p class="ws-att-hint">The functions leaders get assessed against, in the Rate subtab. Add, rename, or retire them here — existing ratings on a retired function stay on record.</p>
+            <form class="ws-member-form" data-lfunc-form>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title" data-lfunc-form-title>Add a function</p>
+              <label class="ws-field ws-field--full">
+                <span>Name *</span>
+                <input type="text" data-lfunc-name required placeholder="e.g. Curriculum planning" />
+              </label>
+              <label class="ws-field ws-field--full">
+                <span>Description</span>
+                <textarea data-lfunc-desc rows="2" placeholder="What good looks like for this function"></textarea>
+              </label>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary" data-lfunc-submit>Add function</button>
+                <button type="button" class="ws-form-cancel" data-lfunc-cancel hidden>Cancel edit</button>
+              </div>
+            </form>
+            <div class="ws-table-wrap">
+              <table class="ws-table" data-lfunc-table>
+                <thead><tr><th>Name</th><th>Description</th><th></th></tr></thead>
+                <tbody data-lfunc-body></tbody>
+              </table>
             </div>
-          </form>
-          <div class="ws-table-wrap">
-            <table class="ws-table" data-lfunc-table>
-              <thead><tr><th>Name</th><th>Description</th><th></th></tr></thead>
-              <tbody data-lfunc-body></tbody>
-            </table>
           </div>
         </section>
 
@@ -5877,13 +5883,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         return { p, attended: rec.attended, last: rec.last, rate };
       });
       withRates.sort((a: any, b: any) => (a.rate ?? -1) - (b.rate ?? -1));
-      return { totalMeetings, withRates, label };
+      const admins = state.allLeaders.filter((p: any) => p.role === 'admin').length;
+      const newInRange = state.allLeaders.filter((p: any) => p.created_at && String(p.created_at).slice(0, 10) >= from && String(p.created_at).slice(0, 10) <= to).length;
+      return { totalMeetings, withRates, label, admins, newInRange };
     }
     async function loadLeaderDashboard() {
       const data = await computeLeaderDashboardData();
-      if (data) renderLeaderDashboard(data.totalMeetings, data.withRates, data.label);
+      if (data) renderLeaderDashboard(data.totalMeetings, data.withRates, data.label, data.admins, data.newInRange);
     }
-    function renderLeaderDashboard(totalMeetings: number, withRates: any[], rangeLabel: string) {
+    function renderLeaderDashboard(totalMeetings: number, withRates: any[], rangeLabel: string, admins: number, newInRange: number) {
       const withHistory = withRates.filter((r: any) => r.rate != null);
       const avgRate = withHistory.length ? Math.round(withHistory.reduce((s: number, r: any) => s + r.rate, 0) / withHistory.length) : null;
       const belowThreshold = withHistory.filter((r: any) => r.rate < 70).length;
@@ -5913,6 +5921,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✕</span><span class="ws-dash-kpi-label">No-shows this range</span></div>
           <span class="ws-dash-kpi-num">${noShows}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">◆</span><span class="ws-dash-kpi-label">Admins</span></div>
+          <span class="ws-dash-kpi-num">${admins}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">+</span><span class="ws-dash-kpi-label">New leaders this range</span></div>
+          <span class="ws-dash-kpi-num">${newInRange}</span>
         </div>
       `;
       if (els.ldashTableSub) els.ldashTableSub.textContent = `${rangeLabel} · Sorted worst-first`;
@@ -6068,13 +6084,26 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function starDisplay(rating: number): string {
       return '<span class="ws-star-display">' + [1, 2, 3, 4, 5].map((n) => `<span class="${n <= rating ? '' : 'ws-star-display--empty'}">★</span>`).join('') + '</span>';
     }
-    async function loadLeaderAssessmentTab() {
-      await ensureAllLeadersLoaded();
-      await ensureLeaderFunctionsLoaded();
-      populateLeaderSelect(els.lassessSelect, state.allLeaders);
+    // Keeps the Rate subtab's own function dropdown/disabled-state in
+    // sync with whatever the Settings subtab last saved — called on tab
+    // load and again after every function add/edit/delete, since both
+    // subtabs share one panel and can be switched between without a
+    // full tab reload.
+    function syncAssessmentFunctionOptions() {
+      const cur = els.lassessFunction.value;
       els.lassessFunction.innerHTML = state.leaderFunctions.map((f: any) => `<option value="${f.id}">${escapeHtml(f.name)}</option>`).join('');
+      if (cur) els.lassessFunction.value = cur;
       els.lassessNoFunctions.toggleAttribute('hidden', state.leaderFunctions.length > 0);
       els.lassessForm.querySelectorAll('input, select, textarea, button[type="submit"]').forEach((elm: any) => { elm.disabled = !state.leaderFunctions.length; });
+    }
+    async function loadLeaderAssessmentTab() {
+      await ensureAllLeadersLoaded();
+      // Settings is a subtab of this same panel now (both loaded
+      // eagerly together, same as Finance's own subtabs) — this both
+      // refreshes state.leaderFunctions and renders its list.
+      await loadLeaderFunctionsSettings();
+      populateLeaderSelect(els.lassessSelect, state.allLeaders);
+      syncAssessmentFunctionOptions();
       if (!els.lassessDate.value) els.lassessDate.value = todayStr();
       if (state.lassessLeaderId) {
         els.lassessSelect.value = state.lassessLeaderId;
@@ -6226,9 +6255,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           const { error } = await db.from('leader_functions').delete().eq('id', id);
           if (error) { showToast('Could not delete.'); return; }
           if (state.editingFunctionId === id) resetLeaderFunctionForm();
-          state.leaderFunctionsLoaded = false;
-          await ensureLeaderFunctionsLoaded();
-          renderLeaderFunctionsList();
+          await loadLeaderFunctionsSettings();
+          syncAssessmentFunctionOptions();
+          if (state.lassessLeaderId) await renderLeaderAssessment(state.lassessLeaderId);
         });
       });
     }
@@ -6255,9 +6284,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         els.lfuncSubmit.disabled = false;
         if (error) { console.error(error); showToast('Could not save function.'); return; }
         resetLeaderFunctionForm();
-        state.leaderFunctionsLoaded = false;
-        await ensureLeaderFunctionsLoaded();
-        renderLeaderFunctionsList();
+        await loadLeaderFunctionsSettings();
+        syncAssessmentFunctionOptions();
+        if (state.lassessLeaderId) await renderLeaderAssessment(state.lassessLeaderId);
       });
     }
 
@@ -9023,7 +9052,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
       [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'meetingnotes', 'reports', 'sharedcal'],
       [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'content', 'credentials', 'sharedcal'],
-      [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'leadersettings', 'sharedcal'],
+      [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'sharedcal'],
     };
     // Inventory/Event Calendar are Music-only, Public Relations is
     // General-only, Content Calendar/Credentials are Social-Media-only,
@@ -9035,7 +9064,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const MUSIC_ONLY_TABS = ['inventory', 'events'];
     const GENERAL_ONLY_TABS = ['pr', 'meetingnotes'];
     const SOCIAL_MEDIA_ONLY_TABS = ['content', 'credentials'];
-    const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'leadersettings'];
+    const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderattendance', 'leaderprofile', 'leaderassessment'];
     function isTabHidden(tab: string) {
       // A leader approved with no group at all (see the People tab's
       // "Support Leader" option) — Shared Calendar is the one tab
@@ -9117,7 +9146,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'leaderattendance') loadLeaderAttendance();
       if (tab === 'leaderprofile') loadLeaderProfileTab();
       if (tab === 'leaderassessment') loadLeaderAssessmentTab();
-      if (tab === 'leadersettings') loadLeaderFunctionsSettings();
     }
 
     function setTab(tab: any) {
