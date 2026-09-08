@@ -1587,7 +1587,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <div class="ws-table-wrap">
                   <table class="ws-table" data-ldash-table>
                     <thead>
-                      <tr><th>Name</th><th>Role</th><th>Attended</th><th>Rate</th><th>Last attended</th></tr>
+                      <tr><th>Member ID</th><th>Name</th><th>Role</th><th>Attended</th><th>Rate</th><th>Last attended</th></tr>
                     </thead>
                     <tbody data-ldash-body></tbody>
                   </table>
@@ -1682,7 +1682,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <table class="ws-table ws-table--collapsible" data-lroster-table>
               <thead>
                 <tr>
-                  <th>Name</th><th>Role</th><th>Groups</th><th>Phone</th><th>Email</th>
+                  <th>Member ID</th><th>Name</th><th>Role</th><th>Groups</th><th>Phone</th><th>Email</th>
                   <th>National ID</th><th>DOB</th><th>Emergency Contact</th><th>Allergies</th>
                   <th>Notes</th><th>Member since</th><th></th>
                 </tr>
@@ -1699,7 +1699,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <table class="ws-table ws-table--collapsible" data-larchive-table>
               <thead>
                 <tr>
-                  <th>Name</th><th>Role</th><th>Groups</th><th>Phone</th><th>Email</th>
+                  <th>Member ID</th><th>Name</th><th>Role</th><th>Groups</th><th>Phone</th><th>Email</th>
                   <th>National ID</th><th>DOB</th><th>Emergency Contact</th><th>Allergies</th>
                   <th>Notes</th><th>Member since</th><th></th>
                 </tr>
@@ -1739,7 +1739,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-table-wrap">
                 <table class="ws-table ws-table--compact-row" data-latt-table>
                   <thead>
-                    <tr><th>Name</th><th>Role</th><th>Present</th></tr>
+                    <tr><th>Member ID</th><th>Name</th><th>Role</th><th>Present</th></tr>
                   </thead>
                   <tbody data-latt-body></tbody>
                 </table>
@@ -5919,6 +5919,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function leaderRowHTML(p: any, actionsHTML: string) {
       return `
         <tr data-leader-id="${p.id}">
+          <td data-label="Member ID">${escapeHtml(p.member_code || '—')}</td>
           <td data-label="Name">${escapeHtml(p.name)}</td>
           <td data-label="Role">${p.role === 'admin' ? 'Admin' : 'Leader'}</td>
           <td data-label="Groups">${escapeHtml(leaderGroupsLabel(p))}</td>
@@ -5936,7 +5937,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderLeaderRoster() {
       const active = activeLeaders();
       if (!active.length) {
-        els.lrosterBody.innerHTML = '<tr><td colspan="12" class="ws-empty">No approved leaders yet.</td></tr>';
+        els.lrosterBody.innerHTML = '<tr><td colspan="13" class="ws-empty">No approved leaders yet.</td></tr>';
         return;
       }
       els.lrosterBody.innerHTML = active.map((p: any) => leaderRowHTML(p, `
@@ -5954,7 +5955,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderLeaderArchive() {
       const archived = state.allLeaders.filter((p: any) => p.active === false);
       if (!archived.length) {
-        els.larchiveBody.innerHTML = '<tr><td colspan="12" class="ws-empty">No archived leaders.</td></tr>';
+        els.larchiveBody.innerHTML = '<tr><td colspan="13" class="ws-empty">No archived leaders.</td></tr>';
         return;
       }
       els.larchiveBody.innerHTML = archived.map((p: any) => leaderRowHTML(p, `
@@ -6140,7 +6141,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     function renderLattList(map: Map<string, any>, date: string) {
       const leaders = activeLeaders();
       if (!leaders.length) {
-        els.lattBody.innerHTML = '<tr><td colspan="3" class="ws-empty">No approved leaders yet.</td></tr>';
+        els.lattBody.innerHTML = '<tr><td colspan="4" class="ws-empty">No approved leaders yet.</td></tr>';
         els.lattSummary.textContent = '';
         return;
       }
@@ -6150,6 +6151,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         if (rec && rec.present) presentCount++;
         return `
           <tr data-leader-id="${p.id}">
+            <td data-label="Member ID">${escapeHtml(p.member_code || '—')}</td>
             <td data-label="Name">${escapeHtml(p.name)}</td>
             <td data-label="Role">${p.role === 'admin' ? 'Admin' : 'Leader'}</td>
             <td data-label="Present"><input type="checkbox" data-latt-present ${rec && rec.present ? 'checked' : ''} /></td>
@@ -6306,12 +6308,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       `;
       if (els.ldashTableSub) els.ldashTableSub.textContent = `${rangeLabel} · Sorted worst-first`;
       if (!withRates.length) {
-        els.ldashBody.innerHTML = '<tr><td colspan="5" class="ws-empty">No approved leaders yet.</td></tr>';
+        els.ldashBody.innerHTML = '<tr><td colspan="6" class="ws-empty">No approved leaders yet.</td></tr>';
         els.ldashAttention.innerHTML = '<p class="ws-dash-empty-mini">No approved leaders yet.</p>';
         return;
       }
       els.ldashBody.innerHTML = withRates.map((r: any) => `
         <tr>
+          <td data-label="Member ID">${escapeHtml(r.p.member_code || '—')}</td>
           <td data-label="Name">${escapeHtml(r.p.name)}</td>
           <td data-label="Role">${r.p.role === 'admin' ? 'Admin' : 'Leader'}</td>
           <td data-label="Attended">${r.attended} / ${totalMeetings}</td>
@@ -6336,8 +6339,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Attendance', `${label}, ${totalMeetings} meeting${totalMeetings === 1 ? '' : 's'} logged, avg rate ${avgRate != null ? avgRate + '%' : '—'}`);
         pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          head: [['Name', 'Role', 'Attended', 'Rate', 'Last attended']],
-          body: withRates.length ? withRates.map((r: any) => [r.p.name, r.p.role === 'admin' ? 'Admin' : 'Leader', `${r.attended} / ${totalMeetings}`, r.rate != null ? `${r.rate}%` : '—', r.last || '—']) : [['', 'No data available', '', '', '']] });
+          head: [['Member ID', 'Name', 'Role', 'Attended', 'Rate', 'Last attended']],
+          body: withRates.length ? withRates.map((r: any) => [r.p.member_code || '—', r.p.name, r.p.role === 'admin' ? 'Admin' : 'Leader', `${r.attended} / ${totalMeetings}`, r.rate != null ? `${r.rate}%` : '—', r.last || '—']) : [['', 'No data available', '', '', '', '']] });
         doc.save(pdfFilename('Attendance', label));
       } catch (err) {
         console.error('leaders attendance report failed', err);
@@ -7632,12 +7635,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const y = pdfHeader(doc, 'Roster', `${leaders.length} approved leader${leaders.length === 1 ? '' : 's'}`, 'Leaders');
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
-          head: [['Name', 'Role', 'Groups', 'Phone', 'Email', 'National ID', 'DOB', 'Emergency Contact', 'Allergy', 'Notes']],
+          head: [['Member ID', 'Name', 'Role', 'Groups', 'Phone', 'Email', 'National ID', 'DOB', 'Emergency Contact', 'Allergy', 'Notes']],
           body: leaders.length ? leaders.map((p: any) => [
-            p.name, p.role === 'admin' ? 'Admin' : 'Leader', leaderGroupsLabel(p), p.phone || '—', p.email || '—', p.national_id || '—', p.birth_date || '—',
+            p.member_code || '—', p.name, p.role === 'admin' ? 'Admin' : 'Leader', leaderGroupsLabel(p), p.phone || '—', p.email || '—', p.national_id || '—', p.birth_date || '—',
             p.emergency_contact_relation || p.emergency_contact_phone ? `${p.emergency_contact_relation || '—'}: ${p.emergency_contact_phone || '—'}` : '—',
             p.has_allergies ? (p.allergy_detail || 'Yes') : '—', p.notes || '—',
-          ]) : [['No leaders found', '', '', '', '', '', '', '', '', '']],
+          ]) : [['', 'No leaders found', '', '', '', '', '', '', '', '', '']],
         });
         doc.save(pdfFilename('Roster', new Date().toISOString().slice(0, 10), 'Leaders'));
       } catch (err) {
@@ -7666,12 +7669,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const bodyRows = leaders.map((p: any) => {
           const rec = byLeader.get(p.id) || { attended: 0, last: null };
           const rate = totalMeetings ? Math.round((rec.attended / totalMeetings) * 100) : 0;
-          return [p.name, p.role === 'admin' ? 'Admin' : 'Leader', `${rec.attended} / ${totalMeetings}`, `${rate}%`, rec.last || '—'];
+          return [p.member_code || '—', p.name, p.role === 'admin' ? 'Admin' : 'Leader', `${rec.attended} / ${totalMeetings}`, `${rate}%`, rec.last || '—'];
         });
         const doc = new jsPDF();
         const y = pdfHeader(doc, 'Attendance', `${label}, ${totalMeetings} meeting${totalMeetings === 1 ? '' : 's'} held`, 'Leaders');
         pdfTable(doc, { startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
-          head: [['Name', 'Role', 'Attended', 'Rate', 'Last attended']], body: bodyRows.length ? bodyRows : [['', 'No data available', '', '', '']] });
+          head: [['Member ID', 'Name', 'Role', 'Attended', 'Rate', 'Last attended']], body: bodyRows.length ? bodyRows : [['', 'No data available', '', '', '', '']] });
         doc.save(pdfFilename('Attendance', label, 'Leaders'));
       } catch (err) {
         console.error('leader attendance report failed', err);
@@ -7716,6 +7719,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
         head: [['Field', 'Value']],
         body: [
+          ['Member ID', leader.member_code || '—'],
           ['Role', leader.role === 'admin' ? 'Admin' : 'Leader'],
           ['Groups', leaderGroupsLabel(leader)],
           ['Phone', leader.phone || '—'],
@@ -9712,11 +9716,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Leaders (see LEADERS_GROUP_KEY) is deliberately left out of the
     // list above — it has no `members` roster or fee-collecting members
     // at all (its own Roster/Attendance read from profiles/
-    // leader_attendance instead), so copyMemberBlock/feesTabHint/
-    // data-troop-only never apply to it either way; those all live
-    // inside panels (roster/fees/library) that isTabHidden() already
-    // hides entirely for Leaders, so it doesn't need to be in this list
-    // for any of that to behave correctly.
+    // leader_attendance instead), so copyMemberBlock/feesTabHint never
+    // apply to it either way; those live inside panels (roster/fees)
+    // that isTabHidden() already hides entirely for Leaders. data-
+    // troop-only is the one exception now that Leaders has its own
+    // Reports tab (see NON_TROOP_TAB_VISIBILITY below) — those report
+    // cards (Monthly Fees, Attendance, Curriculum) live in the one
+    // panel Leaders DOES share with troops, so its own toggle below
+    // checks for Leaders explicitly instead of using this list.
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
       [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
       [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'meetingnotes', 'reports', 'sharedcal'],
@@ -9776,7 +9783,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       // only makes sense for a troop — Social Media sees the rest of
       // Library (Documents/Shared Library) but not this.
       document.querySelectorAll('[data-troop-only]').forEach((el: any) => {
-        el.toggleAttribute('hidden', NON_TROOP_GROUP_KEYS.includes(state.activeGroup));
+        el.toggleAttribute('hidden', NON_TROOP_GROUP_KEYS.includes(state.activeGroup) || state.activeGroup === LEADERS_GROUP_KEY);
       });
       // Each non-troop group's Reports tab only carries the report cards
       // specific to its own tabs — Music's Inventory/Event Calendar/
