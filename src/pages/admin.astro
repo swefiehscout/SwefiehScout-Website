@@ -3766,16 +3766,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // up on the admin-only Leaders Dashboard, and/or to use Shared
     // Calendar, the one feature that's genuinely ungated by group — see
     // isTabHidden() in leaders/app.astro). That's just `groups: []`,
-    // same value an unconfigured brand-new leader already has — which is
-    // exactly why this checkbox never pre-checks itself from `groups`
-    // being empty: a pending signup and a deliberate Support Leader
-    // share that same empty value, so mirroring it would preselect
-    // Support Leader for every still-pending person too. Instead this is
-    // a pure manual toggle — an admin ticks it themselves once they've
-    // actually decided someone is Support Leader — and it isn't its own
-    // flag either way: checking it just clears the real group boxes
-    // (bindPeopleGroupCheckboxes()), same as before.
-    function peopleGroupsCellHTML(groups: string[], role: string) {
+    // same value an unconfigured brand-new leader already has. So on the
+    // *initial* render from saved data this checkbox mirrors "no real
+    // group is checked" — a saved Support Leader still shows checked
+    // when you come back — but only once someone is actually
+    // Leader/Admin; a still-pending signup has that same empty `groups`
+    // purely as an unconfigured default nobody chose, so it's excluded
+    // to avoid preselecting Support Leader for every pending person.
+    // `preselect` is false for the live re-render that fires when the
+    // Role dropdown is switched mid-edit (before Save) — even flipping
+    // straight to Leader shouldn't auto-tick this, an admin presses it
+    // themselves. It isn't its own flag either way: checking it just
+    // clears the real group boxes (bindPeopleGroupCheckboxes()).
+    function peopleGroupsCellHTML(groups: string[], role: string, preselect = true) {
       if (role === 'admin') return '<p class="ws-admin-note">All groups (admin)</p>';
       const realChecks = ASSIGNABLE_GROUPS.map((g) => `
         <label class="ws-group-check">
@@ -3786,7 +3789,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       return realChecks + `
         <span class="ws-group-check-divider">or</span>
         <label class="ws-group-check ws-group-check--special">
-          <input type="checkbox" data-calendar-only-check />
+          <input type="checkbox" data-calendar-only-check ${preselect && groups.length === 0 && role !== 'pending' ? 'checked' : ''} />
           Support Leader
         </label>
       `;
@@ -3835,7 +3838,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindPeopleGroupCheckboxes(groupsCell);
         row.querySelector('[data-people-role]').addEventListener('change', (e: any) => {
           const savedGroups = (groupsCell.dataset.groups || '').split(',').filter(Boolean);
-          groupsCell.innerHTML = peopleGroupsCellHTML(savedGroups, e.target.value);
+          groupsCell.innerHTML = peopleGroupsCellHTML(savedGroups, e.target.value, false);
           bindPeopleGroupCheckboxes(groupsCell);
         });
         row.querySelector('[data-people-save]').addEventListener('click', async () => {
