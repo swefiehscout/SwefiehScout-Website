@@ -3449,7 +3449,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // own group with no age check behind it. Transfer just repoints the
     // request's group_key, same in-place destination-picker pattern as
     // startMoveMember() below. Nothing is approved/created by this, it
-    // only moves which group's queue the request sits in.
+    // only moves which group's queue the request sits in — and it works
+    // even to a group this leader has no access to themselves (see
+    // join_request_transfer_schema.sql: only access to the request's
+    // CURRENT group is required, not the destination).
     function startTransferRequest(id: string) {
       const r = state.approvals.find((x: any) => x.id === id);
       if (!r) return;
@@ -3471,7 +3474,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const to = GROUPS.find((g: any) => g.key === targetKey);
         if (!confirm(`Send ${r.full_name}'s request from ${from?.en} to ${to?.en}? It'll disappear from ${from?.en}'s Approvals and show up under ${to?.en} instead.`)) return;
         const { error } = await db.from('join_requests').update({ group_key: targetKey }).eq('id', id);
-        if (error) { console.error(error); showToast('Could not transfer, check your connection (or you may not have access to that group).'); return; }
+        if (error) { console.error(error); showToast('Could not transfer, check your connection.'); return; }
         showToast(`${r.full_name}'s request sent to ${to?.en}.`);
         await loadApprovals();
         await refreshApprovalsBadge();
