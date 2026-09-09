@@ -364,7 +364,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <p class="ws-soon">
             Anyone can submit a request at <strong>/join</strong> without an account. Approving one adds them
             straight to this group's active roster; rejecting just declines it, nothing is created either way
-            until you act.
+            until you act. Picked the wrong group by mistake (age, mostly)? Transfer sends the request to
+            another group's queue instead — nothing is added until that group approves it.
           </p>
           <input type="search" class="ws-search" data-approvals-search placeholder="Search requests…" />
           <div class="ws-table-wrap">
@@ -2508,7 +2509,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     } from '../../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
-    import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES, SC_EVENT_COLORS, scEventColorValue } from '../../lib/curriculum/constants';
+    import { GROUPS, TROOP_GROUPS, JOINABLE_GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES, SC_EVENT_COLORS, scEventColorValue } from '../../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../../lib/workspace/row-numbers';
     import { fetchLeaderActivity, formatActivityWhen, type LeaderActivityItem } from '../../lib/leader-activity';
 
@@ -3431,6 +3432,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Notes">${escapeHtml(r.notes || '—')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-approve-request>Approve</button>
+            <button type="button" class="ws-edit-btn" data-transfer-request>Transfer</button>
             <button type="button" class="ws-row-del" data-reject-request title="Reject">×</button>
           </td>
         </tr>
@@ -3439,7 +3441,40 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.approvalsBody.querySelectorAll('tr').forEach((row: any) => {
         const id = row.dataset.requestId;
         row.querySelector('[data-approve-request]').addEventListener('click', () => approveRequest(id));
+        row.querySelector('[data-transfer-request]').addEventListener('click', () => startTransferRequest(id));
         row.querySelector('[data-reject-request]').addEventListener('click', () => rejectRequest(id));
+      });
+    }
+    // Wrong-group requests happen — a public /join submitter picks their
+    // own group with no age check behind it. Transfer just repoints the
+    // request's group_key, same in-place destination-picker pattern as
+    // startMoveMember() below. Nothing is approved/created by this, it
+    // only moves which group's queue the request sits in.
+    function startTransferRequest(id: string) {
+      const r = state.approvals.find((x: any) => x.id === id);
+      if (!r) return;
+      const row = els.approvalsBody.querySelector(`tr[data-request-id="${id}"]`);
+      const cell = row?.querySelector('.ws-row-actions');
+      if (!cell) return;
+      const destinations = JOINABLE_GROUPS.filter((g) => g.key !== r.group_key);
+      cell.innerHTML = `
+        <select class="ws-move-select" data-transfer-target>
+          ${destinations.map((g: any) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('')}
+        </select>
+        <button type="button" class="ws-edit-btn" data-transfer-confirm>Transfer</button>
+        <button type="button" class="ws-form-cancel" data-transfer-cancel>Cancel</button>
+      `;
+      cell.querySelector('[data-transfer-cancel]').addEventListener('click', renderApprovals);
+      cell.querySelector('[data-transfer-confirm]').addEventListener('click', async () => {
+        const targetKey = cell.querySelector('[data-transfer-target]').value;
+        const from = GROUPS.find((g: any) => g.key === r.group_key);
+        const to = GROUPS.find((g: any) => g.key === targetKey);
+        if (!confirm(`Send ${r.full_name}'s request from ${from?.en} to ${to?.en}? It'll disappear from ${from?.en}'s Approvals and show up under ${to?.en} instead.`)) return;
+        const { error } = await db.from('join_requests').update({ group_key: targetKey }).eq('id', id);
+        if (error) { console.error(error); showToast('Could not transfer, check your connection (or you may not have access to that group).'); return; }
+        showToast(`${r.full_name}'s request sent to ${to?.en}.`);
+        await loadApprovals();
+        await refreshApprovalsBadge();
       });
     }
     async function approveRequest(id: string) {
