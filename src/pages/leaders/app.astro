@@ -2478,25 +2478,32 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     </div>
   </div>
 
-  <!-- Only shown when deleting an entry that actually repeats — a
-       one-off entry just gets the plain confirm() everything else in
-       the workspace uses. -->
-  <div class="curr-day-overlay" data-sc-delete-choice-overlay hidden>
-    <div class="curr-day-panel ws-sc-custom-panel" data-sc-delete-choice-panel>
-      <p class="curr-day-section-label ws-sc-custom-title">Delete recurring event</p>
+  <!-- Which occurrences a change applies to — shown for BOTH Save and
+       Delete, but only when the entry being acted on actually repeats;
+       a one-off entry just saves outright, or gets the plain confirm()
+       everything else in the workspace uses for delete. Shared between
+       the two (see scOpenScopeChoice()) since the three options and
+       their underlying series-split logic are identical either way. -->
+  <div class="curr-day-overlay" data-sc-scope-overlay hidden>
+    <div class="curr-day-panel ws-sc-custom-panel" data-sc-scope-panel>
+      <p class="curr-day-section-label ws-sc-custom-title" data-sc-scope-title>Recurring event</p>
       <div class="ws-sc-end-options">
         <label class="ws-sc-end-option">
-          <input type="radio" name="sc-delete-scope" value="this" data-sc-delete-scope checked />
+          <input type="radio" name="sc-scope" value="this" data-sc-scope checked />
           <span>This event</span>
         </label>
         <label class="ws-sc-end-option">
-          <input type="radio" name="sc-delete-scope" value="all" data-sc-delete-scope />
+          <input type="radio" name="sc-scope" value="following" data-sc-scope />
+          <span>This and following events</span>
+        </label>
+        <label class="ws-sc-end-option">
+          <input type="radio" name="sc-scope" value="all" data-sc-scope />
           <span>All events</span>
         </label>
       </div>
       <div class="curr-day-actions">
-        <button type="button" class="ws-form-cancel" data-sc-delete-choice-cancel>Cancel</button>
-        <button type="button" class="btn-primary" data-sc-delete-choice-ok>OK</button>
+        <button type="button" class="ws-form-cancel" data-sc-scope-cancel>Cancel</button>
+        <button type="button" class="btn-primary" data-sc-scope-ok>OK</button>
       </div>
     </div>
   </div>
@@ -2539,7 +2546,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       lassessLeaderId: null, lassessRating: 0,
       curr: { anchor: new Date(), meetings: new Map(), currentDay: null, channel: null },
       sc: { view: 'month', anchor: new Date(), currentDay: null },
-      scEvents: [], scMusicEvents: [], editingScId: null, editingScOccurrenceDate: null, scRequests: [],
+      scEvents: [], scMusicEvents: [], editingScId: null, editingScOccurrenceDate: null,
+      scScopeAction: null, scScopePayload: null, scRequests: [],
     };
     const els: any = {};
 
@@ -2842,10 +2850,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.scCustomPanel = el('[data-sc-custom-panel]');
       els.scCustomCancel = el('[data-sc-custom-cancel]');
       els.scCustomDone = el('[data-sc-custom-done]');
-      els.scDeleteChoiceOverlay = el('[data-sc-delete-choice-overlay]');
-      els.scDeleteChoicePanel = el('[data-sc-delete-choice-panel]');
-      els.scDeleteChoiceCancel = el('[data-sc-delete-choice-cancel]');
-      els.scDeleteChoiceOk = el('[data-sc-delete-choice-ok]');
+      els.scScopeOverlay = el('[data-sc-scope-overlay]');
+      els.scScopePanel = el('[data-sc-scope-panel]');
+      els.scScopeTitle = el('[data-sc-scope-title]');
+      els.scScopeCancel = el('[data-sc-scope-cancel]');
+      els.scScopeOk = el('[data-sc-scope-ok]');
       els.scWeekGrid = el('[data-sc-week-grid]');
       els.scMonthGrid = el('[data-sc-month-grid]');
       els.scYearGrid = el('[data-sc-year-grid]');
@@ -8736,7 +8745,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       state.editingScId = id;
       state.editingScOccurrenceDate = occurrenceDate || item.event_date;
       els.scTitle.value = item.title;
-      els.scDate.value = item.event_date;
+      // The date field shows the OCCURRENCE that was clicked, not always
+      // the series' original start — needed so "This event"/"This and
+      // following events" (scOpenScopeChoice()) split at the right spot,
+      // and so rescheduling a single occurrence actually shows its own
+      // date rather than the series anchor's.
+      els.scDate.value = state.editingScOccurrenceDate;
       els.scTime.value = item.event_time || '';
       els.scTimeEnd.value = item.event_end_time || '';
       els.scNotes.value = item.notes || '';
@@ -8779,17 +8793,111 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (error) { console.error(error); showToast('Could not delete.'); return false; }
       return true;
     }
-    // Shared by the list view's own Delete button and the edit form's
-    // — recurring entries need the This event/All events choice either
-    // way, so both routes funnel through here rather than requiring an
-    // Edit click first just to reach Delete.
+    // Cuts the series off the day before dateStr and drops any of its
+    // own exceptions from that point on (they belong to whatever comes
+    // after, which this doesn't create — there's nothing to edit into
+    // it, unlike scSaveFollowing below). Deleting "and following" from
+    // the very first occurrence is just deleting the whole thing.
+    async function scDeleteFollowing(id: string, dateStr: string) {
+      const item = state.scEvents.find((x: any) => x.id === id);
+      if (!item) return false;
+      if (dateStr <= item.event_date) return scDeleteSeries(id);
+      const dayBefore = toDateStr(addDays(parseDateStr(dateStr), -1));
+      const exceptions = (item.recurrence_exceptions || []).filter((d: string) => d < dateStr);
+      const { error } = await db.from('shared_calendar_events')
+        .update({ recurrence_end_type: 'on_date', recurrence_end_date: dayBefore, recurrence_exceptions: exceptions })
+        .eq('id', id);
+      if (error) { console.error(error); showToast('Could not delete.'); return false; }
+      return true;
+    }
+    // The whole row IS the series (see shared_calendar_schema.sql), so
+    // "All events" is mostly a plain update in place — except the date
+    // field shows whichever OCCURRENCE was clicked (scStartEdit), not
+    // the series' own anchor date, so payload.event_date can't just be
+    // written straight through: on a later occurrence, that would drag
+    // the whole series' start forward and silently drop every earlier
+    // occurrence. Shift the stored anchor by the same day delta the
+    // date field actually changed by instead (0 if it wasn't touched)
+    // — the series moves exactly as far as the user moved it, weekday/
+    // day-of-month offset and all, same as dragging one instance of a
+    // recurring Google Calendar event with "All events" selected.
+    async function scSaveAll(id: string, payload: any) {
+      const item = state.scEvents.find((x: any) => x.id === id);
+      if (item && state.editingScOccurrenceDate) {
+        const deltaDays = Math.round((parseDateStr(payload.event_date).getTime() - parseDateStr(state.editingScOccurrenceDate).getTime()) / 86400000);
+        payload = { ...payload, event_date: toDateStr(addDays(parseDateStr(item.event_date), deltaDays)) };
+      }
+      const { error } = await db.from('shared_calendar_events')
+        .update({ ...payload, updated_at: new Date().toISOString() }).eq('id', id);
+      if (error) { console.error(error); showToast('Could not save.'); return false; }
+      return true;
+    }
+    // "This event": the series skips occurrenceDate from now on (same
+    // exceptions mechanism as a single delete), and the edited fields
+    // land in a brand-new plain, non-repeating row standing in for just
+    // that one date — recurrence fields are always reset even if the
+    // form still shows a repeat pattern, since a lone override never
+    // repeats itself. payload.event_date is whatever the form's date
+    // field holds, so rescheduling just this occurrence works too.
+    async function scSaveThisOccurrence(id: string, occurrenceDate: string, payload: any) {
+      const item = state.scEvents.find((x: any) => x.id === id);
+      if (!item) return false;
+      const exceptions = Array.from(new Set([...(item.recurrence_exceptions || []), occurrenceDate]));
+      const { error: exErr } = await db.from('shared_calendar_events')
+        .update({ recurrence_exceptions: exceptions }).eq('id', id);
+      if (exErr) { console.error(exErr); showToast('Could not save.'); return false; }
+      const { error } = await db.from('shared_calendar_events').insert({
+        ...payload,
+        recurrence_unit: null, recurrence_interval: 1, recurrence_days: null,
+        recurrence_end_type: 'never', recurrence_end_date: null, recurrence_end_count: null, recurrence_exceptions: [],
+        created_by: state.session.user.id, created_by_name: state.profile?.name || null,
+      });
+      if (error) { console.error(error); showToast('Could not save.'); return false; }
+      return true;
+    }
+    // "This and following events": splits the series in two at
+    // occurrenceDate — the existing row is truncated to end the day
+    // before (keeping only its earlier exceptions), and a second row
+    // picks up from occurrenceDate carrying the edited fields (title,
+    // time, recurrence pattern, whichever changed) plus whichever of
+    // the old exceptions fall on/after the split. Editing "and
+    // following" from the series' very first occurrence has nothing
+    // earlier to keep, so it's just editing the whole series in place.
+    async function scSaveFollowing(id: string, occurrenceDate: string, payload: any) {
+      const item = state.scEvents.find((x: any) => x.id === id);
+      if (!item) return false;
+      if (occurrenceDate <= item.event_date) return scSaveAll(id, payload);
+      const dayBefore = toDateStr(addDays(parseDateStr(occurrenceDate), -1));
+      const beforeExceptions = (item.recurrence_exceptions || []).filter((d: string) => d < occurrenceDate);
+      const afterExceptions = (item.recurrence_exceptions || []).filter((d: string) => d >= occurrenceDate);
+      const { error: truncErr } = await db.from('shared_calendar_events')
+        .update({ recurrence_end_type: 'on_date', recurrence_end_date: dayBefore, recurrence_exceptions: beforeExceptions })
+        .eq('id', id);
+      if (truncErr) { console.error(truncErr); showToast('Could not save.'); return false; }
+      const { error } = await db.from('shared_calendar_events').insert({
+        ...payload, recurrence_exceptions: afterExceptions,
+        created_by: state.session.user.id, created_by_name: state.profile?.name || null,
+      });
+      if (error) { console.error(error); showToast('Could not save.'); return false; }
+      return true;
+    }
+    // Shared by the edit form's Save and the list view's own Delete —
+    // both need the same This event/This and following events/All
+    // events choice on a recurring entry, so they funnel through the
+    // same popup (scOpenScopeChoice()) rather than each having their own.
+    function scOpenScopeChoice(action: 'save' | 'delete', titleText: string) {
+      state.scScopeAction = action;
+      els.scScopeTitle.textContent = titleText;
+      els.scScopePanel.querySelectorAll('input[name="sc-scope"]').forEach((r: any) => { r.checked = r.value === 'this'; });
+      els.scScopeOverlay.removeAttribute('hidden');
+    }
     function scDeleteFlow(id: string, occurrenceDate: string) {
       const item = state.scEvents.find((x: any) => x.id === id);
       if (!item) return;
       state.editingScId = id;
       state.editingScOccurrenceDate = occurrenceDate;
       if (item.recurrence_unit) {
-        els.scDeleteChoiceOverlay.removeAttribute('hidden');
+        scOpenScopeChoice('delete', 'Delete recurring event');
       } else if (confirm('Delete this calendar entry?')) {
         scDeleteSeries(id).then((ok) => { if (ok) { loadSharedCal(); scShowList(); } });
       }
@@ -8839,16 +8947,25 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           notes: els.scNotes.value.trim() || null, color: state.scSelectedColor === 'brand' ? null : state.scSelectedColor,
           ...scRepeatFieldsFromForm(),
         };
-        let error;
         if (state.editingScId) {
-          payload.updated_at = new Date().toISOString();
-          ({ error } = await db.from('shared_calendar_events').update(payload).eq('id', state.editingScId));
+          // Editing a recurring entry needs to know which occurrences the
+          // change applies to before it can be saved at all — everything
+          // else (a new entry, or editing a plain one-off) just saves.
+          const editing = state.scEvents.find((x: any) => x.id === state.editingScId);
+          if (editing?.recurrence_unit) {
+            state.scScopePayload = payload;
+            scOpenScopeChoice('save', 'Save recurring event');
+            return;
+          }
+          const { error } = await db.from('shared_calendar_events')
+            .update({ ...payload, updated_at: new Date().toISOString() }).eq('id', state.editingScId);
+          if (error) { console.error(error); showToast('Could not save.'); return; }
         } else {
           payload.created_by = state.session.user.id;
           payload.created_by_name = state.profile?.name || null;
-          ({ error } = await db.from('shared_calendar_events').insert(payload));
+          const { error } = await db.from('shared_calendar_events').insert(payload);
+          if (error) { console.error(error); showToast('Could not save.'); return; }
         }
-        if (error) { console.error(error); showToast('Could not save.'); return; }
         await loadSharedCal();
         scShowList();
       });
@@ -8856,13 +8973,30 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         if (!state.editingScId) return;
         scDeleteFlow(state.editingScId, state.editingScOccurrenceDate || els.scDate.value);
       });
-      els.scDeleteChoiceCancel.addEventListener('click', () => els.scDeleteChoiceOverlay.setAttribute('hidden', ''));
-      els.scDeleteChoiceOk.addEventListener('click', async () => {
-        const scope = els.scDeleteChoicePanel.querySelector('input[name="sc-delete-scope"]:checked')?.value || 'this';
-        els.scDeleteChoiceOverlay.setAttribute('hidden', '');
-        const ok = scope === 'all'
-          ? await scDeleteSeries(state.editingScId)
-          : await scDeleteOccurrence(state.editingScId, state.editingScOccurrenceDate || els.scDate.value);
+      els.scScopeCancel.addEventListener('click', () => {
+        els.scScopeOverlay.setAttribute('hidden', '');
+        state.scScopeAction = null;
+        state.scScopePayload = null;
+      });
+      els.scScopeOk.addEventListener('click', async () => {
+        const scope = els.scScopePanel.querySelector('input[name="sc-scope"]:checked')?.value || 'this';
+        const action = state.scScopeAction;
+        const payload = state.scScopePayload;
+        els.scScopeOverlay.setAttribute('hidden', '');
+        state.scScopeAction = null;
+        state.scScopePayload = null;
+        const id = state.editingScId;
+        const occurrenceDate = state.editingScOccurrenceDate || els.scDate.value;
+        let ok = false;
+        if (action === 'delete') {
+          ok = scope === 'all' ? await scDeleteSeries(id)
+            : scope === 'following' ? await scDeleteFollowing(id, occurrenceDate)
+            : await scDeleteOccurrence(id, occurrenceDate);
+        } else if (action === 'save') {
+          ok = scope === 'all' ? await scSaveAll(id, payload)
+            : scope === 'following' ? await scSaveFollowing(id, occurrenceDate, payload)
+            : await scSaveThisOccurrence(id, occurrenceDate, payload);
+        }
         if (ok) { await loadSharedCal(); scShowList(); }
       });
     }

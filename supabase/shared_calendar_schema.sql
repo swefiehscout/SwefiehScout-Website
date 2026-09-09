@@ -35,12 +35,17 @@ create table if not exists shared_calendar_events (
   event_time time,
   event_end_time time,
   notes text,
-  -- Recurrence — one row is the whole series; editing it edits every
-  -- occurrence. Deleting offers "this event" vs "all events" — "this
-  -- event" doesn't touch the row at all, it just appends that one date
-  -- to recurrence_exceptions, which scDateMatchesRecurrence() skips.
-  -- Occurrences are computed client-side from these fields for
-  -- whatever range is on screen, never materialized as separate rows.
+  -- Recurrence — one row is the whole series. Both saving an edit and
+  -- deleting offer "This event" / "This and following events" / "All
+  -- events" (leaders/app.astro, scOpenScopeChoice()): "This event"
+  -- appends that one date to recurrence_exceptions (skipped by
+  -- scDateMatchesRecurrence()) and, for a save, adds a plain
+  -- non-repeating row standing in for it; "This and following events"
+  -- truncates this row's own recurrence_end_* to the day before and,
+  -- for a save, adds a second row picking up the edited series from
+  -- there; "All events" edits/deletes this row outright. Occurrences
+  -- are computed client-side from these fields for whatever range is
+  -- on screen, never materialized as separate rows.
   --   recurrence_unit: null = doesn't repeat, otherwise 'day'/'week'/
   --     'month'/'year' — repeats every recurrence_interval of that unit.
   --   recurrence_days: which weekdays (0=Sun..6=Sat) it lands on, only
