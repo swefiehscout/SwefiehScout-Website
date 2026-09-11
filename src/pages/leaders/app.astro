@@ -9924,7 +9924,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         return `<button type="button" class="curr-tab${key === state.activeGroup ? ' curr-tab--active' : ''}" data-group="${key}">${g ? g.en : key}</button>`;
       }).join('');
       els.groupSwitch.querySelectorAll('[data-group]').forEach((btn: any) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           state.activeGroup = btn.dataset.group;
           // Members are cached per-group (see ensureMembersLoaded) — clear
           // it on every switch so Dashboard/Reports re-fetch for the new
@@ -9938,21 +9938,30 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           renderGroupSwitch();
           refreshApprovalsBadge();
           refreshEventsBadge();
-          // Music/General/Leaders only show a cut-down tab set —
-          // updateTabVisibility() (called from renderGroupSwitch()) already
-          // hid the rest, so a switch that leaves an invalid tab active
-          // needs to land somewhere visible instead of just reloading a
-          // now-hidden panel. Landing on the new group's own first visible
-          // tab (rather than a hardcoded 'finance') matters now that
-          // Leaders doesn't have a Finance tab at all — 'finance' would've
-          // silently un-hidden that panel's content regardless of its nav
-          // button being hidden, since setTab() only ever looks at
-          // dataset.panel, never isTabHidden().
-          if (isTabHidden(state.activeTab)) {
-            const firstVisible = els.tabs.querySelector('.ws-tab:not([hidden]):not([data-admin-only])');
-            setTab(firstVisible ? (firstVisible as any).dataset.tab : 'finance');
-          } else {
-            loadActiveTabData();
+          // Locked for the same reason setTab() locks it — see
+          // setNavBusy()'s comment. A group switch started mid-load here
+          // is exactly the case that used to leave the previous group's
+          // data on screen until a manual refresh.
+          setNavBusy(true);
+          try {
+            // Music/General/Leaders only show a cut-down tab set —
+            // updateTabVisibility() (called from renderGroupSwitch()) already
+            // hid the rest, so a switch that leaves an invalid tab active
+            // needs to land somewhere visible instead of just reloading a
+            // now-hidden panel. Landing on the new group's own first visible
+            // tab (rather than a hardcoded 'finance') matters now that
+            // Leaders doesn't have a Finance tab at all — 'finance' would've
+            // silently un-hidden that panel's content regardless of its nav
+            // button being hidden, since setTab() only ever looks at
+            // dataset.panel, never isTabHidden().
+            if (isTabHidden(state.activeTab)) {
+              const firstVisible = els.tabs.querySelector('.ws-tab:not([hidden]):not([data-admin-only])');
+              await setTab(firstVisible ? (firstVisible as any).dataset.tab : 'finance');
+            } else {
+              await loadActiveTabData();
+            }
+          } finally {
+            setNavBusy(false);
           }
         });
       });
@@ -10078,39 +10087,66 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       balanceTabs();
     }
 
+    // Returns the in-flight loader's promise (rather than firing it and
+    // forgetting) so callers can await a tab/group switch fully settling
+    // before allowing another one — see setNavBusy(). Without that, a
+    // second switch fired while the first is still mid-fetch can have its
+    // (earlier-issued, slower) response land AFTER the second one's and
+    // overwrite the screen with the wrong tab's/group's data — the fix
+    // for "switching tabs/groups doesn't show the right names and data
+    // until I refresh".
     function loadActiveTabData() {
       const tab = state.activeTab;
-      if (tab === 'dashboard') loadDashboard();
-      if (tab === 'roster' || tab === 'archive') loadRoster();
-      if (tab === 'approvals') loadApprovals();
-      if (tab === 'attendance') loadAttendance();
-      if (tab === 'fees') loadFees();
-      if (tab === 'finance') loadFinance();
-      if (tab === 'inventory') loadInventory();
-      if (tab === 'events') loadEvents();
-      if (tab === 'vendors') loadVendors();
-      if (tab === 'pr') loadPR();
-      if (tab === 'meetingnotes') loadMeetingNotes();
-      if (tab === 'content') loadContent();
-      if (tab === 'credentials') loadCredentials();
-      if (tab === 'library') loadLibrary();
-      if (tab === 'curriculum') currStart();
-      if (tab === 'sharedcal') loadSharedCal();
-      if (tab === 'reports') loadReportsTabExtras();
-      if (tab === 'leaderdashboard') loadLeaderDashboard();
-      if (tab === 'leaderroster' || tab === 'leaderarchive') loadLeaderRoster();
-      if (tab === 'leaderattendance') loadLeaderAttendance();
-      if (tab === 'leaderprofile') loadLeaderProfileTab();
-      if (tab === 'leaderassessment') loadLeaderAssessmentTab();
-      if (tab === 'supportoverview') loadSupportOverview();
-      if (tab === 'nextmeetings') loadNextMeetings();
+      if (tab === 'dashboard') return loadDashboard();
+      if (tab === 'roster' || tab === 'archive') return loadRoster();
+      if (tab === 'approvals') return loadApprovals();
+      if (tab === 'attendance') return loadAttendance();
+      if (tab === 'fees') return loadFees();
+      if (tab === 'finance') return loadFinance();
+      if (tab === 'inventory') return loadInventory();
+      if (tab === 'events') return loadEvents();
+      if (tab === 'vendors') return loadVendors();
+      if (tab === 'pr') return loadPR();
+      if (tab === 'meetingnotes') return loadMeetingNotes();
+      if (tab === 'content') return loadContent();
+      if (tab === 'credentials') return loadCredentials();
+      if (tab === 'library') return loadLibrary();
+      if (tab === 'curriculum') return currStart();
+      if (tab === 'sharedcal') return loadSharedCal();
+      if (tab === 'reports') return loadReportsTabExtras();
+      if (tab === 'leaderdashboard') return loadLeaderDashboard();
+      if (tab === 'leaderroster' || tab === 'leaderarchive') return loadLeaderRoster();
+      if (tab === 'leaderattendance') return loadLeaderAttendance();
+      if (tab === 'leaderprofile') return loadLeaderProfileTab();
+      if (tab === 'leaderassessment') return loadLeaderAssessmentTab();
+      if (tab === 'supportoverview') return loadSupportOverview();
+      if (tab === 'nextmeetings') return loadNextMeetings();
+      return Promise.resolve();
     }
 
-    function setTab(tab: any) {
+    // Locks the tab bar + group switcher while a load is in flight, so a
+    // second switch can't be started until the first one's data has fully
+    // landed and rendered. That serializes every load — the two in-flight
+    // requests that used to be able to resolve out of order (see
+    // loadActiveTabData()'s comment) can now never overlap.
+    function setNavBusy(busy: boolean) {
+      els.tabs.style.pointerEvents = busy ? 'none' : '';
+      els.tabs.style.opacity = busy ? '0.6' : '';
+      if (els.groupSwitch) {
+        els.groupSwitch.style.pointerEvents = busy ? 'none' : '';
+        els.groupSwitch.style.opacity = busy ? '0.6' : '';
+      }
+    }
+    async function setTab(tab: any) {
       state.activeTab = tab;
       els.tabs.querySelectorAll('.ws-tab').forEach((b: any) => b.classList.toggle('ws-tab--active', b.dataset.tab === tab));
       document.querySelectorAll('.ws-panel').forEach((p: any) => p.toggleAttribute('hidden', p.dataset.panel !== tab));
-      loadActiveTabData();
+      setNavBusy(true);
+      try {
+        await loadActiveTabData();
+      } finally {
+        setNavBusy(false);
+      }
     }
     function bindTabs() {
       els.tabs.querySelectorAll('.ws-tab').forEach((btn: any) => {
