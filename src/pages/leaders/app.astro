@@ -4056,12 +4056,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <tr data-entry-id="${e.id}" data-receipt-path="${escapeHtml(e.receipt_path || '')}">
           <td data-label="Date">${e.entry_date}</td>
           <td data-label="Type">${e.entry_type === 'income' ? 'Income' : 'Expense'}</td>
-          <td data-label="Category">${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab, unmark it paid there to remove this">Auto</span>' : ''}${e.maintenance_log_id ? ' <span class="ws-allergy-badge" title="Synced from the Inventory tab\'s Maintenance Log, delete it there to remove this">Auto</span>' : ''}</td>
+          <td data-label="Category">${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab. Editing or deleting it here won\'t change the Fees tab, and re-saving that fee payment will recreate it if deleted">Auto</span>' : ''}${e.maintenance_log_id ? ' <span class="ws-allergy-badge" title="Synced from the Inventory tab\'s Maintenance Log. Editing or deleting it here won\'t change that log, and re-saving the log entry will recreate it if deleted">Auto</span>' : ''}</td>
           <td data-label="Description">${escapeHtml(e.description || '—')}</td>
           <td data-label="Amount">${Number(e.amount).toFixed(2)}</td>
           <td data-label="Added by">${escapeHtml(e.created_by_name || '—')}</td>
           <td data-label="Receipt">${e.receipt_path ? '<button type="button" class="ws-edit-btn" data-fin-receipt-view>View</button>' : '—'}</td>
-          <td class="ws-row-actions">${(e.fee_payment_id || e.maintenance_log_id) ? '' : '<button type="button" class="ws-edit-btn" data-fin-edit>Edit</button> <button type="button" class="ws-row-del" data-fin-del>×</button>'}</td>
+          <td class="ws-row-actions"><button type="button" class="ws-edit-btn" data-fin-edit>Edit</button> <button type="button" class="ws-row-del" data-fin-del>×</button></td>
         </tr>
       `).join('');
       els.finBody.querySelectorAll('[data-fin-receipt-view]').forEach((btn: any) => {
@@ -4097,8 +4097,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     // Same reusable-form pattern as Roster/Inventory's edit — repopulate
     // the add-entry form rather than a separate dialog. Auto-synced rows
-    // (fee_payment_id/maintenance_log_id) never reach here since their
-    // Edit button is never rendered in the first place.
+    // (fee_payment_id/maintenance_log_id) are editable here too now; the
+    // link to the source row (and its id) is left untouched, so the
+    // "Auto" badge still shows and the source tab can still resync it.
     function startEditFinEntry(id: string) {
       const entry = state.finEntries.find((x: any) => x.id === id);
       if (!entry) return;
