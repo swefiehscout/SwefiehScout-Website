@@ -13,7 +13,7 @@
 # Lessons
 
 ## Orthodox Lessons
-https://drive.google.com/drive/folders/1V6kK3b_4yF6vMzgiPRPag3DRlU1RCtJG
+https://drive.google.com/drive/folders/1w7i2RISGN1IliCwVtArcBQ2_7r3do8_B
 
 ## Scout Lessons
-https://drive.google.com/drive/folders/1atck4QXNxkEysSkfhqH_xIRUASe7KHRR
+https://drive.google.com/drive/folders/1StYQr8VzqzMhIGw0UItWng-_EHs92-K_

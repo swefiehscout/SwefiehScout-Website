@@ -50,11 +50,9 @@ const albums = [
 
   <section class={`gallery-grid gallery-grid--${albums.length}`}>
     {albums.map((album, i) => (
-      <a
+      <button
+        type="button"
         class="album-card"
-        href={album.href}
-        target="_blank"
-        rel="noopener"
         data-animate
         data-animate-delay={String((i % 5) + 1)}
       >
@@ -67,16 +65,45 @@ const albums = [
           <p class="album-title-ar">{album.titleAr}</p>
           <p class="album-caption-ar">{album.captionAr}</p>
           <span class="album-cta">
-            Open Album
+            Request Access
             <span class="album-cta-arrow" aria-hidden="true">→</span>
           </span>
         </div>
-      </a>
+      </button>
     ))}
   </section>
 
   <p class="gallery-footnote" data-animate>
-    Albums open in Google Drive in a new tab.<br />
-    <span dir="rtl">تُفتح الألبومات في Google Drive في نافذة جديدة.</span>
+    Albums are private — please contact a troop leader for access.<br />
+    <span dir="rtl">الألبومات خاصة - يرجى التواصل مع أحد القادة للحصول على صلاحية الوصول.</span>
   </p>
 </BaseLayout>
+
+<script>
+  // Albums aren't public — the Drive links live only in the source, never
+  // rendered to the page. Clicking a card just points people to a leader
+  // instead of navigating anywhere.
+  function showGalleryToast(en: string, ar: string) {
+    let t = document.querySelector('.gallery-toast') as HTMLElement | null;
+    if (!t) {
+      t = document.createElement('div');
+      t.className = 'gallery-toast';
+      t.setAttribute('role', 'status');
+      t.setAttribute('aria-live', 'polite');
+      document.body.appendChild(t);
+    }
+    t.innerHTML = `${en}<br /><span dir="rtl">${ar}</span>`;
+    t.classList.add('gallery-toast--show');
+    window.clearTimeout((t as any)._toastTimer);
+    (t as any)._toastTimer = window.setTimeout(() => t!.classList.remove('gallery-toast--show'), 3500);
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.album-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      showGalleryToast(
+        'Please contact a troop leader for access to this album.',
+        'يرجى التواصل مع أحد القادة للحصول على صلاحية الوصول إلى هذا الألبوم.'
+      );
+    });
+  });
+</script>
