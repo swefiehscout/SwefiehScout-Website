@@ -1685,30 +1685,96 @@ main.wide {
   line-height: 1.7;
 }
 
-.gallery-toast {
+.gallery-modal-overlay {
   position: fixed;
-  left: 50%;
-  bottom: 1.75rem;
-  z-index: 60;
-  max-width: min(90vw, 26rem);
-  padding: 0.75rem 1.1rem;
-  border-radius: var(--radius-lg);
-  background: var(--color-brand);
-  color: var(--color-surface);
-  font-size: 0.88rem;
-  line-height: 1.5;
-  text-align: center;
-  box-shadow: var(--shadow-lg);
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(26, 20, 16, 0.5);
   opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, 0.5rem);
-  transition:
-    opacity 0.25s var(--ease-out),
-    transform 0.25s var(--ease-out);
+  transition: opacity 0.25s var(--ease-out);
 }
-.gallery-toast--show {
-  opacity: 1;
-  transform: translate(-50%, 0);
+.gallery-modal-overlay[hidden] { display: none; }
+.gallery-modal-overlay--show { opacity: 1; }
+
+.gallery-modal {
+  position: relative;
+  width: 100%;
+  max-width: 22rem;
+  padding: 2.1rem 1.75rem 1.85rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  transform: translateY(12px) scale(0.97);
+  transition: transform 0.25s var(--ease-out);
+}
+.gallery-modal-overlay--show .gallery-modal {
+  transform: translateY(0) scale(1);
+}
+
+.gallery-modal-close {
+  position: absolute;
+  top: 0.6rem;
+  inset-inline-end: 0.6rem;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.2s var(--ease-out),
+    color 0.2s var(--ease-out);
+}
+.gallery-modal-close:hover,
+.gallery-modal-close:focus-visible {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.gallery-modal-icon {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+.gallery-modal-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--color-brand);
+}
+.gallery-modal-title-ar {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display-arabic);
+  font-size: 1.1rem;
+  color: var(--color-text);
+  unicode-bidi: plaintext;
+}
+.gallery-modal-text {
+  margin: 0.9rem 0 0;
+  font-size: 0.92rem;
+  color: var(--color-text);
+  line-height: 1.55;
+}
+.gallery-modal-text-ar {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-arabic);
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  line-height: 1.7;
+  unicode-bidi: plaintext;
+}
+
+body.gallery-modal-open {
+  overflow: hidden;
 }
 
 @media (max-width: 640px) {

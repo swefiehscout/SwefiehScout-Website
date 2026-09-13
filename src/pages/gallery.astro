@@ -77,33 +77,55 @@ const albums = [
     Albums are private — please contact a troop leader for access.<br />
     <span dir="rtl">الألبومات خاصة - يرجى التواصل مع أحد القادة للحصول على صلاحية الوصول.</span>
   </p>
+
+  <div class="gallery-modal-overlay" id="gallery-modal" hidden>
+    <div class="gallery-modal" role="dialog" aria-modal="true" aria-labelledby="gallery-modal-title">
+      <button type="button" class="gallery-modal-close" aria-label="Close">
+        <span aria-hidden="true">×</span>
+      </button>
+      <div class="gallery-modal-icon" aria-hidden="true">🔒</div>
+      <h2 id="gallery-modal-title" class="gallery-modal-title">Private Album</h2>
+      <p class="gallery-modal-title-ar" dir="rtl">ألبوم خاص</p>
+      <p class="gallery-modal-text">Please contact a troop leader for access to this album.</p>
+      <p class="gallery-modal-text-ar" dir="rtl">
+        يرجى التواصل مع أحد القادة للحصول على صلاحية الوصول إلى هذا الألبوم.
+      </p>
+    </div>
+  </div>
 </BaseLayout>
 
 <script>
   // Albums aren't public — the Drive links live only in the source, never
-  // rendered to the page. Clicking a card just points people to a leader
-  // instead of navigating anywhere.
-  function showGalleryToast(en: string, ar: string) {
-    let t = document.querySelector('.gallery-toast') as HTMLElement | null;
-    if (!t) {
-      t = document.createElement('div');
-      t.className = 'gallery-toast';
-      t.setAttribute('role', 'status');
-      t.setAttribute('aria-live', 'polite');
-      document.body.appendChild(t);
-    }
-    t.innerHTML = `${en}<br /><span dir="rtl">${ar}</span>`;
-    t.classList.add('gallery-toast--show');
-    window.clearTimeout((t as any)._toastTimer);
-    (t as any)._toastTimer = window.setTimeout(() => t!.classList.remove('gallery-toast--show'), 3500);
+  // rendered to the page. Clicking a card opens a centered dialog pointing
+  // people to a leader instead of navigating anywhere.
+  const modal = document.getElementById('gallery-modal');
+  const closeBtn = modal?.querySelector<HTMLButtonElement>('.gallery-modal-close');
+  let hideTimer: ReturnType<typeof window.setTimeout> | undefined;
+
+  function openGalleryModal() {
+    if (!modal) return;
+    window.clearTimeout(hideTimer);
+    modal.hidden = false;
+    requestAnimationFrame(() => modal.classList.add('gallery-modal-overlay--show'));
+    document.body.classList.add('gallery-modal-open');
+    closeBtn?.focus();
+  }
+
+  function closeGalleryModal() {
+    if (!modal) return;
+    modal.classList.remove('gallery-modal-overlay--show');
+    document.body.classList.remove('gallery-modal-open');
+    hideTimer = window.setTimeout(() => { modal.hidden = true; }, 200);
   }
 
   document.querySelectorAll<HTMLButtonElement>('.album-card').forEach((card) => {
-    card.addEventListener('click', () => {
-      showGalleryToast(
-        'Please contact a troop leader for access to this album.',
-        'يرجى التواصل مع أحد القادة للحصول على صلاحية الوصول إلى هذا الألبوم.'
-      );
-    });
+    card.addEventListener('click', openGalleryModal);
+  });
+  closeBtn?.addEventListener('click', closeGalleryModal);
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) closeGalleryModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && !modal.hidden) closeGalleryModal();
   });
 </script>
