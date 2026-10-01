@@ -1969,7 +1969,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         db.from('attendance').select('group_key, present, date').in('group_key', troopKeys).gte('date', day60Str),
         db.from('fee_payments').select('group_key, paid, amount').in('group_key', troopKeys).eq('period', period),
         db.from('finance_entries').select('group_key, entry_type, amount, entry_date').in('group_key', troopKeys).gte('entry_date', `${prevPeriod}-01`).lte('entry_date', monthEnd),
-        db.from('join_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        db.from('join_requests').select('group_key').eq('status', 'pending'),
       ]);
 
       const byGroup = new Map<string, any>();
@@ -1997,9 +1997,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const amt = signedAmount(r);
         if (r.entry_date >= `${period}-01`) b.netThis += amt; else b.netPrev += amt;
       });
-      renderOverview(byGroup, pendingRes.count || 0);
+      renderOverview(byGroup, pendingRes.data || []);
     }
-    function renderOverview(byGroup: Map<string, any>, pendingApprovals: number) {
+    function renderOverview(byGroup: Map<string, any>, pendingRows: any[]) {
+      // Pending join requests across every group (Music included, it's on
+      // the /join form too) — broken down by group so it's clear which
+      // group's Approvals tab in the Leaders Workspace they're waiting in.
+      const pendingApprovals = pendingRows.length;
+      const pendingByGroup = new Map<string, number>();
+      pendingRows.forEach((r: any) => pendingByGroup.set(r.group_key, (pendingByGroup.get(r.group_key) || 0) + 1));
+      const pendingBreakdown = [...pendingByGroup.entries()]
+        .map(([k, n]) => `${GROUPS.find((g) => g.key === k)?.en || k} ${n}`).join(' · ');
       const groups = TROOP_GROUPS.map((g) => ({ ...g, ...byGroup.get(g.key) }));
       const totalActive = groups.reduce((s, g) => s + g.activeMembers, 0);
       const totalArchived = groups.reduce((s, g) => s + g.archivedMembers, 0);
@@ -2063,7 +2071,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">!</span><span class="ws-dash-kpi-label">Pending approvals</span></div>
           <span class="ws-dash-kpi-num">${pendingApprovals}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">${pendingApprovals ? 'waiting for review' : 'all caught up'}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${pendingApprovals ? escapeHtml(pendingBreakdown) : 'all caught up'}</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Groups fully paid</span></div>
