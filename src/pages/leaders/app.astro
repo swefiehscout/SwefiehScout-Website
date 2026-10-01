@@ -1478,7 +1478,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </div>
             <div class="ws-report-card" data-social-only hidden>
               <h3 class="ws-admin-h3">Content Calendar</h3>
-              <p class="ws-report-desc">Every content item scheduled for the period, with platform, type, status, and who it's assigned to.</p>
+              <p class="ws-report-desc">Every content item scheduled for the period, with platform, type, and status.</p>
               <button type="button" class="btn-primary" data-report-content>Download PDF</button>
             </div>
             <div class="ws-report-card" data-social-only hidden>
@@ -2269,12 +2269,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </div>
         <div class="curr-day-field-row">
           <label class="curr-day-field">
-            <span>Assigned to</span>
-            <select data-content-assigned>
-              <option value="">Unassigned</option>
-            </select>
-          </label>
-          <label class="curr-day-field">
             <span>Live link (once posted)</span>
             <input type="text" data-content-link placeholder="https://…" />
           </label>
@@ -3026,7 +3020,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.contentTime = el('[data-content-time]');
       els.contentPlatform = el('[data-content-platform]');
       els.contentType = el('[data-content-type]');
-      els.contentAssigned = el('[data-content-assigned]');
       els.contentLink = el('[data-content-link]');
       els.contentCaption = el('[data-content-caption]');
       els.contentNotes = el('[data-content-notes]');
@@ -6869,9 +6862,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function loadContent() {
       if (!state.activeGroup) return;
       await loadGroupSettings();
-      await ensureMembersLoaded();
       renderContentCategories();
-      updateContentAssignedOptions();
       const { data, error } = await db.from('content_items').select('*').eq('group_key', state.activeGroup).order('scheduled_date', { ascending: true });
       if (error) { console.error(error); showToast('Could not load content.'); return; }
       state.contentItems = data || [];
@@ -6903,10 +6894,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const current = els.contentType.value;
       els.contentType.innerHTML = '<option value="">— None —</option>' + list.map((c: string) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
       if (list.includes(current)) els.contentType.value = current;
-    }
-    function updateContentAssignedOptions() {
-      const active = state.members.filter((m: any) => m.active);
-      els.contentAssigned.innerHTML = '<option value="">Unassigned</option>' + active.map((m: any) => `<option value="${m.id}">${escapeHtml(m.full_name)}</option>`).join('');
     }
     function bindContentCategories() {
       els.contentPlatformCatAdd.addEventListener('click', () => {
@@ -7075,7 +7062,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.contentPlatform.value = '';
       els.contentType.value = '';
       els.contentStatus.value = 'idea';
-      els.contentAssigned.value = '';
       els.contentFormTitle.textContent = 'New content';
       els.contentDelete.hidden = true;
       contentRenderAttachment(null);
@@ -7096,7 +7082,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       updateContentTypeOptions();
       els.contentPlatform.value = c.platform || '';
       els.contentType.value = c.content_type || '';
-      els.contentAssigned.value = c.assigned_to || '';
       els.contentLink.value = c.link_url || '';
       els.contentCaption.value = c.caption || '';
       els.contentNotes.value = c.notes || '';
@@ -7171,7 +7156,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const payload: any = {
           title, status: els.contentStatus.value, scheduled_date: date, scheduled_time: els.contentTime.value || null,
           platform: els.contentPlatform.value || null, content_type: els.contentType.value || null,
-          assigned_to: els.contentAssigned.value || null, link_url: els.contentLink.value.trim() || null,
+          link_url: els.contentLink.value.trim() || null,
           caption: els.contentCaption.value.trim() || null, notes: els.contentNotes.value.trim() || null,
         };
         let error;
@@ -7907,7 +7892,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function downloadContentReport() {
       try {
         const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
-        const { data, error } = await db.from('content_items').select('*, members(full_name)').eq('group_key', state.activeGroup)
+        const { data, error } = await db.from('content_items').select('*').eq('group_key', state.activeGroup)
           .gte('scheduled_date', start).lte('scheduled_date', end).order('scheduled_date', { ascending: true });
         if (error) throw error;
         const rows = data || [];
@@ -7915,11 +7900,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const y = pdfHeader(doc, 'Content Calendar', `${label}, ${rows.length} item${rows.length === 1 ? '' : 's'}`);
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
-          head: [['Date', 'Title', 'Platform', 'Type', 'Status', 'Assigned to']],
+          head: [['Date', 'Title', 'Platform', 'Type', 'Status']],
           body: rows.length ? rows.map((c: any) => [
             c.scheduled_date || '—', c.title, c.platform || '—', c.content_type || '—',
-            CONTENT_STATUS_LABELS[c.status] || c.status, c.members?.full_name || '—',
-          ]) : [['No content this period', '', '', '', '', '']],
+            CONTENT_STATUS_LABELS[c.status] || c.status,
+          ]) : [['No content this period', '', '', '', '']],
         });
         doc.save(pdfFilename('Content-Calendar', label));
       } catch (err) {
