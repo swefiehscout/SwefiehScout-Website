@@ -4559,6 +4559,10 @@ body.ws-scroll-locked { overflow: hidden; }
   grid-template-columns: repeat(4, 1fr);
   gap: 1.1rem;
 }
+/* 3 / 6 / 9 cards: rows of 3, so no card is left alone on a row. */
+.ws-dash-kpis:has(> .ws-dash-kpi:last-child:nth-child(3)),
+.ws-dash-kpis:has(> .ws-dash-kpi:last-child:nth-child(6)),
+.ws-dash-kpis:has(> .ws-dash-kpi:last-child:nth-child(9)) { grid-template-columns: repeat(3, 1fr); }
 @media (max-width: 900px) { .ws-dash-kpis { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .ws-dash-kpis { grid-template-columns: 1fr; } }
 .ws-dash-kpi {
@@ -4820,6 +4824,13 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-box-diff--neg { color: var(--color-brand-light); }
 .ws-box-diff--pos { color: var(--color-accent); }
 .ws-stat-num--sm { font-size: 1.25rem; }
+/* Small "?" with a hover explanation (e.g. Cash box over / short). */
+.ws-info {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.05rem; height: 1.05rem; margin-inline-start: 0.25rem;
+  border-radius: 50%; background: var(--color-border); color: var(--color-muted);
+  font-size: 0.68rem; font-weight: 700; cursor: help; vertical-align: middle;
+}
 .ws-badge--audit-insert { background: rgba(46, 125, 50, 0.12); color: #2e7d32; }
 .ws-badge--audit-update { background: rgba(138, 90, 0, 0.12); color: #8a5a00; }
 .ws-badge--audit-delete { background: rgba(198, 40, 40, 0.12); color: #c62828; }

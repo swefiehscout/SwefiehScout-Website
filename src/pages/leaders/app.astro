@@ -2563,7 +2563,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import { GROUPS, TROOP_GROUPS, JOINABLE_GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES, SC_EVENT_COLORS, scEventColorValue } from '../../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../../lib/workspace/row-numbers';
     import { renderDateGroups, ammanDay, whoWhen, formatStamp } from '../../lib/workspace/date-groups';
-    import { computeBox, countCorrection, describeBoxLog, BOX_KIND_LABELS, boxBreakdownRows, boxHistoryRows, pdfWhoWhen, type BoxLog } from '../../lib/workspace/cash-box';
+    import { computeBox, countCorrection, describeBoxLog, BOX_KIND_LABELS, boxBreakdownRows, boxHistoryRows, pdfWhoWhen, boxDiffInRange, BOX_DIFF_LABEL, BOX_DIFF_HELP, type BoxLog } from '../../lib/workspace/cash-box';
     import { describeAudit, auditPdfRows, type AuditRow } from '../../lib/workspace/finance-audit';
     import { fetchLeaderActivity, formatActivityWhen, type LeaderActivityItem } from '../../lib/leader-activity';
 
@@ -4079,13 +4079,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       renderSettings();
       const { start, end, label } = periodRange(els.finMonth, els.finYear);
       state.finLabel = label;
+      state.finStart = start; state.finEnd = end;
       const { data, error } = await db.from('finance_entries').select('*')
         .eq('group_key', state.activeGroup).gte('entry_date', start).lte('entry_date', end)
         .order('entry_date', { ascending: false });
       if (error) { console.error(error); showToast('Could not load finance entries.'); return; }
       state.finEntries = data || [];
-      renderFinance();
+      // Box first: the statement's "Cash box over / short" line needs its counts.
       await Promise.all([loadCashBox(), loadFinanceAudit()]);
+      renderFinance();
     }
     // Finance > Activity Log — finance_audit_log rows, written by database
     // triggers on every add/edit/delete (see cash_box_schema.sql).
@@ -4126,11 +4128,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const expenseRows = categoryTotals('expense');
       const income = incomeRows.reduce((s, [, v]) => s + v, 0);
       const expense = expenseRows.reduce((s, [, v]) => s + v, 0);
+      // Box counts dated in this period: money spent/received without a
+      // ledger entry — its own line, see boxDiffInRange().
+      const hasBox = !!state.box?.opening;
+      const boxDiff = hasBox ? boxDiffInRange(state.boxLogs || [], state.finStart, state.finEnd) : 0;
+      const net = income - expense + boxDiff;
+      const signed = (v: number) => `${v < 0 ? '−' : v > 0 ? '+' : ''}${Math.abs(v).toFixed(2)}`;
 
       els.finStats.innerHTML = `
         <div class="ws-stat ws-stat--accent"><span class="ws-stat-icon">↑</span><span class="ws-stat-text"><span class="ws-stat-num">${income.toFixed(2)}</span><span class="ws-stat-label">Income</span></span></div>
         <div class="ws-stat"><span class="ws-stat-icon">↓</span><span class="ws-stat-text"><span class="ws-stat-num">${expense.toFixed(2)}</span><span class="ws-stat-label">Expenses</span></span></div>
-        <div class="ws-stat"><span class="ws-stat-icon">=</span><span class="ws-stat-text"><span class="ws-stat-num">${(income - expense).toFixed(2)}</span><span class="ws-stat-label">Net</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">=</span><span class="ws-stat-text"><span class="ws-stat-num">${net.toFixed(2)}</span><span class="ws-stat-label">Net income${Math.abs(boxDiff) >= 0.005 ? ` (incl. ${signed(boxDiff)} box over / short)` : ''}</span></span></div>
       `;
 
       const rowsHtml = (rows: [string, number][]) => rows.length
@@ -4146,9 +4154,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <tr class="ws-statement-section"><td colspan="2">Expenses</td></tr>
             ${rowsHtml(expenseRows)}
             <tr class="ws-statement-total"><td>Total Expenses</td><td>${expense.toFixed(2)}</td></tr>
-            <tr class="ws-statement-net"><td>Net Income</td><td>${(income - expense).toFixed(2)}</td></tr>
+            ${hasBox ? `
+            <tr class="ws-statement-total"><td>Net Income (recorded)</td><td>${(income - expense).toFixed(2)}</td></tr>
+            <tr><td>${BOX_DIFF_LABEL} <span class="ws-info" title="${escapeHtml(BOX_DIFF_HELP)}">?</span></td><td>${signed(boxDiff)}</td></tr>` : ''}
+            <tr class="ws-statement-net"><td>Net Income</td><td>${net.toFixed(2)}</td></tr>
           </tbody>
         </table>
+        ${hasBox ? `<p class="ws-box-form-help">${escapeHtml(BOX_DIFF_LABEL)}: ${escapeHtml(BOX_DIFF_HELP)} If you find out what it was, add it as a normal entry before the next count.</p>` : ''}
       `;
 
       if (!state.finEntries.length) {
@@ -7875,6 +7887,22 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       doc.text(lines, 14, y + 5);
       return y + 5 + lines.length * 3.8 + 1;
     }
+    // "Net income" block: recorded net, then each difference line, then
+    // the final net. Differences are their own labelled lines, never
+    // folded into a real category.
+    function pdfNetTable(doc: any, y: number, recorded: number, diffs: [string, number][]): number {
+      const sg = (v: number) => `${v < 0 ? '-' : v > 0 ? '+' : ''}${Math.abs(v).toFixed(2)}`;
+      const total = recorded + diffs.reduce((s2, [, v]) => s2 + v, 0);
+      pdfTable(doc, {
+        startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 10 },
+        footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_ACCENT, fontStyle: 'bold' },
+        columnStyles: { 1: { halign: 'right' } },
+        head: [['Net income', '']],
+        body: [['Net income (recorded in the ledger)', sg(recorded)], ...diffs.map(([l, v]) => [l, sg(v)])],
+        foot: [['Net income', sg(total)]],
+      });
+      return pdfNextY(doc, y + 30);
+    }
     // Adds "Cash Box" on a new page: where the box stands right now, and
     // every box record dated in the report's period.
     function pdfCashBoxPage(doc: any, data: any, start: string, end: string, label: string) {
@@ -7936,11 +7964,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           body: expenseRows.length ? expenseRows.map(([c, v]) => [c, v.toFixed(2)]) : [['No data available', '']],
           foot: [['Total Expenses', expense.toFixed(2)]] });
         y = pdfNextY(doc, y);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(13);
-        doc.setTextColor(...PDF_ACCENT);
-        doc.text(`Net Income: ${(income - expense).toFixed(2)}`, 14, y);
-        pdfCashBoxPage(doc, await fetchBoxData(state.activeGroup), start, end, label);
+        const boxData = await fetchBoxData(state.activeGroup);
+        y = pdfNetTable(doc, y, income - expense, boxData?.box.opening ? [[BOX_DIFF_LABEL, boxDiffInRange(boxData.logs, start, end)]] : []);
+        if (boxData?.box.opening) {
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120, 120, 120);
+          doc.text(doc.splitTextToSize(pdfSafe(`${BOX_DIFF_LABEL}: ${BOX_DIFF_HELP}`), 182), 14, y - 4);
+        }
+        pdfCashBoxPage(doc, boxData, start, end, label);
         doc.save(pdfFilename('Income-Statement', label));
       } catch (err) {
         console.error('finance report failed', err);
@@ -8509,14 +8539,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const rows = data || [];
         const income = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
         const expense = rows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const boxData = await fetchBoxData(state.activeGroup);
+        const boxDiff = boxData?.box.opening ? boxDiffInRange(boxData.logs, start, end) : 0;
         const doc = new jsPDF();
-        const y = pdfHeader(doc, 'Music Finance Report', `${label}, Income ${income.toFixed(2)}, Expenses ${expense.toFixed(2)}, Net ${(income - expense).toFixed(2)}`);
+        const y = pdfHeader(doc, 'Music Finance Report', `${label}, Income ${income.toFixed(2)}, Expenses ${expense.toFixed(2)}, Net income ${(income - expense + boxDiff).toFixed(2)}${Math.abs(boxDiff) >= 0.005 ? ` (incl. ${boxDiff.toFixed(2)} ${BOX_DIFF_LABEL.toLowerCase()})` : ''}`);
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
           head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
           body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), pdfWhoWhen(r.created_by_name, r.created_at)]) : [['No entries this period', '', '', '', '', '']],
         });
-        pdfCashBoxPage(doc, await fetchBoxData(state.activeGroup), start, end, label);
+        pdfCashBoxPage(doc, boxData, start, end, label);
         doc.save(pdfFilename('Music-Finance', label));
       } catch (err) {
         console.error('music finance report failed', err);
@@ -8533,14 +8565,16 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const rows = data || [];
         const income = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
         const expense = rows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
+        const boxData = await fetchBoxData(state.activeGroup);
+        const boxDiff = boxData?.box.opening ? boxDiffInRange(boxData.logs, start, end) : 0;
         const doc = new jsPDF();
-        const y = pdfHeader(doc, 'Social Media Finance Report', `${label}, Income ${income.toFixed(2)}, Expenses ${expense.toFixed(2)}, Net ${(income - expense).toFixed(2)}`);
+        const y = pdfHeader(doc, 'Social Media Finance Report', `${label}, Income ${income.toFixed(2)}, Expenses ${expense.toFixed(2)}, Net income ${(income - expense + boxDiff).toFixed(2)}${Math.abs(boxDiff) >= 0.005 ? ` (incl. ${boxDiff.toFixed(2)} ${BOX_DIFF_LABEL.toLowerCase()})` : ''}`);
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
           head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
           body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), pdfWhoWhen(r.created_by_name, r.created_at)]) : [['No entries this period', '', '', '', '', '']],
         });
-        pdfCashBoxPage(doc, await fetchBoxData(state.activeGroup), start, end, label);
+        pdfCashBoxPage(doc, boxData, start, end, label);
         doc.save(pdfFilename('Social-Media-Finance', label));
       } catch (err) {
         console.error('social media finance report failed', err);
@@ -10087,13 +10121,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
       }
 
-      const [attRes, curRes, feeRes, finRes, pendingRes] = await Promise.all([
+      const [attRes, curRes, feeRes, finRes, pendingRes, boxRes] = await Promise.all([
         db.from('attendance').select('date, present').eq('group_key', state.activeGroup).gte('date', day90).order('date', { ascending: true }),
         db.from('curriculum_meetings').select('date, theme, activities').eq('group_key', state.activeGroup).gte('date', todayStr()).order('date', { ascending: true }).limit(1),
         db.from('fee_payments').select('paid, amount').eq('group_key', state.activeGroup).eq('period', period),
         db.from('finance_entries').select('entry_type, amount, entry_date, category, description').eq('group_key', state.activeGroup).gte('entry_date', sixStart).lte('entry_date', monthEnd).order('entry_date', { ascending: false }),
         db.from('join_requests').select('id', { count: 'exact', head: true }).eq('group_key', state.activeGroup).eq('status', 'pending'),
+        db.from('cash_box_log').select('*').eq('group_key', state.activeGroup),
       ]);
+      const boxLogs: BoxLog[] = boxRes.error ? [] : (boxRes.data || []);
       const attRows = attRes.data || [];
       const feeRows = feeRes.data || [];
       const finRows = finRes.data || [];
@@ -10122,8 +10158,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const netFor = (start: string, end: string) => finRows
         .filter((r: any) => r.entry_date >= start && r.entry_date <= end)
         .reduce((s: number, r: any) => s + (r.entry_type === 'income' ? Number(r.amount) : -Number(r.amount)), 0);
-      const netThis = netFor(`${period}-01`, monthEnd);
-      const netPrev = netFor(`${prevPeriod}-01`, prevMonthEnd);
+      // Includes cash box over / short from counts in that month, same as
+      // the Finance tab's Net Income.
+      const netThis = netFor(`${period}-01`, monthEnd) + boxDiffInRange(boxLogs, `${period}-01`, monthEnd);
+      const netPrev = netFor(`${prevPeriod}-01`, prevMonthEnd) + boxDiffInRange(boxLogs, `${prevPeriod}-01`, prevMonthEnd);
 
       // Same finRows, bucketed by month instead of summed — for the
       // Income vs. expenses chart.

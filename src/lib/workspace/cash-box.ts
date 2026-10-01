@@ -154,3 +154,43 @@ export function boxHistoryRows(logs: BoxLog[], start: string, end: string): stri
       pdfWhoWhen(l.created_by_name, l.created_at) + ((l as any).updated_at ? `\nEdited by ${(l as any).updated_by_name || '-'}, ${pdfStamp((l as any).updated_at)}` : ''),
     ]);
 }
+
+// ---------- Differences that count toward net income -----------------
+// Box counts and bank checks find money that was never entered in the
+// ledger. Net income shows them as their own clearly-labelled lines
+// (standard "cash over / short"), never mixed into a real category:
+//   Net income (recorded)            ledger income - expenses
+//   + Cash box over / short          box counts dated in the period
+//   + Unexplained bank difference    bank checks dated in the period (org-wide only)
+//   = Net income
+
+export const BOX_DIFF_LABEL = 'Cash box over / short';
+export const BANK_DIFF_LABEL = 'Unexplained bank difference';
+export const BOX_DIFF_HELP = 'When a group counted its cash box, the difference between the real cash and what the ledger said should be there: money spent or received without a ledger entry.';
+export const BANK_DIFF_HELP = "When the bank balance was recorded, the difference between what the bank app showed and what the system expected: money that came into or left the bank without a ledger entry.";
+
+// Sum of one group's box count corrections dated in [start, end] —
+// only counts made under the box's current opening balance (the same
+// ones the box balance itself uses).
+export function boxDiffInRange(groupLogs: BoxLog[], start: string, end: string): number {
+  const byNewest = [...groupLogs].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  const opening = byNewest.find((l) => l.kind === 'opening');
+  if (!opening) return 0;
+  return groupLogs
+    .filter((l) => l.kind === 'count' && l.event_date >= start && l.event_date <= end && after(l, opening.event_date, opening.created_at))
+    .reduce((s, l) => s + countCorrection(l), 0);
+}
+
+// Box differences for every group in `groupKeys`, summed.
+export function boxDiffAllGroups(logs: BoxLog[], groupKeys: string[], start: string, end: string): number {
+  return groupKeys.reduce((s, k) => s + boxDiffInRange(logs.filter((l) => l.group_key === k), start, end), 0);
+}
+
+// Sum of bank check differences dated in [start, end]. Checks from the
+// old Reconcile flow that already posted a ledger adjustment entry are
+// skipped — that money is already in the ledger.
+export function bankDiffInRange(checks: any[], start: string, end: string): number {
+  return checks
+    .filter((c) => c.as_of_date >= start && c.as_of_date <= end && !c.adjustment_entry_id && c.difference != null)
+    .reduce((s, c) => s + n(c.difference), 0);
+}
