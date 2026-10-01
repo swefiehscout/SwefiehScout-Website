@@ -161,12 +161,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
           <div data-subpanel="sharedcal:requests" hidden>
             <p class="ws-att-hint">Every open change request, org-wide — as an admin you can act on any of them, not just entries you created.</p>
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-sc-requests-table>
-                <thead><tr><th>Entry</th><th>Date</th><th>Message</th><th>Requested by</th><th>Status</th><th></th></tr></thead>
-                <tbody data-sc-requests-body></tbody>
-              </table>
-            </div>
+            <div class="ws-dgroups" data-sc-requests-body></div>
           </div>
         </section>
 
@@ -233,12 +228,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </div>
 
             <h3 class="ws-admin-h3">Every transaction</h3>
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-fin-table>
-                <thead><tr><th>Date</th><th>Group</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Added by</th></tr></thead>
-                <tbody data-fin-body></tbody>
-              </table>
-            </div>
+            <div class="ws-dgroups" data-fin-body></div>
           </div>
 
           <div data-subpanel="finance:reconcile" hidden>
@@ -267,23 +257,13 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
             <h3 class="ws-admin-h3">Reconciliation history</h3>
             <p class="ws-att-hint">One row every time you check, even when nothing needed fixing. Proof of when you last looked, and what you found.</p>
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-rec-history-table>
-                <thead><tr><th>As of</th><th>Bank Balance</th><th>System Balance</th><th>Adjustment</th><th>Saved</th><th>By</th></tr></thead>
-                <tbody data-rec-history-body></tbody>
-              </table>
-            </div>
+            <div class="ws-dgroups" data-rec-history-body></div>
           </div>
 
           <div data-subpanel="finance:adjustments" hidden>
             <h3 class="ws-admin-h3">Adjustment entries</h3>
             <p class="ws-att-hint">Only the actual correcting transactions, a check on the Reconcile tab only adds a row here when the balances didn't already match. These are real ledger entries (they affect that group's own balance too), pulled out here as a focused audit trail.</p>
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-adj-table>
-                <thead><tr><th>Date</th><th>Group</th><th>Type</th><th>Amount</th><th>Note</th><th>Posted by</th></tr></thead>
-                <tbody data-adj-body></tbody>
-              </table>
-            </div>
+            <div class="ws-dgroups" data-adj-body></div>
           </div>
         </section>
 
@@ -693,12 +673,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <label class="ws-field ws-field--inline"><span>To</span><input type="date" data-alog-to /></label>
               <button type="button" class="btn-primary" data-alog-refresh>Refresh</button>
             </div>
-            <div class="ws-table-wrap">
-              <table class="ws-table" data-alog-table>
-                <thead><tr><th>When</th><th>Who</th><th>Type</th><th>Details</th></tr></thead>
-                <tbody data-alog-body></tbody>
-              </table>
-            </div>
+            <div class="ws-dgroups" data-alog-body></div>
           </div>
         </section>
       </div>
@@ -868,7 +843,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import autoTable from 'jspdf-autotable';
     import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, SC_EVENT_COLORS, scEventColorValue } from '../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../lib/workspace/row-numbers';
-    import { fetchLeaderActivity, formatActivityWhen, type LeaderActivityItem } from '../lib/leader-activity';
+    import { fetchLeaderActivity, activityLocalParts, type LeaderActivityItem } from '../lib/leader-activity';
+    import { renderDateGroups, ammanDay } from '../lib/workspace/date-groups';
 
     const db: any = supabase;
 
@@ -1435,7 +1411,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const openCount = state.scRequests.filter((r: any) => r.status === 'open').length;
       els.scRequestsBadge.textContent = String(openCount);
       els.scRequestsBadge.toggleAttribute('hidden', !openCount);
-      els.scRequestsBody.innerHTML = state.scRequests.length ? state.scRequests.map((r: any) => `
+      els.scRequestsBody.innerHTML = state.scRequests.length ? renderDateGroups({
+        rows: state.scRequests,
+        day: (r: any) => ammanDay(r.created_at),
+        head: '<tr><th>Entry</th><th>Date</th><th>Message</th><th>Requested by</th><th>Status</th><th></th></tr>',
+        row: (r: any) => `
         <tr data-sc-request-id="${r.id}">
           <td data-label="Entry">${escapeHtml(r.shared_calendar_events?.title || '(deleted)')}</td>
           <td data-label="Date">${r.shared_calendar_events?.event_date || '—'}</td>
@@ -1443,8 +1423,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Requested by">${escapeHtml(r.requested_by_name || '—')}</td>
           <td data-label="Status">${r.status === 'open' ? '<span class="ws-badge ws-badge--fair">Open</span>' : '<span class="ws-badge ws-badge--good">Resolved</span>'}</td>
           <td class="ws-row-actions">${r.status === 'open' ? '<button type="button" class="ws-edit-btn" data-sc-resolve>Mark resolved</button>' : ''}</td>
-        </tr>
-      `).join('') : '<tr><td colspan="7" class="ws-empty">No change requests.</td></tr>';
+        </tr>`,
+      }) : '<p class="ws-empty">No change requests.</p>';
       els.scRequestsBody.querySelectorAll('[data-sc-resolve]').forEach((btn: any) => {
         btn.addEventListener('click', async () => {
           const id = btn.closest('tr').dataset.scRequestId;
@@ -2308,7 +2288,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         return `<tr><td data-label="Group">${escapeHtml(g.en)}</td><td data-label="Income">${fmt(b.income)}</td><td data-label="Expenses">${fmt(b.expense)}</td><td data-label="Net">${fmt(b.income - b.expense)}</td></tr>`;
       }).join('');
       els.finBody.innerHTML = rows.length
-        ? rows.map((r) => {
+        ? renderDateGroups({
+            rows,
+            day: (r: any) => r.entry_date,
+            head: '<tr><th>Date</th><th>Group</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Added by</th></tr>',
+            row: (r: any) => {
             const g = GROUPS.find((x) => x.key === r.group_key);
             return `
               <tr>
@@ -2320,8 +2304,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <td data-label="Amount">${fmt(r.amount)}</td>
                 <td data-label="Added by">${escapeHtml(r.created_by_name || '—')}</td>
               </tr>`;
-          }).join('')
-        : '<tr><td colspan="8" class="ws-empty">No entries this period.</td></tr>';
+            },
+          })
+        : '<p class="ws-empty">No entries this period.</p>';
     }
 
     // ---------- Reconcile: compare the system's balance to the real bank
@@ -2362,8 +2347,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       return true;
     }
     function renderReconcileHistory(rows: any[]) {
-      if (!rows.length) { els.recHistoryBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No reconciliations saved yet.</td></tr>'; return; }
-      els.recHistoryBody.innerHTML = rows.map((r: any) => `
+      if (!rows.length) { els.recHistoryBody.innerHTML = '<p class="ws-empty">No reconciliations saved yet.</p>'; return; }
+      els.recHistoryBody.innerHTML = renderDateGroups({
+        rows,
+        day: (r: any) => r.as_of_date,
+        head: '<tr><th>As of</th><th>Bank Balance</th><th>System Balance</th><th>Adjustment</th><th>Saved</th><th>By</th></tr>',
+        row: (r: any) => `
         <tr>
           <td data-label="As of">${r.as_of_date}</td>
           <td data-label="Bank Balance">${fmt(r.statement_balance)}</td>
@@ -2371,8 +2360,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Adjustment">${r.adjustment_entry_id ? fmt(r.difference) : '—'}</td>
           <td data-label="Saved">${new Date(r.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' })}</td>
           <td data-label="By">${escapeHtml(r.created_by_name || '—')}</td>
-        </tr>
-      `).join('');
+        </tr>`,
+      });
     }
     async function loadReconcileHistory() {
       const { data, error } = await db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).limit(12);
@@ -2385,8 +2374,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       renderAdjustmentEntries(data || []);
     }
     function renderAdjustmentEntries(rows: any[]) {
-      if (!rows.length) { els.adjBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No adjustments posted yet.</td></tr>'; return; }
-      els.adjBody.innerHTML = rows.map((r: any) => {
+      if (!rows.length) { els.adjBody.innerHTML = '<p class="ws-empty">No adjustments posted yet.</p>'; return; }
+      els.adjBody.innerHTML = renderDateGroups({
+        rows,
+        day: (r: any) => r.entry_date,
+        head: '<tr><th>Date</th><th>Group</th><th>Type</th><th>Amount</th><th>Note</th><th>Posted by</th></tr>',
+        row: (r: any) => {
         const g = GROUPS.find((x) => x.key === r.group_key);
         return `
           <tr>
@@ -2397,7 +2390,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <td data-label="Note">${escapeHtml(r.description || '—')}</td>
             <td data-label="Posted by">${escapeHtml(r.created_by_name || '—')}</td>
           </tr>`;
-      }).join('');
+        },
+      });
     }
     function bindReconcile() {
       els.recAdjustGroup.innerHTML = GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
@@ -3933,21 +3927,29 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const namesById = new Map(state.people.map((p: any) => [p.id, p.name]));
       const leaderId = els.alogLeader.value || null;
       const leaderName = leaderId ? namesById.get(leaderId) || null : null;
-      els.alogBody.innerHTML = '<tr><td colspan="4" class="ws-empty">Loading…</td></tr>';
+      els.alogBody.innerHTML = '<p class="ws-empty">Loading…</p>';
       const items: LeaderActivityItem[] = await fetchLeaderActivity(db, {
         leaderId, leaderName,
         from: els.alogFrom.value || null, to: els.alogTo.value || null,
         limitPerType: 40, namesById, includeLogins: true,
       });
-      if (!items.length) { els.alogBody.innerHTML = '<tr><td colspan="4" class="ws-empty">Nothing logged for this filter yet.</td></tr>'; return; }
-      els.alogBody.innerHTML = items.slice(0, 200).map((it) => `
-        <tr>
-          <td data-label="When">${escapeHtml(formatActivityWhen(it.date))}</td>
-          <td data-label="Who">${escapeHtml(it.leaderName)}</td>
-          <td data-label="Type"><span class="ws-badge ws-badge--fair">${ACTIVITY_TYPE_LABELS[it.type] || it.type}</span></td>
-          <td data-label="Details">${escapeHtml(it.text)}</td>
-        </tr>
-      `).join('');
+      if (!items.length) { els.alogBody.innerHTML = '<p class="ws-empty">Nothing logged for this filter yet.</p>'; return; }
+      els.alogBody.innerHTML = renderActivityLogGroups(items.slice(0, 200));
+    }
+    function renderActivityLogGroups(items: LeaderActivityItem[]): string {
+      return renderDateGroups({
+        rows: items.map((it) => ({ it, ...activityLocalParts(it.date) })),
+        day: (r) => r.day,
+        head: '<tr><th>Time</th><th>Who</th><th>Type</th><th>Details</th></tr>',
+        tableClass: 'ws-table--alog',
+        row: ({ it, time }) => `
+          <tr>
+            <td data-label="Time">${time || '—'}</td>
+            <td data-label="Who">${escapeHtml(it.leaderName)}</td>
+            <td data-label="Type"><span class="ws-badge ws-badge--fair">${ACTIVITY_TYPE_LABELS[it.type] || it.type}</span></td>
+            <td data-label="Details">${escapeHtml(it.text)}</td>
+          </tr>`,
+      });
     }
     function bindActivityLog() {
       els.alogLeader.addEventListener('change', loadActivityLog);

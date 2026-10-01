@@ -4780,6 +4780,34 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-dash-feed-dot--fee { background: #8a5a00; }
 .ws-dash-feed-dot--roster { background: var(--color-muted); }
 .ws-dash-feed-dot--login { background: #5b8a99; }
+/* Date-grouped lists (Admin's ledger, adjustments, reconciliations,
+   change requests, activity log) — collapsible year >
+   month > week > day, see src/lib/workspace/date-groups.ts. */
+.ws-dgroups { display: flex; flex-direction: column; gap: 0.6rem; }
+.ws-dgroup > summary {
+  display: flex; align-items: center; gap: 0.6rem;
+  cursor: pointer; list-style: none; user-select: none;
+  border-radius: var(--radius);
+}
+.ws-dgroup > summary::-webkit-details-marker { display: none; }
+.ws-dgroup > summary::before {
+  content: '▸'; color: var(--color-muted); font-size: 0.8em;
+  transition: transform 0.15s var(--ease-out);
+}
+.ws-dgroup[open] > summary::before { transform: rotate(90deg); }
+.ws-dgroup > summary:hover { background: var(--color-bg); }
+.ws-dgroup-children { display: flex; flex-direction: column; gap: 0.35rem; padding: 0 0.6rem 0.6rem 1rem; }
+.ws-dgroup--year { border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); box-shadow: var(--shadow-sm); }
+.ws-dgroup--year > summary { padding: 0.85rem 1rem; font-weight: 800; font-size: 1.05rem; color: var(--color-brand); }
+.ws-dgroup--month > summary { padding: 0.65rem 0.6rem; font-weight: 700; color: var(--color-brand); }
+.ws-dgroup--week > summary { padding: 0.55rem 0.6rem; font-weight: 600; font-size: 0.9rem; color: var(--color-text); }
+.ws-dgroup--day > summary { padding: 0.45rem 0.6rem; font-weight: 500; font-size: 0.86rem; color: var(--color-text); }
+.ws-dgroup--day > .ws-table-wrap { margin: 0.2rem 0 0.5rem 1rem; box-shadow: none; }
+.ws-dgroup--year > .ws-table-wrap { margin: 0 0.75rem 0.75rem; box-shadow: none; }
+.ws-dgroup-count { margin-inline-start: auto; font-size: 0.75rem; font-weight: 600; color: var(--color-muted); }
+.ws-dgroups > .ws-empty { margin: 0; }
+.ws-table--alog td[data-label="Time"] { font-variant-numeric: tabular-nums; color: var(--color-muted); }
+.ws-table--alog td[data-label="Details"] { white-space: normal; min-width: 16rem; }
 .ws-dash-feed-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .ws-dash-feed-title { font-size: 0.86rem; font-weight: 600; color: var(--color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ws-dash-feed-date { font-size: 0.72rem; color: var(--color-muted); }

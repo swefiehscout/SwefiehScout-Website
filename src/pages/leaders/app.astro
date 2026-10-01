@@ -9040,6 +9040,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           materials_needed: m.materials_needed || null,
           activities: m.activities, attachment_path: m.attachment_path || null, actual_notes: m.actual_notes || null,
           updated_by: state.profile?.name || null,
+          // No DB trigger bumps this on update — set it here so an edit
+          // shows up with its real time in the activity feeds.
+          updated_at: new Date().toISOString(),
         };
         if (!m.id) payload.created_by = m.created_by || state.profile?.name || null;
         const { data, error } = await db.from('curriculum_meetings').upsert(payload, { onConflict: 'group_key,date' }).select().single();

@@ -22,7 +22,7 @@ export type LeaderActivityType = 'attendance' | 'curriculum' | 'finance' | 'fee'
 
 export type LeaderActivityItem = {
   type: LeaderActivityType;
-  date: string; // ISO date or timestamp — whichever the source row carries, used for sorting/display as-is
+  date: string; // ISO timestamp (UTC) of when the action was saved; a plain 'YYYY-MM-DD' only for legacy rows missing one
   leaderId: string | null;
   leaderName: string;
   text: string;
@@ -56,6 +56,15 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
     if (opts.to) r = r.lte(col, opts.to);
     return r;
   };
+  // Same, for a timestamptz column — the bare 'YYYY-MM-DD' bounds above
+  // would compare as UTC midnight and drop everything later on the "to"
+  // day, so bound by whole Amman-local days instead (UTC+3, no DST).
+  const tsScope = (q: any, col: string) => {
+    let r = q;
+    if (opts.from) r = r.gte(col, `${opts.from}T00:00:00+03:00`);
+    if (opts.to) r = r.lt(col, `${addDays(opts.to, 1)}T00:00:00+03:00`);
+    return r;
+  };
 
   const queries: Promise<any>[] = [];
 
@@ -67,7 +76,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
   );
   // Finance entries logged.
   queries.push(
-    dateScope(scopeUuid(db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, created_by'), 'created_by').order('entry_date', { ascending: false }).limit(limit), 'entry_date')
+    tsScope(scopeUuid(db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, created_by, created_at'), 'created_by').order('created_at', { ascending: false }).limit(limit), 'created_at')
       .then((r: any) => ({ kind: 'finance' as const, r }))
   );
   // Fee payments recorded — collapsed below to one activity per (group, period, who saved it).
@@ -77,7 +86,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
   );
   // Roster members added.
   queries.push(
-    dateScope(scopeUuid(db.from('members').select('group_key, full_name, created_by, created_at'), 'created_by').order('created_at', { ascending: false }).limit(limit), 'created_at')
+    tsScope(scopeUuid(db.from('members').select('group_key, full_name, created_by, created_at'), 'created_by').order('created_at', { ascending: false }).limit(limit), 'created_at')
       .then((r: any) => ({ kind: 'roster' as const, r }))
   );
   // Curriculum planned — created_by/updated_by are plain text names on
@@ -94,7 +103,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
   if (opts.includeLogins) {
     let lq = db.from('device_sessions').select('user_id, device_label, created_at').order('created_at', { ascending: false }).limit(limit * 4);
     if (opts.leaderId) lq = lq.eq('user_id', opts.leaderId);
-    queries.push(dateScope(lq, 'created_at').then((r: any) => ({ kind: 'login' as const, r })));
+    queries.push(tsScope(lq, 'created_at').then((r: any) => ({ kind: 'login' as const, r })));
   }
 
   const results = await Promise.all(queries);
@@ -112,7 +121,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
       });
     } else if (kind === 'finance') {
       r.data.forEach((row: any) => {
-        items.push({ type: 'finance', date: row.entry_date, leaderId: row.created_by, leaderName: nameFor(row.created_by), text: `Logged ${row.entry_type === 'income' ? 'income' : 'an expense'} for ${groupLabel(row.group_key)} — ${row.category || 'Uncategorized'} (${Number(row.amount).toFixed(2)})` });
+        items.push({ type: 'finance', date: row.created_at || row.entry_date, leaderId: row.created_by, leaderName: nameFor(row.created_by), text: `Logged ${row.entry_type === 'income' ? 'income' : 'an expense'} for ${groupLabel(row.group_key)} — ${row.category || 'Uncategorized'} (${Number(row.amount).toFixed(2)}), dated ${row.entry_date}` });
       });
     } else if (kind === 'fee') {
       const seen = new Set<string>();
@@ -138,14 +147,35 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
     }
   }
 
-  items.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  items.sort((a, b) => sortKey(b.date) - sortKey(a.date));
   return items;
 }
 
-// `date` above is deliberately mixed — a real timestamp for most types
-// (updated_at/created_at, stored in UTC) but a plain 'YYYY-MM-DD' for
-// finance's entry_date and the date-only fallbacks (no time-of-day
-// exists to show for those). Both callers display it through here so
+function addDays(ymd: string, n: number): string {
+  const d = new Date(`${ymd}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+// Timestamps and the rare date-only fallback sort together correctly
+// (comparing the raw strings put a bare date after every timestamp on
+// that same day, and a "+00:00" vs "Z" suffix could misorder too).
+function sortKey(value: string): number {
+  const t = Date.parse(value.includes('T') ? value : `${value}T00:00:00+03:00`);
+  return Number.isNaN(t) ? 0 : t;
+}
+
+// Amman-local calendar day + time-of-day for one activity's `date`, for
+// grouping a feed by day/week. `time` is '' only for a legacy date-only
+// row, which has no time-of-day to show.
+export function activityLocalParts(value: string): { day: string; time: string } {
+  const full = formatActivityWhen(value);
+  return { day: full.slice(0, 10), time: full.length > 10 ? full.slice(11, 16) : '' };
+}
+
+// `date` above is a real timestamp (updated_at/created_at, stored in
+// UTC) for every type; only a legacy row missing one falls back to a
+// plain 'YYYY-MM-DD' (no time-of-day exists to show). Both callers display it through here so
 // it always reads in Amman local time instead of the raw UTC clock
 // value the string carries — that was the actual bug: the old callers
 // just sliced the ISO string as text, showing UTC hours unconverted.
