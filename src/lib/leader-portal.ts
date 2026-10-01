@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-// Resolve from the project root via process.cwd() — using import.meta.url
+// Resolve from the project root via process.cwd(), using import.meta.url
 // would point at the build's bundled chunk directory, not the source.
 const MD_PATH = join(process.cwd(), 'src', 'content', 'leader-portal.md');
 
@@ -60,7 +60,7 @@ export function loadPortalData(): PortalData {
 
 // Bilingual labels for the keys used in the markdown. If a key is missing
 // from this map, the portal falls back to the raw key. Only "Lessons" is
-// read anywhere now (the Workspace's Library > Lessons sub-tab) — the old
+// read anywhere now (the Workspace's Library > Lessons sub-tab), the old
 // per-group Attendance/Monthly Fee Tracker spreadsheet links this used to
 // carry were retired once the real Attendance/Fees tabs shipped.
 export const TOOL_LABELS: Record<string, { en: string; ar: string }> = {

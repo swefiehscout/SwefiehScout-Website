@@ -1,14 +1,14 @@
--- Swefieh Scout — Inventory's own dated quantity-change log: "as of
--- this day, this item's quantity changed to N, and here's why" — lost,
+-- Swefieh Scout, Inventory's own dated quantity-change log: "as of
+-- this day, this item's quantity changed to N, and here's why", lost,
 -- damaged, restocked, a recount, whatever it was. Separate from the
 -- existing Maintenance Log (inventory_schema.sql), which tracks repairs,
 -- not counts. Run this AFTER inventory_schema.sql (references
 -- has_group_access() and inventory_items defined there). Safe to re-run.
 
 -- ============================================================
--- inventory_adjustments — one row per logged quantity change. An
+-- inventory_adjustments, one row per logged quantity change. An
 -- item's current quantity still lives on inventory_items.quantity (the
--- Items form can still edit it directly for a quick fix) — this table
+-- Items form can still edit it directly for a quick fix), this table
 -- is purely the audit trail, same relationship inventory_maintenance
 -- has to "Last Maintenance": derived/read, never the source of truth
 -- for what's shown elsewhere.

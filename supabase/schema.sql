@@ -1,4 +1,4 @@
--- Swefieh Scout — Leaders Workspace schema.
+-- Swefieh Scout, Leaders Workspace schema.
 -- Run this whole file in Supabase's SQL Editor. Safe to re-run pieces
 -- individually if something fails partway, but running top to bottom on a
 -- fresh project is the normal path.
@@ -9,7 +9,7 @@
 -- library, and group-scoped Row Level Security throughout.
 
 -- ============================================================
--- profiles — one row per leader/admin, auto-created on signup
+-- profiles, one row per leader/admin, auto-created on signup
 -- with role='pending' until an admin approves them and assigns
 -- group(s). Created first: the helper functions below reference
 -- it, and Postgres validates `language sql` function bodies at
@@ -29,7 +29,7 @@ alter table profiles enable row level security;
 
 -- ============================================================
 -- Helper functions (SECURITY DEFINER so they bypass RLS on
--- `profiles` internally — prevents infinite recursion when a
+-- `profiles` internally, prevents infinite recursion when a
 -- profiles policy or another table's policy needs to check the
 -- current user's role/groups).
 -- ============================================================
@@ -50,7 +50,7 @@ returns boolean language sql security definer stable as $$
   );
 $$;
 
--- A leader can only read their own profile row — not the whole
+-- A leader can only read their own profile row, not the whole
 -- roster of other leaders' names/roles/groups. Admins still see
 -- everyone (the Admin tab lists every leader to approve/assign).
 drop policy if exists "read all profiles" on profiles;
@@ -68,7 +68,7 @@ create policy "admin manage profiles" on profiles
 
 -- A regular leader can update their own row (e.g. rename themselves) via
 -- the "update own name" policy above, but RLS can't restrict *which
--- columns* change — so a trigger blocks anyone but an admin from writing
+-- columns* change, so a trigger blocks anyone but an admin from writing
 -- their own role/groups.
 create or replace function prevent_self_role_escalation()
 returns trigger language plpgsql security definer as $$
@@ -108,7 +108,7 @@ create trigger on_auth_user_created
   for each row execute function handle_new_user();
 
 -- ============================================================
--- members — each group's roster of scouts/students.
+-- members, each group's roster of scouts/students.
 -- ============================================================
 create table if not exists members (
   id uuid primary key default gen_random_uuid(),
@@ -137,7 +137,7 @@ create policy "group access" on members
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
 -- ============================================================
--- attendance — one row per member per meeting date.
+-- attendance, one row per member per meeting date.
 -- ============================================================
 create table if not exists attendance (
   id uuid primary key default gen_random_uuid(),
@@ -157,7 +157,7 @@ create policy "group access" on attendance
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
 -- ============================================================
--- group_settings — per-group config: the default monthly fee (kept
+-- group_settings, per-group config: the default monthly fee (kept
 -- per period, e.g. {"2026-09": 10}, since the amount can change
 -- month to month) plus configurable Finance category lists.
 -- ============================================================
@@ -179,7 +179,7 @@ create policy "group access" on group_settings
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
 -- ============================================================
--- fee_payments — one row per member per month ('YYYY-MM').
+-- fee_payments, one row per member per month ('YYYY-MM').
 -- ============================================================
 create table if not exists fee_payments (
   id uuid primary key default gen_random_uuid(),
@@ -201,7 +201,7 @@ create policy "group access" on fee_payments
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
 -- ============================================================
--- finance_entries — simple income/expense ledger, per group.
+-- finance_entries, simple income/expense ledger, per group.
 -- ============================================================
 create table if not exists finance_entries (
   id uuid primary key default gen_random_uuid(),
@@ -212,7 +212,7 @@ create table if not exists finance_entries (
   entry_date date not null,
   description text,
   -- Set only on entries auto-generated from a paid fee_payments row (see
-  -- the Fees tab) — lets us find/update/remove that entry automatically
+  -- the Fees tab), lets us find/update/remove that entry automatically
   -- as the fee's paid status changes, instead of double-entry bookkeeping.
   fee_payment_id uuid references fee_payments(id) on delete cascade,
   -- Path of an optional attached receipt inside the 'documents' storage
@@ -228,7 +228,7 @@ create policy "group access" on finance_entries
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
 -- ============================================================
--- join_requests — the public "/join" form lands here. Anyone (no
+-- join_requests, the public "/join" form lands here. Anyone (no
 -- login) can insert one; only leaders/admins with access to that
 -- group can ever read, approve, or reject one. Approving copies
 -- the row into `members` and marks the request approved rather
@@ -271,8 +271,8 @@ create policy "group leaders can delete" on join_requests
   for delete using (has_group_access(group_key));
 
 -- ============================================================
--- documents — the file library. Every document belongs to exactly
--- one group's library — no shared/troop-wide documents.
+-- documents, the file library. Every document belongs to exactly
+-- one group's library, no shared/troop-wide documents.
 -- ============================================================
 create table if not exists documents (
   id uuid primary key default gen_random_uuid(),
@@ -287,7 +287,7 @@ create table if not exists documents (
 );
 
 -- Widens an existing documents table from before shared/troop-wide docs
--- were dropped — harmless if the table was already created not-null.
+-- were dropped, harmless if the table was already created not-null.
 -- Only runs cleanly if no group_key is actually null; there's no UI path
 -- that ever created one, so this should be a no-op in practice.
 alter table documents alter column group_key set not null;
@@ -316,7 +316,7 @@ drop policy if exists "admin manage shared docs" on documents;
 
 -- ============================================================
 -- curriculum_meetings already exists from the earlier build.
--- Tighten its policy now that real auth exists — replace the
+-- Tighten its policy now that real auth exists, replace the
 -- open "anon full access" policy with group-scoped access.
 -- ============================================================
 drop policy if exists "anon full access" on curriculum_meetings;
@@ -330,7 +330,7 @@ create policy "group access" on curriculum_meetings
 alter table curriculum_meetings add column if not exists attachment_path text;
 
 -- ============================================================
--- Storage bucket for the document library. Run once — if it
+-- Storage bucket for the document library. Run once, if it
 -- already exists this will error harmlessly; ignore that and
 -- move on to the policies below.
 -- ============================================================
@@ -339,7 +339,7 @@ values ('documents', 'documents', false)
 on conflict (id) do nothing;
 
 -- Every upload path is "<group_key>/..." (see bindLibraryUpload() and the
--- Finance receipt upload in app.astro) — (storage.foldername(name))[1]
+-- Finance receipt upload in app.astro), (storage.foldername(name))[1]
 -- pulls that first path segment back out, so writes/updates/deletes are
 -- scoped to groups the user actually has access to, same as every other
 -- table. Read stays any-authenticated: a signed URL already requires
@@ -373,7 +373,7 @@ create policy "workspace delete documents" on storage.objects
 -- ============================================================
 -- Bootstrapping: after you sign up through the site with your
 -- own email, run this once (with your email) to become the
--- first admin — nobody can approve you otherwise.
+-- first admin, nobody can approve you otherwise.
 --
 --   update profiles set role = 'admin' where id =
 --     (select id from auth.users where email = 'YOUR_EMAIL_HERE');

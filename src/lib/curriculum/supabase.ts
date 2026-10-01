@@ -1,6 +1,6 @@
-// The one shared Supabase client for the whole site — the Leaders
+// The one shared Supabase client for the whole site, the Leaders
 // Workspace (src/lib/workspace/auth.ts re-exports this) and the public
-// /join form. Browser-only module — PUBLIC_ vars are inlined at build
+// /join form. Browser-only module, PUBLIC_ vars are inlined at build
 // time by Vite, and the anon/publishable key is designed to be exposed
 // client-side: access is actually governed by real Supabase Auth plus
 // each table's Row Level Security policy, not by keeping this key

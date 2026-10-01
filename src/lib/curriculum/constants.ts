@@ -3,22 +3,22 @@
 // imported by client-side script as well as the Astro frontmatter.
 
 // 'Music', 'General', and 'SocialMedia' are 3 extra "groups" alongside
-// the 5 troops — same finance machinery (Ledger, Cash Box), but the
+// the 5 troops, same finance machinery (Ledger, Cash Box), but the
 // Leaders Workspace only ever shows a cut-down, group-specific set of
 // tabs for each (see NON_TROOP_TAB_VISIBILITY in leaders/app.astro):
 // none of the 3 has scouts, attendance, fees, or curriculum. Music keeps
 // a band roster; General and Social Media keep none. Music logs
 // event/wedding income and band payouts; General is for shared org-wide
-// costs that aren't any single troop's or Music's — venue maintenance,
+// costs that aren't any single troop's or Music's, venue maintenance,
 // new chairs, that kind of thing; Social Media runs the org's own
-// accounts (Content Calendar, a login/password vault) — all 3 log
+// accounts (Content Calendar, a login/password vault), all 3 log
 // Finance the same way any group logs its own entries.
 export type GroupKey = 'Jawalah' | 'Mutaqaddim' | 'Mubtadi' | 'Ashbal-Zahrat' | 'Baraem' | 'Leaders' | 'Music' | 'General' | 'SocialMedia';
 
 export const MUSIC_GROUP_KEY: GroupKey = 'Music';
 export const GENERAL_GROUP_KEY: GroupKey = 'General';
 export const SOCIAL_MEDIA_GROUP_KEY: GroupKey = 'SocialMedia';
-// Admin-only — see the People tab in /admin (peopleGroupsCellHTML),
+// Admin-only, see the People tab in /admin (peopleGroupsCellHTML),
 // which leaves this out of the checklist a leader's own profile.groups
 // can be set to. There's no other gate: an admin's role already grants
 // every group (see setupGroups() in leaders/app.astro), so simply never
@@ -38,28 +38,28 @@ export const GROUPS: { key: GroupKey; en: string; ar: string }[] = [
   { key: 'SocialMedia',   en: 'Social Media',    ar: 'التواصل الاجتماعي' },
 ];
 
-// The 5 scouting troops only — for attendance/fee/curriculum views,
+// The 5 scouting troops only, for attendance/fee/curriculum views,
 // which don't apply to Music (it keeps a band roster, but no
 // attendance or fees), General and Social Media (no roster at all), or
 // Leaders (no scouts).
-// Groups that keep no member roster at all — their Roster tab is hidden
+// Groups that keep no member roster at all, their Roster tab is hidden
 // and no roster view or report includes them.
 export const NO_ROSTER_GROUP_KEYS: GroupKey[] = [GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY];
 export const NON_TROOP_GROUP_KEYS: GroupKey[] = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY];
 export const TROOP_GROUPS = GROUPS.filter((g) => !NON_TROOP_GROUP_KEYS.includes(g.key));
 
-// Everything the public /join form can offer — the 5 troops only.
+// Everything the public /join form can offer, the 5 troops only.
 // General and Social Media have no roster, Leaders is admin-assigned,
 // and Music's band is picked from existing troop members (the Roster
-// tab's "Copy selected into Music" checkboxes) or added by hand —
+// tab's "Copy selected into Music" checkboxes) or added by hand,
 // nobody signs up for it directly.
 export const JOINABLE_GROUPS = TROOP_GROUPS;
 
-// The meeting types Leaders' own Attendance tab can log against — either
+// The meeting types Leaders' own Attendance tab can log against, either
 // a general leadership meeting, or one of the 5 troops' own regular
 // meetings (tracking whether that troop's own leader showed up to run
 // it). Plain strings, not GroupKeys, since "Leaders Meeting" isn't a
-// group at all — just stored as free text on leader_attendance.meeting_type.
+// group at all, just stored as free text on leader_attendance.meeting_type.
 export const LEADER_MEETING_TYPES: string[] = ['Leaders Meeting', ...TROOP_GROUPS.map((g) => g.en)];
 
 export type ActivityType =
@@ -107,7 +107,7 @@ export const MONTHS: { en: string; ar: string }[] = [
   { en: 'December',  ar: 'كانون الأول' },
 ];
 
-// Shared Calendar event colors — a small fixed palette rather than a
+// Shared Calendar event colors, a small fixed palette rather than a
 // free-form picker, so every entry stays legible against the white
 // text its month/timeline chips already use (see .ws-sc-month-chip /
 // .ws-sc-tl-event in global.css). Stored on the row as `key`, not the

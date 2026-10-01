@@ -1,8 +1,8 @@
 /* ---------- Tokens ----------
    Colours come from the official brand guide (PDF):
      #571607  primary maroon (main brand)
-     #7A1914  lighter brick — secondary
-     #143822  forest green — accent (matches the green wing in the emblem)
+     #7A1914  lighter brick, secondary
+     #143822  forest green, accent (matches the green wing in the emblem)
      #000000  black
    Fonts: the brand spec calls for Canva Sans (proprietary, not webfont-
    available). Inter is the closest open-source analogue for body/UI.
@@ -18,7 +18,7 @@
   --color-brand-light: #7A1914;
   --color-accent: #143822;
   --color-border: #e6dfd2;
-  /* Hero card backdrop tones — used by mission banner / closing CTA so
+  /* Hero card backdrop tones, used by mission banner / closing CTA so
      they pick up dark-mode automatically. */
   --color-card-bg-1: #ffffff;
   --color-card-bg-2: #faf3e8;
@@ -57,7 +57,7 @@
 }
 
 /* Scroll-reveal: elements with data-animate start hidden, then animate when
-   the IntersectionObserver in BaseLayout adds .is-visible. Plain CSS — no
+   the IntersectionObserver in BaseLayout adds .is-visible. Plain CSS, no
    framework. */
 [data-animate] {
   opacity: 0;
@@ -118,7 +118,7 @@ img, video { max-width: 100%; height: auto; display: block; }
 /* ---------- Header & nav -----------------------------------------------
    Sticky on desktop with a glass-on-scroll treatment (frosted background +
    stronger elevation when the page has been scrolled past the top). The
-   header stays static on phones — the user prefers it scrolls away — and
+   header stays static on phones, the user prefers it scrolls away, and
    reveals via the hamburger drawer instead. */
 .site-header {
   background: var(--color-surface);
@@ -210,7 +210,7 @@ img, video { max-width: 100%; height: auto; display: block; }
   margin-top: 0.2rem;
   unicode-bidi: plaintext;
 }
-/* On medium widths the bilingual subtitle starts to crowd the nav — hide
+/* On medium widths the bilingual subtitle starts to crowd the nav, hide
    it until there's enough horizontal room. */
 @media (max-width: 1100px) and (min-width: 880px) {
   .brand-text small { display: none; }
@@ -558,7 +558,7 @@ main {
   margin: 2.5rem auto 4rem;
   padding: 0 1.25rem;
 }
-/* Wide variant for the home landing — lets the hero/grids breathe. */
+/* Wide variant for the home landing, lets the hero/grids breathe. */
 main.wide {
   max-width: 1180px;
 }
@@ -633,10 +633,10 @@ main.wide {
 }
 .prose a { color: var(--color-brand); text-decoration: underline; }
 
-/* Pull-quote treatment for blockquotes inside prose pages — used by the
+/* Pull-quote treatment for blockquotes inside prose pages, used by the
    mission/vision quotes on /about-us. Big serif type, gradient accent
    bar, and an oversized quote glyph that sits fully inside the box (no
-   overflow:hidden trick) so it never gets clipped — matters especially
+   overflow:hidden trick) so it never gets clipped, matters especially
    for RTL/Arabic blockquotes. */
 .prose blockquote {
   margin: 1.25rem 0 1.5rem;
@@ -757,7 +757,7 @@ main.wide {
   border-top: 1px solid var(--color-border);
 }
 /* Inside a bilingual prose, the CTA is a flex child of the column-flex
-   container — it just needs spacing above. */
+   container, it just needs spacing above. */
 .prose.bilingual > .page-cta {
   margin-top: 2rem;
 }
@@ -847,11 +847,11 @@ main.wide {
   outline-offset: 2px;
 }
 /* Same display-vs-[hidden] specificity tie as .ws-report-card elsewhere
-   in this file — .btn-primary's own `display: inline-block` above ties
+   in this file, .btn-primary's own `display: inline-block` above ties
    with the browser's built-in `[hidden] { display: none }` UA rule, and
    author CSS always wins that tie regardless of source order. Without
    this, `els.scAddBtn.hidden = true` (Shared Calendar's "+ Add to
-   calendar", hidden for a Support Leader — see canEditSharedCal() in
+   calendar", hidden for a Support Leader, see canEditSharedCal() in
    leaders/app.astro) and every other `.btn-primary` any script sets
    `.hidden` on stayed visually visible despite the attribute being set
    correctly. */
@@ -868,7 +868,7 @@ main.wide {
 /* ---------- Hero (home page) ----------
    Split layout: a real photo panel on one side and a text card with
    title, tagline, and CTAs on the other. No image-as-background, no
-   overlays — the photo and the words live in their own clearly
+   overlays, the photo and the words live in their own clearly
    separate compartments. */
 .hero {
   position: relative;
@@ -904,7 +904,7 @@ main.wide {
   object-fit: cover;
   display: block;
   transition: transform 0.7s var(--ease-out);
-  /* Slow Ken-Burns zoom for the cinematic feel — only triggers when
+  /* Slow Ken-Burns zoom for the cinematic feel, only triggers when
      view-transitions or scroll-reveals haven't paused motion. */
   animation: heroPhotoDrift 18s ease-in-out infinite alternate;
 }
@@ -1209,7 +1209,7 @@ main.wide {
 }
 
 /* ---------- Stats bar ----------
-   Four stats — divisors 1, 2, 4. 2 cols up to laptop (2×2), 4 cols above
+   Four stats, divisors 1, 2, 4. 2 cols up to laptop (2×2), 4 cols above
    (1×4). No auto-fit so the grid never lands on 3 cols and orphans a tile. */
 .stats {
   display: grid;
@@ -1292,7 +1292,7 @@ main.wide {
 }
 .section { margin: 4rem 0; }
 
-/* Ornamental section divider — a thin gradient rule with a centered
+/* Ornamental section divider, a thin gradient rule with a centered
    diamond glyph. Drop one between major landing-page sections to add
    ceremonial rhythm. */
 .section-divider {
@@ -1325,7 +1325,7 @@ main.wide {
   color: var(--color-brand-light);
 }
 
-/* Scroll progress bar — fixed gradient strip at the top of the viewport
+/* Scroll progress bar, fixed gradient strip at the top of the viewport
    that fills as the user scrolls down the page. */
 .scroll-progress {
   position: fixed;
@@ -1345,7 +1345,7 @@ main.wide {
 }
 
 /* ---------- Quick link cards ----------
-   Eight cards — symmetric layouts only. Phone: 1 col (8×1). Small tablet:
+   Eight cards, symmetric layouts only. Phone: 1 col (8×1). Small tablet:
    2 cols (4×2). Laptop: 4 cols (2×4). 8 divides cleanly into 1, 2, 4, 8
    so no intermediate width can produce an orphan row. */
 .cards-grid {
@@ -1364,7 +1364,7 @@ main.wide {
     grid-template-columns: repeat(4, 1fr);
   }
 }
-/* Two-card variant (e.g. the home page's "Get Started" split) — stays at
+/* Two-card variant (e.g. the home page's "Get Started" split), stays at
    2 columns instead of following the 8-card grid up to 4, filling the
    same full width as the hero above it. */
 @media (min-width: 880px) {
@@ -1544,12 +1544,12 @@ main.wide {
 @media (min-width: 920px) {
   .gallery-grid--4 { grid-template-columns: repeat(4, minmax(0, 240px)); gap: 1.5rem; }
 }
-/* 6 albums — 2 cols phone (3×2), 3 cols tablet+ (2×3) */
+/* 6 albums, 2 cols phone (3×2), 3 cols tablet+ (2×3) */
 .gallery-grid--6 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 720px) {
   .gallery-grid--6 { grid-template-columns: repeat(3, minmax(0, 240px)); }
 }
-/* 5 albums — fall back to single col phone, 5 cols on very wide screens */
+/* 5 albums, fall back to single col phone, 5 cols on very wide screens */
 .gallery-grid--5 { grid-template-columns: minmax(0, 280px); }
 @media (min-width: 1080px) {
   .gallery-grid--5 { grid-template-columns: repeat(5, minmax(0, 200px)); }
@@ -1779,7 +1779,7 @@ body.gallery-modal-open {
 
 @media (max-width: 640px) {
   .gallery-grid { gap: 1rem; }
-  /* Portrait aspect on phone — most of the album cover photos are
+  /* Portrait aspect on phone, most of the album cover photos are
      portrait, so a tall card matches their orientation and shows
      the full subject without aggressive cropping. */
   .album-art { aspect-ratio: 4 / 5; }
@@ -1789,9 +1789,9 @@ body.gallery-modal-open {
    Used by Contact, Event Booking, and Donate. Built around three pieces:
    1. .page-hero (defined above with the gallery)
    2. info / feature / method cards
-   3. .form-card — the form wrapped in a polished surface */
+   3. .form-card, the form wrapped in a polished surface */
 
-/* The card holding the form — a subtle elevated surface with a brand
+/* The card holding the form, a subtle elevated surface with a brand
    gradient strip across the top. */
 .form-card {
   background: var(--color-surface);
@@ -1845,7 +1845,7 @@ body.gallery-modal-open {
   unicode-bidi: plaintext;
 }
 
-/* Section heading used between major sections on the form pages — small
+/* Section heading used between major sections on the form pages, small
    bilingual stack with a brand accent rule. */
 .section-h2 {
   font-family: var(--font-display);
@@ -2095,9 +2095,9 @@ body.gallery-modal-open {
   font-size: 0.9rem;
 }
 
-/* Three impact stats — divisors of 3 are 1 and 3, so 1 col phone / 3 cols
+/* Three impact stats, divisors of 3 are 1 and 3, so 1 col phone / 3 cols
    above keeps it symmetric at every breakpoint. */
-/* Board photo on the Our Team page — wide landscape banner with a
+/* Board photo on the Our Team page, wide landscape banner with a
    bilingual caption underneath. */
 .board-photo {
   max-width: 1100px;
@@ -2115,7 +2115,7 @@ body.gallery-modal-open {
   height: auto;
   aspect-ratio: 21 / 9;
   object-fit: cover;
-  /* Crop the ceiling and the floor — bias the visible band toward the
+  /* Crop the ceiling and the floor, bias the visible band toward the
      centre of the photo where the faces sit. */
   object-position: center 45%;
   display: block;
@@ -2139,7 +2139,7 @@ body.gallery-modal-open {
   .board-photo img { aspect-ratio: 16 / 9; }
 }
 
-/* Donation info banner — preserved at native aspect (no cropping) since
+/* Donation info banner, preserved at native aspect (no cropping) since
    the image typically contains text/details that should stay readable. */
 .donation-banner {
   max-width: 760px;
@@ -2173,7 +2173,7 @@ body.gallery-modal-open {
   .contact-info { padding: 1.25rem; }
   .form-h2 { font-size: 1.3rem; }
 
-  /* Force 2-up on phones — phone is the priority, and four cards in 2×2
+  /* Force 2-up on phones, phone is the priority, and four cards in 2×2
      reads better than a stack of four. Cards tighten internally so the
      content (icon, bilingual title, short blurb) fits the narrower track. */
   .feature-grid,
@@ -2296,7 +2296,7 @@ body.gallery-modal-open {
   unicode-bidi: plaintext;
 }
 
-/* "Who Can Join" — single full-width card with eyebrow label. */
+/* "Who Can Join", single full-width card with eyebrow label. */
 .who-card {
   max-width: 800px;
   margin: 0 auto 3.5rem;
@@ -2547,7 +2547,7 @@ body.gallery-modal-open {
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  /* Faces are usually in the upper portion of headshots — bias the
+  /* Faces are usually in the upper portion of headshots, bias the
      square crop towards the top so heads aren't cut off. */
   object-position: center 20%;
   display: block;
@@ -2580,7 +2580,7 @@ body.gallery-modal-open {
   unicode-bidi: plaintext;
 }
 
-/* Grouped achievements — each as a card with bilingual list items. */
+/* Grouped achievements, each as a card with bilingual list items. */
 .achievement-list {
   display: grid;
   grid-template-columns: 1fr;
@@ -2597,7 +2597,7 @@ body.gallery-modal-open {
   border-inline-start: 4px solid var(--color-brand);
 }
 /* Header is a 2-column grid that mirrors the items below: English title
-   (with icon) on the left, Arabic title on the right edge — keeps the
+   (with icon) on the left, Arabic title on the right edge, keeps the
    bilingual symmetry the rest of the card carries. */
 .achievement-head {
   display: grid;
@@ -2656,7 +2656,7 @@ body.gallery-modal-open {
   gap: 0.85rem;
 }
 /* Each list item is its own EN | AR row so the two languages stay aligned
-   per-bullet — no drift between columns when one item is longer than its
+   per-bullet, no drift between columns when one item is longer than its
    counterpart. */
 .achievement-items li {
   display: grid;
@@ -2855,7 +2855,7 @@ body.gallery-modal-open {
   .priest-name-ar { font-size: 0.82rem; }
 }
 
-/* Wide cathedral panorama banner — full-width card with subtle frame.
+/* Wide cathedral panorama banner, full-width card with subtle frame.
    Aspect ratios capped so very tall source images don't dominate the
    page. object-fit cover crops to fill. */
 .church-banner,
@@ -2883,7 +2883,7 @@ body.gallery-modal-open {
   display: block;
 }
 .church-interior {
-  /* figcaption sits below the image — flex column lets the image fill
+  /* figcaption sits below the image, flex column lets the image fill
      the figure's aspect-ratio area and caption to flow underneath. */
   aspect-ratio: auto;
   display: flex;
@@ -2934,7 +2934,7 @@ body.gallery-modal-open {
   .band-banner { aspect-ratio: 4 / 3; }
 }
 
-/* Band photo marquee — continuous horizontal scroll of every band
+/* Band photo marquee, continuous horizontal scroll of every band
    photo, looping seamlessly because the track contains two copies of
    the photo set. Pauses on hover and respects reduced-motion. */
 .band-marquee {
@@ -2971,7 +2971,7 @@ body.gallery-modal-open {
   /* Duration is calculated from --n (the single-set photo count set
      inline by each page) at ~4s per photo, so a band strip with 11
      photos loops in ~44s while a scenic strip with 62 photos loops in
-     ~248s — every photo passes a fixed point at the same readable pace
+     ~248s, every photo passes a fixed point at the same readable pace
      regardless of total count. */
   animation: bandMarquee calc(var(--n, 11) * 4s) linear infinite;
   will-change: transform;
@@ -3015,7 +3015,7 @@ body.gallery-modal-open {
 /* ---------- Sub-page cards ---------------------------------------------
    When a parent page (e.g. /about-us) lists its children, the catch-all
    route emits .sub-pages-grid--N where N is the count. We define a column
-   layout per count so the grid is ALWAYS symmetric — no orphan card on a
+   layout per count so the grid is ALWAYS symmetric, no orphan card on a
    half-empty last row at any viewport. */
 .sub-pages-grid {
   display: grid;
@@ -3291,7 +3291,7 @@ body.gallery-modal-open {
 
 /* The full leaders-portal page (hero, session pill, Lessons/Management
    directory rows, curriculum CTA) was retired once the real Workspace
-   shipped — this group picker is the one piece still reused, by the
+   shipped, this group picker is the one piece still reused, by the
    public /join form's group-selection step. */
 .portal-picker {
   max-width: 1000px;
@@ -3364,7 +3364,7 @@ body.gallery-modal-open {
   text-transform: uppercase;
   opacity: 0.75;
 }
-/* Join form's age hint under each group button — quieter than
+/* Join form's age hint under each group button, quieter than
    .portal-picker-en so the group name still reads first. */
 .portal-picker-age {
   font-size: 0.66rem;
@@ -3376,7 +3376,7 @@ body.gallery-modal-open {
 }
 
 /* ---------- Curriculum (Workspace tab) ----------------------------------
-   Embedded month planner — click a date to open a centered popup, pick
+   Embedded month planner, click a date to open a centered popup, pick
    from the per-group Activity Bank or add a custom activity. The `curr-`
    namespace also covers the day popup, activity chips, and calendar
    month grid. */
@@ -3385,7 +3385,7 @@ body.gallery-modal-open {
    an unconditional `display` (flex/grid) for when they're shown. Browsers
    disagree on whether `[hidden]` itself is `!important` (Safari's isn't),
    so a same-specificity `display` rule can silently win and leave the
-   element visible — force it explicitly instead of relying on that. */
+   element visible, force it explicitly instead of relying on that. */
 .curr-view[hidden], .curr-day-overlay[hidden], .curr-day-attachment[hidden], .curr-day-field-row[hidden], .curr-day-field[hidden] {
   display: none !important;
 }
@@ -3412,7 +3412,7 @@ body.gallery-modal-open {
   margin-bottom: 1.5rem;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
-  /* A full pill (999px) only reads right on one line — Admin's now has
+  /* A full pill (999px) only reads right on one line, Admin's now has
      enough sub-tabs to wrap on narrower screens, where that shape would
      look broken on a multi-row box. */
   border-radius: var(--radius-lg);
@@ -3588,7 +3588,7 @@ body.gallery-modal-open {
   color: var(--color-muted);
 }
 .curr-mini-more { font-size: 0.64rem; color: var(--color-muted); }
-/* Event Calendar's own chip coloring — same palette as .ws-badge, so a
+/* Event Calendar's own chip coloring, same palette as .ws-badge, so a
    glance at the month grid already shows which days still need a
    financial follow-up (pending, red) vs. are just booked (amber) or
    done (green). */
@@ -3675,12 +3675,12 @@ body.gallery-modal-open {
 .curr-yr-cell--has { background: var(--color-accent); color: #fff; font-weight: 700; }
 
 /* ----- Day planner popup -----
-   Centered modal (not a side drawer) — opened by clicking a date. Picking
+   Centered modal (not a side drawer), opened by clicking a date. Picking
    from the bank, adding a custom activity, and removing/duration-editing
    existing ones all save instantly; Theme/Notes wait for Save. */
 .curr-day-overlay[hidden] { display: none !important; }
 /* Set on <body> whenever any .curr-day-overlay is open (see
-   bindOverlayScrollLock() in app.astro/admin.astro) — every popup in
+   bindOverlayScrollLock() in app.astro/admin.astro), every popup in
    the workspace shares that one class, so this one rule locks the
    page behind any of them: Curriculum, Event Calendar, Content
    Calendar, Shared Calendar's day view, Custom recurrence, Delete
@@ -3692,7 +3692,7 @@ body.ws-scroll-locked { overflow: hidden; }
   position: fixed;
   inset: 0;
   /* Well above the sticky site header (z-index 50) and everything else in
-     the page — a modal has to win every stacking comparison, always. */
+     the page, a modal has to win every stacking comparison, always. */
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -3703,8 +3703,8 @@ body.ws-scroll-locked { overflow: hidden; }
 .curr-day-panel {
   width: min(560px, 94vw);
   /* vh is unreliable on mobile Safari (100vh includes the space behind
-     the address bar, which can leave the bottom of the panel — the Save
-     button — rendered past what's actually visible). dvh tracks the
+     the address bar, which can leave the bottom of the panel, the Save
+     button, rendered past what's actually visible). dvh tracks the
      real visible viewport instead; the vh rule right before it is the
      fallback for the handful of browsers that don't support dvh yet. */
   max-height: min(88vh, 640px);
@@ -3717,7 +3717,7 @@ body.ws-scroll-locked { overflow: hidden; }
   padding: 1.5rem 1.75rem;
 }
 /* Pinned to the top and bottom of the panel's own scroll area (not the
-   page) — the day you're planning and the Save/Cancel buttons stay on
+   page), the day you're planning and the Save/Cancel buttons stay on
    screen the whole time you're scrolling a long activity list, so
    there's never a "now scroll to find Save" moment. */
 .curr-day-banner {
@@ -3736,16 +3736,16 @@ body.ws-scroll-locked { overflow: hidden; }
 .curr-day-banner-text { flex: 1; }
 .curr-day-banner-label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
 .curr-day-banner-value { margin: 0; font-family: var(--font-display); font-size: 1.1rem; }
-/* Content Calendar's own accent — a plum gradient distinct from the
+/* Content Calendar's own accent, a plum gradient distinct from the
    brand maroon every other day-overlay uses, so it reads as its own
    thing rather than a reskinned Event Calendar. */
 .curr-day-panel--content .curr-day-banner { background: linear-gradient(135deg, #6b2d5c 0%, #3d1a38 100%); }
-/* Shared Calendar's own accent — a warm gold, since it's the one
+/* Shared Calendar's own accent, a warm gold, since it's the one
    calendar every group shares rather than belonging to just one. */
 .curr-day-panel--sharedcal .curr-day-banner { background: linear-gradient(135deg, #a87421 0%, #5c4413 100%); }
 
 /* ---- Shared Calendar's Day/Week timeline: one shared renderer for
-   both, a Google-Calendar-style 24-hour grid — 1 hour-label column
+   both, a Google-Calendar-style 24-hour grid, 1 hour-label column
    plus N day columns (N=1 for Day, N=7 for Week), so the two views
    can never visually drift apart. Column count comes from --sc-days,
    row height from --sc-row-h, both set inline per render. Events are
@@ -3759,7 +3759,7 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-sc-tl-head-row, .ws-sc-tl-allday-row { display: grid; grid-template-columns: 3.75rem repeat(var(--sc-days, 1), 1fr); }
 .ws-sc-tl-head-row {
   border-bottom: 1px solid var(--color-border);
-  /* Stays put while the hour grid scrolls underneath it — .ws-sc-tl-wrap
+  /* Stays put while the hour grid scrolls underneath it, .ws-sc-tl-wrap
      is the scrollable ancestor, so `sticky` pins relative to it. */
   position: sticky;
   top: 0;
@@ -3843,7 +3843,7 @@ body.ws-scroll-locked { overflow: hidden; }
 /* ---- Shared Calendar's Repeat controls (in the day-overlay form) ---- */
 .ws-sc-repeat-every { display: flex; gap: 0.5rem; }
 /* .curr-day-field input/select both set width:100% at equal
-   specificity — !important is the only way this compact spinner wins
+   specificity: !important is the only way this compact spinner wins
    that fight (it was previously losing and shoving the unit <select>
    off the row entirely). */
 .ws-sc-repeat-every input { width: 4rem !important; flex: 0 0 auto; }
@@ -3864,7 +3864,7 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-sc-weekday-toggle button.ws-sc-weekday--active { background: var(--color-brand); border-color: var(--color-brand); color: #fff; }
 
 .ws-sc-repeat-mark { font-size: 0.85em; color: var(--color-muted); }
-/* Month view's mini chips — .curr-mini-chip's washed-out grey-on-grey
+/* Month view's mini chips: .curr-mini-chip's washed-out grey-on-grey
    reads fine for Curriculum's own low-key activity tags, but Shared
    Calendar entries need to actually stand out on the grid. */
 .ws-sc-month-chip {
@@ -3880,7 +3880,7 @@ body.ws-scroll-locked { overflow: hidden; }
 }
 .ws-sc-month-chip--music { background: var(--color-muted); }
 
-/* ---- Shared Calendar's Color picker (in the day-overlay form) — a
+/* ---- Shared Calendar's Color picker (in the day-overlay form), a
    row of plain swatches, same interaction as the weekday toggle above
    (click to select, one active at a time), each one's own color set
    inline via --swatch (see scColorSwatchesHTML()). ---- */
@@ -3898,7 +3898,7 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-sc-color-swatch:hover { transform: scale(1.1); }
 .ws-sc-color-swatch--active { border-color: var(--color-text); }
 
-/* ---- Custom recurrence / delete-scope popups — small centered panels
+/* ---- Custom recurrence / delete-scope popups, small centered panels
    reusing the day-overlay shell rather than the full-size day panel. ---- */
 .ws-sc-custom-panel { width: min(30rem, 94vw); max-width: none; }
 .ws-sc-custom-title { font-size: 1.15rem; margin-bottom: 1rem; }
@@ -3909,7 +3909,7 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-sc-end-option input[type="radio"] { width: 1.1rem; height: 1.1rem; accent-color: var(--color-brand); flex-shrink: 0; }
 
 /* ---- Shared Calendar's Day view: a 24-hour timeline, Google-Calendar
-   style — each hour is one row with its label and content side by
+   style, each hour is one row with its label and content side by
    side, so the two columns can never drift out of alignment. ---- */
 .ws-sc-allday { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
 .ws-sc-timeline { border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; background: var(--color-surface); }
@@ -3996,7 +3996,7 @@ body.ws-scroll-locked { overflow: hidden; }
   color: var(--color-text);
   resize: vertical;
 }
-/* Same native-<select> box-model quirk as .ws-field select — see its own
+/* Same native-<select> box-model quirk as .ws-field select, see its own
    comment for the full explanation. */
 .curr-day-field select {
   -webkit-appearance: none;
@@ -4015,7 +4015,7 @@ body.ws-scroll-locked { overflow: hidden; }
   text-transform: uppercase;
   color: var(--color-brand-dark);
 }
-/* The "(fill in after the meeting)" aside on "How it actually went" —
+/* The "(fill in after the meeting)" aside on "How it actually went",
    same label, just not shouting as loud as the rest of it. */
 .curr-day-section-hint {
   text-transform: none;
@@ -4024,7 +4024,7 @@ body.ws-scroll-locked { overflow: hidden; }
   color: var(--color-muted);
 }
 /* Shared by "Select from the activity bank" (a <select>) and "Or add a
-   custom activity" (a text <input>) — same row shape either way, one
+   custom activity" (a text <input>), same row shape either way, one
    right under the other under a single "Add an activity" label instead
    of each getting its own heading. */
 .curr-day-custom-add { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
@@ -4042,7 +4042,7 @@ body.ws-scroll-locked { overflow: hidden; }
 }
 .curr-day-custom-add select:disabled { color: var(--color-muted); background: var(--color-bg); }
 .curr-day-custom-add button { padding: 0.5rem 0.9rem; font-size: 0.82rem; }
-/* The "an attachment is already on file" row — a View link plus a small
+/* The "an attachment is already on file" row, a View link plus a small
    remove (×) button, shown instead of the upload form (never both). */
 .curr-day-attachment { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
 .curr-day-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 2.5rem; margin-bottom: 0.5rem; }
@@ -4084,7 +4084,7 @@ body.ws-scroll-locked { overflow: hidden; }
   box-shadow: 0 -6px 12px -8px rgba(0, 0, 0, 0.12);
 }
 /* Destructive action pinned to the opposite end from Cancel/Save, same
-   convention as most dialogs — keeps it reachable without sitting next
+   convention as most dialogs, keeps it reachable without sitting next
    to (and inviting mis-clicks with) the primary Save action. */
 .curr-day-actions [data-curr-day-clear], .curr-day-actions [data-evt-delete] { margin-right: auto; }
 
@@ -4162,7 +4162,7 @@ body.ws-scroll-locked { overflow: hidden; }
    Auth-gated (real Supabase session, not the old password flag): sign-in
    lives at /leaders, the shell + tabs live at /leaders/app. `ws-` is this
    page's own namespace; the group switcher reuses the curriculum maker's
-   `.curr-tab` pill style. English-only UI — Arabic stays available as
+   `.curr-tab` pill style. English-only UI, Arabic stays available as
    free-text input inside the curriculum tool itself, not as paired chrome
    labels throughout. */
 .ws-main[hidden], .ws-pending[hidden], .ws-panel[hidden], .ws-tab[hidden] {
@@ -4219,9 +4219,9 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-logo { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--color-brand); }
 .ws-header-right { position: relative; z-index: 1; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
 /* A direct flex item of .ws-header itself (not nested in .ws-header-right
-   — see that markup's own comment), always claiming the full row width
+see that markup's own comment), always claiming the full row width
    so it wraps its own pills on its own line under Logo/Admin/Guide/
-   Account instead of ever competing with them for space on row 1 — that
+   Account instead of ever competing with them for space on row 1, that
    competition was what let the account avatar get stranded at the wrong
    edge once there were enough groups to wrap. */
 .ws-group-switch { display: flex; gap: 0.4rem; flex-wrap: wrap; flex-basis: 100%; }
@@ -4236,7 +4236,7 @@ body.ws-scroll-locked { overflow: hidden; }
 
 /* ----- Group banner: sits above every tab's content (not just the
    header switcher) so which group's data is on screen is never
-   ambiguous — the header can scroll out of view, this can't. ----- */
+   ambiguous, the header can scroll out of view, this can't. ----- */
 .ws-group-banner {
   display: flex;
   align-items: center;
@@ -4279,7 +4279,7 @@ body.ws-scroll-locked { overflow: hidden; }
 }
 .ws-guide-link:hover { background: var(--color-brand); color: #fff; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 .ws-guide-link svg { flex-shrink: 0; }
-/* Same display-vs-[hidden] specificity tie as .ws-report-card below —
+/* Same display-vs-[hidden] specificity tie as .ws-report-card below,
    this link is data-admin-only, so without this it shows to everyone. */
 .ws-guide-link[hidden] { display: none !important; }
 
@@ -4407,7 +4407,7 @@ body.ws-scroll-locked { overflow: hidden; }
 /* ----- Tabs: filled pill segmented control, icon + label ----- */
 .ws-tabs {
   /* A grid with a JS-computed, balanced column count (see balanceTabs()
-     in app.astro) — --ws-tab-cols is set so however many rows the tabs
+     in app.astro), --ws-tab-cols is set so however many rows the tabs
      need, every row gets as close to an equal COUNT of tabs as possible
      (e.g. 6 + 5, never 7 + 4), and since inactive tabs have no visible
      background, an evenly-stretched-but-lopsided flex row read as
@@ -4523,7 +4523,7 @@ body.ws-scroll-locked { overflow: hidden; }
    Greeting hero, four headline KPI cards with trend badges, an attendance
    bar chart + fee-collection donut, and three compact feed cards (next
    meeting, recent finance, needs attention). Every number here is a real
-   query against this group's data — nothing hardcoded. */
+   query against this group's data, nothing hardcoded. */
 .ws-dash { display: flex; flex-direction: column; gap: 1.75rem; }
 
 .ws-dash-hero {
@@ -4723,7 +4723,7 @@ body.ws-scroll-locked { overflow: hidden; }
    on-load script in BaseLayout already targets any .band-marquee-track
    on any page, so this needs no JS of its own. ----- */
 .ws-dash-marquee { margin: 0 auto; }
-/* A shorter, wider crop than the home page's portrait 4:5 slides — a
+/* A shorter, wider crop than the home page's portrait 4:5 slides, a
    thin banner strip reads better here than tall cards would. */
 .ws-dash-marquee .band-marquee-slide { width: 9rem; aspect-ratio: 3 / 2; }
 
@@ -4776,7 +4776,7 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-dash-feed-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; flex-shrink: 0; }
 .ws-dash-feed-dot--income { background: var(--color-accent); }
 .ws-dash-feed-dot--expense { background: var(--color-brand-light); }
-/* Leader activity feed (Leader Profile tab / Admin's Activity Log) —
+/* Leader activity feed (Leader Profile tab / Admin's Activity Log),
    one modifier per LeaderActivityType in src/lib/leader-activity.ts. */
 .ws-dash-feed-dot--attendance { background: var(--color-accent); }
 .ws-dash-feed-dot--curriculum { background: var(--color-brand); }
@@ -4787,7 +4787,7 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-dash-feed-dot--cashbox { background: #6b8e23; }
 .ws-dash-feed-dot--bank { background: #34495e; }
 /* Date-grouped lists (Admin's ledger, adjustments, reconciliations,
-   change requests, activity log) — collapsible year >
+   change requests, activity log), collapsible year >
    month > week > day, see src/lib/workspace/date-groups.ts. */
 .ws-dgroups { display: flex; flex-direction: column; gap: 0.6rem; }
 .ws-dgroup > summary {
@@ -4896,7 +4896,7 @@ body.ws-scroll-locked { overflow: hidden; }
 /* Tablet gap: the 720px query below collapses this straight to 1
    column, but nothing covered the space between that and full desktop
    width. The upper bound here was originally 1024px, which turned out
-   to be wrong — main.wide caps the whole app at 1180px regardless of
+   to be wrong, main.wide caps the whole app at 1180px regardless of
    viewport, and iPad landscape alone runs anywhere from ~1024px
    (10.9") up past 1180px to ~1366px (12.9" Pro), so 1024px missed
    most real iPads entirely; a 2-column step tried in between also
@@ -4909,7 +4909,7 @@ body.ws-scroll-locked { overflow: hidden; }
 }
 .ws-field { display: block; margin-bottom: 0.9rem; font-size: 0.78rem; color: var(--color-muted); font-weight: 600; }
 /* Grid cells stretch to the tallest row by default, but a plain block
-   field doesn't use that extra height — its input just sits wherever
+   field doesn't use that extra height, its input just sits wherever
    the label (1 line here, 2 there, e.g. a bilingual label that wraps)
    happens to end, so inputs in the same row drift out of alignment
    with each other. Flex-column + margin-top:auto on the control always
@@ -4940,8 +4940,8 @@ body.ws-scroll-locked { overflow: hidden; }
   color: var(--color-text);
   transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
-/* A field like Leaders Roster's Email — shown, not editable here (it's
-   sourced from their account, see leader_email_from_auth_schema.sql) —
+/* A field like Leaders Roster's Email, shown, not editable here (it's
+   sourced from their account, see leader_email_from_auth_schema.sql),
    reads as filled-in-but-inert rather than a plain editable box. */
 .ws-field input[readonly] {
   background: var(--color-bg);
@@ -4949,14 +4949,14 @@ body.ws-scroll-locked { overflow: hidden; }
   cursor: default;
 }
 /* Safari renders a date input's native controls (segments + calendar
-   icon) at their own intrinsic width unless appearance is reset —
+   icon) at their own intrinsic width unless appearance is reset,
    width:100% above doesn't reliably override that on its own, so the
    box can end up visibly narrower than every other field in the same
    grid despite sharing the identical rule. */
 .ws-field input[type="date"] {
   -webkit-appearance: none;
   appearance: none;
-  /* The appearance reset alone wasn't enough — WebKit's native date
+  /* The appearance reset alone wasn't enough, WebKit's native date
      value (day/month/year segments) can still render past its own
      declared box on iPad regardless of width/box-sizing, since it's
      drawn by an internal UA structure that doesn't fully participate
@@ -4969,11 +4969,11 @@ body.ws-scroll-locked { overflow: hidden; }
   outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(20, 56, 34, 0.1);
 }
 /* A <select>'s native chrome (the dropdown arrow's own reserved space)
-   isn't fully controlled by padding alone — left as-is, it can render at
+   isn't fully controlled by padding alone, left as-is, it can render at
    a visibly different box height/width than a sibling <input> sharing
    the identical CSS above, same class of issue as the date-input fix
    below. Reset appearance and draw our own arrow so every field type in
-   a form — text, number, date, select — is genuinely the same size. */
+   a form, text, number, date, select, is genuinely the same size. */
 .ws-field select, .ws-field--inline select {
   -webkit-appearance: none;
   appearance: none;
@@ -4985,7 +4985,7 @@ body.ws-scroll-locked { overflow: hidden; }
 }
 
 /* Guardian 2 / Allergies: collapsed by default behind a "+ Add" link,
-   expanding into their field(s) plus a "Remove" link when needed —
+   expanding into their field(s) plus a "Remove" link when needed,
    avoids showing empty-most-of-the-time fields for every member. */
 .ws-optional-block { display: flex; align-items: flex-start; min-height: 2.5rem; }
 .ws-add-link {
@@ -5013,7 +5013,7 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-remove-link:hover { color: var(--color-brand-light); }
 
 .ws-form-actions { display: flex; align-items: center; gap: 1.25rem; margin-top: 0.5rem; }
-/* Same display-vs-[hidden] specificity tie as .ws-report-card — Admin's
+/* Same display-vs-[hidden] specificity tie as .ws-report-card, Admin's
    Reconcile tab hides/shows its "balances match" button block via a
    bare `hidden` on this exact class. */
 .ws-form-actions[hidden] { display: none !important; }
@@ -5027,7 +5027,7 @@ body.ws-scroll-locked { overflow: hidden; }
 /* ----- Tables ----- */
 .ws-table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
 /* A table already sitting inside a .ws-dash-card doesn't need its own
-   nested border/shadow on top of the card's — that just doubles up. */
+   nested border/shadow on top of the card's, that just doubles up. */
 .ws-dash-card .ws-table-wrap { border: 0; border-radius: 0; box-shadow: none; }
 .ws-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .ws-table th {
@@ -5050,7 +5050,7 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-table td.ws-cell-wrap { white-space: normal; min-width: 16rem; }
 .ws-table tbody tr:hover { background: var(--color-bg); }
 /* Live row position (1, 2, 3...), added to every .ws-table by
-   initRowNumbering() — see src/lib/workspace/row-numbers.ts. Narrow and
+   initRowNumbering(), see src/lib/workspace/row-numbers.ts. Narrow and
    muted so it reads as a position marker, not a data column. */
 .ws-table th.ws-th-num, .ws-table td.ws-row-num {
   width: 1%;
@@ -5091,7 +5091,7 @@ body.ws-scroll-locked { overflow: hidden; }
   cursor: pointer;
 }
 .ws-edit-btn:hover { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
-/* Roster's own "Move to another troop" — the destination picker that
+/* Roster's own "Move to another troop", the destination picker that
    replaces a row's action buttons in place while it's open (see
    startMoveMember()). Sized to sit inline with .ws-edit-btn/.ws-row-del
    in the same actions cell instead of looking like a stray form field. */
@@ -5133,7 +5133,7 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-badge--fair { background: #fff4dd; color: #8a5a00; }
 .ws-badge--poor { background: #fdecea; color: #b3261e; }
 
-/* Assessment tab's 1-5 star rating — an input (click-to-set, one button
+/* Assessment tab's 1-5 star rating, an input (click-to-set, one button
    per star) and a read-only display, same gold as .ws-badge--fair. */
 .ws-star-input { display: inline-flex; gap: 0.2rem; }
 .ws-star-input button {
@@ -5161,7 +5161,7 @@ body.ws-scroll-locked { overflow: hidden; }
   border-radius: 999px;
   background: var(--color-bg);
 }
-/* The People tab's "or: Support Leader" option — same pill shape
+/* The People tab's "or: Support Leader" option, same pill shape
    as a real group check, styled distinctly (dashed, brand-colored) so
    it doesn't read as one more group to pick, and the little divider
    before it that says so in words too. */
@@ -5176,7 +5176,7 @@ body.ws-scroll-locked { overflow: hidden; }
   background: var(--color-surface);
 }
 
-/* A scrollable, checkable list of names — e.g. bulk-picking existing
+/* A scrollable, checkable list of names, e.g. bulk-picking existing
    members to copy into another group's roster. */
 .ws-pick-list {
   max-height: 16rem;
@@ -5226,12 +5226,12 @@ body.ws-scroll-locked { overflow: hidden; }
   flex-wrap: wrap;
   margin-bottom: 1.25rem;
 }
-/* Same display-vs-[hidden] specificity tie as .ws-report-card — the
+/* Same display-vs-[hidden] specificity tie as .ws-report-card, the
    custom date-range row toggles via a bare `hidden` on this class. */
 .ws-toolbar-row[hidden] { display: none !important; }
 /* Flex items default to a content-based min-width even with an explicit
    width set, so a long label (e.g. "Default fee this month") was still
-   forcing its box wider than the others — min-width:0 + flex-shrink:0
+   forcing its box wider than the others, min-width:0 + flex-shrink:0
    makes every inline field genuinely the same fixed size. */
 .ws-field--inline { margin-bottom: 0; width: 10rem; min-width: 0; flex-shrink: 0; }
 .ws-field--inline span { white-space: normal; }
@@ -5374,7 +5374,7 @@ body.ws-scroll-locked { overflow: hidden; }
 }
 /* .ws-report-card's own `display: flex` above is equal-specificity with
    the browser's built-in `[hidden] { display: none }` UA rule, and
-   author CSS always wins that tie regardless of source order — so a
+   author CSS always wins that tie regardless of source order, so a
    hidden report card (Music/Social Media/General/troop-only gating)
    stayed visually visible despite the `hidden` attribute being set
    correctly. Same bug class as .curr-day-field-row[hidden] earlier. */
@@ -5787,7 +5787,7 @@ body.ws-scroll-locked { overflow: hidden; }
 }
 
 /* ---------- Leaders Workspace: phone redesign (≤640px) ------------------
-   A real mobile layout, not a shrunk desktop one — entirely inside this
+   A real mobile layout, not a shrunk desktop one, entirely inside this
    media query, so none of it touches the computer view. Three rules
    drove every decision here: fill the screen width, never leave a lone
    card/tab orphaned on its own row, and never require sideways scrolling
@@ -5798,11 +5798,11 @@ body.ws-scroll-locked { overflow: hidden; }
   /* ----- Header: the logo and account avatar share one row; the group
      switcher gets a full row of its own below (it's a direct sibling of
      .ws-header-right in the markup already, always flex-basis:100% at
-     every width — see that rule's own comment). Built with real flex
+     every width, see that rule's own comment). Built with real flex
      flow (not guessed pixel offsets) so it can't overlap:
      .ws-header-right's own box is dissolved with display:contents,
      promoting its remaining children (Admin/Guide links, account) to be
-     direct flex items of .ws-header itself alongside the logo — account
+     direct flex items of .ws-header itself alongside the logo, account
      keeps row 1 via margin-inline-start:auto. ----- */
   .ws-header {
     padding: 0.85rem 1rem;
@@ -5814,12 +5814,12 @@ body.ws-scroll-locked { overflow: hidden; }
   .ws-logo { font-size: 1.05rem; }
   .ws-logo-mark { width: 1.75rem; height: 1.75rem; }
   .ws-header-right { display: contents; }
-  /* .ws-guide-link and .ws-account share order:1 — equal-order flex
+  /* .ws-guide-link and .ws-account share order:1, equal-order flex
      items keep their document order among themselves, and the link
      comes first in the markup, so this reads Guide, then the avatar,
      both pushed to the row's end by the margin-auto on the first of
      the pair. */
-  /* Only the account avatar stays on the logo's row — Admin/Guide drop
+  /* Only the account avatar stays on the logo's row, Admin/Guide drop
      down to their own full-width row, styled and sized to match the
      group-switch pills below them, just in red so they read as
      actions rather than one more group to pick. */
@@ -5864,7 +5864,7 @@ body.ws-scroll-locked { overflow: hidden; }
 
   /* ----- Header's group switcher (admins/multi-group leaders): a full-
      width single-column stack instead of pills wrapping by their own
-     text width, which — with 5 groups of very different name lengths —
+     text width, which, with 5 groups of very different name lengths,
      left one lone pill stranded by itself on the last row. A single
      column can never orphan, at any group count. ----- */
   .ws-group-switch { flex-direction: column; align-items: stretch; width: 100%; }
@@ -5885,10 +5885,10 @@ body.ws-scroll-locked { overflow: hidden; }
 
   /* ----- Tables → stacked field-cards, label above value. Every
      .ws-table td already carries a data-label attribute (added
-     specifically for this) that ::before turns into the field name —
+     specifically for this) that ::before turns into the field name,
      one generic rule for every table in the Workspace. Stacked (not
      label-left/value-right) specifically because a value can be
-     arbitrarily long — a leader's full name, a Finance description —
+     arbitrarily long, a leader's full name, a Finance description,
      and a side-by-side row has no room to let that wrap cleanly. ----- */
   .ws-table-wrap { overflow-x: visible; border: 0; border-radius: 0; box-shadow: none; background: none; }
   .ws-table, .ws-table thead, .ws-table tbody, .ws-table tr, .ws-table th, .ws-table td {
@@ -5949,7 +5949,7 @@ body.ws-scroll-locked { overflow: hidden; }
 
   /* ----- Attendance / Fees: keep "#", Member ID, Name, and the one
      checkbox that matters (Present / Paid) together on a single line
-     instead of stacking all 4 as separate fields — this is the table
+     instead of stacking all 4 as separate fields, this is the table
      someone is scanning fast and ticking boxes on, not reading. DOM
      order stays Name-then-Member-ID (matches the desktop columns);
      `order` below is what actually puts Member ID first visually.
@@ -5973,10 +5973,10 @@ body.ws-scroll-locked { overflow: hidden; }
     content: none;
   }
   /* width:auto cancels the base rule's width:100% on every .ws-table td
-     above — left as 100%, it becomes each flex item's used flex-basis
+     above, left as 100%, it becomes each flex item's used flex-basis
      (since these all resolve to flex-basis:auto) and every "inline"
      cell claims the full row width and wraps onto its own line anyway. */
-  /* Reserved width regardless of digit count (1 vs 12 vs 123) — a real
+  /* Reserved width regardless of digit count (1 vs 12 vs 123), a real
      desktop <table> keeps a column's width consistent down every row
      automatically; this flex layout doesn't, so without it "#" shifts
      everything beside it sideways by a different amount on every row
@@ -6016,7 +6016,7 @@ body.ws-scroll-locked { overflow: hidden; }
   .ws-table--compact-row td[data-label="Paid on"] { order: 6; flex-basis: 100%; }
 
   /* ----- Roster / Archive: even without every field to check off, a
-     plain list of names runs long on a phone — collapse each row to
+     plain list of names runs long on a phone, collapse each row to
      just "# Name", tap to reveal Member ID, contact info, Emergency
      Contacts, Allergies, Notes, and the Edit/Archive/Delete buttons.
      See initCollapsibleRows() in row-numbers.ts for the tap handler. */
@@ -6057,7 +6057,7 @@ body.ws-scroll-locked { overflow: hidden; }
 
   /* ----- Attendance / Curriculum month grid: drop the minimum column
      width instead of ever overflowing sideways, and hide the theme/
-     activity-chip preview text inside each cell — full detail is one
+     activity-chip preview text inside each cell, full detail is one
      tap away in the day popup, and cramming it in here was the one
      thing on this page that could force a cell (and the grid) wider
      than the screen. ----- */

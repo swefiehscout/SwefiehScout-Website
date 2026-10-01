@@ -1,19 +1,19 @@
-// Leader activity feed — a merged, time-descending "what has this
+// Leader activity feed, a merged, time-descending "what has this
 // leader (or every leader) actually done in the workspace" list,
 // inferred from each table's own created_by/updated_by rather than a
 // dedicated audit-log table. Shared by two callers so they stay in
 // lockstep: the Leaders Workspace's own Leader Profile tab (one leader,
-// no admin override needed — a leader always has access to their own
+// no admin override needed, a leader always has access to their own
 // rows) and Admin's People > Activity Log subtab (every leader,
-// org-wide, admin-only — see device_sessions_schema.sql's own comment
+// org-wide, admin-only, see device_sessions_schema.sql's own comment
 // on the admin SELECT policy that had to be added for logins to show up
 // here).
 //
-// Deliberately not exhaustive — it covers the core, cross-group actions
+// Deliberately not exhaustive, it covers the core, cross-group actions
 // that exist uniformly for every troop leader (attendance, curriculum,
 // finance, fees, roster, cash box, bank balances), plus sign-ins. It does not reach into
 // group-specific tables that only exist for Music/General/Social Media
-// (events, meeting notes, content items, inventory, vendors, PR) —
+// (events, meeting notes, content items, inventory, vendors, PR),
 // extend the query list below the same way if those ever need to show
 // up here too.
 import { GROUPS } from './curriculum/constants';
@@ -34,16 +34,16 @@ function groupLabel(key: string): string {
 
 export type FetchLeaderActivityOpts = {
   // Scope to one leader. When set, leaderName should be set too (it's
-  // what curriculum_meetings — the one table that stores a name instead
-  // of a uuid, see currPersistMeeting() in leaders/app.astro — is
+  // what curriculum_meetings, the one table that stores a name instead
+  // of a uuid, see currPersistMeeting() in leaders/app.astro, is
   // matched against). Omit both for an org-wide feed.
   leaderId?: string | null;
   leaderName?: string | null;
   from?: string | null; // inclusive, 'YYYY-MM-DD'
   to?: string | null; // inclusive, 'YYYY-MM-DD'
-  limitPerType?: number; // default 25 — rows fetched per query, before the attendance/fee collapse below
+  limitPerType?: number; // default 25, rows fetched per query, before the attendance/fee collapse below
   namesById?: Map<string, string>; // leader_id -> name, for labeling an org-wide feed's uuid-attributed rows
-  includeLogins?: boolean; // device_sessions — admin-only in practice, see that table's own admin SELECT policy
+  includeLogins?: boolean; // device_sessions, admin-only in practice, see that table's own admin SELECT policy
 };
 
 export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts = {}): Promise<LeaderActivityItem[]> {
@@ -56,7 +56,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
     if (opts.to) r = r.lte(col, opts.to);
     return r;
   };
-  // Same, for a timestamptz column — the bare 'YYYY-MM-DD' bounds above
+  // Same, for a timestamptz column, the bare 'YYYY-MM-DD' bounds above
   // would compare as UTC midnight and drop everything later on the "to"
   // day, so bound by whole Amman-local days instead (UTC+3, no DST).
   const tsScope = (q: any, col: string) => {
@@ -68,7 +68,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
 
   const queries: Promise<any>[] = [];
 
-  // Attendance-taking — one row per member per date, collapsed below to
+  // Attendance-taking, one row per member per date, collapsed below to
   // one activity per (group, date, who saved it).
   queries.push(
     dateScope(scopeUuid(db.from('attendance').select('group_key, date, updated_by, updated_at'), 'updated_by').order('updated_at', { ascending: false }).limit(limit * 6), 'date')
@@ -79,7 +79,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
     tsScope(scopeUuid(db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, created_by, created_at'), 'created_by').order('created_at', { ascending: false }).limit(limit), 'created_at')
       .then((r: any) => ({ kind: 'finance' as const, r }))
   );
-  // Fee payments recorded — collapsed below to one activity per (group, period, who saved it).
+  // Fee payments recorded, collapsed below to one activity per (group, period, who saved it).
   queries.push(
     scopeUuid(db.from('fee_payments').select('group_key, period, updated_by, updated_at'), 'updated_by').order('updated_at', { ascending: false }).limit(limit * 6)
       .then((r: any) => ({ kind: 'fee' as const, r }))
@@ -89,7 +89,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
     tsScope(scopeUuid(db.from('members').select('group_key, full_name, created_by, created_at'), 'created_by').order('created_at', { ascending: false }).limit(limit), 'created_at')
       .then((r: any) => ({ kind: 'roster' as const, r }))
   );
-  // Curriculum planned — created_by/updated_by are plain text names on
+  // Curriculum planned, created_by/updated_by are plain text names on
   // this one table (not uuids), so a single-leader scope matches by
   // name instead; skipped entirely for a single-leader request that
   // didn't supply leaderName rather than silently matching everyone.
@@ -103,12 +103,12 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
     tsScope(scopeUuid(db.from('cash_box_log').select('group_key, kind, amount, expected_balance, created_by, created_at'), 'created_by').order('created_at', { ascending: false }).limit(limit), 'created_at')
       .then((r: any) => ({ kind: 'cashbox' as const, r }))
   );
-  // Bank balances recorded — admin-only table, so a leader just gets none.
+  // Bank balances recorded, admin-only table, so a leader just gets none.
   queries.push(
     tsScope(scopeUuid(db.from('finance_reconciliations').select('as_of_date, statement_balance, created_by, created_at'), 'created_by').order('created_at', { ascending: false }).limit(limit), 'created_at')
       .then((r: any) => ({ kind: 'bank' as const, r }))
   );
-  // Sign-ins — org-wide only with an admin session (device_sessions'
+  // Sign-ins, org-wide only with an admin session (device_sessions'
   // own RLS still applies; a non-admin caller just gets its own rows).
   if (opts.includeLogins) {
     let lq = db.from('device_sessions').select('user_id, device_label, created_at').order('created_at', { ascending: false }).limit(limit * 4);
@@ -127,11 +127,11 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
         const key = `${row.group_key}|${row.date}|${row.updated_by}`;
         if (seen.has(key)) return;
         seen.add(key);
-        items.push({ type: 'attendance', date: row.updated_at || row.date, leaderId: row.updated_by, leaderName: nameFor(row.updated_by), text: `Took attendance for ${groupLabel(row.group_key)} — ${row.date}` });
+        items.push({ type: 'attendance', date: row.updated_at || row.date, leaderId: row.updated_by, leaderName: nameFor(row.updated_by), text: `Took attendance for ${groupLabel(row.group_key)}, ${row.date}` });
       });
     } else if (kind === 'finance') {
       r.data.forEach((row: any) => {
-        items.push({ type: 'finance', date: row.created_at || row.entry_date, leaderId: row.created_by, leaderName: nameFor(row.created_by), text: `Logged ${row.entry_type === 'income' ? 'income' : 'an expense'} for ${groupLabel(row.group_key)} — ${row.category || 'Uncategorized'} (${Number(row.amount).toFixed(2)}), dated ${row.entry_date}` });
+        items.push({ type: 'finance', date: row.created_at || row.entry_date, leaderId: row.created_by, leaderName: nameFor(row.created_by), text: `Logged ${row.entry_type === 'income' ? 'income' : 'an expense'} for ${groupLabel(row.group_key)}, ${row.category || 'Uncategorized'} (${Number(row.amount).toFixed(2)}), dated ${row.entry_date}` });
       });
     } else if (kind === 'fee') {
       const seen = new Set<string>();
@@ -139,7 +139,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
         const key = `${row.group_key}|${row.period}|${row.updated_by}`;
         if (seen.has(key)) return;
         seen.add(key);
-        items.push({ type: 'fee', date: row.updated_at, leaderId: row.updated_by, leaderName: nameFor(row.updated_by), text: `Updated fee payments for ${groupLabel(row.group_key)} — ${row.period}` });
+        items.push({ type: 'fee', date: row.updated_at, leaderId: row.updated_by, leaderName: nameFor(row.updated_by), text: `Updated fee payments for ${groupLabel(row.group_key)}, ${row.period}` });
       });
     } else if (kind === 'roster') {
       r.data.forEach((row: any) => {
@@ -148,7 +148,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
     } else if (kind === 'curriculum') {
       r.data.forEach((row: any) => {
         const who = row.updated_by || row.created_by || null;
-        items.push({ type: 'curriculum', date: row.updated_at || row.date, leaderId: null, leaderName: who || 'Unknown', text: `Planned curriculum for ${groupLabel(row.group_key)} — ${row.date}${row.theme ? ` (${row.theme})` : ''}` });
+        items.push({ type: 'curriculum', date: row.updated_at || row.date, leaderId: null, leaderName: who || 'Unknown', text: `Planned curriculum for ${groupLabel(row.group_key)}, ${row.date}${row.theme ? ` (${row.theme})` : ''}` });
       });
     } else if (kind === 'cashbox') {
       r.data.forEach((row: any) => {
@@ -202,11 +202,11 @@ export function activityLocalParts(value: string): { day: string; time: string }
 // UTC) for every type; only a legacy row missing one falls back to a
 // plain 'YYYY-MM-DD' (no time-of-day exists to show). Both callers display it through here so
 // it always reads in Amman local time instead of the raw UTC clock
-// value the string carries — that was the actual bug: the old callers
+// value the string carries, that was the actual bug: the old callers
 // just sliced the ISO string as text, showing UTC hours unconverted.
 export function formatActivityWhen(value: string): string {
   if (!value) return '';
-  if (!value.includes('T')) return value; // plain date column — nothing to convert
+  if (!value.includes('T')) return value; // plain date column, nothing to convert
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value.replace('T', ' ').slice(0, 16);
   const parts = new Intl.DateTimeFormat('en-CA', {

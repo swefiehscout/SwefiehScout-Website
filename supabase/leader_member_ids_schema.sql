@@ -1,4 +1,4 @@
--- Swefieh Scout — leaders get a membership ID too, same
+-- Swefieh Scout, leaders get a membership ID too, same
 -- "TGOS&G-####" shape member_ids_schema.sql gives every scout, just
 -- its own independent numbering pool with an "-L-" segment
 -- ("TGOS&G-L-0001") so a leader's code can never collide with, or be
@@ -6,14 +6,14 @@
 -- leaderRosterRows() in admin.astro's Roster tab and downloadRosterReport()
 -- there, and downloadLeaderRosterReport() in leaders/app.astro).
 -- Assigned when a signup is actually approved (role becomes 'leader' or
--- 'admin'), not at signup itself — every new profiles row starts
+-- 'admin'), not at signup itself, every new profiles row starts
 -- 'pending' (handle_new_user(), schema.sql), so there's nothing to
 -- number yet at that point. Run this AFTER schema.sql and
 -- member_ids_schema.sql. Safe to re-run.
 --
 -- Numbers come from a real Postgres sequence, same reasoning as
 -- member_ids_schema.sql's member_code_seq (see that file's header for
--- the incident that prompted it) — nextval() can't hand out the same
+-- the incident that prompted it), nextval() can't hand out the same
 -- value twice no matter how many approvals land at once, unlike the
 -- previous scan-for-smallest-free-number approach. Trade-off: a
 -- removed leader's old number isn't recycled, codes only climb.
@@ -23,7 +23,7 @@ alter table profiles add column if not exists member_code text;
 create sequence if not exists leader_code_seq;
 
 -- Prime the sequence so the next value continues after the highest
--- leader number already assigned — only has any effect the first time
+-- leader number already assigned, only has any effect the first time
 -- this runs; harmless to re-run afterward (never moves it backward).
 select setval(
   'leader_code_seq',
@@ -34,7 +34,7 @@ select setval(
 );
 
 -- security definer: nextval() needs USAGE/UPDATE on the sequence, which
--- a leader's own (RLS-scoped) role was never granted — same reasoning
+-- a leader's own (RLS-scoped) role was never granted, same reasoning
 -- as is_admin()/has_group_access() in schema.sql, just for a sequence
 -- instead of bypassing RLS.
 create or replace function next_leader_code()

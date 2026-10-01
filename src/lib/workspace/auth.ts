@@ -1,5 +1,5 @@
 // Shared auth/session helpers for the Leaders Workspace. Reuses the single
-// Supabase client from curriculum/supabase.ts — creating a second
+// Supabase client from curriculum/supabase.ts, creating a second
 // `createClient()` call anywhere else in the app would spin up a second
 // GoTrueClient and cause auth state to fall out of sync between them.
 import { supabase, supabaseConfigured } from '../curriculum/supabase';
@@ -23,7 +23,7 @@ export async function getSession() {
 
 // ------------------------------------------------------------------
 // Hard session-lifetime cap. Supabase's own refresh token would happily
-// keep a leader signed in for weeks on a shared/left-open device — this
+// keep a leader signed in for weeks on a shared/left-open device, this
 // forces a real sign-out and back-to-login screen after a fixed window
 // since they last authenticated, independent of that refresh token.
 // Same idea as the old shared-password gate's PORTAL_TTL_HOURS, just
@@ -49,7 +49,7 @@ export function isSessionExpired(): boolean {
     return false;
   }
 }
-// How long until the hard cap kicks in — used to schedule a proactive
+// How long until the hard cap kicks in, used to schedule a proactive
 // sign-out so a tab left open gets kicked at the 3-hour mark instead of
 // only being caught on the next reload.
 export function msUntilSessionExpiry(): number {
@@ -87,7 +87,7 @@ export async function signUp(name: string, email: string, password: string) {
 
 // Signs out THIS device only. Used to default to Supabase's own
 // scope:'global' (signs out every device silently) before device
-// sessions existed to make that distinction meaningful — now that a
+// sessions existed to make that distinction meaningful, now that a
 // leader can see and manage their other devices individually, the plain
 // "Sign out" button should only ever mean "sign me out of here", same as
 // tapping it during a session-expiry or pending/denied redirect
@@ -99,7 +99,7 @@ export async function signOut() {
   await supabase.auth.signOut({ scope: 'local' });
 }
 
-// The explicit "sign out of every device" action — a real, immediate
+// The explicit "sign out of every device" action, a real, immediate
 // Supabase-side revocation of every session on this account.
 export async function signOutEverywhere() {
   if (!supabase) return;
@@ -109,7 +109,7 @@ export async function signOutEverywhere() {
 }
 
 // ------------------------------------------------------------------
-// Device sessions — see supabase/device_sessions_schema.sql for why this
+// Device sessions, see supabase/device_sessions_schema.sql for why this
 // exists instead of just using Supabase's own session list (there isn't
 // one exposed to the client). One row per device/browser this account
 // has signed into; this device's own row id lives in localStorage so it
@@ -133,7 +133,7 @@ function clearDeviceSessionId() {
   try { localStorage.removeItem(DEVICE_SESSION_ID_KEY); } catch { /* private mode etc. */ }
 }
 
-// A short, friendly "Chrome on Mac" style label — good enough to tell
+// A short, friendly "Chrome on Mac" style label, good enough to tell
 // devices apart in a list, not meant to fingerprint anyone.
 function detectDeviceLabel(): string {
   const ua = navigator.userAgent || '';
@@ -170,8 +170,8 @@ export async function registerDeviceSession(): Promise<void> {
       .is('revoked_at', null)
       .select('id')
       .maybeSingle();
-    if (!error && data) return; // still a live row — done
-    clearDeviceSessionId(); // revoked or gone — fall through and re-register
+    if (!error && data) return; // still a live row, done
+    clearDeviceSessionId(); // revoked or gone, fall through and re-register
   }
   const { data: userData } = await supabase.auth.getUser();
   const user = userData?.user;
@@ -184,13 +184,13 @@ export async function registerDeviceSession(): Promise<void> {
   if (!error && data) setDeviceSessionId(data.id);
 }
 
-// Explicitly scoped to the caller's own user_id, not just left to RLS —
+// Explicitly scoped to the caller's own user_id, not just left to RLS,
 // device_sessions' SELECT policy also grants admins read access to
 // EVERY row (device_sessions_select_admin, for Admin's own People >
 // Activity Log subtab, see that table's schema file), so without this
 // filter an admin calling this would get back every leader's device
 // sessions mixed into what's supposed to be "my own devices" here in
-// the Account menu — sign-out policy is still correctly own-row-only,
+// the Account menu, sign-out policy is still correctly own-row-only,
 // so those foreign rows would just silently fail to revoke on top of
 // showing up in the first place. Never rely on RLS alone to scope a
 // "give me my own stuff" query when the table might also grant broader
@@ -216,7 +216,7 @@ export function currentDeviceSessionId(): string | null {
 
 // Sign out one specific device from the list. Kicking THIS device signs
 // it out for real, immediately. Kicking another device just marks its
-// row revoked — that device notices on its own next background check,
+// row revoked, that device notices on its own next background check,
 // usually within about a minute, and signs itself out then.
 export async function signOutDevice(sessionId: string): Promise<void> {
   if (!supabase) return;
@@ -224,17 +224,17 @@ export async function signOutDevice(sessionId: string): Promise<void> {
   const { data: userData } = await supabase.auth.getUser();
   const user = userData?.user;
   if (!user) return;
-  // .eq('user_id', ...) here too — belt-and-suspenders alongside the
+  // .eq('user_id', ...) here too, belt-and-suspenders alongside the
   // update-own RLS policy, same reasoning as listMyDeviceSessions()
   // above. Logged (not just silently ignored) since a blocked update
-  // here means 0 rows changed and no error — the same failure mode
+  // here means 0 rows changed and no error, the same failure mode
   // that made this look broken in the first place.
   const { error } = await supabase.from('device_sessions').update({ revoked_at: new Date().toISOString() }).eq('id', sessionId).eq('user_id', user.id);
   if (error) console.error('signOutDevice failed', error);
   if (isThisDevice) await signOut();
 }
 
-// Every device but this one, revoked immediately and for real — this one
+// Every device but this one, revoked immediately and for real, this one
 // doesn't wait on the polling fallback, it calls Supabase's own
 // scope:'others' sign-out on top of marking the rows revoked.
 export async function signOutOtherDevices(): Promise<void> {
@@ -257,7 +257,7 @@ export async function signOutOtherDevices(): Promise<void> {
 export async function checkThisDeviceStillActive(): Promise<boolean> {
   if (!supabase) return true;
   const id = getDeviceSessionId();
-  if (!id) return true; // not registered yet — nothing to check
+  if (!id) return true; // not registered yet, nothing to check
   const { data, error } = await supabase.from('device_sessions').select('revoked_at').eq('id', id).maybeSingle();
   if (error) return true;
   if (!data || data.revoked_at) {
@@ -270,7 +270,7 @@ export async function checkThisDeviceStillActive(): Promise<boolean> {
   return true;
 }
 
-// "3 minutes ago" / "Yesterday" style — short enough for a menu row.
+// "3 minutes ago" / "Yesterday" style, short enough for a menu row.
 export function formatRelativeTime(iso: string): string {
   const then = new Date(iso).getTime();
   const diffMs = Date.now() - then;

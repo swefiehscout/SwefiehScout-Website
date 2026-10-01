@@ -15,7 +15,7 @@ Bilingual (English / Arabic) Astro site for the Orthodox scout group at the Pres
 ```
 src/
 ├── components/        # SiteHeader, SiteFooter, Icon (SVG icon set)
-├── content/pages/     # Markdown for prose pages — bilingual paired-row split applies
+├── content/pages/     # Markdown for prose pages, bilingual paired-row split applies
 ├── layouts/           # BaseLayout
 ├── lib/               # nav.ts builds the top nav from the content collection
 ├── pages/             # File-based routes
@@ -41,7 +41,7 @@ src/
 
 ## Conventions
 
-- All grids of cards/tiles use **explicit `grid-template-columns`** per item count (no `auto-fit`) so layouts are symmetric at every breakpoint — no orphan cards.
+- All grids of cards/tiles use **explicit `grid-template-columns`** per item count (no `auto-fit`) so layouts are symmetric at every breakpoint, no orphan cards.
 - Markdown pages with both English and Arabic content are paired automatically: each `<h2>` boundary starts a new section, and matching English/Arabic sections render as paired rows on desktop, stacked on phone.
 - Pages backed by a custom `.astro` file in `src/pages/` set `custom: true` in their markdown frontmatter so the catch-all route skips them.
 - Form submissions go to [submit-form.com](https://submit-form.com) endpoints (one per form).

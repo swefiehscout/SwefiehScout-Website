@@ -1,11 +1,11 @@
--- Swefieh Scout — Music's Inventory tab: band instruments/equipment and
+-- Swefieh Scout, Music's Inventory tab: band instruments/equipment and
 -- their maintenance history. Run this AFTER schema.sql (references
 -- has_group_access(), members, finance_entries, and group_settings
 -- defined there). Safe to re-run.
 --
 -- Inventory only shows up in the Leaders Workspace for the Music group
 -- (see MUSIC_GROUP_KEY in src/lib/curriculum/constants.ts and
--- NON_TROOP_TAB_VISIBILITY in app.astro) — these tables use the exact
+-- NON_TROOP_TAB_VISIBILITY in app.astro), these tables use the exact
 -- same group_key + has_group_access() scoping as every other table
 -- anyway, so nothing here is actually Music-specific at the database
 -- level.
@@ -13,13 +13,13 @@
 -- ============================================================
 -- group_settings: a 3rd editable category list, alongside the existing
 -- expense/income ones, for Inventory's own item categories (Bagpipes,
--- Drums, Uniforms, ...). Managed the same way — add/remove chips — from
+-- Drums, Uniforms, ...). Managed the same way, add/remove chips, from
 -- Inventory's own Categories subtab.
 -- ============================================================
 alter table group_settings add column if not exists inventory_categories text[] not null default '{}';
 
 -- ============================================================
--- inventory_items — one row per instrument or piece of equipment.
+-- inventory_items, one row per instrument or piece of equipment.
 -- ============================================================
 create table if not exists inventory_items (
   id uuid primary key default gen_random_uuid(),
@@ -45,10 +45,10 @@ create policy "group access" on inventory_items
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
 -- ============================================================
--- inventory_maintenance — one row per maintenance/repair event logged
+-- inventory_maintenance, one row per maintenance/repair event logged
 -- against an item. An item's "Last Maintenance" date (shown on the
 -- Items subtab) is just the max performed_on across these rows for
--- that item, computed client-side — not stored, so it can never drift.
+-- that item, computed client-side, not stored, so it can never drift.
 -- ============================================================
 create table if not exists inventory_maintenance (
   id uuid primary key default gen_random_uuid(),
@@ -71,7 +71,7 @@ create policy "group access" on inventory_maintenance
 
 -- ============================================================
 -- finance_entries: a maintenance log entry's cost (if any) posts here
--- automatically as an expense — same idea as syncFeeToFinance() on the
+-- automatically as an expense, same idea as syncFeeToFinance() on the
 -- Fees tab. on delete cascade means deleting the maintenance record
 -- also removes the finance entry it posted, with no extra sync code
 -- needed on that path.

@@ -1,20 +1,20 @@
--- Swefieh Scout — Music's Event Calendar tab: wedding/event bookings,
+-- Swefieh Scout, Music's Event Calendar tab: wedding/event bookings,
 -- who's playing, and the payout math once a booking is done. Run this
 -- AFTER schema.sql and inventory_schema.sql (references
 -- has_group_access(), members, finance_entries, and group_settings).
 -- Safe to re-run.
 --
--- Same group_key + has_group_access() scoping as every other table —
+-- Same group_key + has_group_access() scoping as every other table,
 -- Event Calendar only actually shows up for Music in the UI (see
 -- MUSIC_GROUP_KEY / MUSIC_ONLY_TABS in app.astro), nothing here enforces
 -- that at the database level.
 
 -- ============================================================
 -- group_settings: 2 more editable lists, same idea as Inventory's own
--- inventory_categories — both managed from Event Calendar's own
+-- inventory_categories, both managed from Event Calendar's own
 -- Settings subtab.
 --   event_type_categories: what a booking can be (Wedding, Engagement,
---     ...) — also doubles as the Finance income category it posts
+--     ...), also doubles as the Finance income category it posts
 --     under, so there's no separate mapping table.
 --   event_cost_categories: categories for the one-off "extra costs"
 --     (transportation, water, ...) logged against a booking.
@@ -27,7 +27,7 @@ alter table group_settings add column if not exists event_cost_categories text[]
 alter table group_settings add column if not exists event_location_categories text[] not null default '{}';
 
 -- ============================================================
--- event_bookings — one row per wedding/event booking. Financial
+-- event_bookings, one row per wedding/event booking. Financial
 -- completion fields (amount_received onward) start null and are filled
 -- in once the event has happened; see syncEventToFinance() in app.astro
 -- for what posts to finance_entries once they are.
@@ -43,12 +43,12 @@ create table if not exists event_bookings (
   event_date date not null,
   event_time time,
   location text,
-  -- Who's playing: [{member_id, took_car}, ...] — a plain jsonb array on
+  -- Who's playing: [{member_id, took_car}, ...], a plain jsonb array on
   -- the row itself, same convention as curriculum_meetings.activities,
   -- rather than a separate join table for something this small.
   attendees jsonb not null default '[]',
   notes text,
-  -- Financial completion — all null until someone fills them in.
+  -- Financial completion, all null until someone fills them in.
   amount_received numeric(10, 2),
   pay_rate_per_member numeric(10, 2),
   transport_rate_per_member numeric(10, 2),
@@ -67,7 +67,7 @@ create policy "group access" on event_bookings
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
 -- ============================================================
--- event_costs — one-off extra costs logged against a booking
+-- event_costs, one-off extra costs logged against a booking
 -- (transportation, water, ...), each posting its own Finance expense
 -- (see finance_entries.event_cost_id below).
 -- ============================================================
@@ -91,7 +91,7 @@ create policy "group access" on event_costs
 
 -- ============================================================
 -- finance_entries: an event's completion can post up to 3 entries
--- (income, band payouts, transport) plus one per event_costs row — all
+-- (income, band payouts, transport) plus one per event_costs row, all
 -- tagged back to event_id so deleting the booking cascades every entry
 -- it ever posted. event_entry_kind tells the 3 completion-posted rows
 -- apart (there's no natural 1:1 key for those the way fee_payment_id /

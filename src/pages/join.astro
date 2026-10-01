@@ -1,9 +1,9 @@
 ---
-// Public member sign-up form — no login required. A parent/new member
+// Public member sign-up form, no login required. A parent/new member
 // picks a group and fills in the same fields the leaders' Roster form
 // uses; it lands in `join_requests` for a leader/admin of that group to
 // approve (which creates the real roster member) or reject. English
-// only, by request — unlike the rest of the public site, this form
+// only, by request, unlike the rest of the public site, this form
 // doesn't pair English/Arabic.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { JOINABLE_GROUPS, type GroupKey } from '../lib/curriculum/constants';
@@ -163,7 +163,7 @@ const AGE_RANGES: Partial<Record<GroupKey, string>> = {
 
     let selectedGroup: string | null = null;
     function el(sel: string): any { return document.querySelector(sel); }
-    // "joy blah" / "JOY BLAH" → "Joy Blah" — applied on blur so parents
+    // "joy blah" / "JOY BLAH" → "Joy Blah", applied on blur so parents
     // don't have to think about capitalization while typing.
     function titleCase(s: string) {
       return s.trim().replace(/\s+/g, ' ').toLowerCase().replace(/(^|[\s'-])\p{L}/gu, (c) => c.toUpperCase());
@@ -216,7 +216,7 @@ const AGE_RANGES: Partial<Record<GroupKey, string>> = {
       e.hidden = false;
     }
 
-    // English-only — this form dropped its Arabic labels already; this
+    // English-only, this form dropped its Arabic labels already; this
     // keeps what people actually type in step with that too, instead of
     // just the labels around it.
     function bindEnglishOnlyInputs() {

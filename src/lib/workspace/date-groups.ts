@@ -11,7 +11,7 @@
 // Weeks start on Sunday (Jordan's work week) and are clipped to their
 // month, so a week spanning two months shows under each month with
 // just that month's days. Only the newest branch starts open. Rows are
-// rendered in the order given — pass them newest first.
+// rendered in the order given, pass them newest first.
 
 export type DateGroupsOpts<T> = {
   rows: T[];
@@ -59,7 +59,7 @@ export function renderDateGroups<T>(opts: DateGroupsOpts<T>): string {
     const raw = opts.day(r) || '';
     const day = /^\d{4}-\d{2}-\d{2}/.test(raw) ? raw.slice(0, 10) : '';
     if (!day) {
-      // No usable date — still listed, under its own catch-all group.
+      // No usable date, still listed, under its own catch-all group.
       const none = child(root, 'none', () => 'No date');
       none.rows.push(r);
       return;
@@ -103,7 +103,7 @@ export function ammanDay(value: string | null | undefined): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Amman', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
 }
 
-// "30 Sep 2026, 14:32" in Amman time — for "who did this, and when"
+// "30 Sep 2026, 14:32" in Amman time, for "who did this, and when"
 // cells. '' for a missing/invalid value.
 export function formatStamp(value: string | null | undefined): string {
   if (!value) return '';
@@ -116,5 +116,5 @@ export function formatStamp(value: string | null | undefined): string {
 // `escape` is the page's own HTML escaper.
 export function whoWhen(name: string | null | undefined, at: string | null | undefined, escape: (s: string) => string): string {
   const stamp = formatStamp(at);
-  return `${escape(name || '—')}${stamp ? `<span class="ws-stamp">${stamp}</span>` : ''}`;
+  return `${escape(name || '-')}${stamp ? `<span class="ws-stamp">${stamp}</span>` : ''}`;
 }

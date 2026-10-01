@@ -1,13 +1,13 @@
--- Swefieh Scout — Support Leaders (an approved leader with no group at
+-- Swefieh Scout, Support Leaders (an approved leader with no group at
 -- all, see support_leader_overview_schema.sql) get view-only Shared
 -- Calendar. shared_calendar_schema.sql's own is_approved_leader() let
 -- ANY approved leader (support leaders included) add an entry or
--- request a change, regardless of group — this narrows both to a
+-- request a change, regardless of group, this narrows both to a
 -- leader who actually leads something, or an admin. SELECT is
--- untouched (still is_approved_leader()) — everyone, support leaders
+-- untouched (still is_approved_leader()), everyone, support leaders
 -- included, can still see every entry; "creator or admin can edit/
 -- delete" (shared_calendar_schema.sql) is untouched too, and needs no
--- change — a support leader was never a row's creator to begin with,
+-- change, a support leader was never a row's creator to begin with,
 -- now that they can't create rows at all. Run this AFTER
 -- shared_calendar_schema.sql. Safe to re-run.
 

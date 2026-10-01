@@ -1,5 +1,5 @@
--- Swefieh Scout — this round's changes: a Vendors directory (every
--- group's own private list, plus an admin-curated Shared Vendors list —
+-- Swefieh Scout, this round's changes: a Vendors directory (every
+-- group's own private list, plus an admin-curated Shared Vendors list,
 -- same Documents/Shared Library shape as the existing Library tab),
 -- optional Email/National ID on members and join_requests, and a
 -- payment method on event bookings. Run this AFTER schema.sql,
@@ -7,7 +7,7 @@
 -- to re-run.
 
 -- ============================================================
--- vendors — one group's own private directory of who they buy from or
+-- vendors, one group's own private directory of who they buy from or
 -- hire (repair shops, supply stores, transport, venues, ...). Every
 -- group gets a Vendors tab for this, same has_group_access() scoping
 -- as members/finance_entries/inventory_items.
@@ -33,7 +33,7 @@ create policy "group access" on vendors
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
 -- ============================================================
--- shared_vendors / shared_vendor_groups — the Vendors tab's own
+-- shared_vendors / shared_vendor_groups, the Vendors tab's own
 -- "Shared Vendors" subtab: an admin adds one once and ticks which
 -- group(s) it should show up for, read-only to leaders there, managed
 -- from the Admin console's own Vendors tab. Exact same shape as
@@ -80,18 +80,18 @@ create policy "group access read" on shared_vendors
   );
 
 -- inventory_maintenance: an optional link to who (from that group's own
--- Vendors list) did the work — performed_by stays the required display
+-- Vendors list) did the work, performed_by stays the required display
 -- name (auto-filled from the vendor when one's picked, whether it's the
 -- group's own or a shared one, but still editable/freeform for a
 -- one-off person not worth adding as a vendor). Only links to the
--- group's own vendors table — a shared vendor picked from the dropdown
+-- group's own vendors table, a shared vendor picked from the dropdown
 -- still autofills the name, just without a row here to point at.
 alter table inventory_maintenance add column if not exists vendor_id uuid references vendors(id) on delete set null;
 
 -- ============================================================
 -- members / join_requests: 2 more optional fields, same "collapsed
 -- until you press +Add" treatment as allergies/2nd emergency contact.
--- national_id covers either the member's own ID or a parent's — one
+-- national_id covers either the member's own ID or a parent's, one
 -- field, whichever applies.
 -- ============================================================
 alter table members add column if not exists email text;

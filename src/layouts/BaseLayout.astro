@@ -11,7 +11,7 @@ interface Props {
   // When true, drop the prose <article> wrapper and let pages render their
   // own layout (used by the home landing page so hero/cards are full-width).
   bare?: boolean;
-  // When true, widen the main container — use with bare landing pages.
+  // When true, widen the main container, use with bare landing pages.
   wide?: boolean;
 }
 
@@ -68,7 +68,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
         document.addEventListener('astro:page-load', update);
       })();
 
-      // Stat counter — animates from 0 to the displayed number when the
+      // Stat counter, animates from 0 to the displayed number when the
       // .stat-num element first enters the viewport, then pulses briefly
       // when finished. Skips animation if prefers-reduced-motion is set.
       (function () {
@@ -116,7 +116,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
       // Astro's view-transition router from intercepting them) so that
       // FormSubmit's CAPTCHA challenge, when triggered, is visible and
       // solvable by a real visitor. FormSubmit redirects to _next itself
-      // once the message is sent — we only disable the button here so
+      // once the message is sent, we only disable the button here so
       // it's clear the submission is in flight.
       (function () {
         function setup() {
@@ -137,7 +137,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
         document.addEventListener('astro:page-load', setup);
       })();
 
-      // Marquee shuffle — on every page-load, reshuffle each
+      // Marquee shuffle, on every page-load, reshuffle each
       // .band-marquee-track's slides and pick a random starting offset
       // for the looping animation so refresh / re-navigation never
       // shows the same opening sequence twice. The track keeps its
@@ -183,7 +183,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
         document.addEventListener('astro:page-load', bind);
       })();
 
-      // Mouse-tracking card spotlight — sets --x and --y custom props
+      // Mouse-tracking card spotlight, sets --x and --y custom props
       // on each .card so its ::after radial highlight follows the cursor.
       (function () {
         function bind() {
@@ -209,7 +209,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
         // split content into sections at every <h2> boundary, label each
         // section by language (from its first element), then pair the i-th
         // English section with the i-th Arabic section. Each pair becomes
-        // its own .bp-row — a 2-column grid — so corresponding section
+        // its own .bp-row, a 2-column grid, so corresponding section
         // headings always sit across from each other regardless of how
         // much content each section carries. Pre-<h2> content forms an
         // implicit first section.

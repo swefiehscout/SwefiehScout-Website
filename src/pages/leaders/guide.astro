@@ -1,7 +1,7 @@
 ---
 // Step-by-step guide for leaders and admins using the Leaders Workspace.
 // Linked from a "Guide" button in app.astro's header, next to the account
-// avatar. Kept short and plain on purpose — leaders are not technical, so
+// avatar. Kept short and plain on purpose, leaders are not technical, so
 // each section is one clarifying sentence plus a couple of short bullets,
 // no jargon, no raw URLs/paths, no cross-references to chase.
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -35,8 +35,8 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       "Lead more than one? Tap a group's name at the top to switch.",
       "The bar under the tabs always shows which group you're viewing.",
       "The 5 troops (Baraem, Ashbal & Zahrat, Mubtadi, Mutaqaddim, Jawalah) get the full set of tabs below.",
-      "Music, Social Media, and General aren't scout troops, so each sees its own smaller, tailored set of tabs instead — no Dashboard, Attendance, Fees, or Curriculum for any of them.",
-      "Leaders is a 4th one like that, admin-only — see its own section below.",
+      "Music, Social Media, and General aren't scout troops, so each sees its own smaller, tailored set of tabs instead: no Dashboard, Attendance, Fees, or Curriculum for any of them.",
+      "Leaders is a 4th one like that (admin-only), see its own section below.",
     ],
   },
   {
@@ -50,12 +50,12 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'shared-calendar', label: 'Shared Calendar', icon: 'sun',
-    intro: 'One calendar for the whole organization — every group, and Admin, see the exact same thing.',
+    intro: 'One calendar for the whole organization: every group and Admin see the exact same thing.',
     lines: [
       'Anyone approved can add to it: a leaders meeting, a deadline, a reminder, anything at all.',
-      "Music's own Event Calendar bookings show up on it too, as a view-only marker — edit those from Music's own tab instead.",
+      "Music's own Event Calendar bookings show up on it too, as a view-only marker. Edit those from Music's own tab instead.",
       'Switch between Day, Week, Month, and Year views from the toolbar.',
-      "You can only edit or delete an entry you created (or if you're an admin) — on anyone else's, Request a change instead and the creator or an admin will see it.",
+      "You can only edit or delete an entry you created (or if you're an admin). On anyone else's, Request a change instead and the creator or an admin will see it.",
     ],
   },
   {
@@ -66,7 +66,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       "In Music, check people off from a troop's roster instead of retyping them, most band members are already scouts somewhere.",
       'Search to find someone quickly.',
       'Edit to update their details, or Archive when they leave.',
-      "Aged up into the next troop (Baraem → Ashbal & Zahrat → Mubtadi → Mutaqaddim → Jawalah)? Move sends them straight to that troop's own roster instead of re-adding them from scratch — their attendance/fee history up to today stays with the troop they were actually in at the time.",
+      "Aged up into the next troop (Baraem → Ashbal & Zahrat → Mubtadi → Mutaqaddim → Jawalah)? Move sends them straight to that troop's own roster instead of re-adding them from scratch. Their attendance/fee history up to today stays with the troop they were actually in at the time.",
     ],
   },
   {
@@ -109,7 +109,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     lines: [
       'Tap a date to plan that meeting.',
       'Add a theme and pick or type activities.',
-      "Once the date passes, check off each activity you actually got to, and add a note on how it actually went — the month view shows a quick done-count for every past meeting.",
+      "Once the date passes, check off each activity you actually got to, and add a note on how it actually went. The month view shows a quick done-count for every past meeting.",
       "Download a PDF of the plan from the Reports tab anytime.",
     ],
   },
@@ -210,10 +210,10 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'leaders', label: 'Leaders', icon: 'star', adminOnly: true,
-    intro: "A way to assess every leader's own attendance, admin-only — nobody else's profile can ever be set to see this group.",
+    intro: "A way to assess every leader's own attendance. Admin-only: nobody else's profile can ever be set to see this group.",
     lines: [
-      "Roster: every approved leader across every group, read-only — roles and group access are still only ever changed from Admin → People.",
-      'Attendance: log who showed up, same as a troop\'s own Attendance tab, but pick the "Meeting" first — a general Leaders Meeting, or one of the 5 troops\' own meetings (was that troop\'s leader there?).',
+      "Roster: every approved leader across every group, read-only. Roles and group access are still only ever changed from Admin → People.",
+      'Attendance: log who showed up, same as a troop\'s own Attendance tab, but pick the "Meeting" first: a general Leaders Meeting, or one of the 5 troops\' own meetings (was that troop\'s leader there?).',
       "Dashboard: each leader's attendance rate against every meeting logged, sorted worst-first so anyone who needs a nudge is easy to spot.",
       'Archive: leaders who stepped away, restore them any time.',
       "Leader Profile: one leader's details, their KPIs, and a feed of what they've done in the workspace.",
@@ -348,7 +348,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   .guide-list li { line-height: 1.5; font-size: 0.92rem; }
 
   /* ----- Getting Started's list only: a small numbered stepper instead
-     of plain bullets, since it's the one genuinely sequential section —
+     of plain bullets, since it's the one genuinely sequential section,
      everything else is a feature summary, not a process. ----- */
   .guide-list--steps { list-style: none; padding-left: 0; counter-reset: step; gap: 0; }
   .guide-list--steps li {

@@ -1,5 +1,5 @@
 // Adds a live "#" column to every `.ws-table` in the Leaders Workspace
-// and Admin console — showing each row's current position (1, 2, 3, ...)
+// and Admin console, showing each row's current position (1, 2, 3, ...)
 // rather than anything stored. Every table in both pages already
 // re-renders by replacing its whole <tbody>, so one MutationObserver per
 // table catches every re-render (sorted, filtered, or after an add/
@@ -54,7 +54,7 @@ export function initRowNumbering(root: ParentNode = document): void {
 
 // Roster / Archive on phones: rows collapse to just "# Name" (see the
 // `.ws-table--collapsible` rules in global.css, only in effect at
-// narrow widths) — tapping one reveals the rest of that member's
+// narrow widths), tapping one reveals the rest of that member's
 // fields. One delegated listener per table, on the stable <table>
 // element itself, so it keeps working through every re-render of the
 // <tbody> without needing to be re-bound per row.

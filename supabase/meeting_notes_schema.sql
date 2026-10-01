@@ -1,6 +1,6 @@
--- Swefieh Scout — General's own Meeting Notes tab: what the board
+-- Swefieh Scout, General's own Meeting Notes tab: what the board
 -- actually discussed and decided at a meeting (date, title, free-text
--- notes) — separate from Shared Calendar, which only schedules one.
+-- notes), separate from Shared Calendar, which only schedules one.
 -- Not General-specific at the database level (same group_key +
 -- has_group_access() scoping as everything else), same as
 -- inventory_schema.sql's own note on that. Run this AFTER schema.sql.

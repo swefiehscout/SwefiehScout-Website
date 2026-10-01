@@ -1,5 +1,5 @@
 ---
-// Leaders Workspace — sign in / create account. Replaces the old shared-
+// Leaders Workspace, sign in / create account. Replaces the old shared-
 // password gate now that each leader has a real Supabase Auth account.
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
@@ -86,7 +86,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     let mode = 'signin';
 
     function el(sel: string): any { return document.querySelector(sel); }
-    // "joy blah" / "JOY BLAH" → "Joy Blah" — applied on blur so leaders
+    // "joy blah" / "JOY BLAH" → "Joy Blah", applied on blur so leaders
     // don't have to think about capitalization while typing.
     function titleCase(s: string) {
       return s.trim().replace(/\s+/g, ' ').toLowerCase().replace(/(^|[\s'-])\p{L}/gu, (c) => c.toUpperCase());
@@ -119,7 +119,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       clearMessages();
     }
     // Shared by the sign-in/sign-up password field and the recovery
-    // "new password" field — toggles that one input between hidden and
+    // "new password" field, toggles that one input between hidden and
     // plain text.
     function bindPasswordToggle(btn: HTMLElement) {
       const input = btn.previousElementSibling as HTMLInputElement;
@@ -130,7 +130,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
       });
     }
-    // The email itself can take a minute or two to arrive — the Resend
+    // The email itself can take a minute or two to arrive, the Resend
     // button stays disabled with a live countdown for 3 minutes after
     // each send, so nobody fires off a second (or third) email before the
     // first one had a real chance to show up.
@@ -159,7 +159,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     // Swaps the whole card between the sign-in/sign-up form and the
-    // "check your email" screen shown right after Create account — a
+    // "check your email" screen shown right after Create account, a
     // dedicated screen rather than just flipping back to the sign-in tab
     // with a small notice, so it's unmissable.
     function showVerifyView(email: string) {
@@ -280,7 +280,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         });
         // Clicking the emailed verification link lands back here with the
         // session Supabase just auto-established from it (type=signup in
-        // the hash) — sign that straight back out and show the sign-in
+        // the hash), sign that straight back out and show the sign-in
         // form instead of continuing into the app, so "verify, then sign
         // in" is an explicit, deliberate step rather than an implicit one.
         const isSignupLanding = window.location.hash.includes('type=signup');
@@ -294,7 +294,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             showNotice('Email confirmed, sign in below to continue.');
             return;
           }
-          // Already signed in and this isn't a password-recovery landing —
+          // Already signed in and this isn't a password-recovery landing,
           // skip straight to the workspace, unless our own 3-hour cap has
           // already passed (Supabase's refresh token would otherwise keep
           // this session alive for much longer than that).

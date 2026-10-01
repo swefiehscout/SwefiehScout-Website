@@ -1,7 +1,7 @@
 // Reads /public/images/photos/more/ at build time and returns clean
 // public-URL paths for every image inside. Drop new photos into that
 // folder and the home / Join Us / About Us marquees pick them up
-// automatically — no code changes needed.
+// automatically, no code changes needed.
 
 import { readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';

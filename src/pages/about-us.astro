@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { aboutUsMarqueePhotos } from '../lib/scenic-photos';
 
-// Render the sub-page card grid for About Us's children — same logic
+// Render the sub-page card grid for About Us's children, same logic
 // the catch-all uses for parent pages with children, but inlined here
 // since this page is now custom.
 const allPages = await getCollection('pages');

@@ -1,5 +1,5 @@
 -- ============================================================
--- Cash boxes — each group keeps its own physical cash box, separate
+-- Cash boxes, each group keeps its own physical cash box, separate
 -- from the organization's one bank account (which is CliQ-driven and
 -- tracked on Admin > Finance > Bank by recording what the bank app
 -- shows, not transaction by transaction).
@@ -59,12 +59,12 @@ alter table cash_box_log add column if not exists updated_at timestamptz;
 alter table cash_box_log add column if not exists updated_by_name text;
 
 -- Bank checks (finance_reconciliations) no longer post adjustment
--- entries — they just record what the bank app showed, next to what the
+-- entries, they just record what the bank app showed, next to what the
 -- system expected. Who saved the bank opening balance is tracked too.
 alter table org_finance_settings add column if not exists updated_by_name text;
 
 -- ============================================================
--- finance_audit_log — every add, edit, and delete on the money tables,
+-- finance_audit_log, every add, edit, and delete on the money tables,
 -- written by database triggers (so nothing can skip it, whichever page
 -- or automatic sync made the change). Shown on Finance > Activity Log,
 -- per group in the Leaders Workspace and org-wide in Admin.

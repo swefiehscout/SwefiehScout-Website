@@ -1,21 +1,21 @@
--- Swefieh Scout — Support Leaders (an approved leader with no
+-- Swefieh Scout, Support Leaders (an approved leader with no
 -- troop/committee of their own, see "Support Leader" on the People tab
 -- and LEADERS_GROUP_KEY's own comment on the checkbox) used to land on
--- Shared Calendar with nothing else to look at — isTabHidden() in
+-- Shared Calendar with nothing else to look at, isTabHidden() in
 -- leaders/app.astro hid every other tab since none of them make sense
 -- without a group_key to scope to. This gives them 2 more, read-only,
 -- org-wide views: Overview (org-wide KPIs + a leader-per-group
--- directory — this doubles as their leader roster, there's no separate
+-- directory, this doubles as their leader roster, there's no separate
 -- Leaders Roster tab for them) and Next Meetings (soonest upcoming
 -- meeting per group). Run this AFTER schema.sql, curriculum's own table
--- (curriculum_meetings, already exists — see schema.sql) and
+-- (curriculum_meetings, already exists, see schema.sql) and
 -- shared_calendar_schema.sql (for is_approved_leader()). Safe to re-run.
 
 -- ============================================================
--- profiles — broaden SELECT so any approved leader (not just admins)
--- can read the org's leadership directory (name/role/groups — profiles
+-- profiles, broaden SELECT so any approved leader (not just admins)
+-- can read the org's leadership directory (name/role/groups, profiles
 -- has no other columns, no phone/email/DOB, nothing sensitive). Keeps
--- the original "own row" clause too — a still-pending signup has to
+-- the original "own row" clause too, a still-pending signup has to
 -- read their own row to see the "waiting for approval" screen, and
 -- is_approved_leader() alone wouldn't cover them. This is what
 -- Overview's per-group leader cards read (loadSupportOverview() in
@@ -29,9 +29,9 @@ create policy "read own or approved leader" on profiles
   for select using (auth.uid() = id or is_approved_leader());
 
 -- ============================================================
--- org_next_meetings() — one row per group, its soonest curriculum
+-- org_next_meetings(), one row per group, its soonest curriculum
 -- meeting dated today or later, date + theme only (no notes, materials,
--- or attachment_path — those stay behind curriculum_meetings' own
+-- or attachment_path, those stay behind curriculum_meetings' own
 -- has_group_access() policy). Same deliberate-bypass shape as
 -- shared_calendar_music_events() in shared_calendar_schema.sql: a
 -- SECURITY DEFINER function gated by is_approved_leader() in the WHERE

@@ -1,4 +1,4 @@
--- Swefieh Scout — Public Relations tab (General only): Sponsors,
+-- Swefieh Scout, Public Relations tab (General only): Sponsors,
 -- Community/Church Contacts, a PR-scoped document Library, and a
 -- Settings subtab for their 3 editable category lists (same "add a
 -- chip in Settings" pattern as Inventory/Event Calendar). Run this
@@ -13,8 +13,8 @@ alter table group_settings add column if not exists pr_contact_categories text[]
 alter table group_settings add column if not exists pr_library_categories text[] not null default '{}';
 
 -- ============================================================
--- sponsors — companies/individuals sponsoring (or being courted as a
--- potential sponsor of) the org. Pure contact/relationship tracking —
+-- sponsors, companies/individuals sponsoring (or being courted as a
+-- potential sponsor of) the org. Pure contact/relationship tracking,
 -- deliberately no amount/value field, nothing here touches Finance.
 -- ============================================================
 create table if not exists sponsors (
@@ -39,7 +39,7 @@ create policy "group access" on sponsors
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
 
 -- ============================================================
--- pr_contacts — community/church contacts (clergy, other
+-- pr_contacts, community/church contacts (clergy, other
 -- organizations, schools, media, government, ...) not tied to any one
 -- troop's own roster.
 -- ============================================================
@@ -66,7 +66,7 @@ create policy "group access" on pr_contacts
 
 -- ============================================================
 -- Public Relations Library reuses the existing `documents` table (the
--- same one every troop's own Library tab already writes to) — General
+-- same one every troop's own Library tab already writes to), General
 -- never had a Library tab before, so this is its first use of it. No
 -- schema change needed there: `documents.category` already exists,
 -- just newly exposed in this tab's own upload form (Press Release,

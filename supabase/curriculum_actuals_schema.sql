@@ -1,4 +1,4 @@
--- Swefieh Scout — Curriculum gets a "what actually happened" layer on
+-- Swefieh Scout, Curriculum gets a "what actually happened" layer on
 -- top of the plan: each activity already carries a `duration`; it now
 -- also carries a `done` flag (client-set, no migration needed since
 -- `activities` is jsonb), and each meeting gets a free-text

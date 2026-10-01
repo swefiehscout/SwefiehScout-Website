@@ -109,7 +109,7 @@ export function describeBoxLog(l: BoxLog): string {
   return `Counted ${amt}, system expected ${exp}, so the box was ${Math.abs(diff).toFixed(2)} ${diff < 0 ? 'short' : 'over'}`;
 }
 
-// ---------- PDF report tables (plain ASCII — jsPDF's fonts can't draw
+// ---------- PDF report tables (plain ASCII, jsPDF's fonts can't draw
 // "−" or "→") ---------------------------------------------------------
 
 function pdfStamp(at: string | null | undefined): string {
@@ -126,7 +126,7 @@ export function pdfWhoWhen(name: string | null | undefined, at: string | null | 
 
 const sgn = (v: number) => `${v < 0 ? '-' : '+'}${Math.abs(v).toFixed(2)}`;
 
-// "How we got to X" — rows for a 2-column [label, amount] table.
+// "How we got to X", rows for a 2-column [label, amount] table.
 export function boxBreakdownRows(box: BoxSummary): string[][] {
   if (!box.opening) return [['Cash box not set up yet', '-']];
   return [
@@ -169,7 +169,7 @@ export const BANK_DIFF_LABEL = 'Unexplained bank difference';
 export const BOX_DIFF_HELP = 'When a group counted its cash box, the difference between the real cash and what the ledger said should be there: money spent or received without a ledger entry.';
 export const BANK_DIFF_HELP = "When the bank balance was recorded, the difference between what the bank app showed and what the system expected: money that came into or left the bank without a ledger entry.";
 
-// Sum of one group's box count corrections dated in [start, end] —
+// Sum of one group's box count corrections dated in [start, end],
 // only counts made under the box's current opening balance (the same
 // ones the box balance itself uses).
 export function boxDiffInRange(groupLogs: BoxLog[], start: string, end: string): number {
@@ -188,7 +188,7 @@ export function boxDiffAllGroups(logs: BoxLog[], groupKeys: string[], start: str
 
 // Sum of bank check differences dated in [start, end]. Checks from the
 // old Reconcile flow that already posted a ledger adjustment entry are
-// skipped — that money is already in the ledger.
+// skipped, that money is already in the ledger.
 export function bankDiffInRange(checks: any[], start: string, end: string): number {
   return checks
     .filter((c) => c.as_of_date >= start && c.as_of_date <= end && !c.adjustment_entry_id && c.difference != null)

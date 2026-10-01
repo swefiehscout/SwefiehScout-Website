@@ -2,17 +2,17 @@
 -- admin-only rubric for rating each leader's performance across a set
 -- of org-defined "functions" (e.g. Curriculum Planning, Communication),
 -- 1-5 stars, one dated entry per rating rather than a single overwritten
--- value — so a leader can be re-assessed over time and the history/trend
+-- value, so a leader can be re-assessed over time and the history/trend
 -- stays on record. Never exposed to the leader being rated (see
--- is_admin() below, same helper schema.sql already defines) — unlike
+-- is_admin() below, same helper schema.sql already defines), unlike
 -- leader_attendance (leaders_group_schema.sql), this has no group_key /
 -- has_group_access() angle at all, it's genuinely admin-only, not just
 -- admin-only "in practice". Run this AFTER schema.sql. Safe to re-run.
 
 -- ============================================================
--- leader_functions — the rubric itself: whatever an admin has added
+-- leader_functions, the rubric itself: whatever an admin has added
 -- from the Settings tab. Retiring one (delete) doesn't touch existing
--- ratings — leader_assessments.function_name snapshots the name at the
+-- ratings, leader_assessments.function_name snapshots the name at the
 -- time it was rated (function_id goes null instead of cascading), same
 -- created_by_name-alongside-uuid snapshot pattern PR Contacts/Sponsors
 -- already use elsewhere in this app.
@@ -31,7 +31,7 @@ create policy "admin only" on leader_functions
   for all using (is_admin()) with check (is_admin());
 
 -- ============================================================
--- leader_assessments — one row per dated rating of one leader against
+-- leader_assessments, one row per dated rating of one leader against
 -- one function. leader_id points at profiles (an account being rated),
 -- same as leader_attendance.leader_id.
 -- ============================================================

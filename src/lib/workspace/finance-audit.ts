@@ -14,14 +14,14 @@ export type AuditRow = {
   changed_at: string;
 };
 
-const money = (v: any) => (v == null || v === '' ? '—' : Number(v).toFixed(2));
-const text = (v: any) => (v == null || v === '' ? '—' : String(v));
+const money = (v: any) => (v == null || v === '' ? '-' : Number(v).toFixed(2));
+const text = (v: any) => (v == null || v === '' ? '-' : String(v));
 
 // Per table: what to call one row, and which fields are worth showing
 // when they change (internal ids/timestamps are left out).
 const TABLES: Record<string, { label: (r: any) => string; fields: [string, string, (v: any) => string][] }> = {
   finance_entries: {
-    label: (r) => `${r.entry_type === 'income' ? 'Income' : 'Expense'} "${r.description || r.category || '—'}" (${money(r.amount)})`,
+    label: (r) => `${r.entry_type === 'income' ? 'Income' : 'Expense'} "${r.description || r.category || '-'}" (${money(r.amount)})`,
     fields: [
       ['entry_type', 'type', (v) => (v === 'income' ? 'Income' : 'Expense')],
       ['category', 'category', text],

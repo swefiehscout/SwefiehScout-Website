@@ -98,7 +98,7 @@ function isActive(href: string) {
 
     // Click-based submenu: a chevron button next to each parent link
     // toggles the submenu open/closed. The parent link itself still
-    // navigates normally — separating the two interactions makes touch
+    // navigates normally, separating the two interactions makes touch
     // and mouse both reliable. Click outside or press Escape closes.
     var subToggles = document.querySelectorAll('[data-submenu-toggle]');
     function closeAllSubmenus(except) {
