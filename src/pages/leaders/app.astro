@@ -3363,6 +3363,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         .eq('group_key', state.activeGroup)
         .eq('status', 'pending');
       if (error) { console.error(error); return; }
+      if (state.activeGroup === MUSIC_GROUP_KEY && !!count !== !!state.musicPendingApprovals) {
+        state.musicPendingApprovals = !!count;
+        updateTabVisibility();
+      }
       if (count && count > 0) {
         els.approvalsBadge.textContent = String(count);
         els.approvalsBadge.removeAttribute('hidden');
@@ -9974,9 +9978,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // panel Leaders DOES share with troops, so its own toggle below
     // checks for Leaders explicitly instead of using this list.
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
-      // approvals: Music is on the public /join form (JOINABLE_GROUPS),
-      // so its sign-ups need somewhere to land.
-      [MUSIC_GROUP_KEY]: ['roster', 'approvals', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
+      [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
       [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'meetingnotes', 'reports', 'sharedcal'],
       [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'content', 'credentials', 'sharedcal'],
       [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderarchive', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'reports', 'sharedcal'],
@@ -10015,6 +10017,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       // visible, even though nothing in them can load without a real
       // group_key.
       if (!state.activeGroup) return !SUPPORT_LEADER_TABS.includes(tab);
+      // Music is no longer on the /join form, but requests submitted
+      // before that change still need clearing — its Approvals tab shows
+      // only while any are pending (see refreshApprovalsBadge).
+      if (tab === 'approvals' && state.activeGroup === MUSIC_GROUP_KEY) return !state.musicPendingApprovals;
       const visible = NON_TROOP_TAB_VISIBILITY[state.activeGroup];
       if (visible) return !visible.includes(tab);
       return MUSIC_ONLY_TABS.includes(tab) || GENERAL_ONLY_TABS.includes(tab) || SOCIAL_MEDIA_ONLY_TABS.includes(tab) || LEADERS_ONLY_TABS.includes(tab) || SUPPORT_ONLY_TABS.includes(tab);

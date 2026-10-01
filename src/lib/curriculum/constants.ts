@@ -43,13 +43,12 @@ export const GROUPS: { key: GroupKey; en: string; ar: string }[] = [
 export const NON_TROOP_GROUP_KEYS: GroupKey[] = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY];
 export const TROOP_GROUPS = GROUPS.filter((g) => !NON_TROOP_GROUP_KEYS.includes(g.key));
 
-// Everything the public /join form can offer — General and Social Media
-// have no open-signup roster (nobody "joins" shared org expenses or an
-// appointed social media team the way they'd join a troop), so both are
-// excluded; Leaders is admin-assigned only, never a public sign-up
-// either. Music stays since someone could genuinely sign up to join the
-// band.
-export const JOINABLE_GROUPS = GROUPS.filter((g) => g.key !== GENERAL_GROUP_KEY && g.key !== SOCIAL_MEDIA_GROUP_KEY && g.key !== LEADERS_GROUP_KEY);
+// Everything the public /join form can offer — the 5 troops only.
+// General and Social Media have no roster, Leaders is admin-assigned,
+// and Music's band is picked from existing troop members (the Roster
+// tab's "Copy selected into Music" checkboxes) or added by hand —
+// nobody signs up for it directly.
+export const JOINABLE_GROUPS = TROOP_GROUPS;
 
 // The meeting types Leaders' own Attendance tab can log against — either
 // a general leadership meeting, or one of the 5 troops' own regular

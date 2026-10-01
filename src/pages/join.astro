@@ -8,9 +8,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { JOINABLE_GROUPS, type GroupKey } from '../lib/curriculum/constants';
 
-// Age guidance for parents picking a group — Music has no age band (it's
-// skill-based, not age-based), so it's left off the map and just shows
-// no age line below.
+// Age guidance for parents picking a group.
 const AGE_RANGES: Partial<Record<GroupKey, string>> = {
   'Baraem': '4–6',
   'Ashbal-Zahrat': '6–10',
