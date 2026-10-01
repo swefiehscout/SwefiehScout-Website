@@ -7,7 +7,7 @@
 // scouting troops (see MUSIC_GROUP_KEY/GENERAL_GROUP_KEY in
 // curriculum/constants), so they only ever show Roster and Finance:
 // Music for band members and event/wedding income + payouts, General
-// for the board of directors/leadership and shared org-wide costs.
+// for shared org-wide costs and public relations (no roster).
 // Org-wide oversight, the full accounting layer (opening balance,
 // reconciliation, every group combined), and access approval live in
 // the separate /admin console, not here — an admin gets a link to it
@@ -190,8 +190,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         </section>
 
         <section class="ws-panel" data-panel="roster" hidden>
-          <!-- Music and General only — most band members/board members are
-               already scouts or leaders in one of the 5 troops, so this
+          <!-- Music only (the one non-troop group with a roster) — most
+               band members are already scouts or leaders in one of the 5 troops, so this
                copies their name/phone across instead of retyping it.
                Toggled by updateTabVisibility(). -->
           <div class="ws-member-form" data-copy-member-block hidden>
@@ -3256,10 +3256,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       await autoArchiveInactive();
       renderRoster();
       renderArchive();
-      if (NON_TROOP_GROUP_KEYS.includes(state.activeGroup)) await loadCopyPicker();
+      if (state.activeGroup === MUSIC_GROUP_KEY) await loadCopyPicker();
     }
-    // Music and General only — most of their people (band members, board
-    // members) are already scouts/leaders in one of the 5 troops, so offer
+    // Music only (the one non-troop group with a roster) — most band
+    // members are already scouts/leaders in one of the 5 troops, so offer
     // to bulk-copy their name/phone across instead of retyping each one
     // (see the ws-copy-member-block markup). Anyone already copied over
     // into THIS group (tracked via members.source_member_id) drops off the
@@ -3843,7 +3843,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     const DEFAULT_INCOME_CATEGORIES = [
       'Monthly Fees', 'Donations', 'Fundraising', 'Event Tickets', 'Sponsorships', 'Troop Store Sales', 'Other',
     ];
-    // Music and General aren't scouting troops, so the troop-flavored
+    // Music, General and Social Media aren't scouting troops, so the troop-flavored
     // defaults above (Uniforms, Badges & Awards, Monthly Fees, …) don't
     // fit — each gets its own starter list instead.
     // Inventory's own editable category list (Items subtab dropdown +
@@ -10494,7 +10494,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.tabs.querySelectorAll('.ws-tab:not([data-admin-only])').forEach((btn: any) => {
         btn.toggleAttribute('hidden', isTabHidden(btn.dataset.tab));
       });
-      els.copyMemberBlock.toggleAttribute('hidden', !NON_TROOP_GROUP_KEYS.includes(state.activeGroup));
+      els.copyMemberBlock.toggleAttribute('hidden', state.activeGroup !== MUSIC_GROUP_KEY);
       const g = GROUPS.find((x: any) => x.key === state.activeGroup);
       els.copyMemberBtn.textContent = `Copy selected into ${g ? g.en : 'the'} roster`;
       // The Fees tab (and its per-month default fee) doesn't exist for

@@ -330,7 +330,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </div>
             <div class="ws-report-card">
               <h3 class="ws-admin-h3">Full Roster</h3>
-              <p class="ws-report-desc">Every active member across every group (troops, Music, and General), with full contact and emergency-contact info. Not period-dependent.</p>
+              <p class="ws-report-desc">Every active member of the 5 troops and Music (General and Social Media have no roster), plus every approved leader, with full contact and emergency-contact info. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-roster>Download PDF</button>
             </div>
             <div class="ws-report-card">
@@ -862,7 +862,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     } from '../lib/workspace/auth';
     import jsPDF from 'jspdf';
     import autoTable from 'jspdf-autotable';
-    import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, SC_EVENT_COLORS, scEventColorValue } from '../lib/curriculum/constants';
+    import { GROUPS, TROOP_GROUPS, NO_ROSTER_GROUP_KEYS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, SC_EVENT_COLORS, scEventColorValue } from '../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../lib/workspace/row-numbers';
     import { fetchLeaderActivity, activityLocalParts, type LeaderActivityItem } from '../lib/leader-activity';
     import { renderDateGroups, ammanDay, formatStamp, whoWhen } from '../lib/workspace/date-groups';
@@ -3060,8 +3060,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    // Not period-dependent — every active member, across every group
-    // (troops, Music, and General alike), one page. Landscape, since
+    // Not period-dependent — every active member of every group that
+    // keeps a roster (the 5 troops and Music; General and Social Media
+    // don't, see NO_ROSTER_GROUP_KEYS), one page. Landscape, since
     // "all their info" is enough columns that portrait would cramp it.
     // Members + every approved leader/admin, same merge renderRoster()
     // does on screen (leaderRosterRows() above) — not read from
@@ -3070,7 +3071,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function downloadRosterReport() {
       try {
         const [memRes, leaderRes] = await Promise.all([
-          db.from('members').select('*').eq('active', true).order('group_key', { ascending: true }).order('full_name', { ascending: true }),
+          db.from('members').select('*').eq('active', true).not('group_key', 'in', `(${NO_ROSTER_GROUP_KEYS.join(',')})`),
           db.from('profiles').select('*').in('role', ['leader', 'admin']).order('name', { ascending: true }),
         ]);
         if (memRes.error) throw memRes.error;
@@ -3854,7 +3855,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // this stays read-only, same as before.
     async function loadRoster() {
       const [memRes, leaderRes] = await Promise.all([
-        db.from('members').select('*').order('full_name', { ascending: true }),
+        // General / Social Media keep no roster — leave out any stray rows.
+        db.from('members').select('*').not('group_key', 'in', `(${NO_ROSTER_GROUP_KEYS.join(',')})`).order('full_name', { ascending: true }),
         db.from('profiles').select('*').in('role', ['leader', 'admin']).order('name', { ascending: true }),
       ]);
       if (memRes.error) { console.error(memRes.error); showToast('Could not load the roster.'); return; }

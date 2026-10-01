@@ -37,9 +37,13 @@ export const GROUPS: { key: GroupKey; en: string; ar: string }[] = [
   { key: 'SocialMedia',   en: 'Social Media',    ar: 'التواصل الاجتماعي' },
 ];
 
-// The 5 scouting troops only — for member/attendance/fee/curriculum
-// views where a group with no roster (Music, General, Social Media) or
-// no scouts at all (Leaders) wouldn't make sense.
+// The 5 scouting troops only — for attendance/fee/curriculum views,
+// which don't apply to Music (it keeps a band roster, but no
+// attendance or fees), General and Social Media (no roster at all), or
+// Leaders (no scouts).
+// Groups that keep no member roster at all — their Roster tab is hidden
+// and no roster view or report includes them.
+export const NO_ROSTER_GROUP_KEYS: GroupKey[] = [GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY];
 export const NON_TROOP_GROUP_KEYS: GroupKey[] = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY];
 export const TROOP_GROUPS = GROUPS.filter((g) => !NON_TROOP_GROUP_KEYS.includes(g.key));
 
