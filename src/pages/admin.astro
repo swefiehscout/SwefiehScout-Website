@@ -866,7 +866,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import { initRowNumbering, initCollapsibleRows } from '../lib/workspace/row-numbers';
     import { fetchLeaderActivity, activityLocalParts, type LeaderActivityItem } from '../lib/leader-activity';
     import { renderDateGroups, ammanDay, formatStamp, whoWhen } from '../lib/workspace/date-groups';
-    import { byMemberCode } from '../lib/workspace/member-sort';
+    import { byName } from '../lib/workspace/member-sort';
     import { computeBox, computeBank, countCorrection, boxBreakdownRows, boxHistoryRows, pdfWhoWhen, boxDiffInRange, boxDiffAllGroups, bankDiffInRange, BOX_DIFF_LABEL, BOX_DIFF_HELP, BANK_DIFF_LABEL, BANK_DIFF_HELP, type BoxLog } from '../lib/workspace/cash-box';
     import { describeAudit, auditPdfRows, type AuditRow } from '../lib/workspace/finance-audit';
 
@@ -2606,7 +2606,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const { period, label, isYear, isRange, periodFrom, periodTo } = periodRange(els.reportMonth, els.reportYear);
         const troopKeys = TROOP_GROUPS.map((g) => g.key);
         const membersRes = await db.from('members').select('id, full_name, member_code, group_key').eq('active', true).in('group_key', troopKeys);
-        const members = (membersRes.data || []).sort(byMemberCode);
+        const members = (membersRes.data || []).sort(byName);
         const doc = new jsPDF();
         if (isYear || isRange) {
           // Fees are keyed by a plain 'YYYY-MM' period string, not a real
@@ -2667,7 +2667,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           db.from('members').select('id, full_name, member_code, group_key').eq('active', true).in('group_key', troopKeys),
           db.from('attendance').select('member_id, group_key, present, date').in('group_key', troopKeys).gte('date', start).lte('date', end),
         ]);
-        const members = (membersRes.data || []).sort(byMemberCode);
+        const members = (membersRes.data || []).sort(byName);
         const rows = attRes.data || [];
         const byGroupSessions = new Map<string, Set<string>>();
         TROOP_GROUPS.forEach((g) => byGroupSessions.set(g.key, new Set()));
@@ -3078,7 +3078,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const rows: any[] = [
           ...(memRes.data || []).map((m: any) => ({ ...m, _type: 'Member', _groupLabel: null })),
           ...leaderRosterRows((leaderRes.data || []).filter((p: any) => p.active !== false)),
-        ].sort(byMemberCode);
+        ].sort(byName);
         const doc = new jsPDF({ orientation: 'landscape' });
         const y = pdfHeader(doc, 'Full Roster', `${rows.length} active, every group`);
         pdfTable(doc, {
