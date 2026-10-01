@@ -8280,7 +8280,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function downloadAllLeaderAssessmentReports() {
       try {
         const base = await fetchLeaderReportBase();
-        const leaders = activeLeaders();
+        const leaders = [...activeLeaders()].sort(byMemberCode);
         if (!leaders.length) { showToast('No approved leaders yet.'); return; }
         const doc = new jsPDF();
         leaders.forEach((leader: any, i: number) => {
