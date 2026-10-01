@@ -3,10 +3,11 @@
 // imported by client-side script as well as the Astro frontmatter.
 
 // 'Music', 'General', and 'SocialMedia' are 3 extra "groups" alongside
-// the 5 troops — same finance machinery (each also gets a Roster), but
-// the Leaders Workspace only ever shows a cut-down, group-specific set
-// of tabs for each (see NON_TROOP_TAB_VISIBILITY in leaders/app.astro):
-// none of the 3 has scouts, attendance, or curriculum. Music logs
+// the 5 troops — same finance machinery (Ledger, Cash Box), but the
+// Leaders Workspace only ever shows a cut-down, group-specific set of
+// tabs for each (see NON_TROOP_TAB_VISIBILITY in leaders/app.astro):
+// none of the 3 has scouts, attendance, fees, or curriculum. Music keeps
+// a band roster; General and Social Media keep none. Music logs
 // event/wedding income and band payouts; General is for shared org-wide
 // costs that aren't any single troop's or Music's — venue maintenance,
 // new chairs, that kind of thing; Social Media runs the org's own

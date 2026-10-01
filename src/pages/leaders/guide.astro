@@ -79,10 +79,12 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'approvals', label: 'Approvals', icon: 'plus',
-    intro: 'New people asking to join your group.',
+    intro: 'New people asking to join your troop, from the public Join form. Troops only.',
     lines: [
       'Approve adds them straight to your roster.',
       'Reject just declines the request, nothing is saved.',
+      'Picked the wrong troop (age, mostly)? Transfer sends the request to the right one.',
+      "Music isn't on the Join form, band members are added from Music's own Roster. Its Approvals tab only shows while older requests are still waiting.",
     ],
   },
   {
@@ -166,7 +168,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'finance', label: 'Finance', icon: 'bank',
-    intro: "Keep track of your group's money. Every group has one.",
+    intro: "Keep track of your group's money. Every group has one except Leaders.",
     lines: [
       'Ledger: log money coming in or going out. Made a mistake? Edit or delete it, every change is recorded.',
       'See totals for whichever month you pick.',
@@ -180,7 +182,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'vendors', label: 'Vendors', icon: 'phone',
-    intro: "Suppliers, repair shops, venues, anyone your group deals with. Every group has one.",
+    intro: "Suppliers, repair shops, venues, anyone your group deals with. Every group has one except Leaders.",
     lines: [
       'Add your own, or use one an admin already shared into your group under Shared Vendors.',
     ],
@@ -190,7 +192,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     intro: 'Share files with your group. Troops and Social Media.',
     lines: [
       'Upload documents for your leaders to use.',
-      'Find shared lesson resources and anything an admin shared org-wide here too.',
+      'Troops also get Lessons (shared lesson resources), plus anything an admin shared with the troops under Shared Library.',
     ],
   },
   {
@@ -202,6 +204,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       'Social Media: Social Media Finance Report, Cash Box & Finance Activity Log, Content Calendar, Credentials, Vendors.',
       'General: Income Statement, Cash Box & Finance Activity Log, Sponsors, Community & Church Contacts, Meeting Notes, Vendors.',
       "Every finance report ends with a Cash Box page: how much cash is in the box today and every box record in the period.",
+      'Leaders (admin-only): Leaders Roster, Leaders Attendance, Leader Assessment.',
       "Pick a single month, a whole year, or a custom range spanning several months, whichever a report needs. Roster and Vendors (and Sponsors/Contacts/Credentials where they apply) aren't tied to a date at all.",
     ],
   },
@@ -212,6 +215,10 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       "Roster: every approved leader across every group, read-only — roles and group access are still only ever changed from Admin → People.",
       'Attendance: log who showed up, same as a troop\'s own Attendance tab, but pick the "Meeting" first — a general Leaders Meeting, or one of the 5 troops\' own meetings (was that troop\'s leader there?).',
       "Dashboard: each leader's attendance rate against every meeting logged, sorted worst-first so anyone who needs a nudge is easy to spot.",
+      'Archive: leaders who stepped away, restore them any time.',
+      "Leader Profile: one leader's details, their KPIs, and a feed of what they've done in the workspace.",
+      'Assessment: rate each leader on their functions over time.',
+      'Reports and the Shared Calendar, same as every group.',
     ],
   },
   {
@@ -219,10 +226,11 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     intro: 'A separate page for admins, tap Admin in the header to get there.',
     lines: [
       'Overview: the 5 troops rolled up together, at a glance.',
-      'Music and Social Media each get their own dashboard here too, since neither is a scouting troop.',
+      'Music, Social Media, and General each get their own dashboard here too, since none of them is a scouting troop.',
       "Finance: where the money is (the bank, every group's cash box, and the total), logging a transaction to any group, recording what the bank app shows now and then (Bank), every group's box counts (Box Counts), and every change to money anywhere (Activity Log).",
       'Reports: every report from every group\'s own Reports tab, combined in one place, with the same single month / whole year / custom range picker.',
-      'Roster, Vendors (Shared), and Curriculum roll up every group too.',
+      'Roster rolls up the 5 troops, Music, and every leader (General and Social Media keep no roster). Curriculum covers the 5 troops. Vendors (Shared) can be shared into any group except Leaders.',
+      'Library (Shared): upload once and share it with any of the 5 troops.',
       'People: approve leaders and admins, and set which groups each one can access.',
     ],
   },

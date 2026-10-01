@@ -74,6 +74,9 @@ create policy "admin only" on org_finance_settings
 insert into org_finance_settings (id) values ('org') on conflict (id) do nothing;
 
 -- ============================================================
+-- NOTE: superseded by cash_box_schema.sql — bank checks (Admin > Finance
+-- > Bank) no longer post adjustment entries; the description below is
+-- the original Reconcile flow, kept for history.
 -- finance_reconciliations — a saved snapshot each time an admin
 -- reconciles: the real bank balance as of a date, what the system's own
 -- running balance came to, and the gap between them. Not every entry is

@@ -1,10 +1,10 @@
 ---
 // Admin console — the single control tower for the whole org: org-wide
 // oversight across every group, the accounting layer on top of the
-// Leaders Workspace's finance_entries (opening balance, running/cleared
-// balance across every group combined, bank reconciliation, ad-hoc
-// transactions), and approving who gets into the Leaders Workspace and
-// which groups (Music included — see MUSIC_GROUP_KEY). Gated by the
+// Leaders Workspace's finance_entries (the bank, every group's cash box,
+// box counts, the finance activity log, ad-hoc transactions — see
+// src/lib/workspace/cash-box.ts), and approving who gets into the
+// Leaders Workspace and which groups. Gated by the
 // single org admin flag (profiles.role = 'admin'). No separate login
 // screen — signs in through the same Supabase session as /leaders, and
 // a non-admin lands on a plain "not authorized" message instead of a
@@ -244,7 +244,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
 
           <div data-subpanel="finance:reconcile" hidden>
-            <p class="ws-att-hint">Open the bank app, see what the account has, and record it here. You don't need to know every transfer, the system compares it with what it expected (the last recorded amount, plus or minus cash groups moved in or out since) and keeps the difference. That difference shows up in net income as its own line, \"Unexplained bank difference\", never mixed into a real category. If you find out what it was, add it as a normal ledger entry before the next bank check.</p>
+            <p class="ws-att-hint">Open the bank app, see what the account has, and record it here. You don't need to know every transfer, the system compares it with what it expected (the last recorded amount, plus or minus cash groups moved in or out since) and keeps the difference. That difference shows up in net income as its own line, "Unexplained bank difference", never mixed into a real category. If you find out what it was, add it as a normal ledger entry before the next bank check.</p>
             <form class="ws-member-form" data-rec-form>
               <div class="ws-member-form-bar" aria-hidden="true"></div>
               <p class="ws-member-form-title" data-rec-form-title>Record bank balance</p>
@@ -270,7 +270,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-dgroups" data-box-counts></div>
             <div data-adj-block hidden>
               <h3 class="ws-admin-h3">Older bank adjustment entries</h3>
-              <p class="ws-att-hint">From before the cash box, when Reconcile posted a correcting entry into a group's ledger. They're still real ledger entries.</p>
+              <p class="ws-att-hint">From before the cash box, when the old bank check (then called Reconcile) posted a correcting entry into a group's ledger. They're still real ledger entries.</p>
               <div class="ws-dgroups" data-adj-body></div>
             </div>
           </div>
@@ -2042,8 +2042,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       renderOverview(byGroup, pendingRes.data || []);
     }
     function renderOverview(byGroup: Map<string, any>, pendingRows: any[]) {
-      // Pending join requests across every group (Music included, it's on
-      // the /join form too) — broken down by group so it's clear which
+      // Pending join requests across every group (the 5 troops, plus any
+      // older Music requests from before it left /join) — broken down by group so it's clear which
       // group's Approvals tab in the Leaders Workspace they're waiting in.
       const pendingApprovals = pendingRows.length;
       const pendingByGroup = new Map<string, number>();
@@ -2177,6 +2177,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     // Every group that has a Finance tab (Leaders doesn't).
     const FINANCE_GROUPS = GROUPS.filter((g) => g.key !== LEADERS_GROUP_KEY);
+    // Same for Vendors — Leaders has no Vendors tab.
+    const VENDOR_GROUPS = FINANCE_GROUPS;
     // Bank + cash boxes — see src/lib/workspace/cash-box.ts. Also sets
     // state.bank, which the Bank tab compares a new bank amount against.
     async function loadFinanceKpis() {
@@ -2319,7 +2321,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         : `<option value="">No categories yet, add some in ${escapeHtml(GROUPS.find((g) => g.key === groupKey)?.en || groupKey)}'s Finance › Categories</option>`;
     }
     function bindTransactionForm() {
-      els.txGroup.innerHTML = GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
+      els.txGroup.innerHTML = FINANCE_GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
       updateTxCategoryOptions();
       els.txGroup.addEventListener('change', updateTxCategoryOptions);
       els.txType.addEventListener('change', updateTxCategoryOptions);
@@ -3704,7 +3706,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <span class="ws-dash-kpi-num">${contacts.length}</span>
         </div>
         <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">▤</span><span class="ws-dash-kpi-label">Library documents</span></div>
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">▤</span><span class="ws-dash-kpi-label">PR Library documents</span></div>
           <span class="ws-dash-kpi-num">${docsRes.count || 0}</span>
         </div>
         <div class="ws-dash-kpi">
@@ -4052,7 +4054,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!vendors.length) { els.svendorBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No shared vendors yet.</td></tr>'; return; }
       els.svendorBody.innerHTML = vendors.map((v: any) => {
         const checked = new Set((v.shared_vendor_groups || []).map((r: any) => r.group_key));
-        const groupChecks = GROUPS.map((g) => `
+        const groupChecks = VENDOR_GROUPS.map((g) => `
           <label class="ws-group-check">
             <input type="checkbox" data-svendor-row-group value="${g.key}" ${checked.has(g.key) ? 'checked' : ''} />
             ${escapeHtml(g.en)}
@@ -4095,7 +4097,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
     function bindSharedVendorForm() {
-      els.svendorGroups.innerHTML = GROUPS.map((g) => `
+      els.svendorGroups.innerHTML = VENDOR_GROUPS.map((g) => `
         <label class="ws-group-check"><input type="checkbox" data-svendor-group value="${g.key}" /> ${escapeHtml(g.en)}</label>
       `).join('');
       els.svendorCancel.addEventListener('click', resetSharedVendorForm);

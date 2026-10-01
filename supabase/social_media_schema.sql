@@ -32,6 +32,8 @@ create table if not exists content_items (
   status text not null default 'idea' check (status in ('idea', 'drafting', 'scheduled', 'posted')),
   scheduled_date date,
   scheduled_time time,
+  -- Legacy, unused: Content no longer has an "Assigned to" (Social Media
+  -- keeps no roster). Left in place so existing rows don't break.
   assigned_to uuid references members(id) on delete set null,
   caption text,
   -- One optional draft/reference file (image, video, doc) inside the

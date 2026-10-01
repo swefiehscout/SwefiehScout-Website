@@ -1,15 +1,13 @@
 ---
 // Leaders Workspace — the shell. Gated by a real Supabase Auth session
-// (not the old shared-password localStorage flag). Tabs: Dashboard,
-// Roster, Archive, Approvals, Attendance, Fees, Curriculum (embedded,
-// shared per group), Finance (Ledger/Categories), Library
-// (Documents/Lessons), Reports. Two of the switchable groups aren't
-// scouting troops (see MUSIC_GROUP_KEY/GENERAL_GROUP_KEY in
-// curriculum/constants), so they only ever show Roster and Finance:
-// Music for band members and event/wedding income + payouts, General
-// for shared org-wide costs and public relations (no roster).
-// Org-wide oversight, the full accounting layer (opening balance,
-// reconciliation, every group combined), and access approval live in
+// (not the old shared-password localStorage flag). Troop tabs:
+// Dashboard, Roster, Archive, Approvals, Attendance, Fees, Curriculum,
+// Finance (Ledger/Cash Box/Activity Log/Categories), Library
+// (Documents/Shared Library/Lessons), Vendors, Reports, Shared Calendar.
+// Music, General, Social Media, and Leaders aren't scouting troops and
+// each shows its own cut-down set — NON_TROOP_TAB_VISIBILITY below is
+// the source of truth (only Music keeps a member roster).
+// Org-wide oversight, the bank + every group's cash box, and access approval live in
 // the separate /admin console, not here — an admin gets a link to it
 // in the header.
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -332,10 +330,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <section class="ws-panel" data-panel="archive" hidden>
           <p class="ws-soon" data-archive-hint>
-            Archived members are hidden from Attendance and Fees going forward, but every past record tied to
-            them (attendance history, fee payments) stays exactly as it was, nothing is deleted or recalculated.
-            Restore someone here any time to bring them back into the active roster. Anyone with no recorded
-            attendance for 3+ months gets archived automatically (marked "Auto-archived" below).
+            Archived members are hidden from the active roster (and, for troops, from Attendance and Fees) going
+            forward, but every past record tied to them stays exactly as it was, nothing is deleted or recalculated.
+            Restore someone here any time to bring them back into the active roster. Troops only: anyone with no
+            recorded attendance for 3+ months gets archived automatically (marked "Auto-archived" below).
           </p>
           <input type="search" class="ws-search" data-archive-search placeholder="Search members…" />
           <div class="ws-table-wrap">
@@ -366,6 +364,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             straight to this group's active roster; rejecting just declines it, nothing is created either way
             until you act. Picked the wrong group by mistake (age, mostly)? Transfer sends the request to
             another group's queue instead — nothing is added until that group approves it.
+          </p>
+          <p class="ws-soon" data-music-only hidden>
+            Music is no longer on the Join form, these are older requests still waiting. Approve or reject them to
+            clear this tab; it disappears once none are left. New band members are added from the Roster tab.
           </p>
           <input type="search" class="ws-search" data-approvals-search placeholder="Search requests…" />
           <div class="ws-table-wrap">
@@ -573,9 +575,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <span>Year</span>
                 <select data-fin-year></select>
               </label>
-              <!-- Also useful for every group, but the only export Music
-                   gets, its Reports tab is hidden (see updateTabVisibility
-                   in the script below), since Fees/Attendance don't apply. -->
+              <!-- Quick export of the period on screen, for every group
+                   (also on the Reports tab). -->
               <button type="button" class="btn-primary" data-fin-download>Download PDF</button>
             </div>
             <p class="ws-box-hint" data-fin-box-hint hidden></p>
@@ -672,7 +673,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <div data-subpanel="finance:categories" hidden>
             <p class="ws-soon" data-fees-tab-hint>
               The default monthly fee lives on the Fees tab now (it can change month to month), these lists are
-              for things that apply to every month, shared across all groups.
+              for things that apply to every month, shared by everyone leading this group.
             </p>
             <div class="ws-form-grid">
               <div class="ws-member-form">
@@ -1417,7 +1418,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <section class="ws-panel" data-panel="library" hidden>
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="library" data-subtab="documents">Documents</button>
-            <button type="button" class="ws-subtab" data-subtabs="library" data-subtab="shared">Shared Library</button>
+            <button type="button" class="ws-subtab" data-subtabs="library" data-subtab="shared" data-troop-only>Shared Library</button>
             <button type="button" class="ws-subtab" data-subtabs="library" data-subtab="lessons" data-troop-only>Lessons</button>
           </div>
 
@@ -3358,7 +3359,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Anyone active for 3+ months with zero "present" attendance in that
     // window gets archived automatically, tagged so Archive can show why.
     async function autoArchiveInactive() {
-      if (!state.activeGroup) return;
+      // Troops only — it's based on attendance, which Music (the one other
+      // group with a roster) doesn't take, so it would archive the whole band.
+      if (!state.activeGroup || !isTroopGroup(state.activeGroup)) return;
       const cutoff = new Date();
       cutoff.setMonth(cutoff.getMonth() - 3);
       const cutoffStr = toDateStr(cutoff);
@@ -3386,9 +3389,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
     // Moving between troops (Baraem → Ashbal & Zahrat → Mubtadi →
     // Mutaqaddim → Jawalah as a scout ages up) only makes sense for the
-    // 5 troops — Music/General/Social Media/Leaders already have their
-    // own "copy from another group's roster" flow instead (a duplicate,
-    // not a move — someone can be a scout AND a band member at once).
+    // 5 troops — Music has its own "copy from another group's roster"
+    // flow instead (a duplicate, not a move — someone can be a scout AND
+    // a band member at once); no other group keeps a roster.
     function isTroopGroup(key: string) {
       return TROOP_GROUPS.some((g) => g.key === key);
     }
@@ -10426,7 +10429,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Social Media don't — by request, since neither's "membership" (the
     // board, the social media team) needs a tracked roster the way a
     // troop or the band does. Existing member rows for those two groups
-    // aren't deleted (Admin's Full Roster report still lists them), they
+    // aren't deleted (but every roster view and report leaves them out,
+    // see NO_ROSTER_GROUP_KEYS), they
     // just have no Workspace tab to add/edit from anymore. Runs on every
     // group switch, not just once, so leaving one restores every other
     // tab.
@@ -10443,7 +10447,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // panel Leaders DOES share with troops, so its own toggle below
     // checks for Leaders explicitly instead of using this list.
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
-      [MUSIC_GROUP_KEY]: ['roster', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
+      [MUSIC_GROUP_KEY]: ['roster', 'archive', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
       [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'meetingnotes', 'reports', 'sharedcal'],
       [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'content', 'credentials', 'sharedcal'],
       [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderarchive', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'reports', 'sharedcal'],
