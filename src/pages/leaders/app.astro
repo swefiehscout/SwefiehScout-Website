@@ -518,6 +518,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <section class="ws-panel" data-panel="finance" hidden>
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="finance" data-subtab="ledger">Ledger</button>
+            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="box">Cash Box</button>
+            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="activity">Activity Log</button>
             <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="categories">Categories</button>
           </div>
 
@@ -576,12 +578,95 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                    in the script below), since Fees/Attendance don't apply. -->
               <button type="button" class="btn-primary" data-fin-download>Download PDF</button>
             </div>
+            <p class="ws-box-hint" data-fin-box-hint hidden></p>
             <div class="ws-stat-row ws-stat-row--3" data-fin-stats></div>
 
             <div class="ws-statement" data-fin-statement></div>
 
             <h3 class="ws-admin-h3">Transactions</h3>
             <div class="ws-dgroups" data-fin-body></div>
+          </div>
+
+          <!-- Cash Box: the real cash this group holds. See
+               src/lib/workspace/cash-box.ts / cash_box_schema.sql. -->
+          <div data-subpanel="finance:box" hidden>
+            <p class="ws-att-hint">
+              This is your group's <strong>cash box</strong>, the real cash you hold. Every income and expense you add on the
+              Ledger tab updates it automatically. Every now and then, count the cash and press <strong>Count the box</strong>
+              so the number here matches what's really in it. Money you put in the bank (or take out of it) isn't income or
+              an expense, record it with <strong>Move money</strong>.
+            </p>
+            <p class="ws-empty" data-box-unavailable hidden>The cash box isn't switched on yet, ask an admin to finish setting it up.</p>
+
+            <div data-box-main hidden>
+              <div class="ws-stat-row ws-stat-row--3" data-box-stats></div>
+              <div class="ws-statement" data-box-breakdown></div>
+              <div class="ws-box-actions">
+                <button type="button" class="btn-primary" data-box-open="count">Count the box</button>
+                <button type="button" class="btn-primary" data-box-open="move">Move money to / from the bank</button>
+                <button type="button" class="ws-edit-btn" data-box-open="opening">Change opening balance</button>
+              </div>
+            </div>
+
+            <form class="ws-member-form" data-box-form="opening" hidden>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title" data-box-opening-title>Set up your cash box</p>
+              <p class="ws-box-form-help" data-box-opening-help>Count all the cash in your box and enter it here. From this date on, the system keeps track of it for you.</p>
+              <div class="ws-form-grid">
+                <label class="ws-field"><span>Cash in the box *</span><input type="number" step="0.01" min="0" data-box-opening-amount required /></label>
+                <label class="ws-field"><span>Counted on *</span><input type="date" data-box-opening-date required /></label>
+                <label class="ws-field ws-field--full"><span>Note (optional)</span><input type="text" data-box-opening-note /></label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary">Save opening balance</button>
+                <button type="button" class="ws-form-cancel" data-box-cancel>Cancel</button>
+              </div>
+            </form>
+
+            <form class="ws-member-form" data-box-form="count" hidden>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Count the box</p>
+              <p class="ws-box-form-help" data-box-count-help></p>
+              <div class="ws-form-grid">
+                <label class="ws-field"><span>Cash you counted *</span><input type="number" step="0.01" min="0" data-box-count-amount required /></label>
+                <label class="ws-field ws-field--full"><span>Note (optional)</span><input type="text" data-box-count-note placeholder="e.g. forgot to log 10 JD for snacks" /></label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary">Save count</button>
+                <button type="button" class="ws-form-cancel" data-box-cancel>Cancel</button>
+              </div>
+            </form>
+
+            <form class="ws-member-form" data-box-form="move" hidden>
+              <div class="ws-member-form-bar" aria-hidden="true"></div>
+              <p class="ws-member-form-title">Move money to / from the bank</p>
+              <p class="ws-box-form-help">This isn't income or an expense, the money just moves. It changes your box and the bank, nothing else.</p>
+              <div class="ws-form-grid ws-form-grid--4">
+                <label class="ws-field">
+                  <span>What happened *</span>
+                  <select data-box-move-kind required>
+                    <option value="to_bank">Put box cash into the bank</option>
+                    <option value="from_bank">Took bank money into the box</option>
+                  </select>
+                </label>
+                <label class="ws-field"><span>Amount *</span><input type="number" step="0.01" min="0.01" data-box-move-amount required /></label>
+                <label class="ws-field"><span>Date *</span><input type="date" data-box-move-date required /></label>
+                <label class="ws-field"><span>Note (optional)</span><input type="text" data-box-move-note placeholder="e.g. deposited by Rami" /></label>
+              </div>
+              <div class="ws-form-actions">
+                <button type="submit" class="btn-primary">Save</button>
+                <button type="button" class="ws-form-cancel" data-box-cancel>Cancel</button>
+              </div>
+            </form>
+
+            <h3 class="ws-admin-h3">Box history</h3>
+            <p class="ws-att-hint">Everything that happened to the box besides normal income and expenses, with who did it and when.</p>
+            <div class="ws-dgroups" data-box-history></div>
+          </div>
+
+          <div data-subpanel="finance:activity" hidden>
+            <p class="ws-att-hint">Every change to this group's money, recorded automatically: entries and cash box records added, edited, or deleted, with who did it and exactly when. Nothing here can be changed or removed.</p>
+            <div class="ws-dgroups" data-fin-audit></div>
           </div>
 
           <div data-subpanel="finance:categories" hidden>
@@ -1420,6 +1505,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <h3 class="ws-admin-h3">Income Statement</h3>
               <p class="ws-report-desc">Income and expenses by category, with totals and net income.</p>
               <button type="button" class="btn-primary" data-report-finance>Download PDF</button>
+            </div>
+            <div class="ws-report-card" data-cashbox-report>
+              <h3 class="ws-admin-h3">Cash Box &amp; Finance Activity Log</h3>
+              <p class="ws-report-desc">Your cash box today and how it got there, every box record in the period, and every finance change (added, edited, deleted) with who did it and when.</p>
+              <button type="button" class="btn-primary" data-report-cashbox>Download PDF</button>
             </div>
             <div class="ws-report-card" data-music-only hidden>
               <h3 class="ws-admin-h3">Music Finance Report</h3>
@@ -2472,7 +2562,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import autoTable from 'jspdf-autotable';
     import { GROUPS, TROOP_GROUPS, JOINABLE_GROUPS, MONTHS, WEEKDAYS, ACTIVITY_BANK, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, LEADER_MEETING_TYPES, SC_EVENT_COLORS, scEventColorValue } from '../../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../../lib/workspace/row-numbers';
-    import { renderDateGroups, ammanDay } from '../../lib/workspace/date-groups';
+    import { renderDateGroups, ammanDay, whoWhen, formatStamp } from '../../lib/workspace/date-groups';
+    import { computeBox, countCorrection, describeBoxLog, BOX_KIND_LABELS, boxBreakdownRows, boxHistoryRows, pdfWhoWhen, type BoxLog } from '../../lib/workspace/cash-box';
+    import { describeAudit, auditPdfRows, type AuditRow } from '../../lib/workspace/finance-audit';
     import { fetchLeaderActivity, formatActivityWhen, type LeaderActivityItem } from '../../lib/leader-activity';
 
     // Loose alias for actual query calls below — supabaseConfigured is
@@ -2888,6 +2980,25 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.finBody = el('[data-fin-body]');
       els.finStats = el('[data-fin-stats]');
       els.finStatement = el('[data-fin-statement]');
+      els.finBoxHint = el('[data-fin-box-hint]');
+      els.finAudit = el('[data-fin-audit]');
+      els.boxUnavailable = el('[data-box-unavailable]');
+      els.boxMain = el('[data-box-main]');
+      els.boxStats = el('[data-box-stats]');
+      els.boxBreakdown = el('[data-box-breakdown]');
+      els.boxHistory = el('[data-box-history]');
+      els.boxOpeningTitle = el('[data-box-opening-title]');
+      els.boxOpeningHelp = el('[data-box-opening-help]');
+      els.boxOpeningAmount = el('[data-box-opening-amount]');
+      els.boxOpeningDate = el('[data-box-opening-date]');
+      els.boxOpeningNote = el('[data-box-opening-note]');
+      els.boxCountHelp = el('[data-box-count-help]');
+      els.boxCountAmount = el('[data-box-count-amount]');
+      els.boxCountNote = el('[data-box-count-note]');
+      els.boxMoveKind = el('[data-box-move-kind]');
+      els.boxMoveAmount = el('[data-box-move-amount]');
+      els.boxMoveDate = el('[data-box-move-date]');
+      els.boxMoveNote = el('[data-box-move-note]');
       els.invForm = el('[data-inv-form]');
       els.invFormTitle = el('[data-inv-form-title]');
       els.invName = el('[data-inv-name]');
@@ -3974,6 +4085,33 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (error) { console.error(error); showToast('Could not load finance entries.'); return; }
       state.finEntries = data || [];
       renderFinance();
+      await Promise.all([loadCashBox(), loadFinanceAudit()]);
+    }
+    // Finance > Activity Log — finance_audit_log rows, written by database
+    // triggers on every add/edit/delete (see cash_box_schema.sql).
+    async function loadFinanceAudit() {
+      const groupKey = state.activeGroup;
+      if (!groupKey) return;
+      const { data, error } = await db.from('finance_audit_log').select('*').eq('group_key', groupKey).order('changed_at', { ascending: false }).limit(300);
+      if (groupKey !== state.activeGroup) return;
+      if (error) { els.finAudit.innerHTML = '<p class="ws-empty">The activity log isn\'t switched on yet, ask an admin to finish setting it up.</p>'; return; }
+      els.finAudit.innerHTML = data && data.length ? renderDateGroups({
+        rows: data as AuditRow[],
+        day: (a: AuditRow) => ammanDay(a.changed_at),
+        head: '<tr><th>Time</th><th>Who</th><th>What</th><th>Item</th><th>Changes</th></tr>',
+        tableClass: 'ws-table--alog',
+        row: (a: AuditRow) => {
+          const d = describeAudit(a);
+          return `
+          <tr>
+            <td data-label="Time">${escapeHtml(formatStamp(a.changed_at).split(', ').pop() || '')}</td>
+            <td data-label="Who">${escapeHtml(a.changed_by_name || '—')}</td>
+            <td data-label="What"><span class="ws-badge ws-badge--audit-${a.action}">${d.what}</span></td>
+            <td data-label="Item" class="ws-cell-wrap">${escapeHtml(d.item)}</td>
+            <td data-label="Changes" class="ws-cell-wrap">${escapeHtml(d.changes || '—')}</td>
+          </tr>`;
+        },
+      }) : '<p class="ws-empty">Nothing recorded yet.</p>';
     }
     function categoryTotals(type: string) {
       const map = new Map<string, number>();
@@ -4028,7 +4166,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <td data-label="Category">${escapeHtml(e.category || '—')}${e.fee_payment_id ? ' <span class="ws-allergy-badge" title="Synced from the Fees tab. Editing or deleting it here won\'t change the Fees tab, and re-saving that fee payment will recreate it if deleted">Auto</span>' : ''}${e.maintenance_log_id ? ' <span class="ws-allergy-badge" title="Synced from the Inventory tab\'s Maintenance Log. Editing or deleting it here won\'t change that log, and re-saving the log entry will recreate it if deleted">Auto</span>' : ''}</td>
           <td data-label="Description">${escapeHtml(e.description || '—')}</td>
           <td data-label="Amount">${Number(e.amount).toFixed(2)}</td>
-          <td data-label="Added by">${escapeHtml(e.created_by_name || '—')}</td>
+          <td data-label="Added by">${whoWhen(e.created_by_name, e.created_at, escapeHtml)}</td>
           <td data-label="Receipt">${e.receipt_path ? '<button type="button" class="ws-edit-btn" data-fin-receipt-view>View</button>' : '—'}</td>
           <td class="ws-row-actions"><button type="button" class="ws-edit-btn" data-fin-edit>Edit</button> <button type="button" class="ws-row-del" data-fin-del>×</button></td>
         </tr>`,
@@ -4053,6 +4191,217 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           if (error) { showToast('Could not delete.'); return; }
           if (state.editingFinEntryId === id) resetFinanceForm();
           await loadFinance();
+        });
+      });
+    }
+    // ---------- Cash Box (Finance > Cash Box) -----------------------------
+    // The group's real cash — see src/lib/workspace/cash-box.ts. Reloaded
+    // by loadFinance(), so every ledger change updates it too.
+    async function loadCashBox() {
+      const groupKey = state.activeGroup;
+      if (!groupKey) return;
+      const { data: logs, error } = await db.from('cash_box_log').select('*').eq('group_key', groupKey).order('created_at', { ascending: false });
+      if (groupKey !== state.activeGroup) return;
+      if (error) {
+        // Table not created yet (cash_box_schema.sql not run).
+        console.error(error);
+        state.box = null; state.boxLogs = []; state.boxUnavailable = true;
+        renderCashBox();
+        return;
+      }
+      state.boxUnavailable = false;
+      const opening = computeBox([], logs || []).opening;
+      let entries: any[] = [];
+      if (opening) {
+        const r = await db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', groupKey).gte('entry_date', opening.event_date);
+        if (groupKey !== state.activeGroup) return;
+        entries = r.data || [];
+      }
+      // A form left open on another group's box shouldn't carry over.
+      if (state.boxLoadedFor !== groupKey) { showBoxForm(null, false); state.boxLoadedFor = groupKey; }
+      state.boxLogs = logs || [];
+      state.box = computeBox(entries, state.boxLogs);
+      renderCashBox();
+    }
+    // `edit` = a cash_box_log row from the history being corrected;
+    // without it the form records something new.
+    function showBoxForm(kind: string | null, scroll = true, edit: BoxLog | null = null) {
+      state.editingBoxId = edit ? edit.id : null;
+      document.querySelectorAll('[data-box-form]').forEach((f: any) => { f.hidden = f.dataset.boxForm !== kind; });
+      if (!kind) return;
+      const form: any = document.querySelector(`[data-box-form="${kind}"]`);
+      form.querySelector('.ws-member-form-title').textContent = edit
+        ? `Fix this record: ${BOX_KIND_LABELS[edit.kind]}`
+        : ({ count: 'Count the box', move: 'Move money to / from the bank' } as any)[kind] || form.querySelector('.ws-member-form-title').textContent;
+      if (kind === 'count') {
+        els.boxCountHelp.textContent = edit
+          ? `When this count was saved, the system expected ${Number(edit.expected_balance).toFixed(2)}. Fix what was counted or the note; the change is recorded in the Activity Log.`
+          : `The system thinks there should be ${state.box.balance.toFixed(2)} in the box. Count the real cash and type what you find, if it's different the system corrects itself and keeps a record.`;
+        els.boxCountAmount.value = edit ? Number(edit.amount).toFixed(2) : '';
+        els.boxCountNote.value = edit?.note || '';
+      } else if (kind === 'move') {
+        els.boxMoveKind.value = edit ? edit.kind : 'to_bank';
+        els.boxMoveAmount.value = edit ? Number(edit.amount).toFixed(2) : '';
+        els.boxMoveNote.value = edit?.note || '';
+        els.boxMoveDate.value = edit ? edit.event_date : todayStr();
+      } else if (kind === 'opening' && edit) {
+        els.boxOpeningHelp.textContent = 'Fix the amount, date, or note of this opening balance; the change is recorded in the Activity Log.';
+        els.boxOpeningAmount.value = Number(edit.amount).toFixed(2);
+        els.boxOpeningDate.value = edit.event_date;
+        els.boxOpeningNote.value = edit.note || '';
+      } else if (kind === 'opening') {
+        const has = !!state.box?.opening;
+        els.boxOpeningTitle.textContent = has ? 'Change opening balance' : 'Set up your cash box';
+        els.boxOpeningHelp.textContent = has
+          ? 'Only use this if the first count was wrong or you want to start fresh. The box restarts from the new amount and date; the old one stays in the history.'
+          : 'Count all the cash in your box and enter it here. From this date on, the system keeps track of it for you.';
+        els.boxOpeningAmount.value = has ? Number(state.box.opening.amount).toFixed(2) : '';
+        els.boxOpeningDate.value = has ? state.box.opening.event_date : todayStr();
+        els.boxOpeningNote.value = '';
+      }
+      if (scroll) form?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function renderCashBox() {
+      const box = state.box;
+      const hasBox = !!box?.opening;
+      els.boxUnavailable.hidden = !state.boxUnavailable;
+      els.boxMain.hidden = !hasBox;
+      if (state.boxUnavailable) {
+        els.finBoxHint.hidden = true;
+        showBoxForm(null, false);
+        els.boxHistory.innerHTML = '';
+        return;
+      }
+      els.finBoxHint.hidden = false;
+      els.finBoxHint.innerHTML = hasBox
+        ? `Cash in your box right now: <strong>${box.balance.toFixed(2)}</strong>. Open the <strong>Cash Box</strong> tab to count it or move money to the bank.`
+        : `Your cash box isn't set up yet. Open the <strong>Cash Box</strong> tab and enter how much cash you're starting with.`;
+      if (!hasBox) {
+        showBoxForm('opening', false);
+        (document.querySelector('[data-box-form="opening"] [data-box-cancel]') as any).hidden = true;
+      } else {
+        (document.querySelector('[data-box-form="opening"] [data-box-cancel]') as any).hidden = false;
+        const o = box.opening;
+        const lc = box.lastCount;
+        els.boxStats.innerHTML = `
+          <div class="ws-stat ws-stat--accent"><span class="ws-stat-icon">${'\u{1F4B0}'}</span><span class="ws-stat-text"><span class="ws-stat-num">${box.balance.toFixed(2)}</span><span class="ws-stat-label">Cash in the box now</span></span></div>
+          <div class="ws-stat"><span class="ws-stat-icon">✓</span><span class="ws-stat-text"><span class="ws-stat-num ws-stat-num--sm">${lc ? escapeHtml(lc.event_date) : 'Never'}</span><span class="ws-stat-label">${lc ? `Last counted, by ${escapeHtml(lc.created_by_name || '—')}` : 'Last counted'}</span></span></div>
+          <div class="ws-stat"><span class="ws-stat-icon">▶</span><span class="ws-stat-text"><span class="ws-stat-num ws-stat-num--sm">${Number(o.amount).toFixed(2)}</span><span class="ws-stat-label">Opening balance, ${escapeHtml(o.event_date)}</span></span></div>
+        `;
+        const line = (label: string, v: number, sign: string) => `<tr><td>${label}</td><td>${sign}${Math.abs(v).toFixed(2)}</td></tr>`;
+        els.boxBreakdown.innerHTML = `
+          <h3 class="ws-admin-h3">How we got to ${box.balance.toFixed(2)}</h3>
+          <table class="ws-statement-table">
+            <tbody>
+              ${line(`Opening balance (${escapeHtml(o.event_date)})`, Number(o.amount), '')}
+              ${line('+ Income since then', box.income, '+')}
+              ${line('− Expenses since then', box.expense, '−')}
+              ${line('− Put into the bank', box.toBank, '−')}
+              ${line('+ Taken from the bank', box.fromBank, '+')}
+              ${line('± Corrections from counting the box', box.corrections, box.corrections < 0 ? '−' : '+')}
+              <tr class="ws-statement-net"><td>Cash in the box now</td><td>${box.balance.toFixed(2)}</td></tr>
+            </tbody>
+          </table>
+        `;
+      }
+      els.boxHistory.innerHTML = state.boxLogs.length ? renderDateGroups({
+        rows: state.boxLogs,
+        day: (l: BoxLog) => l.event_date,
+        head: '<tr><th>What</th><th>Amount</th><th>Details</th><th>Note</th><th>By</th><th></th></tr>',
+        row: (l: BoxLog) => {
+          const diff = countCorrection(l);
+          return `
+          <tr data-box-log-id="${l.id}">
+            <td data-label="What"><span class="ws-badge ws-badge--fair">${BOX_KIND_LABELS[l.kind]}</span></td>
+            <td data-label="Amount">${Number(l.amount).toFixed(2)}${l.kind === 'count' && Math.abs(diff) >= 0.005 ? ` <span class="ws-box-diff ws-box-diff--${diff < 0 ? 'neg' : 'pos'}">${diff < 0 ? '−' : '+'}${Math.abs(diff).toFixed(2)}</span>` : ''}</td>
+            <td data-label="Details" class="ws-cell-wrap">${escapeHtml(describeBoxLog(l))}</td>
+            <td data-label="Note">${escapeHtml(l.note || '—')}</td>
+            <td data-label="By">${whoWhen(l.created_by_name, l.created_at, escapeHtml)}${(l as any).updated_at ? `<span class="ws-stamp">Edited by ${escapeHtml((l as any).updated_by_name || '—')}, ${formatStamp((l as any).updated_at)}</span>` : ''}</td>
+            <td class="ws-row-actions"><button type="button" class="ws-edit-btn" data-box-edit>Edit</button> <button type="button" class="ws-row-del" data-box-del title="Delete">×</button></td>
+          </tr>`;
+        },
+      }) : '<p class="ws-empty">Nothing yet.</p>';
+      els.boxHistory.querySelectorAll('[data-box-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => {
+          const row = state.boxLogs.find((l: BoxLog) => l.id === btn.closest('tr').dataset.boxLogId);
+          if (!row) return;
+          showBoxForm(row.kind === 'to_bank' || row.kind === 'from_bank' ? 'move' : row.kind, true, row);
+        });
+      });
+      els.boxHistory.querySelectorAll('[data-box-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Delete this record? The box balance is recalculated without it. The deletion is kept in the Activity Log.')) return;
+          const { error } = await db.from('cash_box_log').delete().eq('id', btn.closest('tr').dataset.boxLogId);
+          if (error) { showToast('Could not delete.'); return; }
+          await Promise.all([loadCashBox(), loadFinanceAudit()]);
+        });
+      });
+    }
+    async function insertBoxLog(row: any) {
+      if (state.editingBoxId) {
+        const { kind, expected_balance, ...fields } = row;
+        const { error } = await db.from('cash_box_log').update({
+          ...fields, ...(kind === 'to_bank' || kind === 'from_bank' ? { kind } : {}),
+          updated_at: new Date().toISOString(), updated_by_name: state.profile?.name || null,
+        }).eq('id', state.editingBoxId);
+        if (error) { console.error(error); showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return false; }
+        return true;
+      }
+      const { error } = await db.from('cash_box_log').insert({
+        group_key: state.activeGroup, ...row,
+        created_by: state.session.user.id, created_by_name: state.profile?.name || null,
+      });
+      if (error) { console.error(error); showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return false; }
+      return true;
+    }
+    function bindCashBox() {
+      document.querySelectorAll('[data-box-open]').forEach((btn: any) => {
+        btn.addEventListener('click', () => showBoxForm(btn.dataset.boxOpen));
+      });
+      document.querySelectorAll('[data-box-cancel]').forEach((btn: any) => {
+        btn.addEventListener('click', () => showBoxForm(null));
+      });
+      document.querySelectorAll('[data-box-form]').forEach((form: any) => {
+        form.addEventListener('submit', async (e: Event) => {
+          e.preventDefault();
+          const submit = form.querySelector('button[type="submit"]');
+          const kind = form.dataset.boxForm;
+          let ok = false;
+          if (kind === 'opening') {
+            const amount = Number(els.boxOpeningAmount.value);
+            if (els.boxOpeningAmount.value === '' || amount < 0 || !els.boxOpeningDate.value) { showToast('Enter the cash amount and the date you counted it.'); return; }
+            if (state.box?.opening && !state.editingBoxId && !confirm('Change the opening balance? The box restarts from this new amount and date.')) return;
+            submit.disabled = true;
+            ok = await insertBoxLog({ kind: 'opening', amount, event_date: els.boxOpeningDate.value, note: els.boxOpeningNote.value.trim() || null });
+            if (ok) showToast(state.editingBoxId ? 'Fixed.' : 'Opening balance saved.');
+          } else if (kind === 'count') {
+            if (els.boxCountAmount.value === '') { showToast('Type the cash you counted.'); return; }
+            const amount = Number(els.boxCountAmount.value);
+            const editing = state.editingBoxId;
+            const expected = Number(state.box.balance.toFixed(2));
+            submit.disabled = true;
+            ok = await insertBoxLog(editing
+              ? { kind: 'count', amount, note: els.boxCountNote.value.trim() || null }
+              : { kind: 'count', amount, expected_balance: expected, event_date: todayStr(), note: els.boxCountNote.value.trim() || null });
+            if (ok && editing) showToast('Fixed.');
+            else if (ok) {
+              const diff = amount - expected;
+              showToast(Math.abs(diff) < 0.005 ? 'Count saved, it matches.' : `Count saved, the box was ${Math.abs(diff).toFixed(2)} ${diff < 0 ? 'short' : 'over'}. Corrected.`);
+            }
+          } else if (kind === 'move') {
+            const amount = Number(els.boxMoveAmount.value);
+            const moveKind = els.boxMoveKind.value;
+            if (!amount || amount <= 0 || !els.boxMoveDate.value) { showToast('Enter the amount and date.'); return; }
+            if (moveKind === 'to_bank' && !state.editingBoxId && amount > state.box.balance + 0.005
+              && !confirm(`That's more than the box should have (${state.box.balance.toFixed(2)}). Save anyway?`)) return;
+            submit.disabled = true;
+            ok = await insertBoxLog({ kind: moveKind, amount, event_date: els.boxMoveDate.value, note: els.boxMoveNote.value.trim() || null });
+            if (ok) showToast(state.editingBoxId ? 'Fixed.' : moveKind === 'to_bank' ? 'Saved, moved to the bank.' : 'Saved, taken from the bank.');
+          }
+          submit.disabled = false;
+          if (!ok) return;
+          showBoxForm(null);
+          await Promise.all([loadCashBox(), loadFinanceAudit()]);
         });
       });
     }
@@ -7504,6 +7853,55 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const groupName = groupNameOverride || (g ? g.en : (state.activeGroup || ''));
       return `${groupName}-${title}-${label}`.replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/^-+|-+$/g, '') + '.pdf';
     }
+    // ---------- Cash box / activity log sections shared by every finance
+    // report (Income Statement, Music/Social Media Finance, Cash Box).
+    async function fetchBoxData(groupKey: string) {
+      const { data: logs, error } = await db.from('cash_box_log').select('*').eq('group_key', groupKey);
+      if (error) return null; // cash_box_schema.sql not run yet
+      const opening = computeBox([], logs || []).opening;
+      let entries: any[] = [];
+      if (opening) {
+        const r = await db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', groupKey).gte('entry_date', opening.event_date);
+        entries = r.data || [];
+      }
+      return { logs: (logs || []) as BoxLog[], box: computeBox(entries, logs || []) };
+    }
+    function pdfSectionTitle(doc: any, y: number, title: string, sub?: string): number {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...PDF_BRAND);
+      doc.text(pdfSafe(title), 14, y);
+      if (!sub) return y + 5;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(120, 120, 120);
+      const lines = doc.splitTextToSize(pdfSafe(sub), 182);
+      doc.text(lines, 14, y + 5);
+      return y + 5 + lines.length * 3.8 + 1;
+    }
+    // Adds "Cash Box" on a new page: where the box stands right now, and
+    // every box record dated in the report's period.
+    function pdfCashBoxPage(doc: any, data: any, start: string, end: string, label: string) {
+      doc.addPage();
+      let y = pdfSectionTitle(doc, 20, 'Cash Box', "The group's real cash. Balance is as of today; the records below are the ones dated in this report's period.");
+      if (!data) {
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(90, 90, 90);
+        doc.text('The cash box is not switched on yet.', 14, y + 4);
+        return;
+      }
+      pdfTable(doc, {
+        startY: y + 2, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9.5 },
+        footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
+        columnStyles: { 1: { halign: 'right' } },
+        head: [['How the box got to today', '']],
+        body: boxBreakdownRows(data.box),
+        foot: data.box.opening ? [['Cash in the box now', data.box.balance.toFixed(2)]] : undefined,
+      });
+      y = pdfSectionTitle(doc, pdfNextY(doc, y + 20), `Cash box records, ${label}`, 'Opening balances, box counts, and money moved to or from the bank. None of these are income or expenses.');
+      const rows = boxHistoryRows(data.logs, start, end);
+      pdfTable(doc, {
+        startY: y + 2, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
+        columnStyles: { 2: { halign: 'right' } },
+        head: [['Date', 'What', 'Amount', 'Details', 'Note', 'By']],
+        body: rows.length ? rows : [['No cash box records this period', '', '', '', '', '']],
+      });
+    }
     async function downloadFinanceReport() {
       try {
         const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
@@ -7542,9 +7940,34 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         doc.setFontSize(13);
         doc.setTextColor(...PDF_ACCENT);
         doc.text(`Net Income: ${(income - expense).toFixed(2)}`, 14, y);
+        pdfCashBoxPage(doc, await fetchBoxData(state.activeGroup), start, end, label);
         doc.save(pdfFilename('Income-Statement', label));
       } catch (err) {
         console.error('finance report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    async function downloadCashBoxReport() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const [data, auditRes] = await Promise.all([
+          fetchBoxData(state.activeGroup),
+          db.from('finance_audit_log').select('*').eq('group_key', state.activeGroup)
+            .gte('changed_at', `${start}T00:00:00+03:00`).lte('changed_at', `${end}T23:59:59+03:00`).order('changed_at', { ascending: true }),
+        ]);
+        const doc = new jsPDF();
+        let y = pdfHeader(doc, 'Cash Box & Finance Activity Log', label);
+        y = pdfSectionTitle(doc, y, 'Finance activity log', 'Every add, edit, and delete on this group\'s ledger entries and cash box records in this period, recorded automatically.');
+        const rows = auditRes.error ? [] : auditPdfRows(auditRes.data || []);
+        pdfTable(doc, {
+          startY: y + 2, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
+          head: [['When', 'Who', 'What', 'Item', 'Changes']],
+          body: rows.length ? rows : [[auditRes.error ? 'The activity log is not switched on yet' : 'No changes this period', '', '', '', '']],
+        });
+        pdfCashBoxPage(doc, data, start, end, label);
+        doc.save(pdfFilename('Cash-Box-and-Activity', label));
+      } catch (err) {
+        console.error('cash box report failed', err);
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
@@ -8091,8 +8514,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
           head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
-          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), r.created_by_name || '—']) : [['No entries this period', '', '', '', '', '']],
+          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), pdfWhoWhen(r.created_by_name, r.created_at)]) : [['No entries this period', '', '', '', '', '']],
         });
+        pdfCashBoxPage(doc, await fetchBoxData(state.activeGroup), start, end, label);
         doc.save(pdfFilename('Music-Finance', label));
       } catch (err) {
         console.error('music finance report failed', err);
@@ -8114,8 +8538,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
           head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
-          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), r.created_by_name || '—']) : [['No entries this period', '', '', '', '', '']],
+          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), pdfWhoWhen(r.created_by_name, r.created_at)]) : [['No entries this period', '', '', '', '', '']],
         });
+        pdfCashBoxPage(doc, await fetchBoxData(state.activeGroup), start, end, label);
         doc.save(pdfFilename('Social-Media-Finance', label));
       } catch (err) {
         console.error('social media finance report failed', err);
@@ -8140,6 +8565,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         els.reportRangeRow.toggleAttribute('hidden', !isRange);
       });
       el('[data-report-finance]').addEventListener('click', downloadFinanceReport);
+      el('[data-report-cashbox]').addEventListener('click', downloadCashBoxReport);
       el('[data-report-fees]').addEventListener('click', downloadFeesReport);
       el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);
       el('[data-report-curriculum]').addEventListener('click', downloadCurriculumReport);
@@ -10074,6 +10500,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       document.querySelectorAll('[data-vendors-report]').forEach((el: any) => {
         el.toggleAttribute('hidden', state.activeGroup === LEADERS_GROUP_KEY);
       });
+      // Leaders has no Finance tab, so no cash box either.
+      document.querySelectorAll('[data-cashbox-report]').forEach((el: any) => {
+        el.toggleAttribute('hidden', state.activeGroup === LEADERS_GROUP_KEY);
+      });
       balanceTabs();
     }
 
@@ -10317,6 +10747,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindRosterForm();
         bindCopyPicker();
         bindFinanceForm();
+        bindCashBox();
         bindInventoryForm();
         bindInventoryCategories();
         bindAdjustmentsForm();

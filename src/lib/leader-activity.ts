@@ -11,14 +11,14 @@
 //
 // Deliberately not exhaustive — it covers the core, cross-group actions
 // that exist uniformly for every troop leader (attendance, curriculum,
-// finance, fees, roster), plus sign-ins. It does not reach into
+// finance, fees, roster, cash box, bank balances), plus sign-ins. It does not reach into
 // group-specific tables that only exist for Music/General/Social Media
 // (events, meeting notes, content items, inventory, vendors, PR) —
 // extend the query list below the same way if those ever need to show
 // up here too.
 import { GROUPS } from './curriculum/constants';
 
-export type LeaderActivityType = 'attendance' | 'curriculum' | 'finance' | 'fee' | 'roster' | 'login';
+export type LeaderActivityType = 'attendance' | 'curriculum' | 'finance' | 'fee' | 'roster' | 'login' | 'cashbox' | 'bank';
 
 export type LeaderActivityItem = {
   type: LeaderActivityType;
@@ -98,6 +98,16 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
     if (opts.leaderName) cq = cq.or(`created_by.eq.${opts.leaderName},updated_by.eq.${opts.leaderName}`);
     queries.push(dateScope(cq, 'date').then((r: any) => ({ kind: 'curriculum' as const, r })));
   }
+  // Cash box records (opening, counts, money moved to/from the bank).
+  queries.push(
+    tsScope(scopeUuid(db.from('cash_box_log').select('group_key, kind, amount, expected_balance, created_by, created_at'), 'created_by').order('created_at', { ascending: false }).limit(limit), 'created_at')
+      .then((r: any) => ({ kind: 'cashbox' as const, r }))
+  );
+  // Bank balances recorded — admin-only table, so a leader just gets none.
+  queries.push(
+    tsScope(scopeUuid(db.from('finance_reconciliations').select('as_of_date, statement_balance, created_by, created_at'), 'created_by').order('created_at', { ascending: false }).limit(limit), 'created_at')
+      .then((r: any) => ({ kind: 'bank' as const, r }))
+  );
   // Sign-ins — org-wide only with an admin session (device_sessions'
   // own RLS still applies; a non-admin caller just gets its own rows).
   if (opts.includeLogins) {
@@ -139,6 +149,21 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
       r.data.forEach((row: any) => {
         const who = row.updated_by || row.created_by || null;
         items.push({ type: 'curriculum', date: row.updated_at || row.date, leaderId: null, leaderName: who || 'Unknown', text: `Planned curriculum for ${groupLabel(row.group_key)} — ${row.date}${row.theme ? ` (${row.theme})` : ''}` });
+      });
+    } else if (kind === 'cashbox') {
+      r.data.forEach((row: any) => {
+        const amt = Number(row.amount).toFixed(2);
+        const g = groupLabel(row.group_key);
+        const diff = row.kind === 'count' && row.expected_balance != null ? Number(row.amount) - Number(row.expected_balance) : 0;
+        const text = row.kind === 'opening' ? `Set ${g}'s cash box opening balance to ${amt}`
+          : row.kind === 'to_bank' ? `Moved ${amt} from ${g}'s cash box to the bank`
+          : row.kind === 'from_bank' ? `Took ${amt} from the bank into ${g}'s cash box`
+          : `Counted ${g}'s cash box: ${amt}${Math.abs(diff) < 0.005 ? ', matched' : `, ${Math.abs(diff).toFixed(2)} ${diff < 0 ? 'short' : 'over'}`}`;
+        items.push({ type: 'cashbox', date: row.created_at, leaderId: row.created_by, leaderName: nameFor(row.created_by), text });
+      });
+    } else if (kind === 'bank') {
+      r.data.forEach((row: any) => {
+        items.push({ type: 'bank', date: row.created_at, leaderId: row.created_by, leaderName: nameFor(row.created_by), text: `Recorded the bank balance: ${Number(row.statement_balance).toFixed(2)} on ${row.as_of_date}` });
       });
     } else if (kind === 'login') {
       r.data.forEach((row: any) => {

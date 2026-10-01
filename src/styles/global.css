@@ -4780,6 +4780,8 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-dash-feed-dot--fee { background: #8a5a00; }
 .ws-dash-feed-dot--roster { background: var(--color-muted); }
 .ws-dash-feed-dot--login { background: #5b8a99; }
+.ws-dash-feed-dot--cashbox { background: #6b8e23; }
+.ws-dash-feed-dot--bank { background: #34495e; }
 /* Date-grouped lists (Admin's ledger, adjustments, reconciliations,
    change requests, activity log) — collapsible year >
    month > week > day, see src/lib/workspace/date-groups.ts. */
@@ -4806,6 +4808,23 @@ body.ws-scroll-locked { overflow: hidden; }
 .ws-dgroup--year > .ws-table-wrap { margin: 0 0.75rem 0.75rem; box-shadow: none; }
 .ws-dgroup-count { margin-inline-start: auto; font-size: 0.75rem; font-weight: 600; color: var(--color-muted); }
 .ws-dgroups > .ws-empty { margin: 0; }
+/* Cash Box (group Finance tab) + Admin's bank/boxes view. */
+.ws-box-hint {
+  margin: 0 0 1rem; padding: 0.7rem 0.9rem;
+  background: var(--color-bg); border: 1px solid var(--color-border); border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius); font-size: 0.9rem; color: var(--color-text);
+}
+.ws-box-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0 1.5rem; }
+.ws-box-form-help { margin: 0 0 0.9rem; font-size: 0.85rem; color: var(--color-muted); }
+.ws-box-diff { font-size: 0.78rem; font-weight: 700; }
+.ws-box-diff--neg { color: var(--color-brand-light); }
+.ws-box-diff--pos { color: var(--color-accent); }
+.ws-stat-num--sm { font-size: 1.25rem; }
+.ws-badge--audit-insert { background: rgba(46, 125, 50, 0.12); color: #2e7d32; }
+.ws-badge--audit-update { background: rgba(138, 90, 0, 0.12); color: #8a5a00; }
+.ws-badge--audit-delete { background: rgba(198, 40, 40, 0.12); color: #c62828; }
+/* Timestamp under a name in "Added by"/"By" cells (whoWhen()). */
+.ws-stamp { display: block; font-size: 0.72rem; color: var(--color-muted); font-variant-numeric: tabular-nums; }
 .ws-table--alog td[data-label="Time"] { font-variant-numeric: tabular-nums; color: var(--color-muted); }
 .ws-table--alog td[data-label="Details"] { white-space: normal; min-width: 16rem; }
 .ws-dash-feed-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }

@@ -167,26 +167,38 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= Finance (the accounting system) ================= -->
         <section class="ws-panel" data-panel="finance" hidden>
-          <p class="ws-att-hint">One accounting system across every group, the 5 troops' own Finance ledgers, plus Music's and General's. Nothing here duplicates a group's own Finance tab; it reads the same finance_entries every group already writes to.</p>
+          <p class="ws-att-hint">One accounting system across every group: the 5 troops' own Finance ledgers, plus Music's, General's and Social Media's, and the bank. Nothing here duplicates a group's own Finance tab; it reads the same entries every group already writes.</p>
 
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="finance" data-subtab="balances">Balances</button>
             <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="ledger">Ledger</button>
-            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="reconcile">Reconcile</button>
-            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="adjustments">Adjustments</button>
+            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="reconcile">Bank</button>
+            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="adjustments">Box Counts</button>
+            <button type="button" class="ws-subtab" data-subtabs="finance" data-subtab="activity">Activity Log</button>
           </div>
 
           <div data-subpanel="finance:balances">
+            <p class="ws-att-hint">Where the money is right now. The <strong>bank</strong> is whatever you last recorded from the bank app (Bank tab), plus or minus cash groups moved in or out since. Each group's <strong>cash box</strong> is kept by that group on its own Finance › Cash Box tab. Income and expenses are every group's activity this month, they don't say where the money sits.</p>
             <div class="ws-dash-kpis" data-fin-kpis style="margin-bottom: 1.75rem"></div>
+
+            <h3 class="ws-admin-h3">Group cash boxes</h3>
+            <div class="ws-table-wrap" style="margin-bottom: 1.75rem">
+              <table class="ws-table" data-box-table>
+                <thead><tr><th>Group</th><th>Cash in box</th><th>Opening balance</th><th>Last counted</th><th>Moved to bank (since opening)</th></tr></thead>
+                <tbody data-box-body></tbody>
+              </table>
+            </div>
 
             <div class="ws-member-form">
               <div class="ws-member-form-bar" aria-hidden="true"></div>
-              <p class="ws-member-form-title">Opening balance</p>
+              <p class="ws-member-form-title">Bank opening balance</p>
+              <p class="ws-box-form-help">What the bank account had on the day you started recording. After that, use the Bank tab to record what the bank app shows.</p>
               <div class="ws-form-grid">
                 <label class="ws-field"><span>Amount</span><input type="number" step="0.01" data-open-amount /></label>
                 <label class="ws-field"><span>As of date</span><input type="date" data-open-date /></label>
               </div>
               <div class="ws-form-actions"><button type="button" class="btn-primary" data-open-save>Save</button></div>
+              <p class="ws-box-form-help" data-open-meta></p>
             </div>
           </div>
 
@@ -232,38 +244,43 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
 
           <div data-subpanel="finance:reconcile" hidden>
-            <p class="ws-att-hint">Not every entry ever hits the bank the same way, some are cash, some sit in a group's own hands for a while, so this doesn't tick off individual transactions. It just compares what the system says the balance is, as of a date, against the real bank balance. A mismatch gets posted as a single adjustment entry (attributed to whichever group it belongs to) so the two line back up.</p>
-            <div class="ws-toolbar-row">
-              <label class="ws-field ws-field--inline"><span>As of</span><input type="date" data-rec-asof /></label>
-              <label class="ws-field ws-field--inline"><span>Actual bank balance</span><input type="number" step="0.01" data-rec-bank placeholder="0.00" /></label>
-              <button type="button" class="btn-primary" data-rec-load>Compare</button>
-            </div>
-            <div class="ws-stat-row ws-stat-row--3" data-rec-stats></div>
-
-            <div class="ws-member-form" data-rec-adjust-block hidden>
+            <p class="ws-att-hint">Open the bank app, see what the account has, and record it here. You don't need to know what came in or went out by CliQ, the system just compares it with what it expected (the last recorded amount, plus or minus cash groups moved in or out since) and keeps a record of the difference. Nothing is added to the income or expenses.</p>
+            <form class="ws-member-form" data-rec-form>
               <div class="ws-member-form-bar" aria-hidden="true"></div>
-              <p class="ws-member-form-title">Post an adjustment for the difference</p>
-              <div class="ws-form-grid">
-                <label class="ws-field"><span>Belongs to group *</span><select data-rec-adjust-group required></select></label>
-                <label class="ws-field ws-field--full"><span>Note</span><input type="text" data-rec-adjust-note placeholder="e.g. cash on hand not yet deposited" /></label>
+              <p class="ws-member-form-title" data-rec-form-title>Record bank balance</p>
+              <div class="ws-form-grid ws-form-grid--4">
+                <label class="ws-field"><span>Date *</span><input type="date" data-rec-asof required /></label>
+                <label class="ws-field"><span>Bank app shows *</span><input type="number" step="0.01" data-rec-bank placeholder="0.00" required /></label>
+                <label class="ws-field ws-field--full"><span>Note (optional)</span><input type="text" data-rec-note placeholder="e.g. includes CliQ donations from the bazaar" /></label>
               </div>
+              <div class="ws-stat-row ws-stat-row--3" data-rec-stats></div>
               <div class="ws-form-actions">
-                <button type="button" class="btn-primary" data-rec-save>Post adjustment &amp; save</button>
+                <button type="submit" class="btn-primary" data-rec-save>Save</button>
+                <button type="button" class="ws-form-cancel" data-rec-cancel hidden>Cancel edit</button>
               </div>
-            </div>
-            <div class="ws-form-actions" data-rec-match-block hidden>
-              <button type="button" class="btn-primary" data-rec-save-match>Save reconciliation, balances match</button>
-            </div>
+            </form>
 
-            <h3 class="ws-admin-h3">Reconciliation history</h3>
-            <p class="ws-att-hint">One row every time you check, even when nothing needed fixing. Proof of when you last looked, and what you found.</p>
+            <h3 class="ws-admin-h3">Bank history</h3>
+            <p class="ws-att-hint">One row every time someone records the bank balance.</p>
             <div class="ws-dgroups" data-rec-history-body></div>
           </div>
 
           <div data-subpanel="finance:adjustments" hidden>
-            <h3 class="ws-admin-h3">Adjustment entries</h3>
-            <p class="ws-att-hint">Only the actual correcting transactions, a check on the Reconcile tab only adds a row here when the balances didn't already match. These are real ledger entries (they affect that group's own balance too), pulled out here as a focused audit trail.</p>
-            <div class="ws-dgroups" data-adj-body></div>
+            <p class="ws-att-hint">Every time a group counted its cash box, from every group, and whether it matched. A box that's often short is worth a conversation.</p>
+            <div class="ws-dgroups" data-box-counts></div>
+            <div data-adj-block hidden>
+              <h3 class="ws-admin-h3">Older bank adjustment entries</h3>
+              <p class="ws-att-hint">From before the cash box, when Reconcile posted a correcting entry into a group's ledger. They're still real ledger entries.</p>
+              <div class="ws-dgroups" data-adj-body></div>
+            </div>
+          </div>
+
+          <div data-subpanel="finance:activity" hidden>
+            <p class="ws-att-hint">Every change to money anywhere, recorded automatically: ledger entries, cash box records, bank balances and the bank opening balance, added, edited or deleted, with who did it and exactly when. Nothing here can be changed or removed.</p>
+            <div class="ws-toolbar-row">
+              <label class="ws-field ws-field--inline"><span>Group</span><select data-faudit-group><option value="">Everything</option></select></label>
+            </div>
+            <div class="ws-dgroups" data-faudit-body></div>
           </div>
         </section>
 
@@ -283,8 +300,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <div class="ws-report-grid">
             <div class="ws-report-card">
               <h3 class="ws-admin-h3">Full Accounting Report</h3>
-              <p class="ws-report-desc">Everything in one document: opening &amp; running balance, the latest bank reconciliation (bank vs. system, and when), net income, and the full by-group breakdown.</p>
+              <p class="ws-report-desc">Everything in one document: bank balance and the last bank check, every group's cash box, total money, net income, and the full by-group breakdown.</p>
               <button type="button" class="btn-primary" data-report-full>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Bank &amp; Cash Boxes</h3>
+              <p class="ws-report-desc">Where the money is: the bank and every group's cash box today, every bank balance recorded in the period, and every box record (openings, counts, money moved to or from the bank).</p>
+              <button type="button" class="btn-primary" data-report-bankboxes>Download PDF</button>
+            </div>
+            <div class="ws-report-card">
+              <h3 class="ws-admin-h3">Finance Activity Log</h3>
+              <p class="ws-report-desc">Every change to money in the period, across every group and the bank: what was added, edited, or deleted, by whom, and exactly when.</p>
+              <button type="button" class="btn-primary" data-report-faudit>Download PDF</button>
             </div>
             <div class="ws-report-card">
               <h3 class="ws-admin-h3">Monthly Fees</h3>
@@ -660,7 +687,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
 
           <div data-subpanel="people:activitylog" hidden>
-            <p class="ws-att-hint">Every login and logged action across the workspace, inferred from each table's own record of who last touched it — not every possible click, but every meaningful change: attendance taken, curriculum planned, finance logged, fee payments recorded, roster members added, and sign-ins.</p>
+            <p class="ws-att-hint">Every login and logged action across the workspace, inferred from each table's own record of who last touched it — not every possible click, but every meaningful change: attendance taken, curriculum planned, finance logged, fee payments recorded, roster members added, cash box records, bank balances, and sign-ins. For every edit and delete on money, see Finance › Activity Log.</p>
             <div class="ws-toolbar-row">
               <label class="ws-field ws-field--inline"><span>Leader</span><select data-alog-leader><option value="">All leaders</option></select></label>
               <label class="ws-field ws-field--inline"><span>From</span><input type="date" data-alog-from /></label>
@@ -838,7 +865,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     import { GROUPS, TROOP_GROUPS, MONTHS, WEEKDAYS, MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY, SC_EVENT_COLORS, scEventColorValue } from '../lib/curriculum/constants';
     import { initRowNumbering, initCollapsibleRows } from '../lib/workspace/row-numbers';
     import { fetchLeaderActivity, activityLocalParts, type LeaderActivityItem } from '../lib/leader-activity';
-    import { renderDateGroups, ammanDay } from '../lib/workspace/date-groups';
+    import { renderDateGroups, ammanDay, formatStamp, whoWhen } from '../lib/workspace/date-groups';
+    import { computeBox, computeBank, countCorrection, boxBreakdownRows, boxHistoryRows, pdfWhoWhen, type BoxLog } from '../lib/workspace/cash-box';
+    import { describeAudit, auditPdfRows, type AuditRow } from '../lib/workspace/finance-audit';
 
     const db: any = supabase;
 
@@ -850,8 +879,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       settings: null,
       ovMembers: [],
       ovLeaders: [],
-      recSystemBalance: 0,
-      recDiff: null,
+      bank: null, editingRecId: null, editingRecExpected: null, recHistory: [],
       editingSharedVendorId: null,
       people: [],
       sc: { view: 'month', anchor: new Date(), currentDay: null },
@@ -1144,18 +1172,22 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.finGroupBody = el('[data-fin-group-body]');
       els.finBody = el('[data-fin-body]');
 
+      els.recForm = el('[data-rec-form]');
+      els.recFormTitle = el('[data-rec-form-title]');
       els.recAsof = el('[data-rec-asof]');
       els.recBank = el('[data-rec-bank]');
-      els.recLoad = el('[data-rec-load]');
+      els.recNote = el('[data-rec-note]');
       els.recStats = el('[data-rec-stats]');
-      els.recAdjustBlock = el('[data-rec-adjust-block]');
-      els.recAdjustGroup = el('[data-rec-adjust-group]');
-      els.recAdjustNote = el('[data-rec-adjust-note]');
       els.recSave = el('[data-rec-save]');
-      els.recMatchBlock = el('[data-rec-match-block]');
-      els.recSaveMatch = el('[data-rec-save-match]');
+      els.recCancel = el('[data-rec-cancel]');
       els.recHistoryBody = el('[data-rec-history-body]');
       els.adjBody = el('[data-adj-body]');
+      els.adjBlock = el('[data-adj-block]');
+      els.boxBody = el('[data-box-body]');
+      els.boxCounts = el('[data-box-counts]');
+      els.openMeta = el('[data-open-meta]');
+      els.fauditGroup = el('[data-faudit-group]');
+      els.fauditBody = el('[data-faudit-body]');
 
       els.reportMonth = el('[data-report-month]');
       els.reportYear = el('[data-report-year]');
@@ -2133,70 +2165,102 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       state.settings = data;
       return data;
     }
+    // Every group that has a Finance tab (Leaders doesn't).
+    const FINANCE_GROUPS = GROUPS.filter((g) => g.key !== LEADERS_GROUP_KEY);
+    // Bank + cash boxes — see src/lib/workspace/cash-box.ts. Also sets
+    // state.bank, which the Bank tab compares a new bank amount against.
     async function loadFinanceKpis() {
       await ensureOrgSettings();
-      const [entriesRes, lastRecRes] = await Promise.all([
-        db.from('finance_entries').select('entry_type, amount, entry_date'),
-        db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).limit(1).maybeSingle(),
+      const [entriesRes, lastCheckRes, logsRes] = await Promise.all([
+        db.from('finance_entries').select('group_key, entry_type, amount, entry_date'),
+        db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+        db.from('cash_box_log').select('*'),
       ]);
       if (entriesRes.error) { console.error(entriesRes.error); showToast('Could not load finance totals.'); return; }
       const rows = entriesRes.data || [];
-      const opening = Number(state.settings?.opening_balance || 0);
-      const running = opening + rows.reduce((s: number, r: any) => s + signedAmount(r), 0);
-      const lastRec = lastRecRes.data;
-      // The confirmed bank balance from the last reconciliation, carried
-      // forward by everything logged since — grounded in a real bank
-      // check, unlike Running Balance above (which never anchors to the
-      // actual bank, just opening balance + every entry ever).
-      const actualBalance = lastRec
-        ? Number(lastRec.statement_balance) + rows.filter((r: any) => r.entry_date > lastRec.as_of_date).reduce((s: number, r: any) => s + signedAmount(r), 0)
-        : running;
+      // cash_box_log missing = cash_box_schema.sql not run yet; treat as no boxes.
+      const logs: BoxLog[] = logsRes.error ? [] : (logsRes.data || []);
+      const bank = computeBank(state.settings, lastCheckRes.data, logs);
+      state.bank = bank;
+      const boxes = FINANCE_GROUPS.map((g) => ({
+        g, box: computeBox(rows.filter((r: any) => r.group_key === g.key), logs.filter((l) => l.group_key === g.key)),
+      }));
+      const setUp = boxes.filter((b) => b.box.opening);
+      const cashInBoxes = setUp.reduce((s2, b) => s2 + b.box.balance, 0);
 
       const now = new Date();
       const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       const prevD = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const prevPeriod = `${prevD.getFullYear()}-${String(prevD.getMonth() + 1).padStart(2, '0')}`;
       const thisMonthRows = rows.filter((r: any) => String(r.entry_date).startsWith(period));
-      const incomeThis = thisMonthRows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
-      const expenseThis = thisMonthRows.filter((r: any) => r.entry_type === 'expense').reduce((s: number, r: any) => s + Number(r.amount), 0);
+      const incomeThis = thisMonthRows.filter((r: any) => r.entry_type === 'income').reduce((s2: number, r: any) => s2 + Number(r.amount), 0);
+      const expenseThis = thisMonthRows.filter((r: any) => r.entry_type === 'expense').reduce((s2: number, r: any) => s2 + Number(r.amount), 0);
       const netThis = incomeThis - expenseThis;
-      const netPrev = rows.filter((r: any) => String(r.entry_date).startsWith(prevPeriod)).reduce((s: number, r: any) => s + signedAmount(r), 0);
+      const netPrev = rows.filter((r: any) => String(r.entry_date).startsWith(prevPeriod)).reduce((s2: number, r: any) => s2 + signedAmount(r), 0);
 
+      const moved = bank.movedIn - bank.movedOut;
+      const bankNote = bank.baseKind === 'check'
+        ? `Bank app on ${bank.baseDate}${bank.baseBy ? ` (${escapeHtml(bank.baseBy)})` : ''}${moved ? `, ${moved > 0 ? '+' : '−'}${fmt(Math.abs(moved))} moved by groups since` : ''}`
+        : bank.baseKind === 'opening'
+          ? `Opening balance ${bank.baseDate}${moved ? `, ${moved > 0 ? '+' : '−'}${fmt(Math.abs(moved))} moved by groups since` : ''}, not checked yet`
+          : 'Not set up yet';
       els.finKpis.innerHTML = `
         <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">${'\u{1F3E6}'}</span><span class="ws-dash-kpi-label">Running Balance</span></div>
-          <span class="ws-dash-kpi-num">${fmt(running)}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">Opening ${fmt(opening)} · every group</span>
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">${'\u{1F3E6}'}</span><span class="ws-dash-kpi-label">Bank balance</span></div>
+          <span class="ws-dash-kpi-num">${fmt(bank.balance)}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${bankNote}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">${'\u{1F4B0}'}</span><span class="ws-dash-kpi-label">Cash in boxes</span></div>
+          <span class="ws-dash-kpi-num">${fmt(cashInBoxes)}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${setUp.length} of ${FINANCE_GROUPS.length} groups set up</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">=</span><span class="ws-dash-kpi-label">Total money</span></div>
+          <span class="ws-dash-kpi-num">${fmt(bank.balance + cashInBoxes)}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">Bank + every cash box</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">↑</span><span class="ws-dash-kpi-label">Income (mtd)</span></div>
           <span class="ws-dash-kpi-num">${fmt(incomeThis)}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">${MONTHS[now.getMonth()].en} ${now.getFullYear()}</span>
+          <span class="ws-dash-delta ws-dash-delta--flat">${MONTHS[now.getMonth()].en} ${now.getFullYear()}, every group</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">↓</span><span class="ws-dash-kpi-label">Expenses (mtd)</span></div>
           <span class="ws-dash-kpi-num">${fmt(expenseThis)}</span>
           ${dashDeltaBadge(Math.round(netThis - netPrev))}
         </div>
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✓</span><span class="ws-dash-kpi-label">Actual Running Balance</span></div>
-          <span class="ws-dash-kpi-num">${fmt(actualBalance)}</span>
-          <span class="ws-dash-delta ws-dash-delta--flat">${lastRec ? `Since ${lastRec.as_of_date}'s reconciliation` : 'Not reconciled yet, same as Running Balance'}</span>
-        </div>
       `;
+      els.boxBody.innerHTML = boxes.map(({ g, box }) => box.opening ? `
+        <tr>
+          <td data-label="Group">${escapeHtml(g.en)}</td>
+          <td data-label="Cash in box"><strong>${fmt(box.balance)}</strong></td>
+          <td data-label="Opening balance">${fmt(box.opening.amount)} · ${escapeHtml(box.opening.event_date)}<span class="ws-stamp">by ${escapeHtml(box.opening.created_by_name || '—')}</span></td>
+          <td data-label="Last counted">${box.lastCount ? `${escapeHtml(box.lastCount.event_date)}<span class="ws-stamp">by ${escapeHtml(box.lastCount.created_by_name || '—')}${Math.abs(countCorrection(box.lastCount)) >= 0.005 ? `, ${countCorrection(box.lastCount) < 0 ? 'short' : 'over'} ${fmt(Math.abs(countCorrection(box.lastCount)))}` : ', matched'}</span>` : 'Never'}</td>
+          <td data-label="Moved to bank (since opening)">${fmt(box.toBank)}${box.fromBank ? `<span class="ws-stamp">took ${fmt(box.fromBank)} from the bank</span>` : ''}</td>
+        </tr>` : `
+        <tr>
+          <td data-label="Group">${escapeHtml(g.en)}</td>
+          <td data-label="Cash in box" colspan="4"><span class="ws-dash-empty-mini">Not set up yet, the group enters its opening cash on Finance › Cash Box.</span></td>
+        </tr>`).join('');
       els.openAmount.value = state.settings?.opening_balance ?? 0;
       els.openDate.value = state.settings?.opening_balance_date || todayStr();
+      els.openMeta.textContent = state.settings?.updated_at
+        ? `Last saved ${formatStamp(state.settings.updated_at)}${state.settings.updated_by_name ? ` by ${state.settings.updated_by_name}` : ''}.`
+        : '';
+      updateBankPreview();
     }
     function bindOpeningBalanceForm() {
       els.openSave.addEventListener('click', async () => {
         const opening_balance = Number(els.openAmount.value || 0);
         const opening_balance_date = els.openDate.value || todayStr();
-        const { error } = await db.from('org_finance_settings').update({ opening_balance, opening_balance_date, updated_by: state.session.user.id }).eq('id', 'org');
+        const updated_at = new Date().toISOString();
+        const updated_by_name = state.profile?.name || null;
+        const { error } = await db.from('org_finance_settings').update({ opening_balance, opening_balance_date, updated_by: state.session.user.id, updated_at, updated_by_name }).eq('id', 'org');
         if (error) { showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return; }
-        state.settings.opening_balance = opening_balance;
-        state.settings.opening_balance_date = opening_balance_date;
-        showToast('Opening balance saved.');
-        await loadFinanceKpis();
+        Object.assign(state.settings, { opening_balance, opening_balance_date, updated_at, updated_by_name });
+        showToast('Bank opening balance saved.');
+        await Promise.all([loadFinanceKpis(), loadFinanceAudit()]);
       });
     }
 
@@ -2259,13 +2323,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         els.txDescription.value = '';
         await loadFinancePeriod();
         await loadFinanceKpis();
+        await loadFinanceAudit();
       });
     }
 
     async function loadFinancePeriod() {
       populatePeriodSelects(els.finMonth, els.finYear, true);
       const { start, end } = periodRange(els.finMonth, els.finYear);
-      const { data, error } = await db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, description, created_by_name')
+      const { data, error } = await db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, description, created_by_name, created_at')
         .gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: false });
       if (error) { console.error(error); showToast('Could not load finance.'); return; }
       renderFinancePeriod(data || []);
@@ -2303,139 +2368,200 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 <td data-label="Category">${escapeHtml(r.category || '—')}</td>
                 <td data-label="Description">${escapeHtml(r.description || '—')}</td>
                 <td data-label="Amount">${fmt(r.amount)}</td>
-                <td data-label="Added by">${escapeHtml(r.created_by_name || '—')}</td>
+                <td data-label="Added by">${whoWhen(r.created_by_name, r.created_at, escapeHtml)}</td>
               </tr>`;
             },
           })
         : '<p class="ws-empty">No entries this period.</p>';
     }
 
-    // ---------- Reconcile: compare the system's balance to the real bank
-    // balance as of a date, and — since not every entry is a bank
-    // transaction (cash, in-hand group funds, etc.) — true up any gap with
-    // a single adjustment entry rather than ticking off individual rows. --
-    async function compareReconcile() {
-      await ensureOrgSettings();
+    // ---------- Bank: record what the bank app shows ------------------------
+    // The bank is CliQ-driven, so nothing tries to track it transaction by
+    // transaction — an admin records the real amount now and then, and
+    // the system notes how far it was from what it expected (last
+    // recorded amount ± cash groups moved in/out since). No adjustment
+    // entries; income/expenses are untouched.
+    function updateBankPreview() {
       if (!els.recAsof.value) els.recAsof.value = todayStr();
-      const asOf = els.recAsof.value;
-      const { data, error } = await db.from('finance_entries').select('entry_type, amount, entry_date').lte('entry_date', asOf);
-      if (error) { console.error(error); showToast('Could not load finance totals.'); return; }
-      const opening = Number(state.settings?.opening_balance || 0);
-      const system = opening + (data || []).reduce((s: number, r: any) => s + signedAmount(r), 0);
-      state.recSystemBalance = system;
-
-      const bank = els.recBank.value === '' ? null : Number(els.recBank.value);
-      const diff = bank == null ? null : bank - system;
-      state.recDiff = diff;
+      const expected = state.editingRecId ? state.editingRecExpected : state.bank?.balance;
+      if (expected == null) { els.recStats.innerHTML = ''; return; }
+      const bankVal = els.recBank.value === '' ? null : Number(els.recBank.value);
+      const diff = bankVal == null ? null : bankVal - expected;
       els.recStats.innerHTML = `
-        <div class="ws-stat"><span class="ws-stat-icon">${'\u{1F3E6}'}</span><span class="ws-stat-text"><span class="ws-stat-num">${fmt(system)}</span><span class="ws-stat-label">System Balance (as of this date)</span></span></div>
-        <div class="ws-stat"><span class="ws-stat-icon">✓</span><span class="ws-stat-text"><span class="ws-stat-num">${bank == null ? '—' : fmt(bank)}</span><span class="ws-stat-label">Actual Bank Balance</span></span></div>
-        <div class="ws-stat ${diff != null && Math.abs(diff) < 0.005 ? 'ws-stat--accent' : ''}"><span class="ws-stat-icon">${diff == null ? '?' : (Math.abs(diff) < 0.005 ? '✓' : '⚠')}</span><span class="ws-stat-text"><span class="ws-stat-num">${diff == null ? '—' : fmt(diff)}</span><span class="ws-stat-label">Difference</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">≈</span><span class="ws-stat-text"><span class="ws-stat-num">${fmt(expected)}</span><span class="ws-stat-label">The system expected</span></span></div>
+        <div class="ws-stat"><span class="ws-stat-icon">${'\u{1F3E6}'}</span><span class="ws-stat-text"><span class="ws-stat-num">${bankVal == null ? '—' : fmt(bankVal)}</span><span class="ws-stat-label">Bank app shows</span></span></div>
+        <div class="ws-stat ${diff != null && Math.abs(diff) < 0.005 ? 'ws-stat--accent' : ''}"><span class="ws-stat-icon">±</span><span class="ws-stat-text"><span class="ws-stat-num">${diff == null ? '—' : (diff > 0 ? '+' : diff < 0 ? '−' : '') + fmt(Math.abs(diff))}</span><span class="ws-stat-label">${diff == null ? 'Difference' : Math.abs(diff) < 0.005 ? 'Matches' : 'Came in/out without being recorded here (CliQ etc.)'}</span></span></div>
       `;
-      const matches = diff != null && Math.abs(diff) < 0.005;
-      els.recAdjustBlock.toggleAttribute('hidden', diff == null || matches);
-      els.recMatchBlock.toggleAttribute('hidden', !matches);
     }
-    async function saveReconciliation(adjustmentEntryId: string | null, note: string | null) {
-      const asOf = els.recAsof.value;
-      const bank = Number(els.recBank.value);
-      const { error } = await db.from('finance_reconciliations').insert({
-        as_of_date: asOf, statement_balance: bank, system_balance: state.recSystemBalance,
-        difference: state.recDiff, notes: note, adjustment_entry_id: adjustmentEntryId,
-        created_by: state.session.user.id, created_by_name: state.profile?.name || null,
-      });
-      if (error) { showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return false; }
-      return true;
+    function resetBankForm() {
+      state.editingRecId = null;
+      state.editingRecExpected = null;
+      els.recForm.reset();
+      els.recAsof.value = todayStr();
+      els.recFormTitle.textContent = 'Record bank balance';
+      els.recSave.textContent = 'Save';
+      els.recCancel.hidden = true;
+      updateBankPreview();
     }
     function renderReconcileHistory(rows: any[]) {
-      if (!rows.length) { els.recHistoryBody.innerHTML = '<p class="ws-empty">No reconciliations saved yet.</p>'; return; }
+      state.recHistory = rows;
+      if (!rows.length) { els.recHistoryBody.innerHTML = '<p class="ws-empty">No bank balances recorded yet.</p>'; return; }
       els.recHistoryBody.innerHTML = renderDateGroups({
         rows,
         day: (r: any) => r.as_of_date,
-        head: '<tr><th>As of</th><th>Bank Balance</th><th>System Balance</th><th>Adjustment</th><th>Saved</th><th>By</th></tr>',
-        row: (r: any) => `
-        <tr>
-          <td data-label="As of">${r.as_of_date}</td>
-          <td data-label="Bank Balance">${fmt(r.statement_balance)}</td>
-          <td data-label="System Balance">${fmt(r.system_balance)}</td>
-          <td data-label="Adjustment">${r.adjustment_entry_id ? fmt(r.difference) : '—'}</td>
-          <td data-label="Saved">${new Date(r.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' })}</td>
-          <td data-label="By">${escapeHtml(r.created_by_name || '—')}</td>
-        </tr>`,
-      });
-    }
-    async function loadReconcileHistory() {
-      const { data, error } = await db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).limit(12);
-      if (error) { console.error(error); return; }
-      renderReconcileHistory(data || []);
-    }
-    async function loadAdjustmentEntries() {
-      const { data, error } = await db.from('finance_entries').select('*').eq('is_adjustment', true).order('entry_date', { ascending: false });
-      if (error) { console.error(error); return; }
-      renderAdjustmentEntries(data || []);
-    }
-    function renderAdjustmentEntries(rows: any[]) {
-      if (!rows.length) { els.adjBody.innerHTML = '<p class="ws-empty">No adjustments posted yet.</p>'; return; }
-      els.adjBody.innerHTML = renderDateGroups({
-        rows,
-        day: (r: any) => r.entry_date,
-        head: '<tr><th>Date</th><th>Group</th><th>Type</th><th>Amount</th><th>Note</th><th>Posted by</th></tr>',
+        head: '<tr><th>Bank app showed</th><th>System expected</th><th>Difference</th><th>Note</th><th>Recorded by</th><th></th></tr>',
         row: (r: any) => {
-        const g = GROUPS.find((x) => x.key === r.group_key);
-        return `
-          <tr>
-            <td data-label="Date">${r.entry_date}</td>
-            <td data-label="Group">${escapeHtml(g ? g.en : r.group_key)}</td>
-            <td data-label="Type">${r.entry_type === 'income' ? 'Income' : 'Expense'}</td>
-            <td data-label="Amount">${fmt(r.amount)}</td>
-            <td data-label="Note">${escapeHtml(r.description || '—')}</td>
-            <td data-label="Posted by">${escapeHtml(r.created_by_name || '—')}</td>
+          const diff = r.difference == null ? null : Number(r.difference);
+          return `
+          <tr data-rec-id="${r.id}">
+            <td data-label="Bank app showed"><strong>${fmt(r.statement_balance)}</strong></td>
+            <td data-label="System expected">${r.system_balance == null ? '—' : fmt(r.system_balance)}</td>
+            <td data-label="Difference">${diff == null ? '—' : Math.abs(diff) < 0.005 ? 'Matched' : `<span class="ws-box-diff ws-box-diff--${diff < 0 ? 'neg' : 'pos'}">${diff < 0 ? '−' : '+'}${fmt(Math.abs(diff))}</span>`}${r.adjustment_entry_id ? '<span class="ws-stamp">old-style adjustment posted</span>' : ''}</td>
+            <td data-label="Note">${escapeHtml(r.notes || '—')}</td>
+            <td data-label="Recorded by">${whoWhen(r.created_by_name, r.created_at, escapeHtml)}</td>
+            <td class="ws-row-actions"><button type="button" class="ws-edit-btn" data-rec-edit>Edit</button> <button type="button" class="ws-row-del" data-rec-del>×</button></td>
           </tr>`;
         },
       });
+      els.recHistoryBody.querySelectorAll('[data-rec-edit]').forEach((btn: any) => {
+        btn.addEventListener('click', () => {
+          const r = state.recHistory.find((x: any) => x.id === btn.closest('tr').dataset.recId);
+          if (!r) return;
+          state.editingRecId = r.id;
+          state.editingRecExpected = r.system_balance == null ? null : Number(r.system_balance);
+          els.recAsof.value = r.as_of_date;
+          els.recBank.value = Number(r.statement_balance).toFixed(2);
+          els.recNote.value = r.notes || '';
+          els.recFormTitle.textContent = `Fix the bank balance recorded for ${r.as_of_date}`;
+          els.recSave.textContent = 'Save changes';
+          els.recCancel.hidden = false;
+          updateBankPreview();
+          els.recForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+      els.recHistoryBody.querySelectorAll('[data-rec-del]').forEach((btn: any) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Delete this bank record? The deletion is kept in the Activity Log.')) return;
+          const { error } = await db.from('finance_reconciliations').delete().eq('id', btn.closest('tr').dataset.recId);
+          if (error) { showToast('Could not delete.'); return; }
+          resetBankForm();
+          await Promise.all([loadFinanceKpis(), loadReconcileHistory(), loadFinanceAudit()]);
+        });
+      });
+    }
+    async function loadReconcileHistory() {
+      const { data, error } = await db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).order('created_at', { ascending: false }).limit(100);
+      if (error) { console.error(error); return; }
+      renderReconcileHistory(data || []);
     }
     function bindReconcile() {
-      els.recAdjustGroup.innerHTML = GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
-      els.recLoad.addEventListener('click', compareReconcile);
-      els.recBank.addEventListener('input', compareReconcile);
-
-      els.recSave.addEventListener('click', async () => {
-        const diff = state.recDiff;
-        if (diff == null) return;
-        const note = els.recAdjustNote.value.trim() || null;
-        if (!els.recAdjustGroup.value) { showToast('Pick which group this belongs to.'); return; }
+      els.recBank.addEventListener('input', updateBankPreview);
+      els.recCancel.addEventListener('click', resetBankForm);
+      els.recForm.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        if (els.recBank.value === '' || !els.recAsof.value) { showToast('Enter the date and what the bank app shows.'); return; }
+        const bankVal = Number(els.recBank.value);
+        const note = els.recNote.value.trim() || null;
         els.recSave.disabled = true;
-        const { data: inserted, error } = await db.from('finance_entries').insert({
-          group_key: els.recAdjustGroup.value,
-          entry_type: diff >= 0 ? 'income' : 'expense',
-          category: 'Reconciliation Adjustment',
-          is_adjustment: true,
-          amount: Math.abs(diff),
-          entry_date: els.recAsof.value,
-          description: note || `Reconciliation adjustment as of ${els.recAsof.value}`,
-          created_by: state.session.user.id, created_by_name: state.profile?.name || null,
-        }).select().single();
-        if (error) { showToast('Could not post the adjustment, ' + (error.message || 'unknown error') + '.'); els.recSave.disabled = false; return; }
-        const ok = await saveReconciliation(inserted?.id || null, note);
+        let error;
+        if (state.editingRecId) {
+          const expected = state.editingRecExpected;
+          ({ error } = await db.from('finance_reconciliations').update({
+            as_of_date: els.recAsof.value, statement_balance: bankVal, notes: note,
+            difference: expected == null ? 0 : bankVal - expected,
+          }).eq('id', state.editingRecId));
+        } else {
+          const expected = Number((state.bank?.balance || 0).toFixed(2));
+          ({ error } = await db.from('finance_reconciliations').insert({
+            as_of_date: els.recAsof.value, statement_balance: bankVal, system_balance: expected,
+            difference: bankVal - expected, notes: note,
+            created_by: state.session.user.id, created_by_name: state.profile?.name || null,
+          }));
+        }
         els.recSave.disabled = false;
-        if (!ok) return;
-        showToast(`Adjustment posted to ${GROUPS.find((g) => g.key === els.recAdjustGroup.value)?.en} and reconciliation saved.`);
-        els.recAdjustNote.value = '';
-        await compareReconcile();
-        await loadFinanceKpis();
-        await loadFinancePeriod();
-        await loadReconcileHistory();
-        await loadAdjustmentEntries();
+        if (error) { showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return; }
+        showToast(state.editingRecId ? 'Fixed.' : 'Bank balance recorded.');
+        resetBankForm();
+        await Promise.all([loadFinanceKpis(), loadReconcileHistory(), loadFinanceAudit()]);
       });
+    }
 
-      els.recSaveMatch.addEventListener('click', async () => {
-        els.recSaveMatch.disabled = true;
-        const ok = await saveReconciliation(null, null);
-        els.recSaveMatch.disabled = false;
-        if (!ok) return;
-        showToast('Saved, balances match.');
-        await loadReconcileHistory();
-      });
+    // ---------- Box Counts: every group's cash box counts ------------------
+    async function loadBoxCounts() {
+      const [countsRes, adjRes] = await Promise.all([
+        db.from('cash_box_log').select('*').eq('kind', 'count').order('created_at', { ascending: false }).limit(300),
+        db.from('finance_entries').select('*').eq('is_adjustment', true).order('entry_date', { ascending: false }),
+      ]);
+      const counts: BoxLog[] = countsRes.data || [];
+      els.boxCounts.innerHTML = countsRes.error
+        ? '<p class="ws-empty">The cash box isn\'t switched on yet, run cash_box_schema.sql in Supabase.</p>'
+        : counts.length ? renderDateGroups({
+          rows: counts,
+          day: (l: BoxLog) => l.event_date,
+          head: '<tr><th>Group</th><th>System expected</th><th>Counted</th><th>Difference</th><th>Note</th><th>Counted by</th></tr>',
+          row: (l: BoxLog) => {
+            const diff = countCorrection(l);
+            return `
+            <tr>
+              <td data-label="Group">${escapeHtml(GROUPS.find((g) => g.key === l.group_key)?.en || l.group_key)}</td>
+              <td data-label="System expected">${fmt(Number(l.expected_balance))}</td>
+              <td data-label="Counted"><strong>${fmt(Number(l.amount))}</strong></td>
+              <td data-label="Difference">${Math.abs(diff) < 0.005 ? 'Matched' : `<span class="ws-box-diff ws-box-diff--${diff < 0 ? 'neg' : 'pos'}">${diff < 0 ? 'Short ' : 'Over '}${fmt(Math.abs(diff))}</span>`}</td>
+              <td data-label="Note">${escapeHtml(l.note || '—')}</td>
+              <td data-label="Counted by">${whoWhen(l.created_by_name, l.created_at, escapeHtml)}</td>
+            </tr>`;
+          },
+        }) : '<p class="ws-empty">No group has counted its box yet.</p>';
+      const adj = adjRes.data || [];
+      els.adjBlock.hidden = !adj.length;
+      els.adjBody.innerHTML = adj.length ? renderDateGroups({
+        rows: adj,
+        day: (r: any) => r.entry_date,
+        head: '<tr><th>Date</th><th>Group</th><th>Type</th><th>Amount</th><th>Note</th><th>Posted by</th></tr>',
+        row: (r: any) => `
+          <tr>
+            <td data-label="Date">${r.entry_date}</td>
+            <td data-label="Group">${escapeHtml(GROUPS.find((x) => x.key === r.group_key)?.en || r.group_key)}</td>
+            <td data-label="Type">${r.entry_type === 'income' ? 'Income' : 'Expense'}</td>
+            <td data-label="Amount">${fmt(r.amount)}</td>
+            <td data-label="Note">${escapeHtml(r.description || '—')}</td>
+            <td data-label="Posted by">${whoWhen(r.created_by_name, r.created_at, escapeHtml)}</td>
+          </tr>`,
+      }) : '';
+    }
+
+    // ---------- Finance Activity Log: every add/edit/delete on money -------
+    // finance_audit_log, written by database triggers (cash_box_schema.sql).
+    async function loadFinanceAudit() {
+      let q = db.from('finance_audit_log').select('*').order('changed_at', { ascending: false }).limit(500);
+      const filter = els.fauditGroup.value;
+      if (filter === '__bank') q = q.is('group_key', null);
+      else if (filter) q = q.eq('group_key', filter);
+      const { data, error } = await q;
+      if (error) { els.fauditBody.innerHTML = '<p class="ws-empty">The activity log isn\'t switched on yet, run cash_box_schema.sql in Supabase.</p>'; return; }
+      els.fauditBody.innerHTML = data && data.length ? renderDateGroups({
+        rows: data as AuditRow[],
+        day: (a: AuditRow) => ammanDay(a.changed_at),
+        head: '<tr><th>Time</th><th>Who</th><th>Group</th><th>What</th><th>Item</th><th>Changes</th></tr>',
+        tableClass: 'ws-table--alog',
+        row: (a: AuditRow) => {
+          const d = describeAudit(a);
+          return `
+          <tr>
+            <td data-label="Time">${escapeHtml(formatStamp(a.changed_at).split(', ').pop() || '')}</td>
+            <td data-label="Who">${escapeHtml(a.changed_by_name || '—')}</td>
+            <td data-label="Group">${escapeHtml(a.group_key ? (GROUPS.find((g) => g.key === a.group_key)?.en || a.group_key) : 'Bank')}</td>
+            <td data-label="What"><span class="ws-badge ws-badge--audit-${a.action}">${d.what}</span></td>
+            <td data-label="Item" class="ws-cell-wrap">${escapeHtml(d.item)}</td>
+            <td data-label="Changes" class="ws-cell-wrap">${escapeHtml(d.changes || '—')}</td>
+          </tr>`;
+        },
+      }) : '<p class="ws-empty">Nothing recorded yet.</p>';
+    }
+    function bindFinanceAudit() {
+      els.fauditGroup.innerHTML = '<option value="">Everything</option><option value="__bank">Bank only</option>'
+        + FINANCE_GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
+      els.fauditGroup.addEventListener('change', loadFinanceAudit);
     }
 
     // ---------- Reports (Fees/Attendance stay troop-only) --------------------
@@ -2540,23 +2666,149 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // and when it was last done), net income for the selected period, and
     // the full by-group breakdown — one document instead of piecing it
     // together from the Finance tab.
+    // ---------- Cash box / bank / activity sections for finance reports ----
+    function pdfSectionTitle(doc: any, y: number, title: string, sub?: string): number {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...PDF_BRAND);
+      doc.text(pdfSafe(title), 14, y);
+      if (!sub) return y + 5;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(120, 120, 120);
+      const lines = doc.splitTextToSize(pdfSafe(sub), 182);
+      doc.text(lines, 14, y + 5);
+      return y + 5 + lines.length * 3.8 + 1;
+    }
+    async function fetchBoxData(groupKey: string) {
+      const [logsRes, entriesRes] = await Promise.all([
+        db.from('cash_box_log').select('*').eq('group_key', groupKey),
+        db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', groupKey),
+      ]);
+      if (logsRes.error) return null;
+      const logs = (logsRes.data || []) as BoxLog[];
+      return { logs, box: computeBox(entriesRes.data || [], logs) };
+    }
+    // One group's cash box on a new page (Music/Social Media finance reports).
+    function pdfCashBoxPage(doc: any, data: any, start: string, end: string, label: string) {
+      doc.addPage();
+      let y = pdfSectionTitle(doc, 20, 'Cash Box', "The group's real cash. Balance is as of today; the records below are the ones dated in this report's period.");
+      if (!data) {
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(90, 90, 90);
+        doc.text('The cash box is not switched on yet.', 14, y + 4);
+        return;
+      }
+      pdfTable(doc, {
+        startY: y + 2, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9.5 },
+        footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
+        columnStyles: { 1: { halign: 'right' } },
+        head: [['How the box got to today', '']],
+        body: boxBreakdownRows(data.box),
+        foot: data.box.opening ? [['Cash in the box now', data.box.balance.toFixed(2)]] : undefined,
+      });
+      y = pdfSectionTitle(doc, pdfNextY(doc, y + 20), `Cash box records, ${label}`, 'Opening balances, box counts, and money moved to or from the bank. None of these are income or expenses.');
+      const rows = boxHistoryRows(data.logs, start, end);
+      pdfTable(doc, {
+        startY: y + 2, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
+        columnStyles: { 2: { halign: 'right' } },
+        head: [['Date', 'What', 'Amount', 'Details', 'Note', 'By']],
+        body: rows.length ? rows : [['No cash box records this period', '', '', '', '', '']],
+      });
+    }
+    const groupName = (key: string | null) => (key ? GROUPS.find((g) => g.key === key)?.en || key : 'Bank');
+    async function downloadBankBoxesReport() {
+      try {
+        await ensureOrgSettings();
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const [entriesRes, lastRecRes, logsRes, checksRes] = await Promise.all([
+          db.from('finance_entries').select('group_key, entry_type, amount, entry_date'),
+          db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+          db.from('cash_box_log').select('*'),
+          db.from('finance_reconciliations').select('*').gte('as_of_date', start).lte('as_of_date', end).order('as_of_date', { ascending: true }),
+        ]);
+        const allRows = entriesRes.data || [];
+        const logs: BoxLog[] = logsRes.error ? [] : (logsRes.data || []);
+        const bank = computeBank(state.settings, lastRecRes.data, logs);
+        const boxes = FINANCE_GROUPS.map((g) => ({
+          g, box: computeBox(allRows.filter((r: any) => r.group_key === g.key), logs.filter((l) => l.group_key === g.key)),
+        }));
+        const cashInBoxes = boxes.filter((b) => b.box.opening).reduce((s2, b) => s2 + b.box.balance, 0);
+        const doc = new jsPDF();
+        let y = pdfHeader(doc, 'Bank & Cash Boxes', `${label} · generated ${new Date().toLocaleString()}`);
+        y = pdfSectionTitle(doc, y, 'Where the money is today');
+        pdfTable(doc, {
+          startY: y + 2, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9.5 },
+          footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
+          columnStyles: { 1: { halign: 'right' } },
+          head: [['', 'Amount']],
+          body: [
+            [`Bank (${bank.baseKind === 'check' ? `bank app ${bank.baseDate}` : bank.baseKind === 'opening' ? `opening balance ${bank.baseDate}` : 'not set up'}, moved in by groups since ${fmt(bank.movedIn)}, taken out ${fmt(bank.movedOut)})`, fmt(bank.balance)],
+            ...boxes.map(({ g, box }) => [`${g.en} cash box${box.opening ? (box.lastCount ? `, last counted ${box.lastCount.event_date}` : ', never counted') : ', not set up'}`, box.opening ? fmt(box.balance) : '-']),
+          ],
+          foot: [['Total money', fmt(bank.balance + cashInBoxes)]],
+        });
+        y = pdfSectionTitle(doc, pdfNextY(doc, y + 40), `Bank balances recorded, ${label}`, 'What the bank app showed each time someone checked, next to what the system expected. A difference is money that came in or went out without being recorded here (CliQ etc.).');
+        const checks = checksRes.data || [];
+        pdfTable(doc, {
+          startY: y + 2, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8.5 },
+          columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
+          head: [['Date', 'Bank app showed', 'System expected', 'Difference', 'Note', 'Recorded by']],
+          body: checks.length ? checks.map((r: any) => [
+            r.as_of_date, fmt(r.statement_balance), r.system_balance == null ? '-' : fmt(r.system_balance),
+            r.difference == null ? '-' : `${Number(r.difference) < 0 ? '-' : '+'}${fmt(Math.abs(Number(r.difference)))}`,
+            r.notes || '-', pdfWhoWhen(r.created_by_name, r.created_at),
+          ]) : [['No bank balances recorded this period', '', '', '', '', '']],
+        });
+        y = pdfSectionTitle(doc, pdfNextY(doc, y + 30), `Cash box records, ${label}`, 'Every group: opening balances, box counts, and money moved to or from the bank.');
+        const boxRows = boxHistoryRows(logs, start, end);
+        const sorted = logs.filter((l) => l.event_date >= start && l.event_date <= end)
+          .sort((a, b) => (a.event_date === b.event_date ? (a.created_at < b.created_at ? -1 : 1) : a.event_date < b.event_date ? -1 : 1));
+        pdfTable(doc, {
+          startY: y + 2, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
+          columnStyles: { 3: { halign: 'right' } },
+          head: [['Date', 'Group', 'What', 'Amount', 'Details', 'Note', 'By']],
+          body: boxRows.length ? boxRows.map((r, i) => [r[0], groupName(sorted[i]?.group_key || null), ...r.slice(1)]) : [['No cash box records this period', '', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Bank-and-Cash-Boxes', label));
+      } catch (err) {
+        console.error('bank & boxes report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
+    async function downloadFinanceAuditReport() {
+      try {
+        const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
+        const { data, error } = await db.from('finance_audit_log').select('*')
+          .gte('changed_at', `${start}T00:00:00+03:00`).lte('changed_at', `${end}T23:59:59+03:00`).order('changed_at', { ascending: true });
+        const rows = error ? [] : auditPdfRows(data || [], groupName);
+        const doc = new jsPDF();
+        const y = pdfHeader(doc, 'Finance Activity Log', `${label}, ${rows.length} change${rows.length === 1 ? '' : 's'}`);
+        pdfTable(doc, {
+          startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
+          head: [['When', 'Who', 'Group', 'What', 'Item', 'Changes']],
+          body: rows.length ? rows : [[error ? 'The activity log is not switched on yet' : 'No changes this period', '', '', '', '', '']],
+        });
+        doc.save(pdfFilename('Finance-Activity-Log', label));
+      } catch (err) {
+        console.error('finance activity report failed', err);
+        showToast('Could not generate the report, check your connection and try again.');
+      }
+    }
     async function downloadFullAccountingReport() {
       try {
         await ensureOrgSettings();
         const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
-        const [allEntriesRes, periodEntriesRes, lastRecRes] = await Promise.all([
-          db.from('finance_entries').select('entry_type, amount, entry_date'),
+        const [allEntriesRes, periodEntriesRes, lastRecRes, logsRes] = await Promise.all([
+          db.from('finance_entries').select('group_key, entry_type, amount, entry_date'),
           db.from('finance_entries').select('group_key, entry_type, category, amount').gte('entry_date', start).lte('entry_date', end),
-          db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).limit(1).maybeSingle(),
+          db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+          db.from('cash_box_log').select('*'),
         ]);
         if (allEntriesRes.error) throw allEntriesRes.error;
         const allRows = allEntriesRes.data || [];
-        const opening = Number(state.settings?.opening_balance || 0);
-        const running = opening + allRows.reduce((s: number, r: any) => s + signedAmount(r), 0);
+        const logs: BoxLog[] = logsRes.error ? [] : (logsRes.data || []);
         const lastRec = lastRecRes.data;
-        const actualBalance = lastRec
-          ? Number(lastRec.statement_balance) + allRows.filter((r: any) => r.entry_date > lastRec.as_of_date).reduce((s: number, r: any) => s + signedAmount(r), 0)
-          : running;
+        const bank = computeBank(state.settings, lastRec, logs);
+        const boxes = FINANCE_GROUPS.map((g) => ({
+          g, box: computeBox(allRows.filter((r: any) => r.group_key === g.key), logs.filter((l) => l.group_key === g.key)),
+        }));
+        const cashInBoxes = boxes.filter((b) => b.box.opening).reduce((s2, b) => s2 + b.box.balance, 0);
 
         const periodRows = periodEntriesRes.data || [];
 
@@ -2622,14 +2874,26 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           columnStyles: { 0: { fontStyle: 'bold', cellWidth: 44 }, 1: { cellWidth: 100 }, 2: { halign: 'right', fontStyle: 'bold', cellWidth: 38 } },
           head: [['', 'What this means', 'Amount']],
           body: [
-            ['Opening Balance', `The starting balance before any recorded transaction, set as of ${state.settings?.opening_balance_date || '—'}.`, fmt(opening)],
-            ['Running Balance', "Opening balance plus every transaction ever logged, across every group. The system's live total.", fmt(running)],
-            ['Actual Running Balance', 'The last confirmed bank balance, carried forward by everything logged since. Grounded in a real bank check.', fmt(actualBalance)],
-            ['Last Reconciled', 'The most recent date the books were checked against the real bank statement.', lastRec ? lastRec.as_of_date : 'Never reconciled'],
-            ['Bank Balance', 'What the bank statement actually showed, as of the last reconciliation.', lastRec ? fmt(lastRec.statement_balance) : '—'],
-            ['System Balance', 'What our own records showed on that same date, before any correction.', lastRec ? fmt(lastRec.system_balance) : '—'],
-            ['Adjustment Posted', "The correcting entry made to true the two up, if the balances didn't already match.", lastRec && lastRec.adjustment_entry_id ? fmt(lastRec.difference) : (lastRec ? 'None needed, already matched' : '—')],
+            ['Bank Opening Balance', `What the bank account had when recording started, as of ${state.settings?.opening_balance_date || '—'}.`, fmt(Number(state.settings?.opening_balance || 0))],
+            ['Last Bank Check', 'The most recent time someone recorded what the bank app showed.', lastRec ? `${fmt(lastRec.statement_balance)} on ${lastRec.as_of_date}` : 'Never checked'],
+            ['Bank Balance', 'The last recorded bank amount, plus or minus cash groups moved in or out of the bank since.', fmt(bank.balance)],
+            ['Cash in Boxes', "Every group's cash box added together (each group keeps its own on Finance > Cash Box).", fmt(cashInBoxes)],
+            ['Total Money', 'Bank balance plus every cash box. Everything the organization has right now.', fmt(bank.balance + cashInBoxes)],
           ],
+        });
+
+        y = pdfNextY(doc, y);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...PDF_BRAND);
+        doc.text('Cash Boxes', 14, y);
+        pdfTable(doc, {
+          startY: y + 4, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
+          columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } },
+          head: [['Group', 'Cash in box', 'Opening', 'Last counted']],
+          body: boxes.map(({ g, box }) => box.opening
+            ? [g.en, fmt(box.balance), `${fmt(Number(box.opening.amount))} (${box.opening.event_date})`, box.lastCount ? `${box.lastCount.event_date} by ${box.lastCount.created_by_name || '—'}` : 'Never']
+            : [g.en, '—', 'Not set up', '—']),
+          foot: [['All boxes', fmt(cashInBoxes), '', '']],
+          footStyles: { fillColor: PDF_FOOT_BG, textColor: PDF_BRAND, fontStyle: 'bold' },
         });
 
         y = pdfNextY(doc, y);
@@ -2876,6 +3140,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         els.reportRangeRow.toggleAttribute('hidden', !isRange);
       });
       el('[data-report-full]').addEventListener('click', downloadFullAccountingReport);
+      el('[data-report-bankboxes]').addEventListener('click', downloadBankBoxesReport);
+      el('[data-report-faudit]').addEventListener('click', downloadFinanceAuditReport);
       el('[data-report-fees]').addEventListener('click', downloadFeesReport);
       el('[data-report-attendance]').addEventListener('click', downloadAttendanceReport);
       el('[data-report-curriculum]').addEventListener('click', downloadCurriculumReport);
@@ -3101,8 +3367,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
           head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
-          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), r.created_by_name || '—']) : [['No entries this period', '', '', '', '', '']],
+          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), pdfWhoWhen(r.created_by_name, r.created_at)]) : [['No entries this period', '', '', '', '', '']],
         });
+        pdfCashBoxPage(doc, await fetchBoxData(MUSIC_GROUP_KEY), start, end, label);
         doc.save(pdfFilename('Music-Finance', label));
       } catch (err) {
         console.error('music finance report failed', err);
@@ -3467,8 +3734,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 9 },
           head: [['Date', 'Type', 'Category', 'Description', 'Amount', 'Added by']],
-          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), r.created_by_name || '—']) : [['No entries this period', '', '', '', '', '']],
+          body: rows.length ? rows.map((r: any) => [r.entry_date, r.entry_type === 'income' ? 'Income' : 'Expense', r.category || '—', r.description || '—', Number(r.amount).toFixed(2), pdfWhoWhen(r.created_by_name, r.created_at)]) : [['No entries this period', '', '', '', '', '']],
         });
+        pdfCashBoxPage(doc, await fetchBoxData(SOCIAL_MEDIA_GROUP_KEY), start, end, label);
         doc.save(pdfFilename('Social-Media-Finance', label));
       } catch (err) {
         console.error('social media finance report failed', err);
@@ -3911,7 +4179,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Logins are only visible here because of the admin SELECT policy
     // added on device_sessions specifically for this — that table's own
     // schema comment covers the tradeoff.
-    const ACTIVITY_TYPE_LABELS: Record<string, string> = { attendance: 'Attendance', curriculum: 'Curriculum', finance: 'Finance', fee: 'Fees', roster: 'Roster', login: 'Sign-in' };
+    const ACTIVITY_TYPE_LABELS: Record<string, string> = { attendance: 'Attendance', curriculum: 'Curriculum', finance: 'Finance', fee: 'Fees', roster: 'Roster', login: 'Sign-in', cashbox: 'Cash box', bank: 'Bank' };
     function populateActivityLogLeaderSelect() {
       const cur = els.alogLeader.value;
       els.alogLeader.innerHTML = '<option value="">All leaders</option>' + state.people
@@ -3957,7 +4225,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const tab = state.activeTab;
       if (tab === 'overview') loadOverview();
       if (tab === 'sharedcal') loadSharedCal();
-      if (tab === 'finance') { loadFinanceKpis(); loadFinancePeriod(); compareReconcile(); loadReconcileHistory(); loadAdjustmentEntries(); }
+      if (tab === 'finance') { loadFinanceKpis(); loadFinancePeriod(); loadReconcileHistory(); loadBoxCounts(); loadFinanceAudit(); }
       if (tab === 'curriculum') loadCurriculum();
       if (tab === 'music') loadMusicDashboard();
       if (tab === 'socialmedia') loadSocialMediaDashboard();
@@ -4065,6 +4333,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindOpeningBalanceForm();
         bindTransactionForm();
         bindReconcile();
+        bindFinanceAudit();
         bindReports();
         bindLibraryUpload();
         bindSharedVendorForm();

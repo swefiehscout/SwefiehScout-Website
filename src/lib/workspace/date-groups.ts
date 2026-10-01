@@ -102,3 +102,19 @@ export function ammanDay(value: string | null | undefined): string {
   if (Number.isNaN(d.getTime())) return '';
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Amman', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
 }
+
+// "30 Sep 2026, 14:32" in Amman time — for "who did this, and when"
+// cells. '' for a missing/invalid value.
+export function formatStamp(value: string | null | undefined): string {
+  if (!value) return '';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString('en-GB', { timeZone: 'Asia/Amman', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+// Name with a small timestamp under it, for "Added by"/"By" cells.
+// `escape` is the page's own HTML escaper.
+export function whoWhen(name: string | null | undefined, at: string | null | undefined, escape: (s: string) => string): string {
+  const stamp = formatStamp(at);
+  return `${escape(name || '—')}${stamp ? `<span class="ws-stamp">${stamp}</span>` : ''}`;
+}
