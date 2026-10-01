@@ -31,11 +31,11 @@ The Greek Orthodox Scouts & Guides – Swefieh is more than a scouting group. It
 
 ## Who Can Join?
 
-Ages 6 to 25. Parents and community members are welcome to volunteer and support our young leaders.
+Ages 4 to 25. Parents and community members are welcome to volunteer and support our young leaders.
 
 ## من يمكنه الانضمام؟
 
-من سنّ ٦ إلى ٢٥ عامًا. ندعو أيضًا أولياء الأمور وأعضاء المجتمع للمشاركة كمتطوّعين أو داعمين.
+من سنّ ٤ إلى ٢٥ عامًا. ندعو أيضًا أولياء الأمور وأعضاء المجتمع للمشاركة كمتطوّعين أو داعمين.
 
 ## How to Join
 
