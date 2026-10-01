@@ -585,6 +585,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-statement" data-fin-statement></div>
 
             <h3 class="ws-admin-h3">Transactions</h3>
+            <p class="ws-att-hint">Every month, newest first. The Month and Year above only change the net income totals and Income Statement.</p>
             <div class="ws-dgroups" data-fin-body></div>
           </div>
 
@@ -4084,11 +4085,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const { start, end, label } = periodRange(els.finMonth, els.finYear);
       state.finLabel = label;
       state.finStart = start; state.finEnd = end;
+      // Every entry, all months: the Transactions list always shows them
+      // all; only the net income totals/statement follow the Month/Year
+      // picker (state.finEntries = just that period).
       const { data, error } = await db.from('finance_entries').select('*')
-        .eq('group_key', state.activeGroup).gte('entry_date', start).lte('entry_date', end)
-        .order('entry_date', { ascending: false });
+        .eq('group_key', state.activeGroup)
+        .order('entry_date', { ascending: false }).order('created_at', { ascending: false });
       if (error) { console.error(error); showToast('Could not load finance entries.'); return; }
-      state.finEntries = data || [];
+      state.finAllEntries = data || [];
+      state.finEntries = state.finAllEntries.filter((e: any) => e.entry_date >= start && e.entry_date <= end);
       // Box first: the statement's "Cash box over / short" line needs its counts.
       await Promise.all([loadCashBox(), loadFinanceAudit()]);
       renderFinance();
@@ -4167,12 +4172,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         ${hasBox ? `<p class="ws-box-form-help">${escapeHtml(BOX_DIFF_LABEL)}: ${escapeHtml(BOX_DIFF_HELP)} If you find out what it was, add it as a normal entry before the next count.</p>` : ''}
       `;
 
-      if (!state.finEntries.length) {
-        els.finBody.innerHTML = '<p class="ws-empty">No entries this month.</p>';
+      if (!state.finAllEntries.length) {
+        els.finBody.innerHTML = '<p class="ws-empty">No entries yet.</p>';
         return;
       }
       els.finBody.innerHTML = renderDateGroups({
-        rows: state.finEntries,
+        rows: state.finAllEntries,
         day: (e: any) => e.entry_date,
         head: '<tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Added by</th><th>Receipt</th><th></th></tr>',
         row: (e: any) => `
@@ -4435,7 +4440,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // link to the source row (and its id) is left untouched, so the
     // "Auto" badge still shows and the source tab can still resync it.
     function startEditFinEntry(id: string) {
-      const entry = state.finEntries.find((x: any) => x.id === id);
+      const entry = state.finAllEntries.find((x: any) => x.id === id);
       if (!entry) return;
       state.editingFinEntryId = id;
       els.finType.value = entry.entry_type;

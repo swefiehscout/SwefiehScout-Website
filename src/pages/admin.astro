@@ -240,6 +240,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </div>
 
             <h3 class="ws-admin-h3">Every transaction</h3>
+            <p class="ws-att-hint">Every month, newest first. The Month and Year above only change the net income totals and the By group table.</p>
             <div class="ws-dgroups" data-fin-body></div>
           </div>
 
@@ -2358,15 +2359,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       populatePeriodSelects(els.finMonth, els.finYear, true);
       const { start, end } = periodRange(els.finMonth, els.finYear);
       const [res, boxRes, checksRes] = await Promise.all([
+        // Every entry, all months: the list always shows them all; only
+        // the net income stats and By group table follow the picker.
         db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, description, created_by_name, created_at')
-          .gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: false }),
+          .order('entry_date', { ascending: false }).order('created_at', { ascending: false }),
         db.from('cash_box_log').select('*'),
         db.from('finance_reconciliations').select('as_of_date, difference, adjustment_entry_id').gte('as_of_date', start).lte('as_of_date', end),
       ]);
       if (res.error) { console.error(res.error); showToast('Could not load finance.'); return; }
-      renderFinancePeriod(res.data || [], boxRes.error ? [] : (boxRes.data || []), checksRes.data || [], start, end);
+      const all = res.data || [];
+      renderFinancePeriod(all.filter((r: any) => r.entry_date >= start && r.entry_date <= end), boxRes.error ? [] : (boxRes.data || []), checksRes.data || [], start, end, all);
     }
-    function renderFinancePeriod(rows: any[], boxLogs: BoxLog[] = [], checks: any[] = [], start = '', end = '') {
+    function renderFinancePeriod(rows: any[], boxLogs: BoxLog[] = [], checks: any[] = [], start = '', end = '', allRows: any[] = rows) {
       const income = rows.filter((r) => r.entry_type === 'income').reduce((s, r) => s + Number(r.amount), 0);
       const expense = rows.filter((r) => r.entry_type === 'expense').reduce((s, r) => s + Number(r.amount), 0);
       const boxDiff = boxDiffAllGroups(boxLogs, FINANCE_GROUPS.map((g) => g.key), start, end);
@@ -2391,9 +2395,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }).join('') + `
         <tr><td data-label="Group">${BANK_DIFF_LABEL} <span class="ws-info" title="${escapeHtml(BANK_DIFF_HELP)}">?</span></td><td data-label="Income">-</td><td data-label="Expenses">-</td><td data-label="Cash box over / short">-</td><td data-label="Net income">${sg(bankDiff)}</td></tr>
         <tr class="ws-row-total"><td data-label="Group"><strong>Whole organization</strong></td><td data-label="Income"><strong>${fmt(income)}</strong></td><td data-label="Expenses"><strong>${fmt(expense)}</strong></td><td data-label="Cash box over / short"><strong>${sg(boxDiff)}</strong></td><td data-label="Net income"><strong>${fmt(net)}</strong></td></tr>`;
-      els.finBody.innerHTML = rows.length
+      els.finBody.innerHTML = allRows.length
         ? renderDateGroups({
-            rows,
+            rows: allRows,
             day: (r: any) => r.entry_date,
             head: '<tr><th>Date</th><th>Group</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Added by</th></tr>',
             row: (r: any) => {
@@ -2410,7 +2414,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               </tr>`;
             },
           })
-        : '<p class="ws-empty">No entries this period.</p>';
+        : '<p class="ws-empty">No entries yet.</p>';
     }
 
     // ---------- Bank: record what the bank app shows ------------------------
