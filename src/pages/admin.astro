@@ -75,7 +75,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <!-- ================= Overview (the 5 troops) ================= -->
         <section class="ws-panel" data-panel="overview">
           <div class="ws-dash" data-dash-root>
-            <p class="ws-att-hint">The 5 troops together, the same numbers each group's own Dashboard shows, rolled up troop-wide. Music and General aren't scouting troops, their own rosters live on their group pages (and on the Roster tab here too), and their money lives on the Finance tab instead, alongside the full accounting picture.</p>
+            <p class="ws-att-hint">The 5 troops together, the same numbers each group's own Dashboard shows, rolled up troop-wide. Music, General and Social Media aren't scouting troops, they each have their own tab here, Music's roster also shows on the Roster tab (General and Social Media have none), and their money lives on the Finance tab instead, alongside the full accounting picture.</p>
 
             <div class="band-marquee ws-dash-marquee" aria-label="Troop photos">
               <div class="band-marquee-track" style={`--n: ${workspaceMarqueePhotos.length}`}>
@@ -425,7 +425,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= Roster ================= -->
         <section class="ws-panel" data-panel="roster" hidden>
-          <p class="ws-att-hint">Every group's roster together, including Music and General, plus every approved leader/admin from the Leaders Roster — filter down to what you need.</p>
+          <p class="ws-att-hint">Every group's roster together, including Music, plus every approved leader/admin from the Leaders Roster (General and Social Media have no roster) — filter down to what you need.</p>
           <div class="ws-toolbar-row">
             <label class="ws-field ws-field--inline">
               <span>Group</span>
@@ -451,7 +451,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= Library (Shared) ================= -->
         <section class="ws-panel" data-panel="library" hidden>
-          <p class="ws-att-hint">Upload a file once and tick which of the 5 troops it should show up for, instead of it belonging to just one group. Each sees it on their own Library tab, under Shared Library. Music and General don't have a Library tab, so they're not an option here.</p>
+          <p class="ws-att-hint">Upload a file once and tick which of the 5 troops it should show up for, instead of it belonging to just one group. Each sees it on their own Library tab, under Shared Library. Music and General don't have a Library tab, and Social Media's Library holds only its own files, so none of them are an option here.</p>
 
           <div class="ws-member-form ws-library-upload">
             <div class="ws-member-form-bar" aria-hidden="true"></div>
@@ -542,7 +542,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= General (Public Relations) ================= -->
         <section class="ws-panel" data-panel="general" hidden>
-          <p class="ws-att-hint">General isn't a scouting troop either, so it's not part of the Overview rollup above — this is its own equivalent, covering its Public Relations tab (Sponsors, Community &amp; Church Contacts, Library). Its reports live in the main Reports tab, alongside everyone else's.</p>
+          <p class="ws-att-hint">General isn't a scouting troop either, so it's not part of the Overview rollup above — this is its own equivalent, covering its Public Relations tab (Sponsors, Community &amp; Church Contacts, Library) and Meeting Notes. Its reports live in the main Reports tab, alongside everyone else's.</p>
           <div class="ws-dash">
             <div class="ws-dash-kpis" data-gen-kpis></div>
 
@@ -655,7 +655,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
 
           <div data-subpanel="people:roster">
-            <p class="ws-att-hint">Approve who gets into the Leaders Workspace and which groups they can access, Music and General included, same as any troop. Admin is the one flag that also grants full access here and to the accounting system on the Finance tab.</p>
+            <p class="ws-att-hint">Approve who gets into the Leaders Workspace and which groups they can access, Music, General and Social Media included, same as any troop. Admin is the one flag that also grants full access here and to the accounting system on the Finance tab.</p>
             <h3 class="ws-admin-h3">People</h3>
             <div class="ws-table-wrap">
               <table class="ws-table" data-people-table>
@@ -3177,8 +3177,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       const sixAgoD = new Date(now.getFullYear(), now.getMonth() - 5, 1);
       const sixStart = `${sixAgoD.getFullYear()}-${String(sixAgoD.getMonth() + 1).padStart(2, '0')}-01`;
-      const [membersRes, contentRes, finRes, credRes] = await Promise.all([
-        db.from('members').select('id, full_name', { count: 'exact' }).eq('group_key', SOCIAL_MEDIA_GROUP_KEY).eq('active', true),
+      // No team-members KPI: Social Media has no Roster tab in the
+      // Leaders Workspace (see NON_TROOP_TAB_VISIBILITY there), so that
+      // count could only ever be 0. It does have a Library tab.
+      const [docsRes, contentRes, finRes, credRes] = await Promise.all([
+        db.from('documents').select('id', { count: 'exact', head: true }).eq('group_key', SOCIAL_MEDIA_GROUP_KEY),
         db.from('content_items').select('*, members(full_name)').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('scheduled_date', { ascending: true }),
         db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).gte('entry_date', sixStart),
         db.from('credentials').select('service_name, created_at, created_by_name', { count: 'exact' }).eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('created_at', { ascending: false }),
@@ -3195,10 +3198,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const postedThisMonth = thisMonthContent.filter((c: any) => c.status === 'posted');
       const ideaBacklog = content.filter((c: any) => c.status === 'idea');
       els.smKpis.innerHTML = `
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active team members</span></div>
-          <span class="ws-dash-kpi-num">${membersRes.count || 0}</span>
-        </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">▤</span><span class="ws-dash-kpi-label">Content this month</span></div>
           <span class="ws-dash-kpi-num">${thisMonthContent.length}</span>
@@ -3218,6 +3217,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">◔</span><span class="ws-dash-kpi-label">Idea backlog</span></div>
           <span class="ws-dash-kpi-num">${ideaBacklog.length}</span>
+        </div>
+        <div class="ws-dash-kpi">
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">▥</span><span class="ws-dash-kpi-label">Library documents</span></div>
+          <span class="ws-dash-kpi-num">${docsRes.count || 0}</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
@@ -3321,8 +3324,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       const sixAgoD = new Date(now.getFullYear(), now.getMonth() - 5, 1);
       const sixStart = `${sixAgoD.getFullYear()}-${String(sixAgoD.getMonth() + 1).padStart(2, '0')}-01`;
-      const [membersRes, sponsorsRes, contactsRes, docsRes, finRes] = await Promise.all([
-        db.from('members').select('id', { count: 'exact', head: true }).eq('group_key', GENERAL_GROUP_KEY).eq('active', true),
+      // No team-members KPI: General has no Roster tab in the Leaders
+      // Workspace, so that count could only ever be 0. It does have
+      // Meeting Notes.
+      const [notesRes, sponsorsRes, contactsRes, docsRes, finRes] = await Promise.all([
+        db.from('meeting_notes').select('id', { count: 'exact', head: true }).eq('group_key', GENERAL_GROUP_KEY),
         db.from('sponsors').select('*').eq('group_key', GENERAL_GROUP_KEY).order('created_at', { ascending: false }),
         db.from('pr_contacts').select('*').eq('group_key', GENERAL_GROUP_KEY).order('created_at', { ascending: false }),
         db.from('documents').select('id', { count: 'exact', head: true }).eq('group_key', GENERAL_GROUP_KEY),
@@ -3338,8 +3344,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const prospectiveSponsors = sponsors.filter((s: any) => s.status === 'prospective').length;
       els.genKpis.innerHTML = `
         <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">★</span><span class="ws-dash-kpi-label">Active team members</span></div>
-          <span class="ws-dash-kpi-num">${membersRes.count || 0}</span>
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✎</span><span class="ws-dash-kpi-label">Meeting notes</span></div>
+          <span class="ws-dash-kpi-num">${notesRes.count || 0}</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">◆</span><span class="ws-dash-kpi-label">Total sponsors</span></div>
@@ -4075,7 +4081,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         bindSharedCalForm();
         els.finMonth.addEventListener('change', loadFinancePeriod);
         els.finYear.addEventListener('change', loadFinancePeriod);
-        els.rosterGroup.innerHTML = '<option value="">All Groups</option>' + GROUPS.map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
+        els.rosterGroup.innerHTML = '<option value="">All Groups</option>' + GROUPS.filter((g) => g.key !== GENERAL_GROUP_KEY && g.key !== SOCIAL_MEDIA_GROUP_KEY).map((g) => `<option value="${g.key}">${escapeHtml(g.en)}</option>`).join('');
         els.rosterGroup.addEventListener('change', renderRoster);
         els.rosterStatus.addEventListener('change', renderRoster);
         bindTableSearch(els.rosterSearch, els.rosterBody);

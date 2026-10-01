@@ -1,8 +1,12 @@
 // Renders a date-ordered list as collapsible year > month > week > day
 // groups (native <details>), each day holding its own small .ws-table.
-// Shared by every chronological list in the Admin console (finance
+// Shared by the chronological lists in the Admin console (finance
 // ledger, adjustments, reconciliation history, change requests,
-// activity log) so they all read and collapse the same way.
+// activity log) and the Leaders Workspace (finance transactions,
+// inventory adjustments/maintenance, meeting notes, leader assessments,
+// change requests) so they all read and collapse the same way. Row
+// buttons keep working since each list binds them with
+// querySelectorAll on the container plus closest('tr').
 //
 // Weeks start on Sunday (Jordan's work week) and are clipped to their
 // month, so a week spanning two months shows under each month with
