@@ -9,7 +9,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "videos": "bash scripts/prepare-videos.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.114.0",

@@ -6074,3 +6074,32 @@ see that markup's own comment), always claiming the full row width
   .curr-day-banner { inset-block-start: -1.1rem; margin: -1.1rem -1.1rem 1rem; padding: 0.7rem 0.9rem; }
   .curr-day-actions { inset-block-end: -1.1rem; margin: 1rem -1.1rem -1.1rem; padding: 0.7rem 1.1rem 1.1rem; }
 }
+
+/* ---------- Seasonal: Christmas background ----------
+   Applied to <body> on public pages while CHRISTMAS_THEME is true
+   (src/data/season.ts). Soft red and green glows plus a faint
+   snowflake pattern over the usual cream. */
+body.theme-xmas {
+  background-color: var(--color-bg);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' fill='none' stroke-linecap='round'%3E%3Cg stroke='%23571607' stroke-opacity='.09' stroke-width='1.6'%3E%3Cpath d='M28 50h24M34 39.6l12 20.8M46 39.6 34 60.4'/%3E%3C/g%3E%3Cg stroke='%23143822' stroke-opacity='.08' stroke-width='1.8'%3E%3Cpath d='M144 140h32M152 126.1l16 27.8M168 126.1l-16 27.8'/%3E%3Cpath d='M148 136l-4 4 4 4M172 136l4 4-4 4'/%3E%3C/g%3E%3Cg stroke='%23b3261e' stroke-opacity='.09' stroke-width='1.4'%3E%3Cpath d='M92 190h16M96 183.1l8 13.8M104 183.1l-8 13.8'/%3E%3C/g%3E%3Cg fill='%23571607' fill-opacity='.08' stroke='none'%3E%3Ccircle cx='190' cy='40' r='1.6'/%3E%3Ccircle cx='80' cy='120' r='2'/%3E%3Ccircle cx='20' cy='170' r='1.5'/%3E%3Ccircle cx='130' cy='70' r='1.2'/%3E%3Ccircle cx='200' cy='200' r='1.4'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(ellipse 60% 45% at 0% 0%, rgba(179, 38, 30, 0.09), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 100% 100%, rgba(20, 56, 34, 0.1), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 100% 10%, rgba(232, 196, 106, 0.12), transparent 70%);
+  background-size: 220px 220px, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+/* Candy-cane strip along the very top of the page. */
+body.theme-xmas::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: 4px;
+  z-index: 1000;
+  pointer-events: none;
+  background: repeating-linear-gradient(-45deg, #b3261e 0 10px, #fff 10px 20px, #143822 20px 30px, #fff 30px 40px);
+}
+@media print {
+  body.theme-xmas { background: #fff !important; }
+  body.theme-xmas::before { display: none; }
+}

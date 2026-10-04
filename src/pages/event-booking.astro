@@ -69,6 +69,15 @@ const features = [
     ))}
   </section>
 
+  <a href="/event-booking/christmas-proposal" class="xmas-teaser" data-animate>
+    <span class="xmas-teaser-star" aria-hidden="true">★</span>
+    <span>
+      <strong>Christmas Proposal</strong>
+      <small>Bring the band to your venue this Christmas season</small>
+    </span>
+    <span class="xmas-teaser-go" aria-hidden="true"><Icon name="arrow-right" size={18} /></span>
+  </a>
+
   <div class="form-card form-card--solo" data-animate>
     <h2 class="form-h2">Booking Request</h2>
     <p class="form-h2-ar">طلب حجز</p>
@@ -116,3 +125,41 @@ const features = [
     </form>
   </div>
 </BaseLayout>
+
+<style>
+  .xmas-teaser {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+    padding: 1.1rem 1.4rem;
+    border-radius: 18px;
+    color: #fff;
+    text-decoration: none;
+    background:
+      radial-gradient(circle at 10% 20%, rgba(232, 196, 106, 0.3), transparent 45%),
+      linear-gradient(135deg, #143822, #0b2016 60%, #571607);
+    box-shadow: 0 12px 28px -12px rgba(11, 32, 22, 0.6);
+    transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+  }
+  .xmas-teaser:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 36px -12px rgba(11, 32, 22, 0.7);
+    text-decoration: none;
+  }
+  .xmas-teaser strong { display: block; font-family: var(--font-display); font-size: 1.2rem; }
+  .xmas-teaser small { display: block; color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; }
+  .xmas-teaser-star { font-size: 1.6rem; color: #e8c46a; text-shadow: 0 0 12px rgba(232, 196, 106, 0.8); }
+  .xmas-teaser-go {
+    margin-inline-start: auto;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex: none;
+    border-radius: 50%;
+    background: #e8c46a;
+    color: #3a0f04;
+  }
+</style>
