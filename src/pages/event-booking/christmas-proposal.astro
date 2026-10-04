@@ -312,6 +312,38 @@ const headline = [
             ))}
           </div>
         </div>
+
+        <!-- Phones: swipeable story cards instead of the sticky scroll story -->
+        <div class="xm-swipe" data-xm-swipe>
+          <div class="xm-swipe-track" data-xm-swipe-track>
+            {story.map((st, i) => (
+              <article class={`xm-swipe-card${i === 0 ? ' is-active' : ''}`} data-xm-swipe-card={i}>
+                <video src={st.clip!.src} poster={st.clip!.poster} muted loop playsinline preload="none"></video>
+                <div class="xm-swipe-shade" aria-hidden="true"></div>
+                <div class="xm-phone-live" aria-hidden="true"><span></span> Live</div>
+                <div class="xm-swipe-copy">
+                  <p class="xm-chapter-num">0{i + 1} <span>/ 0{story.length}</span></p>
+                  <h3 class="xm-swipe-title">{st.title}</h3>
+                  <p class="xm-swipe-text">{st.text}</p>
+                  <ul class="xm-chapter-tags">
+                    {st.tags.map((t) => <li>{t}</li>)}
+                  </ul>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div class="xm-swipe-dots">
+            {story.map((st, i) => (
+              <button
+                type="button"
+                class={i === 0 ? 'is-active' : ''}
+                data-xm-swipe-dot={i}
+                aria-label={`Show moment ${i + 1}: ${st.title}`}
+              ></button>
+            ))}
+          </div>
+          <p class="xm-swipe-hint" aria-hidden="true">Swipe for the next moment →</p>
+        </div>
       </section>
     )}
 
@@ -380,7 +412,7 @@ const headline = [
       </div>
     </section>
 
-    <button type="button" class="xm-snow-toggle" data-xm-snow-toggle aria-pressed="true">
+    <button type="button" class="xm-snow-toggle" data-xm-snow-toggle aria-pressed="true" aria-label="Toggle snow">
       <span aria-hidden="true">❄</span> <span data-snow-label>Snow on</span>
     </button>
   </div>
@@ -1138,6 +1170,89 @@ const headline = [
   }
   .xm-chapter-tags li::before { content: '✦ '; color: var(--gold); }
 
+  /* Phone-only swipe cards */
+  .xm-swipe { display: none; }
+  .xm-swipe-track {
+    --cw: calc(min(70vh, 136vw) * 0.5625);
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 1.5rem calc((100% - var(--cw)) / 2) 1rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .xm-swipe-track::-webkit-scrollbar { display: none; }
+  .xm-swipe-card {
+    position: relative;
+    flex: 0 0 var(--cw);
+    aspect-ratio: 9 / 16;
+    border-radius: 26px;
+    overflow: hidden;
+    scroll-snap-align: center;
+    background: #3a0a07 center / cover;
+    border: 2px solid rgba(232, 196, 106, 0.7);
+    box-shadow: 0 30px 50px -25px rgba(0, 0, 0, 0.9), 0 0 50px -15px rgba(232, 196, 106, 0.45);
+    transform: scale(0.9);
+    opacity: 0.55;
+    transition: transform 0.45s var(--ease-out), opacity 0.45s;
+  }
+  .xm-swipe-card.is-active { transform: none; opacity: 1; }
+  .xm-swipe-card video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .xm-swipe-card .xm-phone-live { top: 14px; }
+  .xm-swipe-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(42, 6, 5, 0) 40%, rgba(42, 6, 5, 0.75) 68%, rgba(31, 5, 4, 0.96) 100%);
+  }
+  .xm-swipe-copy {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1.2rem 1.1rem 1.3rem;
+    text-align: left;
+  }
+  .xm-swipe-copy .xm-chapter-num { margin: 0 0 0.35rem; font-size: 0.9rem; }
+  .xm-swipe-title {
+    margin: 0 0 0.45rem;
+    font-family: var(--font-display);
+    font-size: 1.65rem;
+    line-height: 1.05;
+    color: #fff;
+  }
+  .xm-swipe-text {
+    margin: 0 0 0.8rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .xm-swipe-copy .xm-chapter-tags li { padding: 0.3rem 0.7rem; font-size: 0.75rem; }
+  .xm-swipe-dots { display: flex; justify-content: center; gap: 8px; margin-top: 0.6rem; }
+  .xm-swipe-dots button {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    transition: width 0.3s var(--ease-out), background 0.3s;
+  }
+  .xm-swipe-dots button.is-active { width: 26px; background: var(--gold); }
+  .xm-swipe-hint {
+    margin: 0.9rem 0 0;
+    text-align: center;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.6);
+    animation: xmNudge 2s ease-in-out infinite;
+  }
+  @keyframes xmNudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(6px); }
+  }
+
   /* ================= WHY ================= */
   .xm-why {
     position: relative;
@@ -1361,24 +1476,9 @@ const headline = [
     .xm-card--2 { --to: translate(10%, -46%) rotate(10deg); }
     .xm-scroll-cue { display: none; }
 
-    .xm-story { padding-top: 5rem; }
-    .xm-story-inner { grid-template-columns: 1fr; gap: 0; }
-    .xm-story-stage { top: 12px; height: 62vh; z-index: 1; }
-    .xm-phone { height: 56vh; }
-    .xm-deck-card { height: 50vh; }
-    .xm-deck-card--a { transform: translateX(-28%) rotate(-8deg); }
-    .xm-deck-card--b { transform: translateX(28%) rotate(8deg); }
-    .xm-story-chapters { position: relative; z-index: 2; padding: 0 0 30vh; text-align: center; }
-    .xm-chapter { opacity: 0; min-height: 62vh; justify-content: flex-end; align-items: center; }
-    .xm-chapter > *:not(.xm-chapter-tags) {
-      background: rgba(42, 6, 5, 0.82);
-      backdrop-filter: blur(8px);
-    }
-    .xm-chapter-num { padding: 0.3rem 0.8rem; border-radius: 999px; margin-bottom: 0.5rem; font-size: 0.95rem; }
-    .xm-chapter-title { font-size: 1.8rem; padding: 0.6rem 1rem; border-radius: 14px; margin-bottom: 0.4rem; }
-    .xm-chapter-text { font-size: 1rem; padding: 0.6rem 1rem; border-radius: 14px; margin-bottom: 0.6rem; }
-    .xm-chapter-tags { justify-content: center; }
-    .xm-chapter-tags li { background: rgba(42, 6, 5, 0.82); }
+    .xm-story { padding: 4.5rem 0 3.5rem; }
+    .xm-story-inner { display: none; }
+    .xm-swipe { display: block; }
 
     .xm-why { padding: 5rem 0 4rem; }
     .xm-why-row { grid-template-columns: 2.5rem 1fr; gap: 0.3rem 1rem; padding: 1.5rem 0.25rem; }
@@ -1390,6 +1490,31 @@ const headline = [
     .xm-wall-col { gap: 0.7rem; }
     .xm-wall-col:nth-child(even) { margin-top: 2.5rem; }
     .xm-wall-col:nth-child(n + 3) { margin-top: 0; }
+  }
+  @media (max-width: 640px) {
+    /* Phone: buttons stack full width so nothing wraps awkwardly */
+    .xm-hero-cta, .xm-book-cta {
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      max-width: 340px;
+      margin-inline: auto;
+    }
+    .xm-hero-cta .xm-btn, .xm-book-cta .xm-btn { justify-content: center; }
+    /* Snow switch shrinks to a small icon so it never covers text */
+    .xm-snow-toggle {
+      left: 0.75rem;
+      bottom: 0.75rem;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      font-size: 1rem;
+      display: grid;
+      place-items: center;
+    }
+    .xm-snow-toggle [data-snow-label] { display: none; }
+    .xm-snow-toggle[aria-pressed='false'] { opacity: 0.55; }
+    .xm-count-label { letter-spacing: 0.12em; }
   }
   @media (max-width: 480px) {
     .xm-card { width: 150px; }
@@ -1575,7 +1700,9 @@ const headline = [
     cleanup.push(() => io.disconnect());
   }
 
-  /* ---------- Scroll story ---------- */
+  const isPhone = () => window.matchMedia('(max-width: 900px)').matches;
+
+  /* ---------- Scroll story (big screens) ---------- */
   function initStory() {
     const section = document.querySelector<HTMLElement>('[data-xm-story]');
     if (!section) return;
@@ -1594,6 +1721,7 @@ const headline = [
       current = i;
       chapters.forEach((c, k) => c.classList.toggle('is-active', k === i));
       bars.forEach((b, k) => b.classList.toggle('is-active', k <= i));
+      if (isPhone()) return;
       bgs.forEach((b, k) => b.classList.toggle('is-active', k === i));
       // The fanned cards behind the phone preview the next two clips.
       deck.forEach((d) => {
@@ -1619,7 +1747,7 @@ const headline = [
     chapters.forEach((c) => io.observe(c));
 
     const sectionIO = new IntersectionObserver(([e]) => {
-      inView = e.isIntersecting;
+      inView = e.isIntersecting && !isPhone();
       if (inView) {
         if (current < 0) activate(0);
         vids[current]?.play().catch(() => {});
@@ -1628,6 +1756,53 @@ const headline = [
     sectionIO.observe(section);
     activate(0);
     cleanup.push(() => { io.disconnect(); sectionIO.disconnect(); });
+  }
+
+  /* ---------- Story swipe cards (phones) ---------- */
+  function initSwipe() {
+    const root = document.querySelector<HTMLElement>('[data-xm-swipe]');
+    const track = root?.querySelector<HTMLElement>('[data-xm-swipe-track]');
+    if (!root || !track) return;
+    const cards = track.querySelectorAll<HTMLElement>('[data-xm-swipe-card]');
+    const dots = root.querySelectorAll<HTMLButtonElement>('[data-xm-swipe-dot]');
+    const bgs = document.querySelectorAll<HTMLElement>('[data-xm-story-bg]');
+    let current = 0;
+    let inView = false;
+
+    function sync() {
+      cards.forEach((c, k) => {
+        c.classList.toggle('is-active', k === current);
+        const v = c.querySelector('video');
+        if (!v) return;
+        if (k === current && inView && isPhone()) {
+          v.preload = 'auto';
+          v.play().catch(() => {});
+        } else v.pause();
+      });
+      dots.forEach((d, k) => d.classList.toggle('is-active', k === current));
+      if (isPhone()) bgs.forEach((b, k) => b.classList.toggle('is-active', k === current));
+      const next = cards[current + 1]?.querySelector('video');
+      if (next && next.preload === 'none') next.preload = 'metadata';
+    }
+
+    const cardIO = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          current = Number((e.target as HTMLElement).dataset.xmSwipeCard);
+          sync();
+        }
+      });
+    }, { root: track, threshold: 0.6 });
+    cards.forEach((c) => cardIO.observe(c));
+
+    const viewIO = new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }, { threshold: 0.3 });
+    viewIO.observe(track);
+
+    dots.forEach((d) => d.addEventListener('click', () => {
+      const card = cards[Number(d.dataset.xmSwipeDot)];
+      if (card) track.scrollTo({ left: card.offsetLeft - (track.clientWidth - card.offsetWidth) / 2, behavior: 'smooth' });
+    }));
+    cleanup.push(() => { cardIO.disconnect(); viewIO.disconnect(); });
   }
 
   /* ---------- Reel wall: drifting columns ---------- */
@@ -1722,6 +1897,7 @@ const headline = [
     initCountdown();
     initAutoplay();
     initStory();
+    initSwipe();
     initWall();
     initMagnet();
     initLightbox();
