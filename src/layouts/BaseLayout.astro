@@ -4,7 +4,6 @@ import Analytics from '@vercel/analytics/astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import '../styles/global.css';
-import { CHRISTMAS_THEME } from '../data/season';
 
 interface Props {
   title: string;
@@ -18,7 +17,8 @@ interface Props {
 
 const { title, pageTitle, bare, wide } = Astro.props;
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
-const xmasTheme = CHRISTMAS_THEME && !/^\/(leaders|admin)(\/|$)/.test(currentPath);
+// Festive background (body.theme-xmas in global.css) only on the Christmas page.
+const xmasTheme = currentPath === '/event-booking/christmas-proposal';
 ---
 <!DOCTYPE html>
 <html lang="en">

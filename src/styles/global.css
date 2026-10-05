@@ -6076,9 +6076,9 @@ see that markup's own comment), always claiming the full row width
 }
 
 /* ---------- Seasonal: Christmas background ----------
-   Applied to <body> on public pages while CHRISTMAS_THEME is true
-   (src/data/season.ts). Soft red and green glows plus a faint
-   snowflake pattern over the usual cream. */
+   Applied to <body> on the Christmas Proposal page only (see
+   BaseLayout). Soft red and green glows plus a faint snowflake
+   pattern over the usual cream. */
 body.theme-xmas {
   background-color: var(--color-bg);
   background-image:
