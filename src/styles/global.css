@@ -5916,6 +5916,11 @@ see that markup's own comment), always claiming the full row width
   }
   .ws-table td:first-child { border-top: 0; padding-top: 0; }
   .ws-table td:last-child { padding-bottom: 0; }
+  /* The desktop "#" column is width:1% so it hugs its digits; on a phone
+     that same 1% plus overflow-wrap:anywhere above split "27" into one
+     digit per line. Natural width, never broken, label inline ("#27"). */
+  .ws-table td.ws-row-num { width: auto; white-space: nowrap; overflow-wrap: normal; text-align: start; }
+  .ws-table td.ws-row-num::before { display: inline; margin: 0 0.2rem 0 0; }
   .ws-table td::before {
     content: attr(data-label);
     display: block;
