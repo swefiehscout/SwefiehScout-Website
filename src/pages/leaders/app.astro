@@ -83,6 +83,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
       <nav class="ws-tabs" data-ws-tabs>
         <button type="button" class="ws-tab" data-tab="dashboard"><Icon name="compass" size={16} strokeWidth={1.8} /> Dashboard</button>
+        <button type="button" class="ws-tab" data-tab="musicdashboard"><Icon name="compass" size={16} strokeWidth={1.8} /> Dashboard</button>
         <button type="button" class="ws-tab" data-tab="sharedcal"><Icon name="sun" size={16} strokeWidth={1.8} /> Shared Calendar</button>
         <button type="button" class="ws-tab" data-tab="roster"><Icon name="star" size={16} strokeWidth={1.8} /> Roster</button>
         <button type="button" class="ws-tab" data-tab="archive"><Icon name="fleur" size={16} strokeWidth={1.8} /> Archive</button>
@@ -909,14 +910,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         </section>
 
-        <section class="ws-panel" data-panel="events" hidden>
-          <div class="ws-subtabs">
-            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="events" data-subtab="dashboard">Dashboard</button>
-            <button type="button" class="ws-subtab" data-subtabs="events" data-subtab="calendar">Calendar</button>
-            <button type="button" class="ws-subtab" data-subtabs="events" data-subtab="settings">Settings</button>
-          </div>
-
-          <div data-subpanel="events:dashboard">
+        <!-- Music's own Dashboard (bookings, income vs. payouts, top band
+             members, what still needs completing). Same render as before,
+             renderEventsDashboard() from loadEvents(); it used to be the
+             Event Calendar tab's first subtab. -->
+        <section class="ws-panel" data-panel="musicdashboard" hidden>
             <div class="ws-dash">
               <div class="ws-dash-kpis" data-evt-dash-stats></div>
 
@@ -960,9 +958,15 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 </div>
               </div>
             </div>
+        </section>
+
+        <section class="ws-panel" data-panel="events" hidden>
+          <div class="ws-subtabs">
+            <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="events" data-subtab="calendar">Calendar</button>
+            <button type="button" class="ws-subtab" data-subtabs="events" data-subtab="settings">Settings</button>
           </div>
 
-          <div data-subpanel="events:calendar" hidden>
+          <div data-subpanel="events:calendar">
             <div class="curr-toolbar">
               <div class="curr-toolbar-row">
                 <div class="curr-nav">
@@ -5307,10 +5311,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.evtUpcomingBody.innerHTML = upcoming.length ? upcoming.map(rowHtml).join('') : '<tr><td colspan="6" class="ws-empty">Nothing booked yet.</td></tr>';
       [els.evtTodoBody, els.evtUpcomingBody].forEach((body: any) => {
         body.querySelectorAll('[data-evt-dash-open]').forEach((btn: any) => {
-          btn.addEventListener('click', () => {
+          btn.addEventListener('click', async () => {
             const id = btn.closest('tr').dataset.eventId;
             const ev = state.events.find((x: any) => x.id === id);
             if (!ev) return;
+            await setTab('events');
             setSubtab('events', 'calendar');
             evtGoToDate(ev.event_date);
             evtOpenDay(ev.event_date, id);
@@ -10452,7 +10457,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // panel Leaders DOES share with troops, so its own toggle below
     // checks for Leaders explicitly instead of using this list.
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
-      [MUSIC_GROUP_KEY]: ['roster', 'archive', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
+      // No Shared Calendar for Music: leaders kept mixing it up with
+      // Music's own Event Calendar.
+      [MUSIC_GROUP_KEY]: ['musicdashboard', 'roster', 'archive', 'finance', 'inventory', 'events', 'vendors', 'reports'],
       [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'meetingnotes', 'reports', 'sharedcal'],
       [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'pr', 'content', 'credentials', 'sharedcal'],
       [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderarchive', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'reports', 'sharedcal'],
@@ -10465,7 +10472,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // list above doesn't hide anything for them; this covers that case
     // for all 4. Vendors, unlike those, is universal, every troop gets
     // it too, same as Roster/Finance, so it isn't in this list at all.
-    const MUSIC_ONLY_TABS = ['inventory', 'events'];
+    const MUSIC_ONLY_TABS = ['musicdashboard', 'inventory', 'events'];
     const GENERAL_ONLY_TABS = ['meetingnotes'];
     const SOCIAL_MEDIA_ONLY_TABS = ['pr', 'content', 'credentials'];
     const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderarchive', 'leaderattendance', 'leaderprofile', 'leaderassessment'];
@@ -10573,7 +10580,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'fees') return loadFees();
       if (tab === 'finance') return loadFinance();
       if (tab === 'inventory') return loadInventory();
-      if (tab === 'events') return loadEvents();
+      if (tab === 'events' || tab === 'musicdashboard') return loadEvents();
       if (tab === 'vendors') return loadVendors();
       if (tab === 'pr') return loadPR();
       if (tab === 'meetingnotes') return loadMeetingNotes();

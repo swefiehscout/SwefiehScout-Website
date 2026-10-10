@@ -35,7 +35,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       "Lead more than one? Tap a group's name at the top to switch.",
       "The bar under the tabs always shows which group you're viewing.",
       "The 5 troops (Baraem, Ashbal & Zahrat, Mubtadi, Mutaqaddim, Jawalah) get the full set of tabs below.",
-      "Music, Social Media, and General aren't scout troops, so each sees its own smaller, tailored set of tabs instead: no Dashboard, Attendance, Fees, or Curriculum for any of them.",
+      "Music, Social Media, and General aren't scout troops, so each sees its own smaller, tailored set of tabs instead: no Attendance, Fees, or Curriculum for any of them (Music has its own bookings Dashboard).",
       "Leaders is a 4th one like that (admin-only), see its own section below.",
     ],
   },
@@ -50,7 +50,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'shared-calendar', label: 'Shared Calendar', icon: 'sun',
-    intro: 'One calendar for the whole organization: every group and Admin see the exact same thing.',
+    intro: 'One calendar for the whole organization: every group (except Music, which uses its own Event Calendar) and Admin see the exact same thing.',
     lines: [
       'Anyone approved can add to it: a leaders meeting, a deadline, a reminder, anything at all.',
       "Music's own Event Calendar bookings show up on it too, as a view-only marker. Edit those from Music's own tab instead.",
@@ -126,9 +126,19 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     id: 'events', label: 'Event Calendar', icon: 'heart',
     intro: "Every booking the band plays, from first inquiry to getting paid. Music only.",
     lines: [
+      'Two parts: Calendar (where the bookings live) and Settings (event types and other lists).',
       'Tap a date to see or add that day\'s bookings.',
       'Pick which band members are playing, their pay, and any transport pay.',
       "Once the event happens, fill in what was actually received, it posts to Finance automatically.",
+    ],
+  },
+  {
+    id: 'music-dashboard', label: 'Dashboard (Music)', icon: 'compass',
+    intro: "The band's bookings at a glance. Music only.",
+    lines: [
+      'Bookings, income vs. payouts over the last 6 months, top band members, and bookings by type.',
+      'Needs completion: past events still waiting on the amount received. Upcoming: what\'s booked next.',
+      'Tap Open on any row to jump straight to it in the Event Calendar.',
     ],
   },
   {
