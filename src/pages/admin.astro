@@ -376,12 +376,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </div>
             <div class="ws-report-card">
               <h3 class="ws-admin-h3">Sponsors Report</h3>
-              <p class="ws-report-desc">Every sponsor and prospective sponsor General has on file, with contact info, type, and status. Not period-dependent.</p>
+              <p class="ws-report-desc">Every sponsor and prospective sponsor Social Media has on file, with contact info, type, and status. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-main-sponsors>Download PDF</button>
             </div>
             <div class="ws-report-card">
               <h3 class="ws-admin-h3">Community &amp; Church Contacts Report</h3>
-              <p class="ws-report-desc">Every clergy, organization, school, media, and government contact General has on file. Not period-dependent.</p>
+              <p class="ws-report-desc">Every clergy, organization, school, media, and government contact Social Media has on file. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-main-prcontacts>Download PDF</button>
             </div>
             <div class="ws-report-card">
@@ -511,7 +511,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= Social Media ================= -->
         <section class="ws-panel" data-panel="socialmedia" hidden>
-          <p class="ws-att-hint">Social Media isn't a scouting troop either, so it's not part of the Overview rollup above. This is its own equivalent. Its reports live in the main Reports tab, alongside everyone else's.</p>
+          <p class="ws-att-hint">Social Media isn't a scouting troop either, so it's not part of the Overview rollup above. This is its own equivalent, including its Public Relations tab (Sponsors, Community &amp; Church Contacts). Its reports live in the main Reports tab, alongside everyone else's.</p>
           <div class="ws-dash">
             <div class="ws-dash-kpis" data-sm-kpis></div>
 
@@ -559,12 +559,43 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                 </div>
               </div>
             </div>
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Sponsors by status</h3></div>
+                <div data-pr-sponsor-status></div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Sponsors by type</h3></div>
+                <div data-pr-sponsor-type></div>
+              </div>
+            </div>
+
+            <div class="ws-dash-grid ws-dash-grid--2">
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Recent sponsors</h3></div>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-pr-sponsors-table>
+                    <thead><tr><th>Name</th><th>Status</th><th>Added</th></tr></thead>
+                    <tbody data-pr-sponsors-body></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="ws-dash-card">
+                <div class="ws-dash-card-head"><h3>Recent contacts</h3></div>
+                <div class="ws-table-wrap">
+                  <table class="ws-table" data-pr-contacts-table>
+                    <thead><tr><th>Name</th><th>Category</th><th>Added</th></tr></thead>
+                    <tbody data-pr-contacts-body></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <!-- ================= General (Public Relations) ================= -->
+        <!-- ================= General ================= -->
         <section class="ws-panel" data-panel="general" hidden>
-          <p class="ws-att-hint">General isn't a scouting troop either, so it's not part of the Overview rollup above. This is its own equivalent, covering its Public Relations tab (Sponsors, Community &amp; Church Contacts, Library) and Meeting Notes. Its reports live in the main Reports tab, alongside everyone else's.</p>
+          <p class="ws-att-hint">General isn't a scouting troop either, so it's not part of the Overview rollup above. This is its own equivalent, covering its Meeting Notes and Finance. Its reports live in the main Reports tab, alongside everyone else's.</p>
           <div class="ws-dash">
             <div class="ws-dash-kpis" data-gen-kpis></div>
 
@@ -576,37 +607,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div data-gen-chart></div>
             </div>
 
-            <div class="ws-dash-grid ws-dash-grid--2">
-              <div class="ws-dash-card">
-                <div class="ws-dash-card-head"><h3>Sponsors by status</h3></div>
-                <div data-gen-sponsor-status></div>
-              </div>
-              <div class="ws-dash-card">
-                <div class="ws-dash-card-head"><h3>Sponsors by type</h3></div>
-                <div data-gen-sponsor-type></div>
-              </div>
-            </div>
-
-            <div class="ws-dash-grid ws-dash-grid--2">
-              <div class="ws-dash-card">
-                <div class="ws-dash-card-head"><h3>Recent sponsors</h3></div>
-                <div class="ws-table-wrap">
-                  <table class="ws-table" data-gen-sponsors-table>
-                    <thead><tr><th>Name</th><th>Status</th><th>Added</th></tr></thead>
-                    <tbody data-gen-sponsors-body></tbody>
-                  </table>
-                </div>
-              </div>
-              <div class="ws-dash-card">
-                <div class="ws-dash-card-head"><h3>Recent contacts</h3></div>
-                <div class="ws-table-wrap">
-                  <table class="ws-table" data-gen-contacts-table>
-                    <thead><tr><th>Name</th><th>Category</th><th>Added</th></tr></thead>
-                    <tbody data-gen-contacts-body></tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -1216,10 +1216,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.smUpcomingBody = el('[data-sm-upcoming-body]');
       els.genKpis = el('[data-gen-kpis]');
       els.genChart = el('[data-gen-chart]');
-      els.genSponsorStatus = el('[data-gen-sponsor-status]');
-      els.genSponsorType = el('[data-gen-sponsor-type]');
-      els.genSponsorsBody = el('[data-gen-sponsors-body]');
-      els.genContactsBody = el('[data-gen-contacts-body]');
+      els.prSponsorStatus = el('[data-pr-sponsor-status]');
+      els.prSponsorType = el('[data-pr-sponsor-type]');
+      els.prSponsorsBody = el('[data-pr-sponsors-body]');
+      els.prContactsBody = el('[data-pr-contacts-body]');
 
       els.currBody = el('[data-curr-body]');
 
@@ -3111,7 +3111,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Not period-dependent, every sponsor/prospective sponsor General has on file.
     async function downloadSponsorsReportMain() {
       try {
-        const { data, error } = await db.from('sponsors').select('*').eq('group_key', GENERAL_GROUP_KEY).order('name', { ascending: true });
+        const { data, error } = await db.from('sponsors').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('name', { ascending: true });
         if (error) throw error;
         const rows = data || [];
         const doc = new jsPDF();
@@ -3132,7 +3132,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Not period-dependent, every community/church contact General has on file.
     async function downloadPrContactsReportMain() {
       try {
-        const { data, error } = await db.from('pr_contacts').select('*').eq('group_key', GENERAL_GROUP_KEY).order('name', { ascending: true });
+        const { data, error } = await db.from('pr_contacts').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('name', { ascending: true });
         if (error) throw error;
         const rows = data || [];
         const doc = new jsPDF();
@@ -3660,39 +3660,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         ? upcoming.slice(0, 8).map((c: any) => `<tr><td data-label="Date">${c.scheduled_date}</td><td data-label="Title">${escapeHtml(c.title)}</td><td data-label="Platform">${escapeHtml(c.platform || '-')}</td></tr>`).join('')
         : '<tr><td colspan="4" class="ws-empty">Nothing scheduled yet.</td></tr>';
     }
-    async function loadGeneralDashboard() {
-      const now = new Date();
-      const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      const sixAgoD = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-      const sixStart = `${sixAgoD.getFullYear()}-${String(sixAgoD.getMonth() + 1).padStart(2, '0')}-01`;
-      // No team-members KPI: General has no Roster tab in the Leaders
-      // Workspace, so that count could only ever be 0. It does have
-      // Meeting Notes.
-      const [notesRes, sponsorsRes, contactsRes, docsRes, finRes, boxRes] = await Promise.all([
-        db.from('meeting_notes').select('id', { count: 'exact', head: true }).eq('group_key', GENERAL_GROUP_KEY),
-        db.from('sponsors').select('*').eq('group_key', GENERAL_GROUP_KEY).order('created_at', { ascending: false }),
-        db.from('pr_contacts').select('*').eq('group_key', GENERAL_GROUP_KEY).order('created_at', { ascending: false }),
-        db.from('documents').select('id', { count: 'exact', head: true }).eq('group_key', GENERAL_GROUP_KEY),
-        db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', GENERAL_GROUP_KEY),
-        db.from('cash_box_log').select('*').eq('group_key', GENERAL_GROUP_KEY),
+    // Public Relations (Sponsors, Community & Church Contacts) lives in
+    // Social Media's workspace, so its cards and KPIs sit on Social
+    // Media's dashboard, appended after loadSocialMediaDashboard()'s own.
+    async function loadPrDashboard() {
+      const [sponsorsRes, contactsRes] = await Promise.all([
+        db.from('sponsors').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('created_at', { ascending: false }),
+        db.from('pr_contacts').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('created_at', { ascending: false }),
       ]);
       const sponsors = sponsorsRes.data || [];
       const contacts = contactsRes.data || [];
-      const fin = finRes.data || [];
-      // Net income includes cash box over / short, same as everywhere else.
-      const boxLogs: BoxLog[] = boxRes.error ? [] : (boxRes.data || []);
-      const netAllTime = fin.reduce((s: number, e: any) => s + (e.entry_type === 'income' ? Number(e.amount) : -Number(e.amount)), 0)
-        + boxDiffInRange(boxLogs, '0000-01-01', '9999-12-31');
-      const netThisMonth = fin.filter((e: any) => e.entry_date.startsWith(period))
-        .reduce((s: number, e: any) => s + (e.entry_type === 'income' ? Number(e.amount) : -Number(e.amount)), 0)
-        + boxDiffInRange(boxLogs, `${period}-01`, `${period}-31`);
       const activeSponsors = sponsors.filter((s: any) => s.status === 'active').length;
-      const prospectiveSponsors = sponsors.filter((s: any) => s.status === 'prospective').length;
-      els.genKpis.innerHTML = `
-        <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✎</span><span class="ws-dash-kpi-label">Meeting notes</span></div>
-          <span class="ws-dash-kpi-num">${notesRes.count || 0}</span>
-        </div>
+      els.smKpis.insertAdjacentHTML('beforeend', `
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">◆</span><span class="ws-dash-kpi-label">Total sponsors</span></div>
           <span class="ws-dash-kpi-num">${sponsors.length}</span>
@@ -3702,16 +3681,59 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <span class="ws-dash-kpi-num">${activeSponsors}</span>
         </div>
         <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">◔</span><span class="ws-dash-kpi-label">Prospective sponsors</span></div>
-          <span class="ws-dash-kpi-num">${prospectiveSponsors}</span>
-        </div>
-        <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">☎</span><span class="ws-dash-kpi-label">Community &amp; Church contacts</span></div>
           <span class="ws-dash-kpi-num">${contacts.length}</span>
         </div>
+      `);
+      const statusCounts = new Map<string, number>();
+      sponsors.forEach((s: any) => statusCounts.set(s.status, (statusCounts.get(s.status) || 0) + 1));
+      els.prSponsorStatus.innerHTML = statusCounts.size ? Array.from(statusCounts.entries()).map(([status, count]) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${SPONSOR_STATUS_LABELS[status] || status}</span></span>
+          <span class="ws-dash-feed-amount">${count}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No sponsors logged yet.</p>';
+      const typeCounts = new Map<string, number>();
+      sponsors.forEach((s: any) => typeCounts.set(s.type || 'Unspecified', (typeCounts.get(s.type || 'Unspecified') || 0) + 1));
+      els.prSponsorType.innerHTML = typeCounts.size ? Array.from(typeCounts.entries()).sort((a, b) => b[1] - a[1]).map(([type, count]) => `
+        <div class="ws-dash-feed-row">
+          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${escapeHtml(type)}</span></span>
+          <span class="ws-dash-feed-amount">${count}</span>
+        </div>
+      `).join('') : '<p class="ws-dash-empty-mini">No sponsors logged yet.</p>';
+      els.prSponsorsBody.innerHTML = sponsors.length
+        ? sponsors.slice(0, 8).map((s: any) => `<tr><td data-label="Name">${escapeHtml(s.name)}</td><td data-label="Status">${SPONSOR_STATUS_LABELS[s.status] || s.status}</td><td data-label="Added">${s.created_at ? new Date(s.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' }) : '-'}</td></tr>`).join('')
+        : '<tr><td colspan="4" class="ws-empty">No sponsors yet.</td></tr>';
+      els.prContactsBody.innerHTML = contacts.length
+        ? contacts.slice(0, 8).map((c: any) => `<tr><td data-label="Name">${escapeHtml(c.name)}</td><td data-label="Category">${escapeHtml(c.category || '-')}</td><td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' }) : '-'}</td></tr>`).join('')
+        : '<tr><td colspan="4" class="ws-empty">No contacts yet.</td></tr>';
+    }
+    async function loadGeneralDashboard() {
+      const now = new Date();
+      const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const sixAgoD = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+      const sixStart = `${sixAgoD.getFullYear()}-${String(sixAgoD.getMonth() + 1).padStart(2, '0')}-01`;
+      // No team-members KPI: General has no Roster tab in the Leaders
+      // Workspace, so that count could only ever be 0. It does have
+      // Meeting Notes. (Public Relations moved to Social Media, see
+      // loadPrDashboard().)
+      const [notesRes, finRes, boxRes] = await Promise.all([
+        db.from('meeting_notes').select('id', { count: 'exact', head: true }).eq('group_key', GENERAL_GROUP_KEY),
+        db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', GENERAL_GROUP_KEY),
+        db.from('cash_box_log').select('*').eq('group_key', GENERAL_GROUP_KEY),
+      ]);
+      const fin = finRes.data || [];
+      // Net income includes cash box over / short, same as everywhere else.
+      const boxLogs: BoxLog[] = boxRes.error ? [] : (boxRes.data || []);
+      const netAllTime = fin.reduce((s: number, e: any) => s + (e.entry_type === 'income' ? Number(e.amount) : -Number(e.amount)), 0)
+        + boxDiffInRange(boxLogs, '0000-01-01', '9999-12-31');
+      const netThisMonth = fin.filter((e: any) => e.entry_date.startsWith(period))
+        .reduce((s: number, e: any) => s + (e.entry_type === 'income' ? Number(e.amount) : -Number(e.amount)), 0)
+        + boxDiffInRange(boxLogs, `${period}-01`, `${period}-31`);
+      els.genKpis.innerHTML = `
         <div class="ws-dash-kpi">
-          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">▤</span><span class="ws-dash-kpi-label">PR Library documents</span></div>
-          <span class="ws-dash-kpi-num">${docsRes.count || 0}</span>
+          <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">✎</span><span class="ws-dash-kpi-label">Meeting notes</span></div>
+          <span class="ws-dash-kpi-num">${notesRes.count || 0}</span>
         </div>
         <div class="ws-dash-kpi">
           <div class="ws-dash-kpi-head"><span class="ws-dash-kpi-icon">$</span><span class="ws-dash-kpi-label">Net income (mtd)</span></div>
@@ -3766,28 +3788,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </div>
         `;
       }
-      const statusCounts = new Map<string, number>();
-      sponsors.forEach((s: any) => statusCounts.set(s.status, (statusCounts.get(s.status) || 0) + 1));
-      els.genSponsorStatus.innerHTML = statusCounts.size ? Array.from(statusCounts.entries()).map(([status, count]) => `
-        <div class="ws-dash-feed-row">
-          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${SPONSOR_STATUS_LABELS[status] || status}</span></span>
-          <span class="ws-dash-feed-amount">${count}</span>
-        </div>
-      `).join('') : '<p class="ws-dash-empty-mini">No sponsors logged yet.</p>';
-      const typeCounts = new Map<string, number>();
-      sponsors.forEach((s: any) => typeCounts.set(s.type || 'Unspecified', (typeCounts.get(s.type || 'Unspecified') || 0) + 1));
-      els.genSponsorType.innerHTML = typeCounts.size ? Array.from(typeCounts.entries()).sort((a, b) => b[1] - a[1]).map(([type, count]) => `
-        <div class="ws-dash-feed-row">
-          <span class="ws-dash-feed-text"><span class="ws-dash-feed-title">${escapeHtml(type)}</span></span>
-          <span class="ws-dash-feed-amount">${count}</span>
-        </div>
-      `).join('') : '<p class="ws-dash-empty-mini">No sponsors logged yet.</p>';
-      els.genSponsorsBody.innerHTML = sponsors.length
-        ? sponsors.slice(0, 8).map((s: any) => `<tr><td data-label="Name">${escapeHtml(s.name)}</td><td data-label="Status">${SPONSOR_STATUS_LABELS[s.status] || s.status}</td><td data-label="Added">${s.created_at ? new Date(s.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' }) : '-'}</td></tr>`).join('')
-        : '<tr><td colspan="4" class="ws-empty">No sponsors yet.</td></tr>';
-      els.genContactsBody.innerHTML = contacts.length
-        ? contacts.slice(0, 8).map((c: any) => `<tr><td data-label="Name">${escapeHtml(c.name)}</td><td data-label="Category">${escapeHtml(c.category || '-')}</td><td data-label="Added">${c.created_at ? new Date(c.created_at).toLocaleDateString(undefined, { timeZone: 'Asia/Amman' }) : '-'}</td></tr>`).join('')
-        : '<tr><td colspan="4" class="ws-empty">No contacts yet.</td></tr>';
     }
     async function downloadContentCalendarReport(monthEl?: any, yearEl?: any) {
       try {
@@ -4320,7 +4320,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (tab === 'finance') { loadFinanceKpis(); loadFinancePeriod(); loadReconcileHistory(); loadBoxCounts(); loadFinanceAudit(); }
       if (tab === 'curriculum') loadCurriculum();
       if (tab === 'music') loadMusicDashboard();
-      if (tab === 'socialmedia') loadSocialMediaDashboard();
+      if (tab === 'socialmedia') loadSocialMediaDashboard().then(loadPrDashboard);
       if (tab === 'general') loadGeneralDashboard();
       if (tab === 'roster') loadRoster();
       if (tab === 'library') loadSharedDocs();

@@ -1578,12 +1578,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <p class="ws-report-desc">Every login stored in the Credentials tab, in full. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-credentials>Download PDF</button>
             </div>
-            <div class="ws-report-card" data-general-only hidden>
+            <div class="ws-report-card" data-social-only hidden>
               <h3 class="ws-admin-h3">Sponsors</h3>
               <p class="ws-report-desc">Every sponsor and prospective sponsor, with contact info, type, and status. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-sponsors>Download PDF</button>
             </div>
-            <div class="ws-report-card" data-general-only hidden>
+            <div class="ws-report-card" data-social-only hidden>
               <h3 class="ws-admin-h3">Community &amp; Church Contacts</h3>
               <p class="ws-report-desc">Every clergy, organization, school, media, and government contact on file. Not period-dependent.</p>
               <button type="button" class="btn-primary" data-report-prcontacts>Download PDF</button>
@@ -5850,7 +5850,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
-    // ---------- Public Relations (General only): Sponsors, Contacts,
+    // ---------- Public Relations (Social Media only): Sponsors, Contacts,
     // a PR-scoped Library, and their 3 editable category lists ----------
     const DEFAULT_SPONSOR_TYPE_CATEGORIES = ['Financial', 'In-Kind', 'Media', 'Venue', 'Other'];
     const DEFAULT_PR_CONTACT_CATEGORIES = ['Church', 'Community', 'School', 'Media', 'Government', 'Other'];
@@ -10453,20 +10453,21 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // checks for Leaders explicitly instead of using this list.
     const NON_TROOP_TAB_VISIBILITY: Record<string, string[]> = {
       [MUSIC_GROUP_KEY]: ['roster', 'archive', 'finance', 'inventory', 'events', 'vendors', 'reports', 'sharedcal'],
-      [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'pr', 'meetingnotes', 'reports', 'sharedcal'],
-      [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'content', 'credentials', 'sharedcal'],
+      [GENERAL_GROUP_KEY]: ['finance', 'vendors', 'meetingnotes', 'reports', 'sharedcal'],
+      [SOCIAL_MEDIA_GROUP_KEY]: ['finance', 'vendors', 'reports', 'library', 'pr', 'content', 'credentials', 'sharedcal'],
       [LEADERS_GROUP_KEY]: ['leaderdashboard', 'leaderroster', 'leaderarchive', 'leaderattendance', 'leaderprofile', 'leaderassessment', 'reports', 'sharedcal'],
     };
-    // Inventory/Event Calendar are Music-only, Public Relations is
-    // General-only, Content Calendar/Credentials are Social-Media-only,
+    // Inventory/Event Calendar are Music-only, Meeting Notes is
+    // General-only, Public Relations/Content Calendar/Credentials are
+    // Social-Media-only,
     // the leaderX tabs are Leaders-only, troops aren't in
     // NON_TROOP_TAB_VISIBILITY at all, so each group's own inclusion
     // list above doesn't hide anything for them; this covers that case
     // for all 4. Vendors, unlike those, is universal, every troop gets
     // it too, same as Roster/Finance, so it isn't in this list at all.
     const MUSIC_ONLY_TABS = ['inventory', 'events'];
-    const GENERAL_ONLY_TABS = ['pr', 'meetingnotes'];
-    const SOCIAL_MEDIA_ONLY_TABS = ['content', 'credentials'];
+    const GENERAL_ONLY_TABS = ['meetingnotes'];
+    const SOCIAL_MEDIA_ONLY_TABS = ['pr', 'content', 'credentials'];
     const LEADERS_ONLY_TABS = ['leaderdashboard', 'leaderroster', 'leaderarchive', 'leaderattendance', 'leaderprofile', 'leaderassessment'];
     // A leader approved with no group at all (see the People tab's
     // "Support Leader" option): 3 tabs make sense with no group_key to
