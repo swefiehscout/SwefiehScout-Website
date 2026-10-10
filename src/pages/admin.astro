@@ -1999,8 +1999,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
       const troopKeys = TROOP_GROUPS.map((g) => g.key);
       const [membersRes, attRes, feeRes, finRes, pendingRes, boxRes] = await Promise.all([
-        db.from('members').select('group_key, active, has_allergies').in('group_key', troopKeys),
-        db.from('attendance').select('group_key, present, date').in('group_key', troopKeys).gte('date', day60Str),
+        db.from('members').select('id, group_key, active, has_allergies').in('group_key', troopKeys),
+        db.from('attendance').select('member_id, group_key, present, date').in('group_key', troopKeys).gte('date', day60Str),
         db.from('fee_payments').select('group_key, paid, amount').in('group_key', troopKeys).eq('period', period),
         db.from('finance_entries').select('group_key, entry_type, amount, entry_date').in('group_key', troopKeys).gte('entry_date', `${prevPeriod}-01`).lte('entry_date', monthEnd),
         db.from('join_requests').select('group_key').eq('status', 'pending'),
@@ -2019,10 +2019,25 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         if (m.active) { b.activeMembers++; if (m.has_allergies) b.allergyMembers++; }
         else b.archivedMembers++;
       });
+      // Attendance only stores who was ticked present (unticking deletes
+      // the row), so present rows / rows was always 100%. Rate is instead
+      // presences / (meetings held x active members), a meeting being any
+      // date with at least one tick in that troop, same rule as the
+      // Attendance report's "present / meetings held".
+      const activeIds = new Set((membersRes.data || []).filter((m: any) => m.active).map((m: any) => m.id));
+      const dates30 = new Map<string, Set<string>>();
+      const dates3060 = new Map<string, Set<string>>();
       (attRes.data || []).forEach((r: any) => {
         const b = byGroup.get(r.group_key); if (!b) return;
-        if (r.date >= day30Str) { b.attTotal30++; if (r.present) b.attPresent30++; }
-        else { b.attTotal3060++; if (r.present) b.attPresent3060++; }
+        const recent = r.date >= day30Str;
+        const dates = recent ? dates30 : dates3060;
+        if (!dates.has(r.group_key)) dates.set(r.group_key, new Set());
+        dates.get(r.group_key)!.add(r.date);
+        if (r.present && activeIds.has(r.member_id)) { if (recent) b.attPresent30++; else b.attPresent3060++; }
+      });
+      byGroup.forEach((b, key) => {
+        b.attTotal30 = (dates30.get(key)?.size || 0) * b.activeMembers;
+        b.attTotal3060 = (dates3060.get(key)?.size || 0) * b.activeMembers;
       });
       (feeRes.data || []).forEach((r: any) => {
         const b = byGroup.get(r.group_key); if (!b) return;

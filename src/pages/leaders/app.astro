@@ -1298,12 +1298,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               </label>
               <label class="ws-field">
                 <span>Title *</span>
-                <input type="text" data-mn-title data-titlecase placeholder="e.g. Monthly Board Meeting" required />
+                <input type="text" data-mn-title data-titlecase data-allow-non-latin dir="auto" placeholder="e.g. Monthly Board Meeting" required />
               </label>
             </div>
             <label class="ws-field ws-field--full">
               <span>Notes *</span>
-              <textarea data-mn-notes rows="4" placeholder="What was discussed, decided, and who's doing what next…" required></textarea>
+              <textarea data-mn-notes data-allow-non-latin dir="auto" rows="4" placeholder="What was discussed, decided, and who's doing what next…" required></textarea>
             </label>
             <div class="ws-form-actions">
               <button type="submit" class="btn-primary" data-mn-submit>Add notes</button>
@@ -1311,7 +1311,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </div>
           </form>
 
-          <input type="search" class="ws-search" data-mn-search placeholder="Search meeting notes…" />
+          <input type="search" class="ws-search" data-mn-search data-allow-non-latin dir="auto" placeholder="Search meeting notes…" />
 
           <div class="ws-dgroups" data-mn-body></div>
         </section>
@@ -2721,8 +2721,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // just what a report happens to show. One delegated listener catches
     // every text input/textarea already on the page or added later
     // (dynamically-rendered rows included), rather than wiring each one.
-    // data-allow-non-latin opts a field out, currently just Shared
-    // Calendar's Title/Description, which never go into a PDF report.
+    // data-allow-non-latin opts a field out: Shared Calendar's Title/
+    // Description (never in a PDF) and Meeting Notes' Title/Notes/search
+    // (asked for in Arabic; the Meeting Notes PDF still drops Arabic via
+    // pdfSafe() until reports get an Arabic font).
     function bindEnglishOnlyInputs() {
       document.addEventListener('input', (e: any) => {
         const t = e.target;
@@ -6253,8 +6255,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         row: (n: any) => `
         <tr data-mn-id="${n.id}">
           <td data-label="Date">${n.meeting_date}</td>
-          <td data-label="Title">${escapeHtml(n.title)}</td>
-          <td data-label="Notes" class="ws-cell-wrap">${escapeHtml(n.notes)}</td>
+          <td data-label="Title" dir="auto">${escapeHtml(n.title)}</td>
+          <td data-label="Notes" class="ws-cell-wrap" dir="auto">${escapeHtml(n.notes)}</td>
           <td data-label="Added by">${escapeHtml(n.created_by_name || '-')}</td>
           <td class="ws-row-actions">
             <button type="button" class="ws-edit-btn" data-mn-edit>Edit</button>
@@ -10136,7 +10138,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }
 
       const [attRes, curRes, feeRes, finRes, pendingRes, boxRes] = await Promise.all([
-        db.from('attendance').select('date, present').eq('group_key', state.activeGroup).gte('date', day90).order('date', { ascending: true }),
+        db.from('attendance').select('date, present, member_id').eq('group_key', state.activeGroup).gte('date', day90).order('date', { ascending: true }),
         db.from('curriculum_meetings').select('date, theme, activities').eq('group_key', state.activeGroup).gte('date', todayStr()).order('date', { ascending: true }).limit(1),
         db.from('fee_payments').select('paid, amount').eq('group_key', state.activeGroup).eq('period', period),
         db.from('finance_entries').select('entry_type, amount, entry_date, category, description').eq('group_key', state.activeGroup).gte('entry_date', sixStart).lte('entry_date', monthEnd).order('entry_date', { ascending: false }),
@@ -10152,14 +10154,22 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
       // Attendance: per-date rollup (chart) + 30-day rate vs the prior 30
       // days (KPI trend).
+      // Only ticked-present rows exist (unticking deletes the row, see
+      // saveAttendance), so a date's total is every active member, not
+      // its row count, otherwise every rate reads 100%.
+      const activeIds = new Set(active.map((m: any) => m.id));
       const byDate = new Map<string, { present: number; total: number }>();
       attRows.forEach((r: any) => {
-        const e = byDate.get(r.date) || { present: 0, total: 0 };
-        e.total++; if (r.present) e.present++;
+        const e = byDate.get(r.date) || { present: 0, total: active.length };
+        if (r.present && activeIds.has(r.member_id)) e.present++;
         byDate.set(r.date, e);
       });
       const lastDates = Array.from(byDate.keys()).sort().slice(-8);
-      const rateOf = (rows: any[]) => rows.length ? Math.round((rows.filter((r: any) => r.present).length / rows.length) * 100) : null;
+      const rateOf = (rows: any[]) => {
+        const meetings = new Set(rows.map((r: any) => r.date)).size;
+        const expected = meetings * active.length;
+        return expected ? Math.round((rows.filter((r: any) => r.present && activeIds.has(r.member_id)).length / expected) * 100) : null;
+      };
       const rate30 = rateOf(attRows.filter((r: any) => r.date >= day30));
       const ratePrev30 = rateOf(attRows.filter((r: any) => r.date >= day60 && r.date < day30));
 
