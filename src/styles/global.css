@@ -6081,7 +6081,7 @@ see that markup's own comment), always claiming the full row width
 }
 
 /* ---------- Seasonal: Christmas background ----------
-   Applied to <body> on the Christmas Proposal page only (see
+   Applied to <body> on the Christmas Proposal page (/christmas-proposal) only (see
    BaseLayout). Soft red and green glows plus a faint snowflake
    pattern over the usual cream. */
 body.theme-xmas {
@@ -6107,4 +6107,11 @@ body.theme-xmas::before {
 @media print {
   body.theme-xmas { background: #fff !important; }
   body.theme-xmas::before { display: none; }
+}
+
+/* Contact Us without its form (removed 2026-10-17, see
+   docs/archived-public-forms.md): the info card stands alone, centred. */
+.contact-layout--solo { max-width: 560px; }
+@media (min-width: 880px) {
+  .contact-layout.contact-layout--solo { grid-template-columns: 1fr; }
 }

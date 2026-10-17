@@ -16,7 +16,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </p>
   </section>
 
-  <div class="contact-layout">
+  <div class="contact-layout contact-layout--solo">
     <aside class="contact-info" data-animate>
       <h2 class="info-h2">Reach Us Directly</h2>
       <div class="info-list">
@@ -55,40 +55,5 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
     </aside>
 
-    <div class="form-card" data-animate data-animate-delay="1">
-      <h2 class="form-h2">Send a Message</h2>
-      <p class="form-h2-ar">أرسل رسالة</p>
-      <form action="https://formsubmit.co/8c4c29c5ea156dc946846467acb02d46" method="POST" class="form-grid" data-astro-reload>
-        <input type="hidden" name="_cc" value="fzbatshon@gmail.com" />
-        <input type="hidden" name="_subject" value="New contact from Scout site" />
-        <input type="hidden" name="_template" value="table" />
-        <input type="hidden" name="_captcha" value="true" />
-        <input type="hidden" name="_next" value="https://swefieh-orthodox-scout.com/thank-you" />
-        <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
-        <div class="form-row">
-          <label for="name">Name · الاسم</label>
-          <input type="text" id="name" name="name" required />
-        </div>
-        <div class="form-row">
-          <label for="email">Email · البريد الإلكتروني</label>
-          <input type="email" id="email" name="email" required />
-        </div>
-        <div class="form-row">
-          <label for="phone">Phone Number · رقم الهاتف</label>
-          <input type="tel" id="phone" name="phone" required />
-        </div>
-        <div class="form-row">
-          <label for="subject">Subject · الموضوع</label>
-          <input type="text" id="subject" name="subject" />
-        </div>
-        <div class="form-row">
-          <label for="message">Message · الرسالة</label>
-          <textarea id="message" name="message" required></textarea>
-        </div>
-        <div>
-          <button type="submit" class="btn-primary">Send Message</button>
-        </div>
-      </form>
-    </div>
   </div>
 </BaseLayout>
