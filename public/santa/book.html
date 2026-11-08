@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reserve a Visit · Santa Booking</title>
+<meta name="description" content="Reserve a visit from Santa on Christmas Eve, 24 December.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Markazi+Text:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="header.css">
+<link rel="icon" href="logo.png">
+</head>
+<body>
+<!-- Main website header, copied from the built site (src/components/SiteHeader.astro) -->
+<header class="site-header"> <div class="header-inner"> <a href="/" class="brand"> <img src="/images/logo.png" alt="Greek Orthodox Scouts & Guides - Swefieh emblem"> <span class="brand-text">
+Greek Orthodox Scouts &amp; Guides - Swefieh
+<small>مجموعة كشافة ومرشدات الروم الأرثوذكس - الصويفية</small> </span> </a> <button class="nav-toggle" type="button" aria-label="Open menu" aria-controls="primary-nav" aria-expanded="false" data-nav-toggle> <span class="nav-toggle-bar"></span> <span class="nav-toggle-bar"></span> <span class="nav-toggle-bar"></span> </button> <nav class="site-nav" id="primary-nav" aria-label="Primary" data-nav> <ul> <li class> <a href="/">Home</a>  </li><li class="has-children"> <div class="nav-parent"> <a href="/about-us">About Us</a> <button type="button" class="submenu-toggle" aria-controls="submenu-1" aria-expanded="false" aria-label="Toggle About Us menu" data-submenu-toggle> <span aria-hidden="true">▾</span> </button> </div> <ul class="submenu" id="submenu-1" data-submenu> <li> <a href="/about-us/our-band">Our Band</a> </li><li> <a href="/about-us/our-church">Our Church</a> </li><li> <a href="/about-us/our-team">Our Team</a> </li> </ul> </li><li class="has-children"> <div class="nav-parent"> <a href="/join-us">Join Us</a> <button type="button" class="submenu-toggle" aria-controls="submenu-2" aria-expanded="false" aria-label="Toggle Join Us menu" data-submenu-toggle> <span aria-hidden="true">▾</span> </button> </div> <ul class="submenu" id="submenu-2" data-submenu> <li> <a href="/join">Register</a> </li> </ul> </li><li class> <a href="/gallery">Gallery</a>  </li><li class> <a href="/contact-us">Contact Us</a>  </li><li class="has-children"> <div class="nav-parent"> <a href="/santa/" aria-current="page">Christmas</a> <button type="button" class="submenu-toggle" aria-controls="submenu-5" aria-expanded="false" aria-label="Toggle Christmas menu" data-submenu-toggle> <span aria-hidden="true">▾</span> </button> </div> <ul class="submenu" id="submenu-5" data-submenu> <li> <a href="/santa/" aria-current="page">Book Santa</a> </li><li> <a href="/christmas-proposal">Christmas Proposal</a> </li> </ul> </li><li class> <a href="/leaders">Leaders</a>  </li> </ul> </nav> </div> <div class="nav-backdrop" data-nav-backdrop hidden></div> </header>
+<script>
+  function setupSiteHeader() {
+    // Glass-on-scroll: the header switches to a translucent backdrop-blur
+    // surface when the page has been scrolled past the very top.
+    var header = document.querySelector('.site-header');
+    if (header) {
+      var sync = function () {
+        header.classList.toggle('is-scrolled', window.scrollY > 8);
+      };
+      sync();
+      window.addEventListener('scroll', sync, { passive: true });
+    }
+
+    // Click-based submenu: a chevron button next to each parent link
+    // toggles the submenu open/closed. The parent link itself still
+    // navigates normally, separating the two interactions makes touch
+    // and mouse both reliable. Click outside or press Escape closes.
+    var subToggles = document.querySelectorAll('[data-submenu-toggle]');
+    function closeAllSubmenus(except) {
+      subToggles.forEach(function (b) {
+        if (b === except) return;
+        b.setAttribute('aria-expanded', 'false');
+        var id = b.getAttribute('aria-controls');
+        var menu = id && document.getElementById(id);
+        if (menu) menu.classList.remove('is-open');
+      });
+    }
+    subToggles.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var id = btn.getAttribute('aria-controls');
+        var menu = id && document.getElementById(id);
+        var isOpen = btn.getAttribute('aria-expanded') === 'true';
+        closeAllSubmenus(btn);
+        if (!isOpen) {
+          btn.setAttribute('aria-expanded', 'true');
+          if (menu) menu.classList.add('is-open');
+        } else {
+          btn.setAttribute('aria-expanded', 'false');
+          if (menu) menu.classList.remove('is-open');
+        }
+      });
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('.has-children')) {
+        closeAllSubmenus(null);
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeAllSubmenus(null);
+    });
+
+    var btn = document.querySelector('[data-nav-toggle]');
+    var nav = document.querySelector('[data-nav]');
+    var backdrop = document.querySelector('[data-nav-backdrop]');
+    if (!btn || !nav || !backdrop) return;
+
+    function setOpen(open) {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      nav.classList.toggle('is-open', open);
+      btn.classList.toggle('is-open', open);
+      document.body.classList.toggle('nav-locked', open);
+      if (open) {
+        backdrop.removeAttribute('hidden');
+        // next frame so transition runs
+        requestAnimationFrame(function () { backdrop.classList.add('is-visible'); });
+      } else {
+        backdrop.classList.remove('is-visible');
+        setTimeout(function () { backdrop.setAttribute('hidden', ''); }, 220);
+      }
+    }
+
+    btn.addEventListener('click', function () {
+      setOpen(btn.getAttribute('aria-expanded') !== 'true');
+    });
+    backdrop.addEventListener('click', function () { setOpen(false); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') setOpen(false);
+    });
+    // Tap a link → close drawer.
+    nav.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { setOpen(false); });
+    });
+    // Close on resize back to desktop so state doesn't get stuck.
+    var mq = window.matchMedia('(min-width: 880px)');
+    (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(function (e) {
+      if (e.matches) setOpen(false);
+    });
+  }
+  // astro:page-load fires on initial page load AND after every view
+  // transition, so a single listener covers both. Adding setup() as a
+  // direct call too would double-bind the click handlers and make the
+  // hamburger toggle open-then-close on a single tap.
+  setupSiteHeader();
+</script>
+<div class="garland" aria-hidden="true"></div>
+
+<div class="wrap page">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="/">Home</a><span aria-hidden="true">›</span><span>Christmas</span><span aria-hidden="true">›</span><a href="index.html">Book Santa</a><span aria-hidden="true">›</span><span aria-current="page">Book a Visit</span>
+  </nav>
+
+  <section class="page-head">
+    <p class="eyebrow" id="date-tag">Christmas Eve · 24 December</p>
+    <h1>Reserve a Visit</h1>
+    <p class="lede">Tell us where to find you and choose a time. Our team will call you to confirm before Christmas Eve.</p>
+  </section>
+
+  <div id="loading" class="closed"><p>Opening Santa's diary…</p></div>
+
+  <div id="closed" class="notice notice-page" data-closed hidden>
+    <span class="notice-icon" aria-hidden="true" data-closed-icon>✦</span>
+    <div class="notice-body">
+      <h2 class="notice-title" data-closed-title>Bookings are closed for now</h2>
+      <p class="notice-text" data-closed-text>Please check back again soon.</p>
+      <p id="closed-contact"></p>
+      <div class="notice-action" data-closed-action hidden></div>
+    </div>
+  </div>
+
+  <form id="form" class="card narrow" novalidate hidden>
+    <fieldset>
+      <legend><span class="n">1</span><span class="tt">Where Should Santa Go?</span></legend>
+      <div class="field">
+        <label class="req" for="area">Area</label>
+        <select id="area" name="area" required></select>
+      </div>
+      <div class="field">
+        <span class="label req">Mark your home on the map</span>
+        <div id="map"></div>
+        <div class="map-tools">
+          <span class="pin-state" id="pin-state">Tap the map to place a pin on your home.</span>
+          <button type="button" class="ghost" id="locate">Use my current location</button>
+        </div>
+        <span class="err" id="pin-err" hidden>Please place a pin on your home.</span>
+      </div>
+      <div class="field">
+        <label class="req" for="maps">Google Maps link to your home</label>
+        <input id="maps" name="maps" inputmode="url" placeholder="Paste the link from Google Maps → Share">
+        <span class="hint" id="maps-hint">In Google Maps, tap your home, then Share, then Copy link.</span>
+        <span class="err" id="maps-err" hidden>Please paste a Google Maps link to your home.</span>
+      </div>
+      <div class="field">
+        <label for="address">Building, floor &amp; directions</label>
+        <input id="address" name="address" autocomplete="street-address" placeholder="Building 12, 3rd floor, next to the pharmacy">
+      </div>
+    </fieldset>
+
+    <hr class="sep">
+
+    <fieldset>
+      <legend><span class="n">2</span><span class="tt">Choose a Time</span></legend>
+      <div class="slots" id="slots" role="group" aria-label="Visit times"></div>
+      <span class="err" id="slot-err" hidden>Please choose a time.</span>
+    </fieldset>
+
+    <hr class="sep">
+
+    <fieldset>
+      <legend><span class="n">3</span><span class="tt">Your Details</span></legend>
+      <div class="row two">
+        <div class="field">
+          <label class="req" for="name">Full name</label>
+          <input id="name" name="name" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label class="req" for="phone">Mobile number</label>
+          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07X XXX XXXX" required>
+        </div>
+      </div>
+      <span class="err" id="phone-err" hidden>Enter a Jordanian mobile number, like 0791234567.</span>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="Optional">
+      </div>
+      <div class="row two">
+        <div class="field">
+          <label for="gift">A message for Santa</label>
+          <textarea id="gift" name="gift" rows="3" placeholder="Children's names, a wish, a gift to hand over"></textarea>
+        </div>
+        <div class="field">
+          <label for="notes">Anything else?</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="Optional"></textarea>
+        </div>
+      </div>
+    </fieldset>
+
+    <hr class="sep">
+
+    <fieldset>
+      <legend><span class="n">4</span><span class="tt">How Will You Donate? <span style="color:var(--gold);font-size:12px;vertical-align:4px">✦</span></span></legend>
+      <div class="pay">
+        <label><input type="radio" name="pay" value="cash"><span>Cash on the visit</span></label>
+        <label><input type="radio" name="pay" value="cliq"><span>CliQ</span></label>
+        <label><input type="radio" name="pay" value="transfer"><span>Bank transfer</span></label>
+      </div>
+      <span class="err" id="pay-err" hidden>Please choose how you will donate.</span>
+      <div class="price" id="price" hidden></div>
+    </fieldset>
+
+    <div class="form-error" id="form-error" role="alert" hidden></div>
+    <button class="submit" id="submit" type="submit">Reserve the Visit</button>
+  </form>
+
+
+  <section id="result" class="card narrow result" hidden aria-live="polite"></section>
+
+  <p class="aside-link">Questions before you book? <a href="contact.html">Write to us</a></p>
+
+  <nav class="santa-links" aria-label="Santa Booking pages">
+    <span class="santa-links-title">✦ Santa Booking</span>
+    <a href="index.html">Santa Home</a>
+    <a href="book.html" aria-current="page">Book a Visit</a>
+    <a href="contact.html">Contact</a>
+    <a href="admin.html">Team Sign In</a>
+  </nav>
+
+  <footer class="foot"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="config.js"></script>
+<script src="demo.js"></script>
+<script src="shared.js"></script>
+<script src="book.js"></script>
+<script src="closed.js"></script>
+</body>
+</html>

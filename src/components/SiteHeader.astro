@@ -40,7 +40,8 @@ function isActive(href: string) {
               <div class="nav-parent">
                 <a
                   href={item.href}
-                  aria-current={isActive(item.href) ? 'page' : undefined}
+                  aria-current={isActive(item.href) || item.children.some((c) => isActive(c.href)) ? 'page' : undefined}
+                  data-astro-reload={item.fullReload ? true : undefined}
                 >{item.title}</a>
                 <button
                   type="button"
@@ -57,6 +58,7 @@ function isActive(href: string) {
               <a
                 href={item.href}
                 aria-current={isActive(item.href) ? 'page' : undefined}
+                data-astro-reload={item.fullReload ? true : undefined}
               >{item.title}</a>
             )}
             {item.children.length > 0 && (
@@ -70,6 +72,7 @@ function isActive(href: string) {
                     <a
                       href={child.href}
                       aria-current={isActive(child.href) ? 'page' : undefined}
+                      data-astro-reload={child.fullReload ? true : undefined}
                     >{child.title}</a>
                   </li>
                 ))}

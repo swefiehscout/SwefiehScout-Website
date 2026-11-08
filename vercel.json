@@ -1,0 +1,11 @@
+{
+  "redirects": [
+    { "source": "/santa", "destination": "/santa/", "permanent": true },
+    { "source": "/santa/index", "destination": "/santa/", "permanent": true },
+    { "source": "/santa/index.html", "destination": "/santa/", "permanent": true },
+    { "source": "/santa/:page(book|contact|admin).html", "destination": "/santa/:page", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/santa/:page(book|contact|admin)", "destination": "/santa/:page.html" }
+  ]
+}
