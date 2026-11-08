@@ -17,7 +17,7 @@
 <!-- Main website header, copied from the built site (src/components/SiteHeader.astro) -->
 <header class="site-header"> <div class="header-inner"> <a href="/" class="brand"> <img src="/images/logo.png" alt="Greek Orthodox Scouts & Guides - Swefieh emblem"> <span class="brand-text">
 Greek Orthodox Scouts &amp; Guides - Swefieh
-<small>مجموعة كشافة ومرشدات الروم الأرثوذكس - الصويفية</small> </span> </a> <button class="nav-toggle" type="button" aria-label="Open menu" aria-controls="primary-nav" aria-expanded="false" data-nav-toggle> <span class="nav-toggle-bar"></span> <span class="nav-toggle-bar"></span> <span class="nav-toggle-bar"></span> </button> <nav class="site-nav" id="primary-nav" aria-label="Primary" data-nav> <ul> <li class> <a href="/">Home</a>  </li><li class="has-children"> <div class="nav-parent"> <a href="/about-us">About Us</a> <button type="button" class="submenu-toggle" aria-controls="submenu-1" aria-expanded="false" aria-label="Toggle About Us menu" data-submenu-toggle> <span aria-hidden="true">▾</span> </button> </div> <ul class="submenu" id="submenu-1" data-submenu> <li> <a href="/about-us/our-band">Our Band</a> </li><li> <a href="/about-us/our-church">Our Church</a> </li><li> <a href="/about-us/our-team">Our Team</a> </li> </ul> </li><li class="has-children"> <div class="nav-parent"> <a href="/join-us">Join Us</a> <button type="button" class="submenu-toggle" aria-controls="submenu-2" aria-expanded="false" aria-label="Toggle Join Us menu" data-submenu-toggle> <span aria-hidden="true">▾</span> </button> </div> <ul class="submenu" id="submenu-2" data-submenu> <li> <a href="/join">Register</a> </li> </ul> </li><li class> <a href="/gallery">Gallery</a>  </li><li class> <a href="/contact-us">Contact Us</a>  </li><li class="has-children"> <div class="nav-parent"> <a href="/santa/" aria-current="page">Christmas</a> <button type="button" class="submenu-toggle" aria-controls="submenu-5" aria-expanded="false" aria-label="Toggle Christmas menu" data-submenu-toggle> <span aria-hidden="true">▾</span> </button> </div> <ul class="submenu" id="submenu-5" data-submenu> <li> <a href="/santa/" aria-current="page">Book Santa</a> </li><li> <a href="/christmas-proposal">Christmas Proposal</a> </li> </ul> </li><li class> <a href="/leaders">Leaders</a>  </li> </ul> </nav> </div> <div class="nav-backdrop" data-nav-backdrop hidden></div> </header>
+<small>مجموعة كشافة ومرشدات الروم الأرثوذكس - الصويفية</small> </span> </a> <button class="nav-toggle" type="button" aria-label="Open menu" aria-controls="primary-nav" aria-expanded="false" data-nav-toggle> <span class="nav-toggle-bar"></span> <span class="nav-toggle-bar"></span> <span class="nav-toggle-bar"></span> </button> <nav class="site-nav" id="primary-nav" aria-label="Primary" data-nav> <ul> <li class> <a href="/">Home</a>  </li><li class="has-children"> <div class="nav-parent"> <a href="/about-us">About Us</a> <button type="button" class="submenu-toggle" aria-controls="submenu-1" aria-expanded="false" aria-label="Toggle About Us menu" data-submenu-toggle> <span aria-hidden="true">▾</span> </button> </div> <ul class="submenu" id="submenu-1" data-submenu> <li> <a href="/about-us/our-band">Our Band</a> </li><li> <a href="/about-us/our-church">Our Church</a> </li><li> <a href="/about-us/our-team">Our Team</a> </li> </ul> </li><li class="has-children"> <div class="nav-parent"> <a href="/join-us">Join Us</a> <button type="button" class="submenu-toggle" aria-controls="submenu-2" aria-expanded="false" aria-label="Toggle Join Us menu" data-submenu-toggle> <span aria-hidden="true">▾</span> </button> </div> <ul class="submenu" id="submenu-2" data-submenu> <li> <a href="/join">Register</a> </li> </ul> </li><li class> <a href="/contact-us">Contact Us</a>  </li><li class="has-children"> <div class="nav-parent"> <a href="/santa/" aria-current="page">Christmas</a> <button type="button" class="submenu-toggle" aria-controls="submenu-5" aria-expanded="false" aria-label="Toggle Christmas menu" data-submenu-toggle> <span aria-hidden="true">▾</span> </button> </div> <ul class="submenu" id="submenu-5" data-submenu> <li> <a href="/santa/" aria-current="page">Book Santa</a> </li><li> <a href="/christmas-proposal">Christmas Proposal</a> </li> </ul> </li><li class> <a href="/leaders">Leaders</a>  </li> </ul> </nav> </div> <div class="nav-backdrop" data-nav-backdrop hidden></div> </header>
 <script>
   function setupSiteHeader() {
     // Glass-on-scroll: the header switches to a translucent backdrop-blur
@@ -115,17 +115,29 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
   // hamburger toggle open-then-close on a single tap.
   setupSiteHeader();
 </script>
-<div class="garland" aria-hidden="true"></div>
+<div class="gold-rule" aria-hidden="true"></div>
 
 <div class="wrap page">
   <nav class="crumbs" aria-label="Breadcrumb">
     <a href="/">Home</a><span aria-hidden="true">›</span><span>Christmas</span><span aria-hidden="true">›</span><span aria-current="page">Book Santa</span>
   </nav>
 
+  <div class="notice notice-top" id="closed" data-closed role="status" hidden>
+    <span class="notice-icon" aria-hidden="true" data-closed-icon>✦</span>
+    <div class="notice-body">
+      <p class="notice-title" data-closed-title>Bookings are closed for now</p>
+      <p class="notice-text" data-closed-text>Please check back again soon.</p>
+    </div>
+    <div class="notice-action" data-closed-action hidden></div>
+  </div>
+
   <section class="s-hero">
-    <div class="s-hero-art" aria-hidden="true">
-      <div class="medallion"><img src="logo.png" alt=""></div>
-      <p class="art-caption"><span>✦</span> Christmas Eve <span>✦</span></p>
+    <div class="s-hero-art">
+      <picture class="hero-photo">
+        <source srcset="hero-illustration.webp" type="image/webp">
+        <img src="hero-illustration.jpg" width="1254" height="1254" alt="Illustration of our Christmas Eve team on the way: Santa, Mrs. Claus, two elves and our driver in a car full of presents">
+      </picture>
+      <p class="art-caption" aria-hidden="true"><span>✦</span> Christmas Eve <span>✦</span></p>
     </div>
     <div class="s-hero-body">
       <p class="eyebrow">The Swefieh Orthodox Scouts present</p>
@@ -136,19 +148,24 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
         <div><dt>Visiting hours</dt><dd id="f-hours">3:00 – 10:30 PM</dd></div>
       </dl>
       <p class="note" id="cta-note">Places are limited on the night. Reserve early.</p>
-      <div class="notice" id="closed" data-closed hidden>
-        <span class="notice-icon" aria-hidden="true" data-closed-icon>✦</span>
-        <div class="notice-body">
-          <p class="notice-title" data-closed-title>Bookings are closed for now</p>
-          <p class="notice-text" data-closed-text>Please check back again soon.</p>
-        </div>
-      </div>
       <div class="actions">
         <a class="btn-primary" id="cta" href="book.html">Reserve Santa's Visit</a>
         <a class="btn-secondary" href="contact.html">Ask a Question</a>
         <a class="btn-team" href="admin.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Team Sign In</a>
       </div>
     </div>
+  </section>
+
+  <section class="s-count" data-countdown aria-labelledby="count-title">
+    <p class="eyebrow">The countdown is on</p>
+    <h2 class="count-title" id="count-title" data-cd-title>Christmas Eve is <span class="accent">coming.</span></h2>
+    <div class="count-grid" data-cd-grid role="timer" aria-live="off">
+      <div class="count-cell"><div class="count-card"><span data-cd="d">00</span></div><p class="count-label">Days</p></div>
+      <div class="count-cell"><div class="count-card"><span data-cd="h">00</span></div><p class="count-label">Hours</p></div>
+      <div class="count-cell"><div class="count-card"><span data-cd="m">00</span></div><p class="count-label">Minutes</p></div>
+      <div class="count-cell"><div class="count-card"><span data-cd="s">00</span></div><p class="count-label">Seconds</p></div>
+    </div>
+    <p class="count-note" data-cd-note></p>
   </section>
 
   <section class="s-cta" aria-labelledby="cta-band-title">
@@ -167,14 +184,6 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
       <a class="btn-gold big" href="book.html">Reserve Santa's Visit</a>
       <a class="s-cta-link" href="contact.html">Questions? Write to us</a>
     </div>
-    <div class="notice notice-dark" id="cta-band-closed" data-closed hidden>
-        <span class="notice-icon" aria-hidden="true" data-closed-icon>✦</span>
-        <div class="notice-body">
-          <p class="notice-title" data-closed-title>Bookings are closed for now</p>
-          <p class="notice-text" data-closed-text>Please check back again soon.</p>
-          <div class="notice-action" data-closed-action hidden></div>
-        </div>
-      </div>
   </section>
 
   <section class="s-section">
@@ -202,6 +211,7 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
 <script src="demo.js"></script>
 <script src="shared.js"></script>
 <script src="closed.js"></script>
+<script src="countdown.js"></script>
 <script>
 (function () {
   const { sb, clock, page } = window.Santa;
@@ -214,21 +224,9 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
     document.getElementById("f-month").textContent = d.toLocaleDateString("en-GB", { month: "long" });
     const [a] = clock(data.start_time).split(" ");
     document.getElementById("f-hours").textContent = `${a} – ${clock(data.end_time)}`;
-    document.getElementById("cta").hidden = !data.open;
     document.getElementById("closed").hidden = data.open;
     document.getElementById("cta-note").hidden = !data.open;
   });
-})();
-</script>
-<script>
-// The booking band follows the hero button: if bookings close, both hide.
-(function () {
-  const cta = document.getElementById("cta");
-  const sync = () => {
-    document.getElementById("cta-band").hidden = cta.hidden;
-    document.getElementById("cta-band-closed").hidden = !cta.hidden;
-  };
-  new MutationObserver(sync).observe(cta, { attributes: true, attributeFilter: ["hidden"] });
 })();
 </script>
 </body>

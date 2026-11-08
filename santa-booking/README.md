@@ -17,6 +17,11 @@ It lives inside the main website repo and is served at **/santa/** on the main s
   - `theme.css`: the main website's look for the public pages (home, book, contact). Admin doesn't use it.
   - `header.css`: the main website's header styles, copied from `src/styles/global.css`
   - `closed.js`: the friendly "bookings closed" messages on home and book (see below)
+  - `countdown.js`: the home page countdown to Christmas Eve (24 December, midnight Amman time)
+  - `hero-illustration.webp` / `.jpg`: the Christmas Eve illustration in the home hero circle. To change it,
+    replace both files with a new square image (about 1250 x 1250 px) keeping the same names
+  - `book-hero`, `contact-hero`, `signin-hero` (`.webp` + `.jpg`): the pictures in the Book and Contact
+    heroes and beside the Team Sign In form; swap them the same way
 - `santa-booking/` (this folder): database scripts in `supabase/` and these notes. It sits
   outside `public/`, so none of it is published on the website.
 
@@ -52,7 +57,9 @@ one on phones). It flips `booking_open` in the settings, the same switch as the 
 Setup, and asks before changing anything. Existing bookings are kept.
 
 Bookings also close by themselves `cutoff_hours` (48 by default) before the first visit.
-When bookings are closed, `closed.js` shows families a message based on why:
+When bookings are closed, `closed.js` shows families a message based on why: as its own card at
+the top of the home page, and in place of the form on the Book page. The Reserve buttons stay, so
+families who tap them see the message there:
 
 - **Paused by the team:** "Bookings are paused for now", check back soon, or call if it seems wrong
 - **Close to Christmas Eve:** "Online booking has closed", call or message us
