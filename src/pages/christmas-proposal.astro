@@ -188,7 +188,6 @@ const WHATSAPP = `https://wa.me/962792028785?text=${encodeURIComponent(
       <div class="cp-contact-actions">
         <a class="cp-btn-gold" href={WHATSAPP} target="_blank" rel="noopener">WhatsApp us</a>
         <a class="cp-btn-light" href={PHONE_TEL}>Call now</a>
-        <a class="cp-btn-light" href="/contact-us">Contact form</a>
       </div>
     </section>
   </div>
@@ -263,6 +262,9 @@ const WHATSAPP = `https://wa.me/962792028785?text=${encodeURIComponent(
   .cp-facts li + li { border-left: 1px solid var(--cp-border); }
   .cp-facts b { font: 700 1.6rem/1.1 var(--font-display); color: var(--cp-brand); }
   .cp-facts span { font-size: 0.78rem; color: var(--cp-muted); line-height: 1.35; }
+  @media (max-width: 400px) { .cp-facts li { padding: 10px 6px; } }
+  /* a long paragraph runs past the 6 lines that balance handles on tiny phones */
+  @media (max-width: 359px) { .cp-lede { text-wrap: pretty; } .cp-facts span { font-size: 0.72rem; } }
   .cp-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
   @media (max-width: 899px) {
     .cp-hero-body { text-align: center; justify-items: center; }
@@ -419,6 +421,14 @@ const WHATSAPP = `https://wa.me/962792028785?text=${encodeURIComponent(
   .cp-btn-light { color: #fdf3dc; border: 1.5px solid rgba(241, 217, 142, 0.6); }
   .cp-btn-gold:hover, .cp-btn-light:hover { transform: translateY(-2px); text-decoration: none; }
   .cp-btn-light:hover { background: rgba(255, 250, 235, 0.1); color: #fff; }
+
+  /* ---------- Phones: no lone words, no lone buttons, everything centred ---------- */
+  /* Every line balances, so no line ends on a lone word; this page's header and footer too */
+  .cp, body:has(.cp) :is(.brand-text, .site-footer) { text-wrap: balance; }
+  .cp-num { font-variant-numeric: lining-nums; line-height: 1; }
+  @media (max-width: 480px) {
+    .cp-reason { justify-items: center; text-align: center; }
+  }
 
   /* ---------- Video player ---------- */
   .cp-lightbox { width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; margin: 0; padding: 0; border: 0; background: transparent; color: #fff; }

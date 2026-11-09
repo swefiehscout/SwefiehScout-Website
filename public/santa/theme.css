@@ -685,7 +685,7 @@ html { scroll-behavior: smooth; }
 @media (max-width: 819px) {
   .hero-strip { text-align: left; }
 }
-@media (max-width: 420px) {
+@media (max-width: 599px) {
   .hero-strip { grid-template-columns: minmax(0, 1fr); }
   .hero-strip li { grid-template-columns: 30px 1fr; align-items: center; gap: 12px; }
   .hero-strip li + li { border-left: 0; border-top: 1px solid var(--border); }
@@ -695,3 +695,72 @@ html { scroll-behavior: smooth; }
 .gold-rule { display: none; }
 .wrap.page { padding-top: 22px; }
 .crumbs { margin-bottom: -26px; }
+
+/* ---------- Phones: no lone words, numbers centred in circles, tidy link rows ---------- */
+/* Every line of text balances, so no line ends on a lone word (form fields wrap normally) */
+body { text-wrap: balance; }
+:is(input, textarea, select) { text-wrap: wrap; }
+/* Playfair's old-style figures sit low in a circle; use full-height figures, centred */
+.step .n, legend .n, .hero-strip b { font-variant-numeric: lining-nums; line-height: 1; }
+
+/* Team Sign In: an outlined button, quieter than Ask a Question */
+.btn-team, .santa-links a[href="admin.html"] { box-shadow: inset 0 0 0 1.5px rgba(87, 22, 7, .35); }
+.btn-team:hover, .santa-links a[href="admin.html"]:hover { box-shadow: inset 0 0 0 1.5px var(--brand); text-decoration: none; }
+.s-hero-body .btn-team { padding-inline: .9rem; }
+@media (min-width: 820px) { .s-hero-body .btn-team { padding-inline: .7rem; } }
+
+/* Bottom Santa links: an even two-by-two grid on phones, centred */
+@media (max-width: 699px) {
+  .santa-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; justify-items: stretch; text-align: center; }
+}
+@media (max-width: 479px) { .santa-links { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 699px) {
+  .santa-links-title { grid-column: 1 / -1; }
+  .santa-links a { text-align: center; padding: 10px 8px; }
+}
+
+/* Phones: How It Works cards centred; follow-us pills big enough to tap */
+@media (max-width: 759px) { .step { justify-items: center; text-align: center; } }
+.pill { min-height: 40px; display: inline-flex; align-items: center; padding-inline: 16px; }
+
+/* Home hero buttons on desktop: Reserve, Ask a Question and Team Sign In on one row.
+   Between 820 and 1099px there isn't room, so Reserve takes the first row and the other two share the second. */
+@media (min-width: 421px) and (max-width: 1099px) {
+  .s-hero-body .actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .s-hero-body .actions > :first-child { grid-column: 1 / -1; }
+  .s-hero-body .actions > * { justify-content: center; }
+}
+@media (min-width: 1100px) {
+  .s-hero-body { padding-inline: 36px; }
+  .s-hero-body .actions { flex-wrap: nowrap; gap: 8px; }
+  .s-hero-body .actions > * { flex: 0 1 auto; white-space: nowrap; font-size: 14.5px; }
+  .s-hero-body .btn-primary, .s-hero-body .btn-secondary { padding: .75rem .85rem; }
+  .s-hero-body .btn-team { padding: .75rem .6rem; gap: 6px; }
+}
+
+/* No orphans at any width: short text balances its lines, longer text never ends on a lone word */
+.s-cta .btn-gold.big { white-space: nowrap; }
+@media (max-width: 400px) { .s-cta .btn-gold.big { font-size: 16px; padding: 18px 16px; } }
+
+/* Follow Us: the three links share one even row */
+.pill-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; width: min(100%, 360px); margin-inline: auto; }
+.pill-row .pill { justify-content: center; padding-inline: 8px; }
+
+/* Book: the map hint and "Use my current location" sit centred under the map */
+.map-tools { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.map-tools .pin-state { text-align: center; }
+
+/* The three-step strip stacks wherever its columns would be too narrow (phones, and the 820-1099px hero) */
+@media (min-width: 820px) and (max-width: 1099px) {
+  .hero-strip { grid-template-columns: minmax(0, 1fr); text-align: left; }
+  .hero-strip li { grid-template-columns: 30px 1fr; align-items: center; gap: 12px; }
+  .hero-strip li + li { border-left: 0; border-top: 1px solid var(--border); }
+}
+
+/* Very small phones (320-380px): slightly smaller headings so their lines break evenly */
+@media (max-width: 400px) { legend .tt { font-size: 20px; } }
+@media (max-width: 345px) { legend .tt { font-size: 18px; } }
+@media (max-width: 359px) {
+  .s-cta h2 { font-size: 28px; }
+  .crumbs { gap: 5px; font-size: 12px; }
+}
