@@ -53,11 +53,13 @@ const quickLinks = [
     title: 'Join Us',
     blurb: 'New scouts, families, and supporters always welcome.',
   },
+  // Gallery is archived (2026-11-08); Book Santa takes its spot so the grid stays an even 4 x 2.
   {
-    href: '/gallery',
-    icon: 'diamond',
-    title: 'Gallery',
-    blurb: 'Moments from camps, parades, and life in the troop.',
+    href: '/santa/',
+    icon: 'sparkle',
+    title: 'Book Santa',
+    blurb: 'Santa and our scouts at your door on Christmas Eve.',
+    fullReload: true,
   },
   {
     href: '/christmas-proposal',
@@ -166,7 +168,7 @@ const quickLinks = [
     <h2 class="section-heading" data-animate>Explore Our Community</h2>
     <div class="cards-grid">
       {quickLinks.map((link, i) => (
-        <a class="card" href={link.href} data-animate data-animate-delay={String((i % 5) + 1)}>
+        <a class="card" href={link.href} data-animate data-animate-delay={String((i % 5) + 1)} data-astro-reload={'fullReload' in link ? true : undefined}>
           <span class="card-icon" aria-hidden="true">
             <Icon name={link.icon} size={26} />
           </span>
