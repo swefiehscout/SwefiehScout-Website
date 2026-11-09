@@ -727,8 +727,12 @@ body { text-wrap: balance; }
    Between 820 and 1099px there isn't room, so Reserve takes the first row and the other two share the second. */
 @media (min-width: 421px) and (max-width: 1099px) {
   .s-hero-body .actions { display: grid; grid-template-columns: 1fr 1fr; }
-  .s-hero-body .actions > :first-child { grid-column: 1 / -1; }
+  .s-hero-body .actions:has(> :nth-child(3)) > :first-child { grid-column: 1 / -1; }
   .s-hero-body .actions > * { justify-content: center; }
+}
+/* Two-button heroes (Book, Contact): both full width on phones, side by side when there is room */
+@media (max-width: 599px) {
+  .s-hero-body .actions:not(:has(> :nth-child(3))) { display: grid; grid-template-columns: minmax(0, 1fr); }
 }
 @media (min-width: 1100px) {
   .s-hero-body { padding-inline: 36px; }
@@ -764,3 +768,28 @@ body { text-wrap: balance; }
   .s-cta h2 { font-size: 28px; }
   .crumbs { gap: 5px; font-size: 12px; }
 }
+
+/* Book on phones: the Google Maps hint stays on one line */
+@media (max-width: 480px) {
+  .card { padding-inline: 18px; }
+  #maps-hint { font-size: 13px; }
+}
+@media (max-width: 374px) { #maps-hint { font-size: 12.5px; } }
+/* Two-button heroes stretch to the full width on phones */
+@media (max-width: 599px) { .s-hero-body .actions:not(:has(> :nth-child(3))) { width: 100%; justify-items: stretch; } }
+/* Two-button heroes from 600px: side by side only when both labels fit on one line, otherwise stacked */
+@media (min-width: 600px) and (max-width: 1099px) {
+  .s-hero-body .actions:not(:has(> :nth-child(3))) { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .s-hero-body .actions > * { white-space: nowrap; }
+}
+
+/* Christmas pages: the header's top strip is a candy cane (same as the Christmas Proposal page) */
+body .site-header::before {
+  height: 4px;
+  background: repeating-linear-gradient(-45deg, #b3261e 0 10px, #fff 10px 20px, #143822 20px 30px, #fff 30px 40px);
+}
+/* ...and the rest of the menu bar stays exactly as on every other page of the site */
+.site-header { text-wrap: wrap; }
+/* The booking app's overflow-x: hidden made the page its own scroller, which unpinned the menu bar
+   on desktop. clip still stops sideways scrolling but keeps the menu bar pinned like everywhere else. */
+html, body { overflow-x: clip; overflow-y: visible; }

@@ -6094,19 +6094,19 @@ body.theme-xmas {
   background-size: 220px 220px, 100% 100%, 100% 100%, 100% 100%;
   background-attachment: fixed;
 }
-/* Candy-cane strip along the very top of the page. */
-body.theme-xmas::before {
-  content: '';
-  position: fixed;
-  inset: 0 0 auto;
+/* Christmas pages: the header's top strip is a candy cane instead of the brand gradient.
+   It is the header's own strip, so the header looks and scrolls exactly as on every other page.
+   (The Santa Booking pages in public/santa/ use the same rule in theme.css.) */
+body.theme-xmas .site-header::before {
   height: 4px;
-  z-index: 1000;
-  pointer-events: none;
   background: repeating-linear-gradient(-45deg, #b3261e 0 10px, #fff 10px 20px, #143822 20px 30px, #fff 30px 40px);
+}
+/* Phones: a fixed background judders on iPhone, so it scrolls with the page there */
+@media (max-width: 879px) {
+  body.theme-xmas { background-attachment: scroll; }
 }
 @media print {
   body.theme-xmas { background: #fff !important; }
-  body.theme-xmas::before { display: none; }
 }
 
 /* Contact Us without its form (removed 2026-10-17, see

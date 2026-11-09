@@ -423,8 +423,8 @@ const WHATSAPP = `https://wa.me/962792028785?text=${encodeURIComponent(
   .cp-btn-light:hover { background: rgba(255, 250, 235, 0.1); color: #fff; }
 
   /* ---------- Phones: no lone words, no lone buttons, everything centred ---------- */
-  /* Every line balances, so no line ends on a lone word; this page's header and footer too */
-  .cp, body:has(.cp) :is(.brand-text, .site-footer) { text-wrap: balance; }
+  /* Every line balances, so no line ends on a lone word (the menu bar stays exactly as on other pages) */
+  .cp, body:has(.cp) .site-footer { text-wrap: balance; }
   .cp-num { font-variant-numeric: lining-nums; line-height: 1; }
   @media (max-width: 480px) {
     .cp-reason { justify-items: center; text-align: center; }

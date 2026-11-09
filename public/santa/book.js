@@ -60,7 +60,7 @@
     } else if (isShortMapsLink(v)) {
       $("maps-hint").textContent = "Thanks. Please also tap your home on the map above.";
     } else {
-      $("maps-hint").textContent = "In Google Maps, tap your home, then Share, then Copy link.";
+      $("maps-hint").textContent = "Google Maps: tap your home › Share › Copy link";
     }
   });
   const looksLikeMaps = (v) => /google\.[a-z.]+\/maps|maps\.google|goo\.gl|maps\.app/i.test(v) || !!parseMapsLink(v);
