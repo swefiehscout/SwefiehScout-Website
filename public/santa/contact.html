@@ -168,6 +168,11 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
         <label class="req" for="m-text">Message</label>
         <textarea id="m-text" rows="5" required></textarea>
       </div>
+      <!-- Spam trap: hidden from people, but form-filling bots type into it. -->
+      <div class="hp-field" aria-hidden="true">
+        <label for="m-website">Website</label>
+        <input id="m-website" name="website" tabindex="-1" autocomplete="off">
+      </div>
     </fieldset>
     <div class="form-error" id="m-error" hidden></div>
     <div class="sent" id="m-sent" hidden>Thank you. We have your message and will get back to you soon.</div>
@@ -204,6 +209,7 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
   const cards = social.length ? [`<div class="contact-card"><h3>Follow Us</h3><div class="pill-row">${social.join("")}</div></div>`] : [];
   $("cards").innerHTML = cards.join("");
 
+  const openedAt = Date.now(); // spam guard: real people take more than a few seconds to write
   $("msg-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = $("m-name").value.trim(), text = $("m-text").value.trim();
@@ -214,9 +220,10 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
     err("");
     const btn = $("m-submit");
     btn.disabled = true; btn.textContent = "Sending…";
-    const { data, error } = await sb.rpc("public_message", {
-      p_name: name, p_phone: $("m-phone").value, p_email: $("m-email").value, p_message: text,
-    });
+    const base = { p_name: name, p_phone: $("m-phone").value, p_email: $("m-email").value, p_message: text };
+    let { data, error } = await sb.rpc("public_message", { ...base, p_website: $("m-website").value, p_elapsed_ms: Date.now() - openedAt });
+    // Until the spam guard is installed in the database (spam_guard.sql), send the message the old way.
+    if (error && error.code === "PGRST202") ({ data, error } = await sb.rpc("public_message", base));
     btn.disabled = false; btn.textContent = "Send Message";
     if (error || !data) { console.error(error); return err("Your message didn't send. Check your connection and try again."); }
     if (!data.ok) return err(data.reason === "busy" ? "We're getting a lot of messages right now. Please try again in a few minutes, or call us." : "Please write your name and a message.");

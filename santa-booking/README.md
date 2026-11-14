@@ -120,4 +120,16 @@ The owner account `santa@swefieh-orthodox-scout.com` signs in by typing the full
 
 On an existing database, run `supabase/home_car_only.sql` and then `supabase/audit_fixes.sql` once in the SQL Editor. The second one adds length limits, caps the website at 40 bookings in any 10 minutes, and stops signed-in accounts that aren't on the team from calling internal functions. Keep "Allow new users to sign up" turned off in Supabase.
 
+**Contact page spam guard.** Run `supabase/spam_guard.sql` once (after `audit_fixes.sql`). Messages that look like spam then go to a hidden `messages_spam` table instead of Admin → Messages:
+- messages not sent from the Contact page;
+- messages sent within 3 seconds of opening it;
+- messages that fill in the hidden trap field;
+- messages with links other than Google Maps;
+- messages in Cyrillic or Chinese/Japanese/Korean script;
+- repeats of the same text within 24 hours.
+
+The same phone or email can send at most 3 messages an hour. Senders always see "sent". Running it also moves spam already in Messages (non-Maps links, Cyrillic/CJK script, repeated text) into `messages_spam` and shows how many are left. The bottom of the file has SQL to see what was caught, move a real message back, or empty the spam table. The Contact page works before and after the script is run.
+
+**Deleting messages.** Admin → Messages has a Delete button on each message, and a Select all / Delete selected bar for clearing many at once. Every delete can be undone from the toast straight after.
+
 Everything (hours, cars, zones, capacity, blocked times) can be edited in Admin → Setup and on the Board.

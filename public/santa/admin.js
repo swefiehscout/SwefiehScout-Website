@@ -841,14 +841,38 @@
   }
 
   // ===== Messages =====
+  const msgPicked = new Set(); // messages ticked for "Delete selected"
+  async function deleteMessages(ids) {
+    const rows = S.messages.filter((m) => ids.includes(m.id));
+    if (!rows.length) return;
+    const { error } = await sb.from("messages").delete().in("id", ids);
+    if (error) return toast("Not deleted: " + error.message);
+    S.messages = S.messages.filter((m) => !ids.includes(m.id));
+    ids.forEach((id) => msgPicked.delete(id));
+    render();
+    toast(rows.length === 1 ? `Deleted the message from ${rows[0].name}` : `Deleted ${rows.length} messages`, async () => {
+      const { error: e2 } = await sb.from("messages").insert(rows);
+      if (e2) { toast("Not undone: " + e2.message); return false; }
+      S.messages = [...S.messages, ...rows].sort((a, b) => b.created_at.localeCompare(a.created_at));
+      render();
+    });
+  }
   function viewMessages() {
-    $("main").innerHTML = intro("Messages", "Notes sent from the Contact page. Tick them once someone has replied.") +
+    [...msgPicked].forEach((id) => { if (!S.messages.some((m) => m.id === id)) msgPicked.delete(id); });
+    const n = msgPicked.size, all = S.messages.length > 0 && n === S.messages.length;
+    const bar = S.messages.length ? `<div class="row" style="gap:10px;flex-wrap:wrap">
+        <label class="row" style="gap:6px"><input type="checkbox" id="msg-all" ${all ? "checked" : ""}> Select all</label>
+        <button class="btn small danger" id="msg-del-picked" ${n ? "" : "disabled"}>Delete selected${n ? ` (${n})` : ""}</button>
+      </div>` : "";
+    $("main").innerHTML = intro("Messages", "Notes sent from the Contact page. Tick them once someone has replied, and delete spam.") + bar +
       (S.messages.length ? `<div class="list">${S.messages.map((m) => `<div class="panel" style="gap:6px;${m.handled ? "opacity:.6" : ""}">
-        <div class="row"><b>${esc(m.name)}</b><span class="muted num">${esc(m.phone)}</span><span class="muted">${esc(m.email)}</span>
+        <div class="row"><input type="checkbox" data-pick="${m.id}" ${msgPicked.has(m.id) ? "checked" : ""} aria-label="Select this message">
+          <b>${esc(m.name)}</b><span class="muted num">${esc(m.phone)}</span><span class="muted">${esc(m.email)}</span>
           <span class="muted" style="margin-inline-start:auto">${esc(dateTime(m.created_at))}</span></div>
-        <div style="white-space:pre-wrap">${esc(m.message)}</div>
+        <div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(m.message)}</div>
         <div class="row">${waNumber(m.phone) ? `<a class="btn small" target="_blank" rel="noopener" href="https://wa.me/${waNumber(m.phone)}">WhatsApp</a>` : ""}
-          <label class="row" style="gap:6px"><input type="checkbox" data-msg="${m.id}" ${m.handled ? "checked" : ""}> Replied</label></div></div>`).join("")}</div>`
+          <label class="row" style="gap:6px"><input type="checkbox" data-msg="${m.id}" ${m.handled ? "checked" : ""}> Replied</label>
+          <button class="btn small danger" data-del="${m.id}" style="margin-inline-start:auto">Delete</button></div></div>`).join("")}</div>`
         : `<div class="empty">No messages yet.</div>`);
     $("main").querySelectorAll("[data-msg]").forEach((cb) => (cb.onchange = async () => {
       const { error } = await sb.from("messages").update({ handled: cb.checked }).eq("id", cb.dataset.msg);
@@ -856,6 +880,21 @@
       S.messages.find((m) => m.id === cb.dataset.msg).handled = cb.checked;
       render();
     }));
+    $("main").querySelectorAll("[data-pick]").forEach((cb) => (cb.onchange = () => {
+      cb.checked ? msgPicked.add(cb.dataset.pick) : msgPicked.delete(cb.dataset.pick);
+      render();
+    }));
+    $("main").querySelectorAll("[data-del]").forEach((b) => (b.onclick = () => deleteMessages([b.dataset.del])));
+    const allBox = $("msg-all");
+    if (allBox) allBox.onchange = () => {
+      if (allBox.checked) S.messages.forEach((m) => msgPicked.add(m.id)); else msgPicked.clear();
+      render();
+    };
+    const delPicked = $("msg-del-picked");
+    if (delPicked) delPicked.onclick = () => {
+      const ids = [...msgPicked];
+      if (ids.length && confirm(`Delete ${ids.length} message${ids.length === 1 ? "" : "s"}? You can undo right after.`)) deleteMessages(ids);
+    };
   }
 
   // ===== Setup =====

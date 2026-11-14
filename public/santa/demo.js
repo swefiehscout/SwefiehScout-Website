@@ -222,7 +222,8 @@
       let rows = db[table];
       const match0 = (r) => q.filters.every(([c, v]) => r[c] === v || String(r[c]) === String(v));
       const before = q.op === "update" ? rows.filter(match0).map((r) => ({ ...r })) : null;
-      const match = (r) => q.filters.every(([c, v]) => r[c] === v || String(r[c]) === String(v));
+      const match = (r) => q.filters.every(([c, v]) => r[c] === v || String(r[c]) === String(v))
+        && (q.ins || []).every(([c, vs]) => vs.some((v) => String(r[c]) === String(v)));
       let out;
       if (q.op === "select") out = rows.filter(match);
       else if (q.op === "update") {
@@ -232,6 +233,9 @@
           Object.assign(r, q.payload, { updated_at: now() });
           if (table === "bookings") history(before, r);
         });
+      } else if (q.op === "insert" && Array.isArray(q.payload)) {
+        out = q.payload.map((p) => ({ id: uuid(), ...p }));   // several rows at once (e.g. undo a delete)
+        rows.push(...out);
       } else if (q.op === "insert") {
         const r = { ...q.payload };
         if (table === "bookings") Object.assign(r, { id: uuid(), ref: "S" + db.seq++, created_at: now(), updated_at: now(), lang: "en", email: "", maps_link: "", ...q.payload });
@@ -259,6 +263,7 @@
       select() { if (q.op !== "select") q.returning = true; return b; },
       order(c, o) { q.order.push([c, o?.ascending !== false]); return b; },
       eq(c, v) { q.filters.push([c, v]); return b; },
+      in(c, vs) { (q.ins = q.ins || []).push([c, vs]); return b; },
       lt(c, v) { q.lt = [c, v]; return b; },
       limit(n) { q.limit = n; return b; },
       single() { q.single = true; return b; },

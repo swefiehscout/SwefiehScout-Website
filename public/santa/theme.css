@@ -793,3 +793,6 @@ body .site-header::before {
 /* The booking app's overflow-x: hidden made the page its own scroller, which unpinned the menu bar
    on desktop. clip still stops sideways scrolling but keeps the menu bar pinned like everywhere else. */
 html, body { overflow-x: clip; overflow-y: visible; }
+
+/* Contact form spam trap: off-screen for people, still in the page for bots */
+.hp-field { position: absolute !important; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
