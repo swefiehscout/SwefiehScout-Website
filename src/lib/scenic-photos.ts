@@ -27,7 +27,7 @@ const CURATED_EXTRAS = [
   '/images/photos/board.jpg',
   '/images/photos/guys.jpg',
   '/images/photos/church-panorama.jpg',
-  '/images/photos/church-interior.png',
+  '/images/photos/church-interior.jpg',
 ];
 
 // Deterministic Fisher-Yates shuffle keyed by a numeric seed so each
@@ -43,7 +43,21 @@ function shuffleSeeded<T>(arr: T[], seed: number): T[] {
   return a;
 }
 
-const ALL = listMore().concat(CURATED_EXTRAS).concat(bandPhotos);
+// The strips show small tiles, so they use the preview copies made by
+// scripts/make-thumbs.mjs (public/images/photos/thumbs/<same path>.webp,
+// about 80 KB instead of the full photo). If a preview is missing, the
+// full photo is used so nothing breaks.
+const PHOTOS_DIR = join(process.cwd(), 'public', 'images', 'photos');
+export function thumb(src: string): string {
+  const rel = decodeURIComponent(src).replace(/^\/images\/photos\//, '');
+  if (rel === decodeURIComponent(src)) return src;
+  const webp = rel.replace(/\.(jpe?g|png|webp)$/i, '.webp');
+  return existsSync(join(PHOTOS_DIR, 'thumbs', webp))
+    ? '/images/photos/thumbs/' + webp.split('/').map(encodeURIComponent).join('/')
+    : src;
+}
+
+const ALL = listMore().concat(CURATED_EXTRAS).concat(bandPhotos).map(thumb);
 
 export const homeMarqueePhotos = shuffleSeeded(ALL, 11);
 export const joinUsMarqueePhotos = shuffleSeeded(ALL, 73);

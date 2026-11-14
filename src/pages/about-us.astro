@@ -85,7 +85,7 @@ const marqueePhotos = [...aboutUsMarqueePhotos, ...aboutUsMarqueePhotos];
     <div class="band-marquee-track" style={`--n: ${aboutUsMarqueePhotos.length}`}>
       {marqueePhotos.map((src, i) => (
         <div class="band-marquee-slide">
-          <img src={src} alt="" loading="lazy" aria-hidden={i >= aboutUsMarqueePhotos.length} />
+          <img src={i < 4 ? src : undefined} data-src={i < 4 ? undefined : src} alt="" loading="lazy" aria-hidden={i >= aboutUsMarqueePhotos.length} />
         </div>
       ))}
     </div>

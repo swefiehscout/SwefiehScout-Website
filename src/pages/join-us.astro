@@ -118,7 +118,7 @@ const steps = [
     <div class="band-marquee-track" style={`--n: ${joinUsMarqueePhotos.length}`}>
       {marqueePhotos.map((src, i) => (
         <div class="band-marquee-slide">
-          <img src={src} alt="" loading="lazy" aria-hidden={i >= joinUsMarqueePhotos.length} />
+          <img src={i < 4 ? src : undefined} data-src={i < 4 ? undefined : src} alt="" loading="lazy" aria-hidden={i >= joinUsMarqueePhotos.length} />
         </div>
       ))}
     </div>

@@ -175,11 +175,46 @@ const xmasTheme = currentPath === '/christmas-proposal';
             track.style.animationDelay = '-' + (Math.random() * dur).toFixed(2) + 's';
           }
         }
+        // Strip photos after the first few arrive as data-src and are only
+        // fetched as they near the visible part of the strip (the browser's own
+        // lazy loading only looks down the page, not sideways, so it fetched
+        // every photo at once). The strip moves by CSS animation, which
+        // IntersectionObserver doesn't notice, so a light check runs twice a
+        // second and stops once every photo is in.
+        function lazyLoad(track) {
+          // photos that already have a src load straight away: after the shuffle
+          // they can start off to the side, where the browser's own lazy loading
+          // would leave them blank
+          track.querySelectorAll('img[src]').forEach(function (img) { img.loading = 'eager'; });
+          if (!track.querySelector('img[data-src]')) return;
+          var box = track.closest('.band-marquee') || track;
+          var timer;
+          var tick = function () {
+            if (!document.contains(track)) return clearInterval(timer);
+            var left = track.querySelectorAll('img[data-src]');
+            if (!left.length) return clearInterval(timer);
+            if (document.hidden) return;
+            var R = box.getBoundingClientRect();
+            if (!R.width || R.bottom < -400 || R.top > innerHeight + 400) return; // strip off screen
+            var ahead = R.width; // load up to one strip-width ahead
+            left.forEach(function (img) {
+              var r = img.parentElement.getBoundingClientRect();
+              if (r.right > R.left - ahead && r.left < R.right + ahead) {
+                img.loading = 'eager';
+                img.src = img.getAttribute('data-src');
+                img.removeAttribute('data-src');
+              }
+            });
+          };
+          timer = setInterval(tick, 500);
+          tick();
+        }
         function bind() {
           document.querySelectorAll('.band-marquee-track').forEach(function (t) {
             if (t.dataset.shuffled) return;
             t.dataset.shuffled = '1';
             shuffle(t);
+            lazyLoad(t);
           });
         }
         document.addEventListener('astro:page-load', bind);

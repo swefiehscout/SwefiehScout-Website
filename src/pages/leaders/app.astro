@@ -142,7 +142,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="band-marquee-track" style={`--n: ${workspaceMarqueePhotos.length}`}>
                 {dashMarqueePhotos.map((src, i) => (
                   <div class="band-marquee-slide">
-                    <img src={src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
+                    <img src={i < 4 ? src : undefined} data-src={i < 4 ? undefined : src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
                   </div>
                 ))}
               </div>
@@ -1982,7 +1982,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="band-marquee-track" style={`--n: ${workspaceMarqueePhotos.length}`}>
                 {dashMarqueePhotos.map((src, i) => (
                   <div class="band-marquee-slide">
-                    <img src={src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
+                    <img src={i < 4 ? src : undefined} data-src={i < 4 ? undefined : src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
                   </div>
                 ))}
               </div>

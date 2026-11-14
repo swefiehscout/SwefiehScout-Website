@@ -1,9 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { bandPhotos } from '../../data/band-photos';
+import { thumb } from '../../lib/scenic-photos';
 
 // Render the photo array twice in the track to make the loop seamless.
-const marqueePhotos = [...bandPhotos, ...bandPhotos];
+const bandThumbs = bandPhotos.map(thumb);
+const marqueePhotos = [...bandThumbs, ...bandThumbs];
 ---
 <BaseLayout title="Our Band" bare wide>
   <section class="page-hero" data-animate>
@@ -23,7 +25,7 @@ const marqueePhotos = [...bandPhotos, ...bandPhotos];
     <div class="band-marquee-track" style={`--n: ${bandPhotos.length}`}>
       {marqueePhotos.map((src, i) => (
         <div class="band-marquee-slide">
-          <img src={src} alt="" loading="lazy" aria-hidden={i >= bandPhotos.length} />
+          <img src={i < 4 ? src : undefined} data-src={i < 4 ? undefined : src} alt="" loading="lazy" aria-hidden={i >= bandPhotos.length} />
         </div>
       ))}
     </div>

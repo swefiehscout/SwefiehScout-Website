@@ -257,7 +257,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       <div class="band-marquee-track" style={`--n: ${workspaceMarqueePhotos.length}`}>
         {marqueePhotos.map((src, i) => (
           <div class="band-marquee-slide">
-            <img src={src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
+            <img src={i < 4 ? src : undefined} data-src={i < 4 ? undefined : src} alt="" loading="lazy" aria-hidden={i >= workspaceMarqueePhotos.length} />
           </div>
         ))}
       </div>

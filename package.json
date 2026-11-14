@@ -7,10 +7,12 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node scripts/make-thumbs.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "videos": "bash scripts/prepare-videos.sh"
+    "videos": "bash scripts/prepare-videos.sh",
+    "thumbs": "node scripts/make-thumbs.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.114.0",
