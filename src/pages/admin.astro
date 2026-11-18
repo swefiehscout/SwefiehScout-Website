@@ -988,7 +988,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const up = val > 0;
       return `<span class="ws-dash-delta ${up ? 'ws-dash-delta--up' : 'ws-dash-delta--down'}">${up ? '↑' : '↓'} ${Math.abs(val)}${suffix} vs last period</span>`;
     }
-    function populatePeriodSelects(monthSel: any, yearSel: any, withYearOption = false) {
+    function populatePeriodSelects(monthSel: any, yearSel: any, withYearOption = false, startOnWholeYear = false) {
       if (monthSel.options.length) return;
       let opts = MONTHS.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}">${m.en}</option>`).join('');
       if (withYearOption) opts = `<option value="ALL">Whole Year</option>` + opts;
@@ -998,7 +998,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       for (let y = nowYear - 3; y <= nowYear + 1; y++) years.push(y);
       yearSel.innerHTML = years.map((y) => `<option value="${y}">${y}</option>`).join('');
       const now = new Date();
-      monthSel.value = String(now.getMonth() + 1).padStart(2, '0');
+      // The Finance tab starts on Whole Year so its income statement
+      // shows the full year until someone picks a month.
+      monthSel.value = withYearOption && startOnWholeYear ? 'ALL' : String(now.getMonth() + 1).padStart(2, '0');
       yearSel.value = String(now.getFullYear());
     }
     // 'RANGE' is only ever a value on the main Reports tab's own month
@@ -2349,7 +2351,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
 
     async function loadFinancePeriod() {
-      populatePeriodSelects(els.finMonth, els.finYear, true);
+      populatePeriodSelects(els.finMonth, els.finYear, true, true);
       const { start, end } = periodRange(els.finMonth, els.finYear);
       const [res, boxRes, checksRes] = await Promise.all([
         // Every entry, all months: the list always shows them all; only

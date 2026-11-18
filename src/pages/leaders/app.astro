@@ -3657,7 +3657,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     // Month/Year dropdown pair used by both Fees and Finance instead of a
     // native <input type="month">.
-    function populatePeriodSelects(monthSel: any, yearSel: any, withYearOption = false) {
+    function populatePeriodSelects(monthSel: any, yearSel: any, withYearOption = false, startOnWholeYear = false) {
       if (monthSel.options.length) return; // already populated
       let opts = MONTHS.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}">${m.en}</option>`).join('');
       if (withYearOption) opts = `<option value="ALL">Whole Year</option>` + opts;
@@ -3667,9 +3667,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       for (let y = nowYear - 3; y <= nowYear + 1; y++) years.push(y);
       yearSel.innerHTML = years.map((y) => `<option value="${y}">${y}</option>`).join('');
       const now = new Date();
-      // Pickers that offer "Whole Year" (Finance, Reports) start on the
-      // whole year so income statements show the full year by default.
-      monthSel.value = withYearOption ? 'ALL' : String(now.getMonth() + 1).padStart(2, '0');
+      // The Finance tab starts on Whole Year so its income statement
+      // shows the full year until someone picks a month.
+      monthSel.value = withYearOption && startOnWholeYear ? 'ALL' : String(now.getMonth() + 1).padStart(2, '0');
       yearSel.value = String(now.getFullYear());
     }
     function getPeriod(monthSel: any, yearSel: any) {
@@ -4109,7 +4109,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // ---------- Finance ---------------------------------------------------
     async function loadFinance() {
       if (!state.activeGroup) return;
-      populatePeriodSelects(els.finMonth, els.finYear, true);
+      populatePeriodSelects(els.finMonth, els.finYear, true, true);
       await loadGroupSettings();
       updateFinCategoryOptions();
       renderSettings();
