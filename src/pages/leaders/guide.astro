@@ -12,7 +12,7 @@ const marqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos];
 
 type IconName =
   | 'sparkle' | 'cross' | 'star' | 'heart' | 'flag' | 'music' | 'flower' | 'fleur'
-  | 'arrow-right' | 'phone' | 'envelope' | 'pin' | 'bank' | 'cliq' | 'cash'
+  | 'arrow-right' | 'phone' | 'envelope' | 'pin' | 'bank' | 'cash'
   | 'calendar' | 'compass' | 'plus' | 'diamond' | 'sun' | 'box' | 'megaphone' | 'lock';
 
 const sections: { id: string; label: string; icon: IconName; intro: string; lines: string[]; numbered?: boolean; adminOnly?: boolean }[] = [
@@ -20,7 +20,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     id: 'getting-started', label: 'Getting started', icon: 'sun', numbered: true,
     intro: 'Every leader signs in with their own account.',
     lines: [
-      'Tap Sign up and enter your name, email, and a password.',
+      'Tap Create account and enter your name, email, and a password.',
       'Check your email and tap the confirmation link.',
       'Come back and sign in.',
       'Wait for an admin to approve you and add you to a group.',
@@ -37,6 +37,25 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
       "The 5 troops (Baraem, Ashbal & Zahrat, Mubtadi, Mutaqaddim, Jawalah) get the full set of tabs below.",
       "Music, Social Media, and General aren't scout troops, so each sees its own smaller, tailored set of tabs instead: no Attendance, Fees, or Curriculum for any of them (Music has its own bookings Dashboard).",
       "Leaders is a 4th one like that (admin-only), see its own section below.",
+    ],
+  },
+  {
+    id: 'support-leaders', label: 'Support Leaders', icon: 'compass',
+    intro: "Approved but not added to a group? You're a Support Leader, and you see 3 tabs.",
+    lines: [
+      'Overview: the whole organization at a glance, including who leads each group.',
+      "Next Meetings: each troop's next planned meeting.",
+      "Shared Calendar: you can look at everything, but you can't add or change entries.",
+    ],
+  },
+  {
+    id: 'account', label: 'Your account', icon: 'lock',
+    intro: 'Tap your initials at the top of the workspace to open your account menu.',
+    lines: [
+      "See every device you're signed in on, and sign out of any one of them.",
+      'Lost a phone or used a shared computer? Tap Sign out of all other devices.',
+      "For safety, you're signed out automatically 3 hours after you sign in. Just sign in again.",
+      'Santa Team, next to Guide, opens the Santa Booking team sign-in in a new tab.',
     ],
   },
   {
@@ -71,10 +90,11 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
   },
   {
     id: 'archive', label: 'Archive', icon: 'fleur',
-    intro: "Members who've left, kept, not deleted.",
+    intro: "Members who've left, kept, not deleted. Troops and Music only.",
     lines: [
       'Nothing about them is lost, their history stays intact.',
-      'Restore brings someone back at any time.',
+      "In a troop, anyone with no attendance marked for 3 months is archived automatically and shows an Auto-archived label.",
+      'Restore brings someone back at any time, and they stay on the roster for at least another 3 months.',
     ],
   },
   {
@@ -224,7 +244,7 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     lines: [
       "Roster: every approved leader across every group, read-only. Roles and group access are still only ever changed from Admin → People.",
       'Attendance: log who showed up, same as a troop\'s own Attendance tab, but pick the "Meeting" first: a general Leaders Meeting, or one of the 5 troops\' own meetings (was that troop\'s leader there?).',
-      "Dashboard: each leader's attendance rate against every meeting logged, sorted worst-first so anyone who needs a nudge is easy to spot.",
+      "Dashboard: each leader's attendance rate for the dates you pick in From and To (the last 90 days unless you change them), sorted worst-first so anyone who needs a nudge is easy to spot.",
       'Archive: leaders who stepped away, restore them any time.',
       "Leader Profile: one leader's details, their KPIs, and a feed of what they've done in the workspace.",
       'Assessment: rate each leader on their functions over time.',
@@ -236,12 +256,14 @@ const sections: { id: string; label: string; icon: IconName; intro: string; line
     intro: 'A separate page for admins, tap Admin in the header to get there.',
     lines: [
       'Overview: the 5 troops rolled up together, at a glance.',
+      'Shared Calendar: the same calendar every group sees, right here in Admin.',
       'Music, Social Media, and General each get their own dashboard here too, since none of them is a scouting troop.',
       "Finance: where the money is (the bank, every group's cash box, and the total), logging a transaction to any group, recording what the bank app shows now and then (Bank), every group's box counts (Box Counts), and every change to money anywhere (Activity Log).",
       'Reports: every report from every group\'s own Reports tab, combined in one place, with the same single month / whole year / custom range picker.',
       'Roster rolls up the 5 troops, Music, and every leader (General and Social Media keep no roster). Curriculum covers the 5 troops. Vendors (Shared) can be shared into any group except Leaders.',
       'Library (Shared): upload once and share it with any of the 5 troops.',
       'People: approve leaders and admins, and set which groups each one can access.',
+      "People › Activity Log: every sign-in and change across the workspace, with who did it and when.",
     ],
   },
 ];

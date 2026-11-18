@@ -42,7 +42,8 @@ language sql stable security definer set search_path = public as $$
   limit 1;
 $$;
 
--- Choose a car for a booking, or null if none fits. (Used for the team's suggestions; the website uses home_car.)
+-- Choose a car for a booking, or null if none fits. Not used by the website or the admin page
+-- today (the admin page works out suggestions itself); kept for use from the SQL Editor.
 -- 1) the area's own car(s) if one has room,
 -- 2) else the closest other car with room, within borrow_km.
 create or replace function pick_car(p_slot time, p_area int,

@@ -19,7 +19,7 @@ import { workspaceMarqueePhotos } from '../../lib/scenic-photos';
 // shared, troop-wide Drive links, not per-group data.
 const lessonsData = loadPortalData()['Lessons'] ?? {};
 const LESSON_LINKS = Object.entries(lessonsData).map(([key, v]) => ({
-  label: TOOL_LABELS[key]?.en ?? key,
+  label: TOOL_LABELS[key] ?? key,
   url: v.url,
 }));
 
@@ -2586,7 +2586,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
     const state: any = {
       session: null, profile: null, availableGroups: [], activeGroup: null, activeTab: 'dashboard',
-      members: [], approvals: [], finEntries: [], docs: [], ovMembers: [], editingMemberId: null,
+      members: [], approvals: [], finEntries: [], docs: [], editingMemberId: null,
       inventoryItems: [], maintenanceLog: [], inventoryAdjustments: [], editingInventoryItemId: null,
       editingFinEntryId: null, editingMaintenanceLogId: null,
       events: [], eventCosts: [], editingEventId: null, editingEventCostId: null,
@@ -2727,20 +2727,24 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // (dynamically-rendered rows included), rather than wiring each one.
     // data-allow-non-latin opts a field out: Shared Calendar's Title/
     // Description (never in a PDF) and Meeting Notes' Title/Notes/search
-    // (asked for in Arabic; the Meeting Notes PDF still drops Arabic via
-    // pdfSafe() until reports get an Arabic font).
+    // (asked for in Arabic; the Meeting Notes PDF embeds an Arabic font,
+    // Amiri, via enableArabicPdf()). Smart quotes and dashes (iOS types
+    // ’ in O’Brien) are swapped for their ASCII forms before stripping.
     function bindEnglishOnlyInputs() {
       document.addEventListener('input', (e: any) => {
         const t = e.target;
         if (!(t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement)) return;
         if (t instanceof HTMLInputElement && !['text', 'search', 'tel', 'email', 'url', ''].includes(t.type)) return;
         if (t.hasAttribute('data-allow-non-latin')) return;
-        const filtered = t.value.replace(/[^\x00-\x7F]/g, '');
+        // 1:1 character swaps, so the caret position maps straight across.
+        const toAscii = (v: string) => v.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').replace(/[\u2013\u2014]/g, '-');
+        const filtered = toAscii(t.value).replace(/[^\x00-\x7F]/g, '');
         if (filtered === t.value) return;
         const pos = t.selectionStart ?? t.value.length;
-        const posInFiltered = t.value.slice(0, pos).replace(/[^\x00-\x7F]/g, '').length;
+        const posInFiltered = toAscii(t.value.slice(0, pos)).replace(/[^\x00-\x7F]/g, '').length;
         t.value = filtered;
-        t.setSelectionRange(posInFiltered, posInFiltered);
+        // type="email" inputs throw on setSelectionRange.
+        try { t.setSelectionRange(posInFiltered, posInFiltered); } catch { /* caret just lands at the end */ }
       });
     }
     // A brief "Saved ✓" flash next to the curriculum toolbar's export
@@ -3363,12 +3367,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       await loadRoster();
     }
     async function restoreMember(id: string) {
-      const { error } = await db.from('members').update({ active: true, archived_reason: null }).eq('id', id);
+      // Stamping updated_at gives the member a fresh 3-month grace period,
+      // otherwise autoArchiveInactive() (run by loadRoster) would archive
+      // them straight back for the same lack of attendance.
+      const { error } = await db.from('members').update({ active: true, archived_reason: null, updated_at: new Date().toISOString() }).eq('id', id);
       if (error) { showToast('Could not restore.'); return; }
       await loadRoster();
     }
     // Anyone active for 3+ months with zero "present" attendance in that
     // window gets archived automatically, tagged so Archive can show why.
+    // "Active for 3+ months" means both created AND last updated (restore
+    // stamps updated_at) before the cutoff, so a restored member sticks.
     async function autoArchiveInactive() {
       // Troops only, it's based on attendance, which Music (the one other
       // group with a roster) doesn't take, so it would archive the whole band.
@@ -3376,10 +3385,14 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const cutoff = new Date();
       cutoff.setMonth(cutoff.getMonth() - 3);
       const cutoffStr = toDateStr(cutoff);
-      const candidates = state.members.filter((m: any) => m.active && (!m.created_at || m.created_at.slice(0, 10) <= cutoffStr));
+      const candidates = state.members.filter((m: any) => m.active
+        && (!m.created_at || m.created_at.slice(0, 10) <= cutoffStr)
+        && (!m.updated_at || m.updated_at.slice(0, 10) <= cutoffStr));
       if (!candidates.length) return;
+      // By member, not by group: someone who just moved troops still has
+      // their recent attendance under the old troop's group_key.
       const { data, error } = await db.from('attendance').select('member_id')
-        .eq('group_key', state.activeGroup).eq('present', true).gte('date', cutoffStr);
+        .in('member_id', candidates.map((m: any) => m.id)).eq('present', true).gte('date', cutoffStr);
       if (error) { console.error(error); return; }
       const attendedRecently = new Set((data || []).map((r: any) => r.member_id));
       const toArchive = candidates.filter((m: any) => !attendedRecently.has(m.id));
@@ -3452,7 +3465,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         const from = GROUPS.find((g: any) => g.key === state.activeGroup);
         const to = GROUPS.find((g: any) => g.key === targetKey);
         if (!confirm(`Move ${m.full_name} from ${from?.en} to ${to?.en}? Their attendance and fee history up to today stays with ${from?.en}. Anything logged from now on goes under ${to?.en} instead.`)) return;
-        const { error } = await db.from('members').update({ group_key: targetKey }).eq('id', id);
+        // updated_at gives a moved scout 3 months in the new troop before auto-archive can look at them
+        // (their earlier attendance stays under the old troop, which this troop's leaders can't see).
+        const { error } = await db.from('members').update({ group_key: targetKey, updated_at: new Date().toISOString() }).eq('id', id);
         if (error) { console.error(error); showToast('Could not move, check your connection.'); return; }
         if (state.editingMemberId === id) resetMemberForm();
         showToast(`${m.full_name} moved to ${to?.en}.`);
@@ -4478,8 +4493,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         // downloadFinanceReport() reads the Reports tab's own period
         // selects (always populated, see bindReports()), sync them to
         // Finance's current period first so the PDF matches what's on
-        // screen here, since Music's Reports tab (which normally owns
-        // that picker) is hidden, see updateTabVisibility().
+        // screen here rather than whatever period Reports was last set to.
         els.reportMonth.value = els.finMonth.value;
         els.reportYear.value = els.finYear.value;
         downloadFinanceReport();
@@ -4867,10 +4881,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           : state.vendors.find((v: any) => v.id === val);
         if (vendor) els.invMaintBy.value = vendor.name;
       });
-      // Quick-add a vendor right here, any leader can add one (though
-      // only General can edit/remove one afterward, from its own
-      // Vendors tab), so Music never has to leave Maintenance for a
-      // vendor that isn't on file yet.
+      // Quick-add a vendor right here, saved to the active group's own
+      // vendors (vendors are per group), so Music never has to leave
+      // Maintenance for a vendor that isn't on file yet. Editing or
+      // removing it afterward happens from Music's own Vendors tab.
       els.invMaintVendorAdd.addEventListener('click', () => {
         els.invMaintVendorNew.hidden = false;
         els.invMaintVendorAdd.hidden = true;
@@ -6133,9 +6147,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
-    // ---- PR Library, reuses the same `documents` table every troop's
-    // own Library tab writes to; General never had a Library tab
-    // before, so this is its first use of it.
+    // ---- PR Library, Social Media's (Public Relations is a Social Media
+    // tab), reuses the same `documents` table every group's own Library
+    // tab writes to, scoped to Social Media's group_key.
     function renderPRLibrary() {
       if (!state.prDocs.length) {
         els.prlibBody.innerHTML = '<tr><td colspan="7" class="ws-empty">No documents yet.</td></tr>';
@@ -6320,7 +6334,12 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Leader Profile/Assessment pickers, Support Overview) should read
     // instead, so an archived leader drops out of all of those at once.
     async function fetchAllLeaders() {
-      const { data, error } = await db.from('profiles').select('*').in('role', ['leader', 'admin']).order('name', { ascending: true });
+      // Only admins can read full profiles (phone, ID, notes...). Everyone else gets the
+      // name/role/groups directory (leader_directory() in security_fixes_schema.sql),
+      // which is all Support Overview needs.
+      const { data, error } = state.profile?.role === 'admin'
+        ? await db.from('profiles').select('*').in('role', ['leader', 'admin']).order('name', { ascending: true })
+        : await db.rpc('leader_directory');
       if (error) { console.error(error); showToast('Could not load leaders.'); return []; }
       return data || [];
     }
@@ -7300,11 +7319,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
 
     // ---- Calendar view, same shape as Event Calendar's own month grid.
-    function contentGoToDate(dateStr: string) {
-      const d = parseDateStr(dateStr);
-      state.content.anchor = new Date(d.getFullYear(), d.getMonth(), 1);
-      contentRenderMonth();
-    }
     function contentStepMonth(delta: number) {
       state.content.anchor = new Date(state.content.anchor.getFullYear(), state.content.anchor.getMonth() + delta, 1);
       contentRenderMonth();
@@ -7801,7 +7815,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       });
     }
 
-    // ---------- Reports (PDF export via print) -----------------------------
+    // ---------- Reports (PDF export via jsPDF) -----------------------------
     // Reports can be the very first tab someone opens after signing in, so
     // the roster may never have loaded yet, fetch it on demand instead of
     // silently reporting zero members.
@@ -7810,17 +7824,19 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const { data } = await db.from('members').select('*').eq('group_key', state.activeGroup).order('full_name', { ascending: true });
       state.members = data || [];
     }
-    // Not group-scoped (see loadVendors()), cached the same lazy way,
-    // for the Maintenance Log's vendor picker.
+    // Vendors are per group (plus the ones shared with this group, see
+    // loadSharedVendors()), cached the same lazy way for the Maintenance
+    // Log's vendor picker and cleared on every group switch.
     async function ensureVendorsLoaded() {
       if (state.vendors.length || state.sharedVendors.length || !state.activeGroup) return;
       const { data } = await db.from('vendors').select('*').eq('group_key', state.activeGroup).order('name', { ascending: true });
       state.vendors = data || [];
       await loadSharedVendors();
     }
-    // Real PDF generation (not the browser print dialog), Reports and
-    // Curriculum are English-only now, so jsPDF's limited RTL support is
-    // no longer a concern, and this gives a genuine one-click download.
+    // Real PDF generation (not the browser print dialog), a genuine
+    // one-click download. Reports and Curriculum are English-only, except
+    // the Meeting Notes report, which embeds an Arabic font (see
+    // enableArabicPdf()) so notes written in Arabic print correctly.
     const PDF_BRAND: [number, number, number] = [87, 22, 7];
     const PDF_ACCENT: [number, number, number] = [20, 56, 34];
     const PDF_FOOT_BG: [number, number, number] = [250, 243, 232];
@@ -10419,6 +10435,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           // it on every switch so Dashboard/Reports re-fetch for the new
           // group instead of reusing the previous group's roster.
           state.members = [];
+          // Vendors are per group too (see ensureVendorsLoaded), clear
+          // them so the Maintenance picker never offers the old group's.
+          state.vendors = [];
+          state.sharedVendors = [];
           // An open "Editing <member>" form is bound to a member id from
           // the group we're leaving; submitting it after a switch would
           // save group_key: <new group> against that id, silently moving
@@ -10433,7 +10453,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           // data on screen until a manual refresh.
           setNavBusy(true);
           try {
-            // Music/General/Leaders only show a cut-down tab set,
+            // Music/General/Social Media/Leaders only show a cut-down tab set,
             // updateTabVisibility() (called from renderGroupSwitch()) already
             // hid the rest, so a switch that leaves an invalid tab active
             // needs to land somewhere visible instead of just reloading a
@@ -10444,7 +10464,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             // button being hidden, since setTab() only ever looks at
             // dataset.panel, never isTabHidden().
             if (isTabHidden(state.activeTab)) {
-              const firstVisible = els.tabs.querySelector('.ws-tab:not([hidden]):not([data-admin-only])');
+              const firstVisible = els.tabs.querySelector('.ws-tab:not([hidden])');
               await setTab(firstVisible ? (firstVisible as any).dataset.tab : 'finance');
             } else {
               await loadActiveTabData();
@@ -10457,19 +10477,17 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     // Music, General, and Social Media (see MUSIC_GROUP_KEY/
     // GENERAL_GROUP_KEY/SOCIAL_MEDIA_GROUP_KEY) aren't scouting troops,
-    // Archive/Approvals/Attendance/Fees/Curriculum/Dashboard don't apply
-    // to any of them (each gets its own dashboard-equivalent in the
-    // Admin console instead, see loadMusicDashboard()-style tabs
-    // there). Music still gets Roster (band members); General and
-    // Social Media don't, by request, since neither's "membership" (the
-    // board, the social media team) needs a tracked roster the way a
-    // troop or the band does. Existing member rows for those two groups
-    // aren't deleted (but every roster view and report leaves them out,
-    // see NO_ROSTER_GROUP_KEYS), they
-    // just have no Workspace tab to add/edit from anymore. Runs on every
-    // group switch, not just once, so leaving one restores every other
-    // tab.
-    const NON_TROOP_GROUP_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY];
+    // Attendance/Fees/Curriculum and the troop Dashboard don't apply to
+    // any of them; each shows only its own tab set (see
+    // NON_TROOP_TAB_VISIBILITY below). Music still gets Roster and
+    // Archive (band members) plus its own Music Dashboard, and Approvals
+    // only while old requests are pending; General and Social Media get
+    // no roster, by request (see NO_ROSTER_GROUP_KEYS in constants.ts,
+    // which every roster view and report uses to leave them out). Runs on
+    // every group switch, not just once, so leaving one restores every
+    // other tab. Named apart from constants.ts's NON_TROOP_GROUP_KEYS,
+    // which also includes Leaders.
+    const MUSIC_GENERAL_SOCIAL_KEYS = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY];
     // Leaders (see LEADERS_GROUP_KEY) is deliberately left out of the
     // list above, it has no `members` roster or fee-collecting members
     // at all (its own Roster/Attendance read from profiles/
@@ -10518,11 +10536,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // below, same as leaderX is Leaders-only.
     const SUPPORT_ONLY_TABS = ['supportoverview', 'nextmeetings'];
     function isTabHidden(tab: string) {
-      // Without this check, a null activeGroup fell through to the
-      // *_ONLY_TABS fallback below and, since none of those name troop
-      // tabs like Roster/Attendance/Dashboard, wrongly left them all
-      // visible, even though nothing in them can load without a real
-      // group_key.
+      // No group at all means a Support Leader: only their 3 tabs show
+      // (Overview, Next Meetings, Shared Calendar). Without this, the
+      // *_ONLY_TABS fallback below would leave every troop tab visible
+      // with no group_key to load it from.
       if (!state.activeGroup) return !SUPPORT_LEADER_TABS.includes(tab);
       // Music is no longer on the /join form, but requests submitted
       // before that change still need clearing, its Approvals tab shows
@@ -10533,26 +10550,27 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       return MUSIC_ONLY_TABS.includes(tab) || GENERAL_ONLY_TABS.includes(tab) || SOCIAL_MEDIA_ONLY_TABS.includes(tab) || LEADERS_ONLY_TABS.includes(tab) || SUPPORT_ONLY_TABS.includes(tab);
     }
     function updateTabVisibility() {
-      els.tabs.querySelectorAll('.ws-tab:not([data-admin-only])').forEach((btn: any) => {
+      els.tabs.querySelectorAll('.ws-tab').forEach((btn: any) => {
         btn.toggleAttribute('hidden', isTabHidden(btn.dataset.tab));
       });
       els.copyMemberBlock.toggleAttribute('hidden', state.activeGroup !== MUSIC_GROUP_KEY);
       const g = GROUPS.find((x: any) => x.key === state.activeGroup);
       els.copyMemberBtn.textContent = `Copy selected into ${g ? g.en : 'the'} roster`;
       // The Fees tab (and its per-month default fee) doesn't exist for
-      // Music/General, this categories hint references it by name, so it
-      // only makes sense for a troop.
-      els.feesTabHint.toggleAttribute('hidden', NON_TROOP_GROUP_KEYS.includes(state.activeGroup));
-      // Library's own Lessons subtab (troop curriculum resource links)
-      // only makes sense for a troop, Social Media sees the rest of
-      // Library (Documents/Shared Library) but not this.
+      // Music/General/Social Media, this categories hint references it by
+      // name, so it only makes sense for a troop.
+      els.feesTabHint.toggleAttribute('hidden', MUSIC_GENERAL_SOCIAL_KEYS.includes(state.activeGroup));
+      // Troop-only bits inside shared panels: Library's Shared Library and
+      // Lessons subtabs (Social Media's Library is Documents only), and
+      // the Reports tab's Monthly Fees/Attendance/Curriculum cards.
       document.querySelectorAll('[data-troop-only]').forEach((el: any) => {
-        el.toggleAttribute('hidden', NON_TROOP_GROUP_KEYS.includes(state.activeGroup) || state.activeGroup === LEADERS_GROUP_KEY);
+        el.toggleAttribute('hidden', MUSIC_GENERAL_SOCIAL_KEYS.includes(state.activeGroup) || state.activeGroup === LEADERS_GROUP_KEY);
       });
       // Each non-troop group's Reports tab only carries the report cards
-      // specific to its own tabs, Music's Inventory/Event Calendar/
-      // Maintenance, Social Media's Content Calendar/Credentials,
-      // General's Sponsors/Community & Church Contacts.
+      // specific to its own tabs, Music's finance report/Inventory/Event
+      // Calendar/Maintenance/Adjustments, Social Media's finance report/
+      // Content Calendar/Credentials/Sponsors/Community & Church Contacts,
+      // General's Meeting Notes, Leaders' own roster/attendance cards.
       document.querySelectorAll('[data-music-only]').forEach((el: any) => {
         el.toggleAttribute('hidden', state.activeGroup !== MUSIC_GROUP_KEY);
       });
@@ -10692,7 +10710,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
 
     // ---------- Generic sub-tabs (Finance's Ledger/Categories, Library's
-    // Documents/Lessons), same pattern as Curriculum's Plan/Activity Bank,
+    // Documents/Shared Library/Lessons, and the rest), same pattern as Curriculum's Plan/Activity Bank,
     // scoped by a "group" name so unrelated sub-tab sets don't collide.
     function setSubtab(group: string, name: string) {
       document.querySelectorAll(`.ws-subtab[data-subtabs="${group}"]`).forEach((b: any) => b.classList.toggle('ws-subtab--active', b.dataset.subtab === name));
@@ -10708,13 +10726,21 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // astro:page-load fires on the very first load AND again after every
     // client-side view-transition back to this page (e.g. a leader clicks
     // a site-nav link like Home, then hits the browser Back button, the
-    // header/footer are outside the workspace, always in reach). init()
-    // has to re-run then (session may have expired, role/groups may have
-    // changed) but must NOT re-bind every listener on top of the ones
-    // already bound, these two flags gate just the one-time bindings.
+    // header/footer are outside the workspace, always in reach). The new
+    // page brings fresh markup, so init() reloads the page in that case
+    // (see `booted` below); the two bound flags guard the one-time bindings.
     let boundOnce = false;
     let boundPendingOnce = false;
+    let booted = false;
     async function init() {
+      // This listener stays on the document after leaving the workspace, so only run on its own page.
+      const shell = document.querySelector('[data-ws-shell]:not([data-admin-root])');
+      if (!shell) return;
+      // Coming back by Back/Forward or a link swaps in fresh page markup, but the one-time listeners
+      // below were bound to the old markup. A full reload starts clean, same as a normal visit.
+      if (booted && !shell.hasAttribute('data-ws-booted')) { window.location.reload(); return; }
+      booted = true;
+      shell.setAttribute('data-ws-booted', '');
       cacheEls();
       initRowNumbering();
       initCollapsibleRows();
@@ -10775,8 +10801,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         // only ever be empty for them.
         el('[data-sc-requests-tab]')?.setAttribute('hidden', '');
       }
-      // Re-measured every load (not just once) since admin-only visibility
-      // and so the tab count itself, can differ between loads.
+      // Re-measured every load (not just once) since the visible tab
+      // count depends on the leader's groups, which can change between
+      // loads.
       balanceTabs();
 
       // setupGroups()/renderGroupSwitch() rebuild their own innerHTML (and

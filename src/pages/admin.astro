@@ -16,14 +16,14 @@ import { workspaceMarqueePhotos } from '../lib/scenic-photos';
 const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos];
 ---
 <BaseLayout title="Admin" bare wide>
-  <div class="ws-shell" data-ws-shell hidden>
+  <div class="ws-shell" data-ws-shell data-admin-root hidden>
 
     <section class="ws-pending" data-ws-denied hidden>
       <div class="ws-pending-card">
         <h2 class="section-h2">Admin access only</h2>
         <p class="ws-pending-text">
           This console is for org admins. If that should be you, ask an existing admin to set your
-          role to Admin from here (People tab), from the Leaders Workspace, not this page.
+          role to Admin on the People tab of this page.
         </p>
         <div class="ws-pending-actions">
           <a class="btn-primary" href="/leaders">Go to Leaders Workspace</a>
@@ -106,7 +106,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <div class="ws-dash-card ws-dash-card--full">
               <div class="ws-dash-card-head"><h3>By group</h3></div>
               <div class="ws-table-wrap">
-                <table class="ws-table" data-ov-table>
+                <table class="ws-table">
                   <thead><tr><th>Group</th><th>Active</th><th>% of Troop</th><th>Attendance (30d)</th><th>Fees Collected</th><th>Net Income</th></tr></thead>
                   <tbody data-ov-body></tbody>
                 </table>
@@ -118,7 +118,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <!-- ================= Shared Calendar (org-wide, same data as
              every group's own Shared Calendar tab) ================= -->
         <section class="ws-panel" data-panel="sharedcal" hidden>
-          <p class="ws-att-hint">The exact same calendar every leader sees on their own Shared Calendar tab, anyone approved can add to it. Music's own Event Calendar bookings show up too, as a read-only marker.</p>
+          <p class="ws-att-hint">The same calendar leaders see on their own Shared Calendar tab. Leaders with a group can add to it, Support Leaders can only view it, and Music has no Shared Calendar tab. Music's Event Calendar bookings show up here too, as view-only markers.</p>
           <div class="ws-subtabs">
             <button type="button" class="ws-subtab ws-subtab--active" data-subtabs="sharedcal" data-subtab="calendar">Calendar</button>
             <button type="button" class="ws-subtab" data-subtabs="sharedcal" data-subtab="requests">Change Requests<span class="ws-tab-badge" data-sc-requests-badge hidden></span></button>
@@ -133,7 +133,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
                   <button type="button" class="curr-nav-btn" data-sc-next aria-label="Next">›</button>
                 </div>
                 <span class="curr-nav-label" data-sc-nav-label></span>
-                <div class="curr-view-toggle" data-sc-view-toggle>
+                <div class="curr-view-toggle">
                   <button type="button" class="curr-view-btn--active" data-sc-view="day">Day</button>
                   <button type="button" data-sc-view="week">Week</button>
                   <button type="button" data-sc-view="month">Month</button>
@@ -183,7 +183,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
             <h3 class="ws-admin-h3">Group cash boxes</h3>
             <div class="ws-table-wrap" style="margin-bottom: 1.75rem">
-              <table class="ws-table" data-box-table>
+              <table class="ws-table">
                 <thead><tr><th>Group</th><th>Cash in box</th><th>Opening balance</th><th>Last counted</th><th>Moved to bank (since opening)</th></tr></thead>
                 <tbody data-box-body></tbody>
               </table>
@@ -233,7 +233,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
             <h3 class="ws-admin-h3">By group</h3>
             <div class="ws-table-wrap">
-              <table class="ws-table" data-fin-group-table>
+              <table class="ws-table">
                 <thead><tr><th>Group</th><th>Income</th><th>Expenses</th><th>Cash box over / short</th><th>Net income</th></tr></thead>
                 <tbody data-fin-group-body></tbody>
               </table>
@@ -396,7 +396,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <section class="ws-panel" data-panel="curriculum" hidden>
           <p class="ws-att-hint">Every troop's next planned meeting, at a glance.</p>
           <div class="ws-table-wrap">
-            <table class="ws-table" data-curr-table>
+            <table class="ws-table">
               <thead><tr><th>Group</th><th>Next Meeting</th><th>Theme</th><th>Activities</th><th>Materials Needed</th></tr></thead>
               <tbody data-curr-body></tbody>
             </table>
@@ -432,7 +432,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-dash-card">
                 <div class="ws-dash-card-head"><h3>Needs completion</h3></div>
                 <div class="ws-table-wrap">
-                  <table class="ws-table" data-music-todo-table>
+                  <table class="ws-table">
                     <thead><tr><th>Date</th><th>Client</th><th>Type</th></tr></thead>
                     <tbody data-music-todo-body></tbody>
                   </table>
@@ -441,7 +441,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-dash-card">
                 <div class="ws-dash-card-head"><h3>Upcoming events</h3></div>
                 <div class="ws-table-wrap">
-                  <table class="ws-table" data-music-upcoming-table>
+                  <table class="ws-table">
                     <thead><tr><th>Date</th><th>Client</th><th>Type</th></tr></thead>
                     <tbody data-music-upcoming-body></tbody>
                   </table>
@@ -543,7 +543,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-dash-card">
                 <div class="ws-dash-card-head"><h3>Needs posting</h3></div>
                 <div class="ws-table-wrap">
-                  <table class="ws-table" data-sm-todo-table>
+                  <table class="ws-table">
                     <thead><tr><th>Date</th><th>Title</th><th>Status</th></tr></thead>
                     <tbody data-sm-todo-body></tbody>
                   </table>
@@ -552,7 +552,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-dash-card">
                 <div class="ws-dash-card-head"><h3>Upcoming content</h3></div>
                 <div class="ws-table-wrap">
-                  <table class="ws-table" data-sm-upcoming-table>
+                  <table class="ws-table">
                     <thead><tr><th>Date</th><th>Title</th><th>Platform</th></tr></thead>
                     <tbody data-sm-upcoming-body></tbody>
                   </table>
@@ -574,7 +574,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-dash-card">
                 <div class="ws-dash-card-head"><h3>Recent sponsors</h3></div>
                 <div class="ws-table-wrap">
-                  <table class="ws-table" data-pr-sponsors-table>
+                  <table class="ws-table">
                     <thead><tr><th>Name</th><th>Status</th><th>Added</th></tr></thead>
                     <tbody data-pr-sponsors-body></tbody>
                   </table>
@@ -583,7 +583,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               <div class="ws-dash-card">
                 <div class="ws-dash-card-head"><h3>Recent contacts</h3></div>
                 <div class="ws-table-wrap">
-                  <table class="ws-table" data-pr-contacts-table>
+                  <table class="ws-table">
                     <thead><tr><th>Name</th><th>Category</th><th>Added</th></tr></thead>
                     <tbody data-pr-contacts-body></tbody>
                   </table>
@@ -595,7 +595,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
         <!-- ================= General ================= -->
         <section class="ws-panel" data-panel="general" hidden>
-          <p class="ws-att-hint">General isn't a scouting troop either, so it's not part of the Overview rollup above. This is its own equivalent, covering its Meeting Notes and Finance. Its reports live in the main Reports tab, alongside everyone else's.</p>
+          <p class="ws-att-hint">General isn't a scouting troop, so it's not part of the Overview. This shows its meeting notes count, net income and a 6 month income vs. expenses chart. Its reports are in the main Reports tab.</p>
           <div class="ws-dash">
             <div class="ws-dash-kpis" data-gen-kpis></div>
 
@@ -662,7 +662,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           </form>
 
           <div class="ws-table-wrap">
-            <table class="ws-table" data-svendor-table>
+            <table class="ws-table">
               <thead><tr><th>Name</th><th>Category</th><th>Phone</th><th>Groups</th><th>Added by</th><th></th></tr></thead>
               <tbody data-svendor-body></tbody>
             </table>
@@ -680,7 +680,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <p class="ws-att-hint">Approve who gets into the Leaders Workspace and which groups they can access, Music, General and Social Media included, same as any troop. Admin is the one flag that also grants full access here and to the accounting system on the Finance tab.</p>
             <h3 class="ws-admin-h3">People</h3>
             <div class="ws-table-wrap">
-              <table class="ws-table" data-people-table>
+              <table class="ws-table">
                 <thead><tr><th>Name</th><th>Role</th><th>Groups</th><th></th></tr></thead>
                 <tbody data-people-body></tbody>
               </table>
@@ -706,7 +706,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
        in the workspace. Admins can edit/delete any entry (not just
        their own), so there's no "Request a change" branch here. -->
   <div class="curr-day-overlay" data-sc-day-overlay hidden>
-    <div class="curr-day-panel curr-day-panel--sharedcal" data-sc-day-panel>
+    <div class="curr-day-panel curr-day-panel--sharedcal">
       <div class="curr-day-banner">
         <span class="curr-day-banner-text">
           <span class="curr-day-banner-label">Shared Calendar for</span>
@@ -769,7 +769,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         <div class="curr-day-actions">
           <button type="button" class="ws-edit-btn" data-sc-delete hidden>Delete</button>
           <button type="button" class="ws-form-cancel" data-sc-form-back>Back to list</button>
-          <button type="submit" class="btn-primary" data-sc-save>Save</button>
+          <button type="submit" class="btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -1078,6 +1078,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // Calendar's Title/Description, which never go into a PDF report.
     function bindEnglishOnlyInputs() {
       document.addEventListener('input', (e: any) => {
+        if (!onAdminPage()) return;
         const t = e.target;
         if (!(t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement)) return;
         if (t instanceof HTMLInputElement && !['text', 'search', 'tel', 'email', 'url', ''].includes(t.type)) return;
@@ -1099,6 +1100,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     function bindTitleCaseInputs() {
       document.addEventListener('blur', (e: any) => {
+        if (!onAdminPage()) return;
         const t = e.target;
         if (!(t instanceof HTMLInputElement) || !t.hasAttribute('data-titlecase')) return;
         if (t.value.trim()) t.value = titleCase(t.value);
@@ -1306,13 +1308,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // ---------- Shared Calendar (org-wide, the exact same rows every
     // group's own Shared Calendar tab shows). Music's own Event Calendar
     // bookings are pulled in read-only via shared_calendar_music_events(),
-    // a SECURITY DEFINER function (see shared_calendar_schema.sql). An
-    // admin can manage any entry here regardless of who created it, so
-    // scCanManage() is really just documentation of that in this file,
-    // it always evaluates true on this page. -----------------------------
-    function scCanManage(item: any) {
-      return item.created_by === state.session.user.id || state.profile?.role === 'admin';
-    }
+    // a SECURITY DEFINER function (see shared_calendar_schema.sql). This
+    // page is admin-only and an admin can manage any entry regardless of
+    // who created it, so every entry gets Edit/Delete here. -------------
     // Recurrence is never materialized as rows, one event row is the
     // whole series, and occurrences are computed on the fly for
     // whatever range is currently on screen. 'never'/'on_date' end
@@ -1385,10 +1383,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }
       return results;
     }
-    // One pass over every event for the whole visible range, instead of
-    // re-checking every event for every single day, the difference
-    // between O(events) and O(events × days) once Year view (365+ days
-    // × every month card) is in the mix.
+    // Builds a date -> items map once for the whole visible range, so
+    // each day cell is a lookup instead of its own scan over every event.
+    // Building it is still events × days, but only once per render.
     function scBuildOccurrenceIndex(rangeStart: Date, rangeEnd: Date): Map<string, any[]> {
       const map = new Map<string, any[]>();
       const add = (dateStr: string, item: any) => {
@@ -1468,17 +1465,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         });
       });
     }
-    async function scRequestChange(eventId: string) {
-      const message = prompt('What should change about this entry?');
-      if (!message || !message.trim()) return;
-      const { error } = await db.from('shared_calendar_change_requests').insert({
-        event_id: eventId, message: message.trim(),
-        requested_by: state.session.user.id, requested_by_name: state.profile?.name || null,
-      });
-      if (error) { console.error(error); showToast('Could not send the request.'); return; }
-      showToast('Request sent.');
-      await loadScRequests();
-    }
     function scNavLabelFor(): string {
       const a = state.sc.anchor;
       if (state.sc.view === 'day') {
@@ -1529,7 +1515,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <span class="ws-badge ws-badge--fair">View only</span>
           </div>`;
       }
-      const canManage = scCanManage(item);
       return `
         <div class="ws-evt-day-item" style="--sc-item-color:${scEventColorValue(item.color)}" data-sc-event-id="${item.id}" data-sc-occurrence-date="${item.occurrence_date || item.event_date}">
           <div class="ws-evt-day-item-main">
@@ -1537,9 +1522,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             <span class="ws-evt-day-item-sub">${scTimeRangeLabel(item)}${item.notes ? ' · ' + escapeHtml(item.notes) : ''} · Added by ${escapeHtml(item.created_by_name || '-')}</span>
           </div>
           <div class="ws-evt-day-item-actions">
-            ${canManage
-              ? '<button type="button" class="ws-edit-btn" data-sc-day-edit>Edit</button><button type="button" class="ws-row-del" data-sc-day-delete title="Delete">×</button>'
-              : '<button type="button" class="ws-edit-btn" data-sc-day-request>Request a change</button>'}
+            <button type="button" class="ws-edit-btn" data-sc-day-edit>Edit</button><button type="button" class="ws-row-del" data-sc-day-delete title="Delete">×</button>
           </div>
         </div>`;
     }
@@ -1555,9 +1538,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           const row = btn.closest('[data-sc-event-id]');
           scDeleteFlow(row.dataset.scEventId, row.dataset.scOccurrenceDate);
         });
-      });
-      container.querySelectorAll('[data-sc-day-request]').forEach((btn: any) => {
-        btn.addEventListener('click', () => scRequestChange(btn.closest('[data-sc-event-id]').dataset.scEventId));
       });
     }
     function scHourLabel(h: number): string {
@@ -2723,11 +2703,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    // The one report that ties everything together: opening balance,
-    // today's running balance, the latest reconciliation (bank vs. system,
-    // and when it was last done), net income for the selected period, and
-    // the full by-group breakdown, one document instead of piecing it
-    // together from the Finance tab.
     // ---------- Cash box / bank / activity sections for finance reports ----
     function pdfSectionTitle(doc: any, y: number, title: string, sub?: string): number {
       doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...PDF_BRAND);
@@ -2873,6 +2848,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
+    // The one report that ties everything together: opening balance,
+    // today's running balance, the latest reconciliation (bank vs. system,
+    // and when it was last done), net income for the selected period, and
+    // the full by-group breakdown, one document instead of piecing it
+    // together from the Finance tab.
     async function downloadFullAccountingReport() {
       try {
         await ensureOrgSettings();
@@ -3091,7 +3071,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // don't, see NO_ROSTER_GROUP_KEYS), one page. Landscape, since
     // "all their info" is enough columns that portrait would cramp it.
     // Members + every approved leader/admin, same merge renderRoster()
-    // does on screen (leaderRosterRows() above), not read from
+    // does on screen (leaderRosterRows() below), not read from
     // state.ovMembers/ovLeaders since this can be downloaded straight
     // from Reports without ever having opened the Roster tab first.
     async function downloadRosterReport() {
@@ -3128,7 +3108,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }
     }
     const SPONSOR_STATUS_LABELS: Record<string, string> = { active: 'Active', past: 'Past', prospective: 'Prospective' };
-    // Not period-dependent, every sponsor/prospective sponsor General has on file.
+    // Not period-dependent, every sponsor/prospective sponsor Social Media has on file.
     async function downloadSponsorsReportMain() {
       try {
         const { data, error } = await db.from('sponsors').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('name', { ascending: true });
@@ -3149,7 +3129,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    // Not period-dependent, every community/church contact General has on file.
+    // Not period-dependent, every community/church contact Social Media has on file.
     async function downloadPrContactsReportMain() {
       try {
         const { data, error } = await db.from('pr_contacts').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).order('name', { ascending: true });
@@ -3251,10 +3231,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       el('[data-report-curriculum]').addEventListener('click', downloadCurriculumReport);
       el('[data-report-roster]').addEventListener('click', downloadRosterReport);
       el('[data-report-vendors]').addEventListener('click', downloadVendorReport);
-      // Same per-group reports as Music/Social Media's own tabs, offered
-      // here too so nobody has to hop tabs to find them, using THIS
-      // tab's own month/year selects, not Music/Social Media's (which
-      // may be sitting on a different, hidden period).
+      // Music and Social Media reports live only here, and use this
+      // tab's own month/year selects.
       el('[data-report-main-music-finance]').addEventListener('click', () => downloadMusicFinanceReport(els.reportMonth, els.reportYear));
       el('[data-report-main-music-events]').addEventListener('click', () => downloadMusicEventReport(els.reportMonth, els.reportYear));
       el('[data-report-main-music-maintenance]').addEventListener('click', () => downloadMusicMaintenanceReport(els.reportMonth, els.reportYear));
@@ -3294,8 +3272,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       }).join('');
     }
 
-    // ---------- Music: its own dashboard + reports (not a troop, so it
-    // sits outside the Overview rollup and its own Reports section) ------
+    // ---------- Music: its own dashboard (not a troop, so it sits
+    // outside the Overview rollup). Its reports are in the main Reports
+    // tab, see the data-report-main-music-* buttons. ---------------------
     function musicEventDateTimeHasPassed(dateStr: string, timeStr: string | null) {
       const eventDT = timeStr ? new Date(`${dateStr}T${timeStr}`) : new Date(`${dateStr}T23:59:59`);
       return eventDT.getTime() < Date.now();
@@ -3459,9 +3438,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.musicTodoBody.innerHTML = todo.length ? todo.map(rowHtml).join('') : '<tr><td colspan="4" class="ws-empty">Nothing pending.</td></tr>';
       els.musicUpcomingBody.innerHTML = upcoming.length ? upcoming.map(rowHtml).join('') : '<tr><td colspan="4" class="ws-empty">Nothing booked yet.</td></tr>';
     }
-    async function downloadMusicFinanceReport(monthEl?: any, yearEl?: any) {
+    async function downloadMusicFinanceReport(monthEl: any, yearEl: any) {
       try {
-        const { start, end, label } = periodRange(monthEl || els.musicReportMonth, yearEl || els.musicReportYear);
+        const { start, end, label } = periodRange(monthEl, yearEl);
         const { data } = await db.from('finance_entries').select('*').eq('group_key', MUSIC_GROUP_KEY).gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: true });
         const rows = data || [];
         const income = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
@@ -3482,9 +3461,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    async function downloadMusicEventReport(monthEl?: any, yearEl?: any) {
+    async function downloadMusicEventReport(monthEl: any, yearEl: any) {
       try {
-        const { start, end, label } = periodRange(monthEl || els.musicReportMonth, yearEl || els.musicReportYear);
+        const { start, end, label } = periodRange(monthEl, yearEl);
         const { data } = await db.from('event_bookings').select('*').eq('group_key', MUSIC_GROUP_KEY).gte('event_date', start).lte('event_date', end).order('event_date', { ascending: true });
         const rows = data || [];
         const doc = new jsPDF();
@@ -3505,9 +3484,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    async function downloadMusicMaintenanceReport(monthEl?: any, yearEl?: any) {
+    async function downloadMusicMaintenanceReport(monthEl: any, yearEl: any) {
       try {
-        const { start, end, label } = periodRange(monthEl || els.musicReportMonth, yearEl || els.musicReportYear);
+        const { start, end, label } = periodRange(monthEl, yearEl);
         const { data } = await db.from('inventory_maintenance').select('*, inventory_items(name)').eq('group_key', MUSIC_GROUP_KEY).gte('performed_on', start).lte('performed_on', end).order('performed_on', { ascending: true });
         const rows = data || [];
         const totalCost = rows.reduce((s: number, r: any) => s + Number(r.cost || 0), 0);
@@ -3524,9 +3503,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    async function downloadMusicAdjustmentsReport(monthEl?: any, yearEl?: any) {
+    async function downloadMusicAdjustmentsReport(monthEl: any, yearEl: any) {
       try {
-        const { start, end, label } = periodRange(monthEl || els.musicReportMonth, yearEl || els.musicReportYear);
+        const { start, end, label } = periodRange(monthEl, yearEl);
         const { data } = await db.from('inventory_adjustments').select('*, inventory_items(name)').eq('group_key', MUSIC_GROUP_KEY).gte('adjusted_on', start).lte('adjusted_on', end).order('adjusted_on', { ascending: true });
         const rows = data || [];
         const doc = new jsPDF();
@@ -3549,8 +3528,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function loadSocialMediaDashboard() {
       const now = new Date();
       const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      const sixAgoD = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-      const sixStart = `${sixAgoD.getFullYear()}-${String(sixAgoD.getMonth() + 1).padStart(2, '0')}-01`;
       // No team-members KPI: Social Media has no Roster tab in the
       // Leaders Workspace (see NON_TROOP_TAB_VISIBILITY there), so that
       // count could only ever be 0. It does have a Library tab.
@@ -3738,8 +3715,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function loadGeneralDashboard() {
       const now = new Date();
       const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      const sixAgoD = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-      const sixStart = `${sixAgoD.getFullYear()}-${String(sixAgoD.getMonth() + 1).padStart(2, '0')}-01`;
       // No team-members KPI: General has no Roster tab in the Leaders
       // Workspace, so that count could only ever be 0. It does have
       // Meeting Notes. (Public Relations moved to Social Media, see
@@ -3816,9 +3791,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         `;
       }
     }
-    async function downloadContentCalendarReport(monthEl?: any, yearEl?: any) {
+    async function downloadContentCalendarReport(monthEl: any, yearEl: any) {
       try {
-        const { start, end, label } = periodRange(monthEl || els.smReportMonth, yearEl || els.smReportYear);
+        const { start, end, label } = periodRange(monthEl, yearEl);
         const { data } = await db.from('content_items').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY)
           .gte('scheduled_date', start).lte('scheduled_date', end).order('scheduled_date', { ascending: true });
         const rows = data || [];
@@ -3838,9 +3813,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         showToast('Could not generate the report, check your connection and try again.');
       }
     }
-    async function downloadSocialMediaFinanceReport(monthEl?: any, yearEl?: any) {
+    async function downloadSocialMediaFinanceReport(monthEl: any, yearEl: any) {
       try {
-        const { start, end, label } = periodRange(monthEl || els.smReportMonth, yearEl || els.smReportYear);
+        const { start, end, label } = periodRange(monthEl, yearEl);
         const { data } = await db.from('finance_entries').select('*').eq('group_key', SOCIAL_MEDIA_GROUP_KEY).gte('entry_date', start).lte('entry_date', end).order('entry_date', { ascending: true });
         const rows = data || [];
         const income = rows.filter((r: any) => r.entry_type === 'income').reduce((s: number, r: any) => s + Number(r.amount), 0);
@@ -3901,7 +3876,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // One row per group a leader actually belongs to (so filtering by
     // "Baraem" surfaces Baraem's own leader alongside its members),
     // except an admin (implicitly every group, profiles.groups is
-    // always [] for them, see admin's own Save handler above) or a
+    // always [] for them, see the People tab's Save handler below) or a
     // Support Leader (approved, no group at all), who both get a single
     // row filed under the Leaders group filter option instead of one
     // per troop, so they don't appear duplicated 8 times over.
@@ -3935,7 +3910,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (groupFilter) rows = rows.filter((m: any) => m.group_key === groupFilter);
       if (statusFilter === 'active') rows = rows.filter((m: any) => m.active);
       else if (statusFilter === 'archived') rows = rows.filter((m: any) => !m.active);
-      if (!rows.length) { els.rosterBody.innerHTML = '<tr><td colspan="13" class="ws-empty">No one matches these filters.</td></tr>'; return; }
+      if (!rows.length) { els.rosterBody.innerHTML = '<tr><td colspan="14" class="ws-empty">No one matches these filters.</td></tr>'; return; }
       els.rosterBody.innerHTML = rows.map((m: any) => {
         const g = GROUPS.find((x) => x.key === m.group_key);
         const groupLabel = m._groupLabel || (g ? g.en : m.group_key);
@@ -4001,9 +3976,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         });
         row.querySelector('[data-doc-del]').addEventListener('click', async () => {
           if (!confirm('Delete this shared document? It disappears from every group it was shared into.')) return;
-          await db.storage.from('documents').remove([path]);
+          // Row first: if that fails the file is still there and nothing
+          // is left pointing at a missing file.
           const { error } = await db.from('shared_documents').delete().eq('id', id);
           if (error) { showToast('Could not delete.'); return; }
+          await db.storage.from('documents').remove([path]);
           await loadSharedDocs();
         });
         row.querySelectorAll('[data-doc-group]').forEach((cb: any) => {
@@ -4188,10 +4165,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // check a leader profile into a group that's never offered here.
     const ASSIGNABLE_GROUPS = GROUPS.filter((g) => g.key !== LEADERS_GROUP_KEY);
     // A leader can also be given no real group at all, someone with no
-    // troop/committee of their own who still needs an account (to show
-    // up on the admin-only Leaders Dashboard, and/or to use Shared
-    // Calendar, the one feature that's genuinely ungated by group, see
-    // isTabHidden() in leaders/app.astro). That's just `groups: []`,
+    // troop/committee of their own who still needs an account (a Support
+    // Leader: they get Overview, Next Meetings and a view-only Shared
+    // Calendar, see SUPPORT_LEADER_TABS and isTabHidden() in
+    // leaders/app.astro). That's just `groups: []`,
     // same value an unconfigured brand-new leader already has. So on the
     // *initial* render from saved data this checkbox mirrors "no real
     // group is checked", a saved Support Leader still shows checked
@@ -4274,6 +4251,9 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             : Array.from(row.querySelectorAll('.ws-group-check input:checked:not([data-calendar-only-check])')).map((i: any) => i.value);
           const { error } = await db.from('profiles').update({ role, groups }).eq('id', id);
           if (error) { console.error(error); showToast('Could not save, ' + (error.message || 'unknown error') + '.'); return; }
+          // Keep the saved groups current so switching Role again redraws
+          // from what was just saved, not from the page load.
+          groupsCell.dataset.groups = groups.join(',');
           showToast('Saved.');
           if (id === state.session.user.id && role !== 'admin') {
             // Demoted themselves out of admin, this console isn't reachable
@@ -4365,8 +4345,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         btn.addEventListener('click', () => setTab(btn.dataset.tab));
       });
     }
-    // Generic sub-tabs (Finance's Balances/Ledger/Reconcile/Adjustments),
-    // scoped by a "group" name so unrelated sub-tab sets don't collide.
+    // Generic sub-tabs (Finance's Balances/Ledger/Bank/Box Counts/Activity
+    // Log, Shared Calendar's Calendar/Change Requests, People's People/
+    // Activity Log), scoped by a "group" name so unrelated sub-tab sets
+    // don't collide.
     function setSubtab(group: string, name: string) {
       document.querySelectorAll(`.ws-subtab[data-subtabs="${group}"]`).forEach((b: any) => b.classList.toggle('ws-subtab--active', b.dataset.subtab === name));
       document.querySelectorAll(`[data-subpanel^="${group}:"]`).forEach((p: any) => p.toggleAttribute('hidden', p.dataset.subpanel !== `${group}:${name}`));
@@ -4378,8 +4360,18 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
 
     // ---------- Boot -------------------------------------------------------
-    let boundOnce = false;
+    // astro:page-load fires on every page of the site once this script
+    // has loaded (BaseLayout uses <ClientRouter/>), so init() bails unless
+    // the admin console is actually on screen. Each visit to /admin gets
+    // fresh DOM, so element listeners are bound once per DOM (marked on
+    // the root element), while document-level listeners and timers are
+    // bound once per document (module flag) and check onAdminPage().
+    let docBound = false;
+    let sessionExpiryTimer: any;
+    function onAdminPage() { return !!document.querySelector('[data-admin-root]'); }
     async function init() {
+      const root: any = document.querySelector('[data-admin-root]');
+      if (!root) return;
       cacheEls();
       initRowNumbering();
       initCollapsibleRows();
@@ -4389,7 +4381,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!session) { window.location.replace('/leaders'); return; }
       if (isSessionExpired()) { await signOut(); window.location.replace('/leaders?expired=1'); return; }
       state.session = session;
-      setTimeout(async () => {
+      clearTimeout(sessionExpiryTimer);
+      sessionExpiryTimer = setTimeout(async () => {
         await signOut();
         window.location.replace('/leaders?expired=1');
       }, msUntilSessionExpiry());
@@ -4402,7 +4395,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
       if (!state.isAdmin) {
         els.denied.removeAttribute('hidden');
-        els.signoutDenied.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
+        if (!els.signoutDenied.dataset.bound) {
+          els.signoutDenied.dataset.bound = '1';
+          els.signoutDenied.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
+        }
         return;
       }
 
@@ -4412,19 +4408,33 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.who.innerHTML = `<span class="ws-account-name">${escapeHtml(profile.name)}</span><span class="ws-account-role">admin</span>`;
       registerDeviceSession();
 
-      if (!boundOnce) {
-        boundOnce = true;
+      if (!docBound) {
+        docBound = true;
+        document.addEventListener('click', (e: any) => {
+          if (!onAdminPage() || !els.accountMenu || els.accountMenu.hidden) return;
+          if (e.target.closest('.ws-account')) return;
+          els.accountMenu.setAttribute('hidden', '');
+        });
+        setInterval(async () => {
+          if (!onAdminPage()) return;
+          if (!(await checkThisDeviceStillActive())) window.location.replace('/leaders?revoked=1');
+        }, 45000);
+        document.addEventListener('visibilitychange', async () => {
+          if (document.visibilityState !== 'visible' || !onAdminPage()) return;
+          if (!(await checkThisDeviceStillActive())) window.location.replace('/leaders?revoked=1');
+        });
+        bindEnglishOnlyInputs();
+        bindTitleCaseInputs();
+      }
+
+      if (!root.dataset.bound) {
+        root.dataset.bound = '1';
         bindOverlayScrollLock();
         bindDeviceKicks();
         els.accountBtn.addEventListener('click', () => {
           const opening = els.accountMenu.hidden;
           els.accountMenu.toggleAttribute('hidden');
           if (opening) renderDevices();
-        });
-        document.addEventListener('click', (e: any) => {
-          if (els.accountMenu.hidden) return;
-          if (e.target.closest('.ws-account')) return;
-          els.accountMenu.setAttribute('hidden', '');
         });
         els.signout.addEventListener('click', async () => { await signOut(); window.location.replace('/leaders'); });
         els.signoutOthers.addEventListener('click', async () => {
@@ -4436,15 +4446,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           els.signoutOthers.textContent = 'Sign out of all other devices';
         });
         els.signoutEverywhere.addEventListener('click', async () => { await signOutEverywhere(); window.location.replace('/leaders'); });
-        setInterval(async () => {
-          if (!(await checkThisDeviceStillActive())) window.location.replace('/leaders?revoked=1');
-        }, 45000);
-        document.addEventListener('visibilitychange', async () => {
-          if (document.visibilityState !== 'visible') return;
-          if (!(await checkThisDeviceStillActive())) window.location.replace('/leaders?revoked=1');
-        });
-        bindEnglishOnlyInputs();
-        bindTitleCaseInputs();
 
         bindTabs();
         bindSubtabs();

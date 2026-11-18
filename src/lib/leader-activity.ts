@@ -81,7 +81,7 @@ export async function fetchLeaderActivity(db: any, opts: FetchLeaderActivityOpts
   );
   // Fee payments recorded, collapsed below to one activity per (group, period, who saved it).
   queries.push(
-    scopeUuid(db.from('fee_payments').select('group_key, period, updated_by, updated_at'), 'updated_by').order('updated_at', { ascending: false }).limit(limit * 6)
+    tsScope(scopeUuid(db.from('fee_payments').select('group_key, period, updated_by, updated_at'), 'updated_by').order('updated_at', { ascending: false }).limit(limit * 6), 'updated_at')
       .then((r: any) => ({ kind: 'fee' as const, r }))
   );
   // Roster members added.

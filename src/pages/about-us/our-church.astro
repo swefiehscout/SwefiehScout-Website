@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { thumb } from '../../lib/scenic-photos';
 
 const priests = [
   {
@@ -51,7 +52,7 @@ const priests = [
     {priests.map((p, i) => (
       <article class="priest-card" data-animate data-animate-delay={String((i % 5) + 1)}>
         <div class="priest-photo">
-          <img src={p.photo} alt={p.name} loading="lazy" />
+          <img src={thumb(p.photo)} alt={p.name} loading="lazy" />
         </div>
         <h3 class="priest-name">{p.name}</h3>
         <p class="priest-name-ar">{p.nameAr}</p>

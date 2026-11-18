@@ -110,10 +110,7 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
       if (e.matches) setOpen(false);
     });
   }
-  // astro:page-load fires on initial page load AND after every view
-  // transition, so a single listener covers both. Adding setup() as a
-  // direct call too would double-bind the click handlers and make the
-  // hamburger toggle open-then-close on a single tap.
+  // Static page (no Astro page transitions), so set the header up once.
   setupSiteHeader();
 </script>
 <div class="gold-rule" aria-hidden="true"></div>
@@ -261,7 +258,6 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="config.js"></script>
-<script src="demo.js"></script>
 <script src="shared.js"></script>
 <script src="book.js"></script>
 <script src="closed.js"></script>

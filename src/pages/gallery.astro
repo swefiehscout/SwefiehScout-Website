@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { thumb } from '../lib/scenic-photos';
 
 const albums = [
   {
@@ -53,7 +54,7 @@ const albums = [
         data-animate-delay={String((i % 5) + 1)}
       >
         <div class="album-art">
-          <img class="album-cover" src={album.cover} alt={album.title} loading="lazy" />
+          <img class="album-cover" src={thumb(album.cover)} alt={album.title} loading="lazy" />
         </div>
         <div class="album-meta">
           <p class="album-caption">{album.caption}</p>
@@ -94,34 +95,54 @@ const albums = [
   // Albums aren't public, the Drive links live only in the source, never
   // rendered to the page. Clicking a card opens a centered dialog pointing
   // people to a leader instead of navigating anywhere.
-  const modal = document.getElementById('gallery-modal');
-  const closeBtn = modal?.querySelector<HTMLButtonElement>('.gallery-modal-close');
-  let hideTimer: ReturnType<typeof window.setTimeout> | undefined;
+  // Module scripts run once per session under <ClientRouter/>, so the
+  // setup runs on every astro:page-load (looking the elements up again)
+  // and the document keydown listener is removed before each swap.
+  let cleanup: Array<() => void> = [];
 
-  function openGalleryModal() {
+  function initGallery() {
+    const modal = document.getElementById('gallery-modal');
     if (!modal) return;
-    window.clearTimeout(hideTimer);
-    modal.hidden = false;
-    requestAnimationFrame(() => modal.classList.add('gallery-modal-overlay--show'));
-    document.body.classList.add('gallery-modal-open');
-    closeBtn?.focus();
+    const closeBtn = modal.querySelector<HTMLButtonElement>('.gallery-modal-close');
+    let hideTimer: ReturnType<typeof window.setTimeout> | undefined;
+
+    function openGalleryModal() {
+      if (!modal) return;
+      window.clearTimeout(hideTimer);
+      modal.hidden = false;
+      requestAnimationFrame(() => modal.classList.add('gallery-modal-overlay--show'));
+      document.body.classList.add('gallery-modal-open');
+      closeBtn?.focus();
+    }
+
+    function closeGalleryModal() {
+      if (!modal) return;
+      modal.classList.remove('gallery-modal-overlay--show');
+      document.body.classList.remove('gallery-modal-open');
+      hideTimer = window.setTimeout(() => { modal.hidden = true; }, 200);
+    }
+
+    document.querySelectorAll<HTMLButtonElement>('.album-card').forEach((card) => {
+      card.addEventListener('click', openGalleryModal);
+    });
+    closeBtn?.addEventListener('click', closeGalleryModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeGalleryModal();
+    });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !modal.hidden) closeGalleryModal();
+    };
+    document.addEventListener('keydown', onKey);
+    cleanup.push(() => {
+      document.removeEventListener('keydown', onKey);
+      window.clearTimeout(hideTimer);
+      document.body.classList.remove('gallery-modal-open');
+    });
   }
 
-  function closeGalleryModal() {
-    if (!modal) return;
-    modal.classList.remove('gallery-modal-overlay--show');
-    document.body.classList.remove('gallery-modal-open');
-    hideTimer = window.setTimeout(() => { modal.hidden = true; }, 200);
-  }
-
-  document.querySelectorAll<HTMLButtonElement>('.album-card').forEach((card) => {
-    card.addEventListener('click', openGalleryModal);
-  });
-  closeBtn?.addEventListener('click', closeGalleryModal);
-  modal?.addEventListener('click', (e) => {
-    if (e.target === modal) closeGalleryModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && !modal.hidden) closeGalleryModal();
+  document.addEventListener('astro:page-load', initGallery);
+  document.addEventListener('astro:before-swap', () => {
+    cleanup.forEach((fn) => fn());
+    cleanup = [];
   });
 </script>

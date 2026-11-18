@@ -1,7 +1,7 @@
 // Countdown to Christmas Eve (24 December, midnight Amman time) on the Santa home page.
 // On 24 December it says "It's Christmas Eve!", and "Santa is out tonight!" during the visiting
-// hours (from the public settings, so it follows Admin > Setup). From 25 December it counts to
-// next year's Christmas Eve. Booking logic is not touched.
+// hours (from the public settings, so it follows Admin > Setup). Once the night is over it counts
+// to next year's Christmas Eve. Booking logic is not touched.
 (function () {
   const root = document.querySelector("[data-countdown]");
   if (!root) return;
@@ -31,7 +31,10 @@
   function target(now) {
     const y = new Date(now + 3 * 3600e3).getUTCFullYear(); // the year in Amman
     const thisEve = at(eveOf(y), "00:00");
-    const thisEnd = at(`${y}-12-25`, "00:00");
+    // Christmas Eve lasts until midnight, or until the last visit if cars work past midnight.
+    let lastVisit = at(eveOf(y), hours.end);
+    if (lastVisit <= at(eveOf(y), hours.start)) lastVisit += 864e5;
+    const thisEnd = Math.max(at(`${y}-12-25`, "00:00"), lastVisit);
     if (now < thisEve) return { phase: "before", eve: eveOf(y), t: thisEve };
     if (now < thisEnd) return { phase: "eve", eve: eveOf(y) };
     return { phase: "before", eve: eveOf(y + 1), t: at(eveOf(y + 1), "00:00") };

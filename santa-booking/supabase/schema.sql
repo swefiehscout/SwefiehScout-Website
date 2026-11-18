@@ -61,7 +61,7 @@ create table bookings (
   ref             text unique not null default ('S' || nextval('booking_ref_seq')),
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now(),
-  updated_by      text not null default 'public form',
+  updated_by      text not null default 'Website',
   name            text not null,
   phone           text not null,
   email           text not null default '',
@@ -107,7 +107,8 @@ create table messages (
   handled    boolean not null default false
 );
 
--- Shared admin login(s). Add the admin account's email here after creating it.
+-- Team members allowed into the admin page, one row per person.
+-- team_accounts.sql adds their name and owner_only_log.sql adds is_owner; add people with add_team.sql.
 create table admins (email text primary key);
 
 -- ---------- Helpers ---------------------------------------------------
@@ -192,7 +193,8 @@ language sql stable security definer set search_path = public as $$
   select coalesce((select min(d) from near_stops), (select d from zone));
 $$;
 
--- Choose a car for a booking, or null if none fits. (Used for the team's suggestions; the website uses home_car.)
+-- Choose a car for a booking, or null if none fits. Not used by the website or the admin page
+-- today (the admin page works out suggestions itself); kept for use from the SQL Editor.
 -- 1) the area's own car(s) if one has room,
 -- 2) else the closest other car with room, within borrow_km.
 create or replace function pick_car(p_slot time, p_area int,
@@ -400,7 +402,7 @@ begin
 end;
 $$;
 
--- Admin helper: suggest a car for a booking (used by "Auto-assign" and waitlist).
+-- Admin helper: suggest a car for a booking. Not called by the admin page today; kept for the SQL Editor.
 create or replace function admin_suggest_car(p_booking uuid, p_slot text)
 returns int
 language plpgsql stable security definer set search_path = public as $$
@@ -442,8 +444,8 @@ create trigger bookings_history before insert or update on bookings
 for each row execute function log_booking_change();
 
 -- ---------- Security --------------------------------------------------
--- The public can ONLY call public_config / public_availability / public_book.
--- Everything else needs the shared admin login.
+-- The public can ONLY call public_config / public_availability / public_book / public_message.
+-- Everything else needs a team login (a row in admins).
 
 alter table settings        enable row level security;
 alter table cars            enable row level security;

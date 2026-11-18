@@ -87,33 +87,57 @@ function isActive(href: string) {
 </header>
 
 <script is:inline>
-  function setupSiteHeader() {
-    // Glass-on-scroll: the header switches to a translucent backdrop-blur
-    // surface when the page has been scrolled past the very top.
-    var header = document.querySelector('.site-header');
-    if (header) {
-      var sync = function () {
-        header.classList.toggle('is-scrolled', window.scrollY > 8);
-      };
-      sync();
-      window.addEventListener('scroll', sync, { passive: true });
-    }
+  // Element lookups happen at call time: the header is swapped on every
+  // view transition, so the global listeners below must act on the
+  // current page's elements, not the ones from the first load.
 
-    // Click-based submenu: a chevron button next to each parent link
-    // toggles the submenu open/closed. The parent link itself still
-    // navigates normally, separating the two interactions makes touch
-    // and mouse both reliable. Click outside or press Escape closes.
-    var subToggles = document.querySelectorAll('[data-submenu-toggle]');
-    function closeAllSubmenus(except) {
-      subToggles.forEach(function (b) {
-        if (b === except) return;
-        b.setAttribute('aria-expanded', 'false');
-        var id = b.getAttribute('aria-controls');
-        var menu = id && document.getElementById(id);
-        if (menu) menu.classList.remove('is-open');
-      });
+  // Glass-on-scroll: the header switches to a translucent backdrop-blur
+  // surface when the page has been scrolled past the very top.
+  function syncSiteHeaderScrolled() {
+    var header = document.querySelector('.site-header');
+    if (header) header.classList.toggle('is-scrolled', window.scrollY > 8);
+  }
+
+  // Click-based submenu: a chevron button next to each parent link
+  // toggles the submenu open/closed. The parent link itself still
+  // navigates normally, separating the two interactions makes touch
+  // and mouse both reliable. Click outside or press Escape closes.
+  function closeAllSubmenus(except) {
+    document.querySelectorAll('[data-submenu-toggle]').forEach(function (b) {
+      if (b === except) return;
+      b.setAttribute('aria-expanded', 'false');
+      var id = b.getAttribute('aria-controls');
+      var menu = id && document.getElementById(id);
+      if (menu) menu.classList.remove('is-open');
+    });
+  }
+
+  // Mobile drawer open/close.
+  function setSiteNavOpen(open) {
+    var btn = document.querySelector('[data-nav-toggle]');
+    var nav = document.querySelector('[data-nav]');
+    var backdrop = document.querySelector('[data-nav-backdrop]');
+    if (!btn || !nav || !backdrop) return;
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    nav.classList.toggle('is-open', open);
+    btn.classList.toggle('is-open', open);
+    document.body.classList.toggle('nav-locked', open);
+    if (open) {
+      backdrop.removeAttribute('hidden');
+      // next frame so transition runs
+      requestAnimationFrame(function () { backdrop.classList.add('is-visible'); });
+    } else {
+      backdrop.classList.remove('is-visible');
+      setTimeout(function () { backdrop.setAttribute('hidden', ''); }, 220);
     }
-    subToggles.forEach(function (btn) {
+  }
+
+  // Per-page setup: binds to this page's header elements only.
+  function setupSiteHeader() {
+    syncSiteHeaderScrolled();
+
+    document.querySelectorAll('[data-submenu-toggle]').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -130,56 +154,47 @@ function isActive(href: string) {
         }
       });
     });
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest || !e.target.closest('.has-children')) {
-        closeAllSubmenus(null);
-      }
-    });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeAllSubmenus(null);
-    });
 
     var btn = document.querySelector('[data-nav-toggle]');
     var nav = document.querySelector('[data-nav]');
     var backdrop = document.querySelector('[data-nav-backdrop]');
     if (!btn || !nav || !backdrop) return;
 
-    function setOpen(open) {
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-      nav.classList.toggle('is-open', open);
-      btn.classList.toggle('is-open', open);
-      document.body.classList.toggle('nav-locked', open);
-      if (open) {
-        backdrop.removeAttribute('hidden');
-        // next frame so transition runs
-        requestAnimationFrame(function () { backdrop.classList.add('is-visible'); });
-      } else {
-        backdrop.classList.remove('is-visible');
-        setTimeout(function () { backdrop.setAttribute('hidden', ''); }, 220);
-      }
-    }
-
     btn.addEventListener('click', function () {
-      setOpen(btn.getAttribute('aria-expanded') !== 'true');
+      setSiteNavOpen(btn.getAttribute('aria-expanded') !== 'true');
     });
-    backdrop.addEventListener('click', function () { setOpen(false); });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') setOpen(false);
-    });
+    backdrop.addEventListener('click', function () { setSiteNavOpen(false); });
     // Tap a link → close drawer.
     nav.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', function () { setOpen(false); });
+      a.addEventListener('click', function () { setSiteNavOpen(false); });
+    });
+  }
+
+  // Global (window / document / matchMedia) listeners are bound once per
+  // session, so they don't pile up with each view transition.
+  if (!window.__siteHeaderGlobalsBound) {
+    window.__siteHeaderGlobalsBound = true;
+    window.addEventListener('scroll', syncSiteHeaderScrolled, { passive: true });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('.has-children')) {
+        closeAllSubmenus(null);
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      closeAllSubmenus(null);
+      setSiteNavOpen(false);
     });
     // Close on resize back to desktop so state doesn't get stuck.
     var mq = window.matchMedia('(min-width: 880px)');
     (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(function (e) {
-      if (e.matches) setOpen(false);
+      if (e.matches) setSiteNavOpen(false);
     });
+
+    // astro:page-load fires on initial page load AND after every view
+    // transition, so a single listener covers both. Adding setup() as a
+    // direct call too would double-bind the click handlers and make the
+    // hamburger toggle open-then-close on a single tap.
+    document.addEventListener('astro:page-load', setupSiteHeader);
   }
-  // astro:page-load fires on initial page load AND after every view
-  // transition, so a single listener covers both. Adding setup() as a
-  // direct call too would double-bind the click handlers and make the
-  // hamburger toggle open-then-close on a single tap.
-  document.addEventListener('astro:page-load', setupSiteHeader);
 </script>

@@ -1,8 +1,8 @@
 /* Public pages only (index, book, contact), loaded after site.css.
    Gives the pages families see the main Swefieh Scouts website's design: one white header with
    the main site's menu, the cream background, Playfair Display headings with Inter text, white
-   rounded cards, maroon and outline buttons, and green as the accent. Christmas touches: the
-   garland under the header and gold star details. The admin page doesn't load this file. */
+   rounded cards, maroon and outline buttons, and green as the accent. Christmas touch: gold
+   star details. The admin page doesn't load this file. */
 :root {
   /* Main site tokens (src/styles/global.css) */
   --bg: #f9f7f1;
@@ -49,11 +49,6 @@ a { color: inherit; }
 .site-header { margin-inline: -16px; }
 body.nav-locked { overflow: hidden; }
 
-/* ---------- Christmas garland under the header ---------- */
-.garland { height: 54px; margin-bottom: -18px; opacity: .95; }
-.garland svg { height: 54px; }
-.garland .wire { stroke: #4b5a3d; }
-
 /* ---------- Page frame ---------- */
 .wrap.page { max-width: 1120px; gap: 48px; justify-items: stretch; }
 .crumbs { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font: 500 13px var(--font-body); color: var(--muted); margin-bottom: -24px; }
@@ -98,23 +93,6 @@ body.nav-locked { overflow: hidden; }
   content: ""; position: absolute; inset: 14px; z-index: -1; pointer-events: none;
   border: 1px solid rgba(241, 217, 142, .45); border-radius: 10px;
 }
-.medallion {
-  width: min(250px, 62vw); height: min(250px, 62vw); align-self: center; justify-self: center;
-  border-radius: 50%; background: var(--surface); display: grid; place-items: center; padding: 9%;
-  box-shadow:
-    0 0 0 3px #d9b45f, 0 0 0 9px #fffaf0, 0 0 0 11px #d9b45f,
-    0 0 50px 8px rgba(241, 217, 142, .35), 0 24px 50px -16px rgba(0, 0, 0, .55);
-}
-.medallion img { width: 100%; height: 100%; object-fit: contain; display: block; }
-.art-caption {
-  margin: 0; display: flex; align-items: center; gap: 12px;
-  font: 600 13px var(--font-body); letter-spacing: .22em; text-transform: uppercase; color: #f6e3a1;
-}
-.art-caption::before, .art-caption::after {
-  content: ""; width: 34px; height: 1px; background: linear-gradient(90deg, transparent, #d9b45f);
-}
-.art-caption::after { background: linear-gradient(90deg, #d9b45f, transparent); }
-.art-caption span { color: #d9b45f; font-size: 11px; }
 .s-hero-body { display: grid; gap: 16px; align-content: center; padding: clamp(28px, 5vw, 56px); }
 .s-hero-body h1 { margin: 0; font: 700 clamp(34px, 4.6vw, 52px)/1.12 var(--font-display); color: var(--brand); }
 .s-hero-body h1 .accent { color: var(--accent); }
@@ -169,15 +147,6 @@ body.nav-locked { overflow: hidden; }
 .step h3 { margin: 0; font: 700 19px var(--font-display); letter-spacing: 0; color: var(--brand); }
 .step p { margin: 0; font-size: 15px; color: var(--muted); }
 
-/* ---------- Book and Contact: page title ---------- */
-.page-head { display: grid; gap: 12px; justify-items: center; text-align: center; max-width: 680px; margin: 0 auto; }
-.page-head .eyebrow { text-align: center; }
-.page-head h1 { margin: 0; font: 700 clamp(32px, 4.4vw, 46px)/1.15 var(--font-display); color: var(--brand); }
-.page-head h1::after {
-  content: ""; display: block; width: 60px; height: 3px; margin: 14px auto 0; border-radius: 2px;
-  background: linear-gradient(90deg, var(--brand), var(--accent));
-}
-.page-head .actions { justify-content: center; margin-top: 4px; }
 .aside-link { margin: -24px 0 0; text-align: center; color: var(--muted); font-size: 15px; }
 .aside-link a { color: var(--brand); font-weight: 600; }
 #loading, .wrap.page > .closed { text-align: center; justify-items: center; }
@@ -316,7 +285,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
 @media (max-width: 520px) { .s-cta .btn-gold.big { font-size: 17px; padding: 19px 30px; width: 100%; } }
 .s-cta-link { color: #f1d98e; font: 500 15px var(--font-body); text-decoration: none; border-bottom: 1px solid rgba(241, 217, 142, .5); }
 .s-cta-link:hover { color: #fff; border-bottom-color: #fff; }
-.s-cta-closed { margin: 0; font-size: 16px; color: #f3e2c4; }
 @media (prefers-reduced-motion: reduce) { .s-cta-star { animation: none; } }
 
 /* Team sign-in in the home hero: a quiet text button next to the main actions */
@@ -352,7 +320,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
 
 /* ---------- Booking confirmation screens (booked, waitlist, "That Time Has Filled Up") ---------- */
 /* Once a result shows, the form's heading and helper line step aside */
-.wrap.page:has(> #result:not([hidden])) > .page-head,
 .wrap.page:has(> #result:not([hidden])) > .aside-link { display: none; }
 .card.result {
   max-width: 580px; padding: 0 0 36px; gap: 14px; overflow: hidden; text-align: center; justify-items: center;
@@ -437,21 +404,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
 .notice-page .notice-title { font-size: clamp(24px, 3.4vw, 30px); }
 .notice-page .notice-text { font-size: 16px; max-width: 46ch; }
 .notice-page .notice-action { justify-content: center; }
-/* inside the red booking band */
-.notice-dark {
-  width: 100%; max-width: 640px; flex-direction: column; align-items: center; text-align: center;
-  background: rgba(255, 250, 235, .08); border-color: rgba(241, 217, 142, .45); padding: 24px;
-}
-.notice-dark .notice-icon { background: rgba(255, 250, 235, .12); box-shadow: inset 0 0 0 1px rgba(241, 217, 142, .6); }
-.notice-dark .notice-body { justify-items: center; }
-.notice-dark .notice-title { color: #fff; font-size: 22px; }
-.notice-dark .notice-text { color: #f3e2c4; max-width: 46ch; }
-.notice-dark .notice-action { justify-content: center; }
-.notice-dark .btn-secondary { color: #f6e3a1; border-color: #d9b45f; }
-.notice-dark .btn-secondary:hover { background: #f6e3a1; color: var(--brand-dark); }
-.notice-dark .btn-primary { background: linear-gradient(135deg, #f6e3a1, #d4ad57); color: var(--brand-dark); border-color: #d4ad57; }
 @media (max-width: 819px) { .s-hero-body .notice { text-align: left; } }
-.wrap.page:has(> #closed:not([hidden])) > .page-head,
 .wrap.page:has(> #closed:not([hidden])) > .aside-link { display: none; }
 
 
@@ -567,12 +520,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
   width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; object-position: 50% 45%;
   border-radius: 0; box-shadow: none;
 }
-.s-hero-art .art-caption {
-  position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 1; white-space: nowrap;
-  padding: 7px 16px; border-radius: 999px; background: rgba(31, 6, 4, .62); backdrop-filter: blur(4px);
-  box-shadow: 0 0 0 1px rgba(217, 180, 95, .55);
-}
-.s-hero-art .art-caption::before, .s-hero-art .art-caption::after { display: none; }
 @media (max-width: 819px) {
   .s-hero-art { aspect-ratio: 1448 / 1086; padding: 0; }
 }
@@ -589,10 +536,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
   box-shadow: 0 0 0 3px #d9b45f, 0 0 0 10px #fffaf0, 0 0 0 12px #d9b45f, 0 26px 54px -18px rgba(0, 0, 0, .6);
 }
 .hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; border-radius: 0; box-shadow: none; }
-.s-hero-art .art-caption {
-  position: static; transform: none; padding: 0; background: none; box-shadow: none; backdrop-filter: none;
-}
-.s-hero-art .art-caption::before, .s-hero-art .art-caption::after { display: block; }
 @media (max-width: 819px) {
   .s-hero-art { aspect-ratio: auto; padding: 32px 20px 24px; }
   .hero-photo { width: min(82vw, 360px); }
@@ -638,7 +581,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
    (no panel, ring, corners or caption around it) */
 .s-hero-art { position: relative; display: block; padding: 0; gap: 0; background: #2a0805; }
 .s-hero-art::after { display: none; }
-.s-hero-art .art-caption { display: none; }
 .hero-photo {
   position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; aspect-ratio: auto;
   border-radius: 0; box-shadow: none;
@@ -652,7 +594,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
 /* ---------- Book and Contact: the same hero card as the home page ---------- */
 .page-hero .s-hero-body h1 { margin: 0; font: 700 clamp(30px, min(4vw, 6.4vh), 46px)/1.12 var(--font-display); color: var(--brand); }
 .page-hero .s-hero-body h1 .accent { color: var(--accent); }
-.page-hero .hero-hint { margin: 0; font-size: 14px; color: var(--gold-deep); font-weight: 600; }
 @media (min-width: 820px) { .page-hero { min-height: min(calc(100svh - 230px), 520px); } }
 /* once a booking is confirmed, or bookings are closed, the message stands alone */
 .wrap.page:has(> #result:not([hidden])) > .page-hero,

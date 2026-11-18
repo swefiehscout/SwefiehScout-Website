@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { thumb } from '../../lib/scenic-photos';
 import Icon from '../../components/Icon.astro';
 
 const leaders = [
@@ -70,7 +71,7 @@ const achievements = [
     {leaders.map((l, i) => (
       <article class="leader-card" data-animate data-animate-delay={String(i + 1)}>
         <div class="leader-avatar">
-          <img src={l.photo} alt={l.name} loading="lazy" />
+          <img src={thumb(l.photo)} alt={l.name} loading="lazy" />
         </div>
         <h2 class="leader-name">{l.name}</h2>
         <p class="leader-name-ar">{l.nameAr}</p>

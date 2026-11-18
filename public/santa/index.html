@@ -109,10 +109,7 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
       if (e.matches) setOpen(false);
     });
   }
-  // astro:page-load fires on initial page load AND after every view
-  // transition, so a single listener covers both. Adding setup() as a
-  // direct call too would double-bind the click handlers and make the
-  // hamburger toggle open-then-close on a single tap.
+  // Static page (no Astro page transitions), so set the header up once.
   setupSiteHeader();
 </script>
 <div class="gold-rule" aria-hidden="true"></div>
@@ -137,7 +134,6 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
         <source srcset="hero-illustration.webp" type="image/webp">
         <img src="hero-illustration.jpg" width="1254" height="1254" alt="Illustration of our Christmas Eve team on the way: Santa, Mrs. Claus, two elves and our driver in a car full of presents">
       </picture>
-      <p class="art-caption" aria-hidden="true"><span>✦</span> Christmas Eve <span>✦</span></p>
     </div>
     <div class="s-hero-body">
       <p class="eyebrow">The Swefieh Orthodox Scouts present</p>
@@ -208,7 +204,6 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
-<script src="demo.js"></script>
 <script src="shared.js"></script>
 <script src="closed.js"></script>
 <script src="countdown.js"></script>
@@ -222,8 +217,9 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
     document.getElementById("f-day").textContent = d.toLocaleDateString("en-GB", { weekday: "long" });
     document.getElementById("f-num").textContent = d.getDate();
     document.getElementById("f-month").textContent = d.toLocaleDateString("en-GB", { month: "long" });
-    const [a] = clock(data.start_time).split(" ");
-    document.getElementById("f-hours").textContent = `${a} – ${clock(data.end_time)}`;
+    // "3:00 – 10:30 PM", keeping the first AM/PM only when the two differ.
+    const a = clock(data.start_time), b = clock(data.end_time);
+    document.getElementById("f-hours").textContent = `${a.split(" ")[1] === b.split(" ")[1] ? a.split(" ")[0] : a} – ${b}`;
     document.getElementById("closed").hidden = data.open;
     document.getElementById("cta-note").hidden = !data.open;
   });

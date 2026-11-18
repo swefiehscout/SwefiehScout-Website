@@ -109,10 +109,7 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
       if (e.matches) setOpen(false);
     });
   }
-  // astro:page-load fires on initial page load AND after every view
-  // transition, so a single listener covers both. Adding setup() as a
-  // direct call too would double-bind the click handlers and make the
-  // hamburger toggle open-then-close on a single tap.
+  // Static page (no Astro page transitions), so set the header up once.
   setupSiteHeader();
 </script>
 <div class="gold-rule" aria-hidden="true"></div>
@@ -153,20 +150,20 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
       <div class="row two">
         <div class="field">
           <label class="req" for="m-name">Your name</label>
-          <input id="m-name" autocomplete="name" required>
+          <input id="m-name" autocomplete="name" maxlength="120" required>
         </div>
         <div class="field">
           <label for="m-phone">Mobile number</label>
-          <input id="m-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07X XXX XXXX">
+          <input id="m-phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="40" placeholder="07X XXX XXXX">
         </div>
       </div>
       <div class="field">
         <label for="m-email">Email</label>
-        <input id="m-email" type="email" autocomplete="email" placeholder="Optional">
+        <input id="m-email" type="email" autocomplete="email" maxlength="200" placeholder="Optional">
       </div>
       <div class="field">
         <label class="req" for="m-text">Message</label>
-        <textarea id="m-text" rows="5" required></textarea>
+        <textarea id="m-text" rows="5" maxlength="4000" required></textarea>
       </div>
       <!-- Spam trap: hidden from people, but form-filling bots type into it. -->
       <div class="hp-field" aria-hidden="true">
@@ -192,7 +189,6 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
-<script src="demo.js"></script>
 <script src="shared.js"></script>
 <script>
 (function () {
@@ -220,13 +216,16 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
     err("");
     const btn = $("m-submit");
     btn.disabled = true; btn.textContent = "Sending…";
-    const base = { p_name: name, p_phone: $("m-phone").value, p_email: $("m-email").value, p_message: text };
-    let { data, error } = await sb.rpc("public_message", { ...base, p_website: $("m-website").value, p_elapsed_ms: Date.now() - openedAt });
-    // Until the spam guard is installed in the database (spam_guard.sql), send the message the old way.
-    if (error && error.code === "PGRST202") ({ data, error } = await sb.rpc("public_message", base));
+    const { data, error } = await sb.rpc("public_message", {
+      p_name: name, p_phone: $("m-phone").value, p_email: $("m-email").value, p_message: text,
+      p_website: $("m-website").value, p_elapsed_ms: Date.now() - openedAt,
+    });
     btn.disabled = false; btn.textContent = "Send Message";
     if (error || !data) { console.error(error); return err("Your message didn't send. Check your connection and try again."); }
-    if (!data.ok) return err(data.reason === "busy" ? "We're getting a lot of messages right now. Please try again in a few minutes, or call us." : "Please write your name and a message.");
+    if (!data.ok) return err(
+      data.reason === "busy" ? "We're getting a lot of messages right now. Please try again in a few minutes, or call us."
+      : data.reason === "long" ? "Your message is too long. Please shorten it, or call us."
+      : "Please write your name and a message.");
     $("msg-form").reset();
     $("m-sent").hidden = false;
   });

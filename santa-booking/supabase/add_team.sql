@@ -8,9 +8,10 @@
 drop table if exists pg_temp.new_team;
 create temp table new_team (username text, name text, password text, result text);
 
+-- Replace these example rows with the real people before running.
 insert into new_team (username, name, password) values
-  ('sara', 'Sara Haddad', null),
-  ('omar', 'Omar Khoury', null);
+  ('example1', 'Example Person One', null),
+  ('example2', 'Example Person Two', null);
 
 -- ---------- nothing to change below this line ----------
 
@@ -22,6 +23,9 @@ declare
   pw  text;
   uid uuid;
 begin
+  if exists (select 1 from new_team where username like 'example%') then
+    raise exception 'Replace the example rows at the top with the real people first.';
+  end if;
   for p in select * from new_team loop
     em := lower(trim(p.username)) || '@santa.team';
 

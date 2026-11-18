@@ -1,6 +1,7 @@
-// Single source of truth for the band-photo marquee. Used by the home,
-// Join Us scenic mix, Our Band page, and Event Booking page. Add or
-// remove paths here and every surface updates.
+// Single source of truth for the band photos. Used by the Our Band
+// marquee and mixed into the scenic photo strips (home, About Us, Join Us,
+// Leaders Workspace) via src/lib/scenic-photos.ts. Add or remove paths
+// here and every surface updates.
 export const bandPhotos = [
   '/images/photos/band/ISSA0037.jpg',
   '/images/photos/band/ISSA0180.jpg',

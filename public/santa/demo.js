@@ -1,8 +1,7 @@
-// DEMO MODE — used while config.js still has the placeholder Supabase URL, or when
-// an owner presses "Demo mode" on the admin page.
-// Imitates the Supabase calls the site makes, storing everything in this browser
-// (localStorage). Any password works on the admin page. Delete nothing; it switches
-// itself off as soon as real keys are in config.js.
+// DEMO MODE: loaded by the admin page only. It is used when an owner presses "Demo mode"
+// (for presentations), or if config.js ever has the placeholder Supabase URL again.
+// Imitates the Supabase calls the admin page makes, storing a sample night in this browser
+// (localStorage). Real data is never touched, and any password works in demo mode.
 (function () {
   const KEY = "santa-demo-db-v13";
   const AREAS = [
@@ -88,7 +87,7 @@
       const a = db.areas.find((x) => x.name_en === areaName);
       const kid = pick(KIDS), i = db.bookings.length;
       db.bookings.push({
-        id: uuid(), ref: "S" + db.seq++, created_at: day(ago, rnd() * 20), updated_at: day(ago / 2, 1), updated_by: status === "new" ? "public form" : pick(["Sara (demo)", "Owner (demo)"]),
+        id: uuid(), ref: "S" + db.seq++, created_at: day(ago, rnd() * 20), updated_at: day(ago / 2, 1), updated_by: status === "new" ? "Website" : pick(["Sara (demo)", "Owner (demo)"]),
         name: `${fam} family`, phone: "079" + String(1000000 + i * 7919).slice(-7), email: "", area_id: a.id,
         lat: +(a.lat + (rnd() - 0.5) * 0.008).toFixed(5), lng: +(a.lng + (rnd() - 0.5) * 0.008).toFixed(5),
         maps_link: "https://maps.google.com/?q=demo", address_details: pick(ADDR), gift_message: pick(GIFTS).replace("%k", kid),
@@ -193,7 +192,7 @@
       }
       const ref = "S" + db.seq++;
       db.bookings.push({
-        id: uuid(), ref, created_at: now(), updated_at: now(), updated_by: "public form", name: p.p_name.trim(), phone, email: p.p_email || "",
+        id: uuid(), ref, created_at: now(), updated_at: now(), updated_by: "Website", name: p.p_name.trim(), phone, email: p.p_email || "",
         area_id: p.p_area, lat: p.p_lat, lng: p.p_lng, maps_link: p.p_maps_link || "", address_details: p.p_address || "",
         gift_message: p.p_gift || "", notes: p.p_notes || "", payment_method: p.p_payment, paid: false, amount: null,
         preferred_time: p.p_slot + ":00", slot_time: car ? p.p_slot + ":00" : null, car_id: car, status: car ? "new" : "waitlist",

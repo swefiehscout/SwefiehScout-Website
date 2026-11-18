@@ -15,24 +15,3 @@ export const supabaseConfigured = Boolean(url && anonKey);
 export const supabase: SupabaseClient | null = supabaseConfigured
   ? createClient(url!, anonKey!)
   : null;
-
-export type Activity = {
-  id: string;
-  type: string;
-  en: string;
-  ar: string;
-  duration?: number | null;
-  notes?: string | null;
-};
-
-export type Meeting = {
-  id?: string;
-  group_key: string;
-  date: string; // YYYY-MM-DD
-  theme?: string | null;
-  notes?: string | null;
-  activities: Activity[];
-  created_by?: string | null;
-  updated_by?: string | null;
-  updated_at?: string;
-};

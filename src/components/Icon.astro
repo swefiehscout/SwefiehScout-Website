@@ -18,7 +18,6 @@ interface Props {
     | 'envelope'
     | 'pin'
     | 'bank'
-    | 'cliq'
     | 'cash'
     | 'calendar'
     | 'compass'
@@ -28,8 +27,7 @@ interface Props {
     | 'box'
     | 'megaphone'
     | 'lock'
-    | 'user'
-    | 'sliders';
+    | 'user';
   size?: number | string;
   strokeWidth?: number;
   class?: string;
@@ -141,13 +139,6 @@ const sw = strokeWidth;
       <path d="M3 21h18" />
     </>
   )}
-  {name === 'cliq' && (
-    <>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M8 12h8" />
-      <path d="M12 8v8" />
-    </>
-  )}
   {name === 'cash' && (
     <>
       <rect x="2.5" y="6" width="19" height="12" rx="2" />
@@ -216,19 +207,6 @@ const sw = strokeWidth;
     <>
       <circle cx="12" cy="8" r="4" />
       <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
-    </>
-  )}
-  {name === 'sliders' && (
-    <>
-      <path d="M4 6h10" />
-      <path d="M18 6h2" />
-      <circle cx="16" cy="6" r="2" />
-      <path d="M4 12h2" />
-      <path d="M10 12h10" />
-      <circle cx="8" cy="12" r="2" />
-      <path d="M4 18h10" />
-      <path d="M18 18h2" />
-      <circle cx="16" cy="18" r="2" />
     </>
   )}
 </svg>

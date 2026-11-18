@@ -1,5 +1,6 @@
 // Small preview copies for the photo strips (home, About Us, Join Us, Our Band,
-// Leaders Workspace). Every photo under public/images/photos/ gets a WebP copy at
+// Leaders Workspace) and the Gallery album covers. Every photo under
+// public/images/photos/ gets a WebP copy at
 // public/images/photos/thumbs/<same path>.webp, sized for the strip tiles
 // (at least 640 x 800, keeping the shape). Only missing or out-of-date copies are
 // made, so it is quick. Runs before every build (npm "prebuild") and by hand with

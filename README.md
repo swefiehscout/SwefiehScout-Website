@@ -31,9 +31,8 @@ src/
 │   ├── leaders.astro          # Leaders Workspace sign in / create account
 │   ├── leaders/app.astro      # Leaders Workspace
 │   ├── leaders/guide.astro    # plain-language guide for leaders
-│   ├── admin.astro            # Admin console: all groups, bank and cash boxes, approvals
-│   └── [...path].astro        # renders the Markdown pages in src/content/pages/
-├── content/pages/       # text for the Markdown pages
+│   └── admin.astro            # Admin console: all groups, bank and cash boxes, approvals
+├── content/pages/       # menu entries (title, Arabic title, order); frontmatter only
 ├── content/leader-portal.md   # Lessons links shown in the workspace
 ├── components/          # SiteHeader, SiteFooter, Icon
 ├── layouts/BaseLayout.astro
@@ -50,8 +49,22 @@ vercel.json          # clean URLs and redirects for /santa only
 
 ## Conventions
 
-- **English and Arabic side by side.** On Markdown pages, each `<h2>` starts a new section, and matching English and Arabic sections show as paired rows on desktop and stacked on phones.
-- **Custom pages.** A Markdown page that has its own `.astro` file sets `custom: true` in its frontmatter, so the catch-all route skips it.
+- **English and Arabic side by side.** Inside an `<article class="prose">`, each `<h2>` starts a new section, and matching English and Arabic sections show as paired rows on desktop and stacked on phones (see `BaseLayout.astro`).
+- **Pages.** Every page has its own `.astro` file in `src/pages/`. The files in `src/content/pages/` only feed the menu and the About Us cards.
 - **Grids.** Card and tile grids set `grid-template-columns` for each item count (no `auto-fit`), so rows stay even at every width.
 - **Menu.** The Christmas menu (Book Santa, Christmas Proposal) is added by hand in `src/lib/nav.ts`. If the menu changes, also update the copy of the header in the Santa pages (see the Santa README).
-- **Database changes.** New tables and columns go in a new file in `supabase/`, run once in the Supabase SQL Editor.
+- **Database changes.** New tables and columns go in a new file in `supabase/`, run once in the Supabase SQL Editor. Each file has already been run on the live database. Don't re-run an older file: some later files replace its rules, and re-running it would undo them.
+
+## Leaders Workspace database
+
+The files in `supabase/` are the history of the database, in this order:
+
+1. `schema.sql` (the `curriculum_meetings` table it relies on was created before these files and isn't in the repo)
+2. `admin_schema.sql`, `cash_box_schema.sql`
+3. `member_ids_schema.sql`, `curriculum_actuals_schema.sql`, `curriculum_materials_schema.sql`
+4. `inventory_schema.sql`, `events_schema.sql`, `inventory_adjustments_schema.sql`, `vendors_and_profile_fields_schema.sql`
+5. `public_relations_schema.sql`, `social_media_schema.sql`, `pr_to_social_media_schema.sql`, `meeting_notes_schema.sql`
+6. `device_sessions_schema.sql`, `shared_calendar_schema.sql`, `support_leader_calendar_readonly_schema.sql`, `support_leader_overview_schema.sql`
+7. `leaders_group_schema.sql`, `leader_profile_fields_schema.sql`, `leader_email_from_auth_schema.sql`, `leader_member_since_schema.sql`, `leader_member_ids_schema.sql`, `leader_assessment_schema.sql`
+8. `join_request_transfer_schema.sql`
+9. `security_fixes_schema.sql` (always last: it tightens who can read profiles and library files)

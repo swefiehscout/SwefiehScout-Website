@@ -1,5 +1,6 @@
 /* Main site header, copied from src/styles/global.css (header rules only) so the Santa
-   pages show the exact same header. Regenerate with the extract script if the header changes. */
+   pages show the exact same header. If the header's styles change in global.css, copy the
+   changed header rules here by hand. */
 :root {
   --color-bg: #f9f7f1;
   --color-surface: #ffffff;

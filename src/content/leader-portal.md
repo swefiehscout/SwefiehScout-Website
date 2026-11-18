@@ -2,7 +2,8 @@
   Paste each Lessons URL on its own line under the matching heading.
   Don't rename the headings, the site uses them as keys.
   Lines without a URL are ignored, so it's fine to leave a heading blank
-  while you collect the link; that button just won't render.
+  while you collect the link; that row shows "Not linked yet" until you
+  add one.
 -->
 
 # Lessons

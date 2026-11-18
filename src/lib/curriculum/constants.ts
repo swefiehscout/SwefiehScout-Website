@@ -1,4 +1,6 @@
-// Shared config for the Curriculum Maker. Kept free of any Node-only
+// Shared group/calendar config for the Leaders Workspace, Admin, the
+// /join form and the Curriculum Maker (groups, months, weekdays, the
+// activity bank, Shared Calendar colors). Kept free of any Node-only
 // imports (no `node:fs`, unlike leader-portal.ts) because this module is
 // imported by client-side script as well as the Astro frontmatter.
 
@@ -38,14 +40,14 @@ export const GROUPS: { key: GroupKey; en: string; ar: string }[] = [
   { key: 'SocialMedia',   en: 'Social Media',    ar: 'التواصل الاجتماعي' },
 ];
 
-// The 5 scouting troops only, for attendance/fee/curriculum views,
-// which don't apply to Music (it keeps a band roster, but no
-// attendance or fees), General and Social Media (no roster at all), or
-// Leaders (no scouts).
 // Groups that keep no member roster at all, their Roster tab is hidden
 // and no roster view or report includes them.
 export const NO_ROSTER_GROUP_KEYS: GroupKey[] = [GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY];
 export const NON_TROOP_GROUP_KEYS: GroupKey[] = [MUSIC_GROUP_KEY, GENERAL_GROUP_KEY, SOCIAL_MEDIA_GROUP_KEY, LEADERS_GROUP_KEY];
+// The 5 scouting troops only, for attendance/fee/curriculum views,
+// which don't apply to Music (it keeps a band roster, but no
+// attendance or fees), General and Social Media (no roster at all), or
+// Leaders (no scouts).
 export const TROOP_GROUPS = GROUPS.filter((g) => !NON_TROOP_GROUP_KEYS.includes(g.key));
 
 // Everything the public /join form can offer, the 5 troops only.

@@ -11,15 +11,15 @@ The database is a separate Supabase project, "Santa Booking".
 | File | What it is |
 | :--- | :--- |
 | `index.html` | Home page (`/santa/`) |
-| `book.html`, `book.js` | Booking form in Arabic and English, with map pin and live free times (`/santa/book`) |
+| `book.html`, `book.js` | Booking form (English), with map pin and live free times (`/santa/book`) |
 | `contact.html` | Contact details and message form (`/santa/contact`) |
-| `admin.html`, `admin.js` | Team dashboard: board, bookings, waitlist, driver sheets, messages, setup (`/santa/admin`) |
+| `admin.html`, `admin.js` | Team dashboard: bookings, schedule, waitlist, route map, donations, print sheets, messages, setup, activity log (`/santa/admin`) |
 | `config.js` | Supabase URL and public key, team login domain, contact links |
 | `shared.js` | Code shared by all pages |
-| `demo.js` | Demo mode on sample data (used when `config.js` has no real keys) |
+| `demo.js` | Demo mode on sample data, for owners (admin page only) |
 | `closed.js` | The "bookings closed" messages on home and book |
 | `countdown.js` | Home page countdown to Christmas Eve (24 December, midnight Amman time) |
-| `site.css` | Styles for all pages |
+| `site.css` | Base styles for home, book and contact (admin has its own styles inside `admin.html`) |
 | `theme.css` | The main website's look for home, book and contact (admin doesn't use it) |
 | `header.css` | The main website's header styles, copied from `src/styles/global.css` |
 | `logo.png` | Logo |
@@ -77,7 +77,7 @@ the public settings don't include the cutoff.
 3. If the time they want is taken, they can pick one of the nearest free times or join the waitlist for that time.
 4. The team places waitlist families from Admin → Waitlist, which lists every free car and time with its distance from the family.
 
-Hours, cars, areas, capacity and blocked times can all be edited in Admin → Setup and on the Board.
+Hours, cars, areas, capacity and blocked times can all be edited in Admin → Setup and on the Schedule.
 
 ## Team logins
 
@@ -118,7 +118,8 @@ Every delete can be undone from the toast straight after.
 ## Database
 
 The SQL in `supabase/` has already been applied to the live project; it's kept for reference and for
-setting up again. To set up a new project, run these in the SQL Editor in this order:
+setting up again. `schema.sql` already includes most of what files 6 to 8 add, but run them anyway: they also
+lock down which functions the website can call. To set up a new project, run these in the SQL Editor in this order:
 
 1. `schema.sql`: tables and booking rules
 2. `seed.sql`: 8 cars and the Amman areas
@@ -134,8 +135,9 @@ Then:
 
 - Authentication → Providers → Email: turn off "Allow new users to sign up".
 - Create the owner login (Authentication → Users → Add user), add it to **admins** and tick **is_owner**.
-- Project Settings → API: copy the Project URL and the public `anon` key into `public/santa/config.js`, and set `ADMIN_EMAIL`.
+- Project Settings → API Keys: copy the Project URL and the publishable key into `public/santa/config.js`.
 - Add the team with `add_team.sql`.
 
-If `config.js` has no real keys, the pages run in **demo mode** on sample data saved in the browser,
-and any password works on the admin page.
+**Demo mode.** Owners have a Demo mode button on the admin page that switches their browser tab to a
+sample night (for presentations); real bookings are never touched. The admin page also falls back to
+demo mode if `config.js` ever has the placeholder URL (`YOUR-PROJECT`) instead of real keys.

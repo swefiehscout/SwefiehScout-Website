@@ -106,7 +106,5 @@ begin
 end;
 $$;
 
--- Contact form.
-
 -- Only the booking functions above use it.
 revoke execute on function home_car(time, int) from public, anon;

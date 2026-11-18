@@ -7,8 +7,7 @@
 //
 // Videos live in public/videos/christmas/. After adding new ones run `npm run videos`
 // (scripts/prepare-videos.sh) to make web-safe .mp4s and poster images. Every video appears in
-// the "on film" row automatically; the hero and the four moments use the hand-picked clips
-// below (picked by filename, skipped if the file is missing).
+// the "on film" row automatically. The hero is a photo and the four moments are text only.
 import fs from 'node:fs';
 import path from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -33,21 +32,15 @@ function clip(file: string): Clip {
     : undefined;
   return { src: `/${VIDEO_DIR}/${encodeURIComponent(file)}`, poster };
 }
-const pick = (base: string): Clip | undefined => {
-  const f = videoFiles.find((v) => v.startsWith(base));
-  return f ? clip(f) : undefined;
-};
-
 const allClips: Clip[] = videoFiles.map((f: string) => clip(f));
-const indexOf = (c?: Clip) => (c ? allClips.findIndex((x: Clip) => x.src === c.src) : -1);
 
 
 // Four moments of the night (text only; the videos are all in the "on film" row).
 const moments = [
-  { icon: '🥁', title: 'It starts with a drum roll', text: 'You hear us before you see us, and every head in the place turns.' },
-  { icon: '🎶', title: 'Then the bagpipes', text: 'A sound you don’t hear every day fills the whole space.' },
-  { icon: '👀', title: 'Everyone stops', text: 'Shoppers gather, kids run to the front, and Santa joins in.' },
-  { icon: '🎄', title: 'It feels like Christmas', text: 'Trees light up, phones go up, and your venue is in everyone’s stories.' },
+  { title: 'It starts with a drum roll', text: 'You hear us before you see us, and every head in the place turns.' },
+  { title: 'Then the bagpipes', text: 'A sound you don’t hear every day fills the whole space.' },
+  { title: 'Everyone stops', text: 'Shoppers gather, kids run to the front, and Santa joins in.' },
+  { title: 'It feels like Christmas', text: 'Trees light up, phones go up, and your venue is in everyone’s stories.' },
 ];
 
 const reasons = [
@@ -128,7 +121,6 @@ const WHATSAPP = `https://wa.me/962792028785?text=${encodeURIComponent(
         <ol class="cp-moments">
           {moments.map((m, i) => (
             <li class="cp-moment">
-              <span class="cp-moment-icon" aria-hidden="true">{m.icon}</span>
               <span class="cp-num">0{i + 1}</span>
               <h3 class="cp-moment-title">{m.title}</h3>
               <p class="cp-moment-text">{m.text}</p>
@@ -236,7 +228,7 @@ const WHATSAPP = `https://wa.me/962792028785?text=${encodeURIComponent(
   .cp-gold { color: var(--cp-gold-light); }
   .cp h1, .cp h2, .cp h3 { font-family: var(--font-display); }
 
-  /* ---------- Hero: one card, video left, words right ---------- */
+  /* ---------- Hero: one card, photo left, words right ---------- */
   .cp-hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -322,7 +314,6 @@ const WHATSAPP = `https://wa.me/962792028785?text=${encodeURIComponent(
     background: linear-gradient(90deg, rgba(201, 162, 78, 0.25), var(--cp-gold) 15%, var(--cp-gold) 85%, rgba(201, 162, 78, 0.25));
   }
   .cp-moment { position: relative; display: grid; justify-items: center; gap: 8px; text-align: center; padding: 0 6px; }
-  .cp-moment-icon { display: none; }
   .cp-moment .cp-num {
     position: relative; z-index: 1; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
     font: 700 1.05rem var(--font-display); color: #fff; letter-spacing: 0.04em; background: var(--cp-brand);
@@ -467,17 +458,6 @@ const WHATSAPP = `https://wa.me/962792028785?text=${encodeURIComponent(
     if (label) label.textContent = days === 1 ? 'day to Christmas' : 'days to Christmas';
   }
 
-  // Play muted videos only while they're on screen.
-  function initInView() {
-    const vids = document.querySelectorAll<HTMLVideoElement>('[data-cp-inview]');
-    const io = new IntersectionObserver((entries) => entries.forEach((e) => {
-      const v = e.target as HTMLVideoElement;
-      if (e.isIntersecting) v.play().catch(() => {}); else v.pause();
-    }), { threshold: 0.2 });
-    vids.forEach((v) => io.observe(v));
-    cleanup.push(() => io.disconnect());
-  }
-
   // Video row: arrows and a "1-5 of 16" counter.
   function initRail() {
     const rail = document.querySelector<HTMLElement>('[data-cp-rail]');
@@ -550,7 +530,6 @@ const WHATSAPP = `https://wa.me/962792028785?text=${encodeURIComponent(
   function init() {
     if (!document.querySelector('.cp')) return;
     initCountdown();
-    initInView();
     initRail();
     initLightbox();
   }

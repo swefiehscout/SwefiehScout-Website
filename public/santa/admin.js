@@ -468,7 +468,6 @@
       .filter((x) => x.d != null).sort((x, y) => x.d - y.d)[0];
     if (near) return near;
     const d = km(lat, lng, ...carCentre(carId));
-    if (d != null && d < 0.1) return { d, from: "its usual areas" };
     return d == null ? null : { d, from: "its usual areas" };
   }
   // Every free place within two hours of the wanted time, scored: closer in time and distance is better.
@@ -746,6 +745,7 @@
   const fieldLabel = (k) => LOG_FIELDS[k] || k.replace(/_/g, " ");
   function logSentence(r) {
     const c = r.changes || {}, lbl = esc(r.label || "");
+    const msgLbl = lbl.charAt(0).toLowerCase() + lbl.slice(1);   // "Message from Rana" -> "message from Rana"
     const bk = r.entity === "booking" && r.entity_id && bookingById(r.entity_id) ? `<button class="btn link" data-open="${r.entity_id}">${lbl}</button>` : `<b>${lbl}</b>`;
     switch (r.entity) {
       case "booking":
@@ -763,9 +763,9 @@
       case "area": return r.action === "created" ? `added the area <b>${lbl}</b>` : r.action === "deleted" ? `removed the area <b>${lbl}</b>` : `changed the area <b>${lbl}</b>`;
       case "settings": return `changed the night settings`;
       case "message":
-        if (r.action === "created") return `sent a message on the Contact page (<b>${esc(c.name || "")}</b>)`;
-        if (c.handled) return `marked the ${lbl.toLowerCase()} as ${c.handled[1] ? "replied" : "not replied"}`;
-        return `${r.action} the ${lbl.toLowerCase()}`;
+        if (r.action === "created") return r.actor === "Website" ? `sent a message on the Contact page (<b>${esc(c.name || "")}</b>)` : `restored the ${msgLbl}`;
+        if (c.handled) return `marked the ${msgLbl} as ${c.handled[1] ? "replied" : "not replied"}`;
+        return `${r.action} the ${msgLbl}`;
       case "team": { const t = r.label || r.action; return esc(t.charAt(0).toLowerCase() + t.slice(1)); }
       case "team member": return r.action === "created" ? `added <b>${lbl}</b> to the team` : r.action === "deleted" ? `removed <b>${lbl}</b> from the team` : `changed the team member <b>${lbl}</b>`;
       default: return `${esc(r.action)} ${esc(r.entity)} ${lbl}`;
@@ -1335,7 +1335,9 @@
       () => { clearTimeout(t); t = setTimeout(reloadBookings, 500); }).subscribe();
     setInterval(async () => {
       const { data } = await sb.from("messages").select("*").order("created_at", { ascending: false });
-      if (data && data.length !== S.messages.length) { S.messages = data; softRender(); }
+      // Compare ids and the Replied ticks, so teammates' changes show up too.
+      const sig = (list) => list.map((m) => m.id + (m.handled ? "+" : "-")).join();
+      if (data && sig(data) !== sig(S.messages)) { S.messages = data; softRender(); }
     }, 60000);
   }
   function showLogin(msg) {
