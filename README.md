@@ -59,7 +59,7 @@ vercel.json          # clean URLs and redirects for /santa only
 
 The files in `supabase/` are the history of the database, in this order:
 
-1. `schema.sql` (the `curriculum_meetings` table it relies on was created before these files and isn't in the repo)
+1. `schema.sql`
 2. `admin_schema.sql`, `cash_box_schema.sql`
 3. `member_ids_schema.sql`, `curriculum_actuals_schema.sql`, `curriculum_materials_schema.sql`
 4. `inventory_schema.sql`, `events_schema.sql`, `inventory_adjustments_schema.sql`, `vendors_and_profile_fields_schema.sql`
@@ -67,4 +67,7 @@ The files in `supabase/` are the history of the database, in this order:
 6. `device_sessions_schema.sql`, `shared_calendar_schema.sql`, `support_leader_calendar_readonly_schema.sql`, `support_leader_overview_schema.sql`
 7. `leaders_group_schema.sql`, `leader_profile_fields_schema.sql`, `leader_email_from_auth_schema.sql`, `leader_member_since_schema.sql`, `leader_member_ids_schema.sql`, `leader_assessment_schema.sql`
 8. `join_request_transfer_schema.sql`
-9. `security_fixes_schema.sql` (always last: it tightens who can read profiles and library files)
+9. `security_fixes_schema.sql` (tightens who can read profiles and library files)
+10. `audit_followups_schema.sql` (join form spam guard, function hardening, Curriculum live updates)
+
+Always run 9 and 10 last: they replace rules from earlier files.

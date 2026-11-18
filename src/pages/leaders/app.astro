@@ -602,7 +602,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
               so the number here matches what's really in it. Money you put in the bank (or take out of it) isn't income or
               an expense, record it with <strong>Move money</strong>.
             </p>
-            <p class="ws-empty" data-box-unavailable hidden>The cash box isn't switched on yet, ask an admin to finish setting it up.</p>
+            <p class="ws-empty" data-box-unavailable hidden>Could not load the cash box. Check your connection and try again.</p>
 
             <div data-box-main hidden>
               <div class="ws-stat-row ws-stat-row--3" data-box-stats></div>
@@ -3711,6 +3711,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     // ---------- Attendance (calendar date-picker) ---------------------------
     async function loadAttendance() {
       if (!state.activeGroup) return;
+      // The names come from the group's members, which a group switch clears.
+      await ensureMembersLoaded();
       if (!els.attWeekdayRow.children.length) {
         els.attWeekdayRow.innerHTML = WEEKDAYS.map((w) => `<div class="curr-weekday">${w.en}</div>`).join('');
       }
@@ -3923,6 +3925,8 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     }
     async function loadFees() {
       if (!state.activeGroup) return;
+      // The names come from the group's members, which a group switch clears.
+      await ensureMembersLoaded();
       populatePeriodSelects(els.feeMonth, els.feeYear);
       const period = getPeriod(els.feeMonth, els.feeYear);
       await loadGroupSettings();
@@ -4130,7 +4134,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (!groupKey) return;
       const { data, error } = await db.from('finance_audit_log').select('*').eq('group_key', groupKey).order('changed_at', { ascending: false }).limit(300);
       if (groupKey !== state.activeGroup) return;
-      if (error) { els.finAudit.innerHTML = '<p class="ws-empty">The activity log isn\'t switched on yet, ask an admin to finish setting it up.</p>'; return; }
+      if (error) { els.finAudit.innerHTML = '<p class="ws-empty">Could not load the activity log. Check your connection and try again.</p>'; return; }
       els.finAudit.innerHTML = data && data.length ? renderDateGroups({
         rows: data as AuditRow[],
         day: (a: AuditRow) => ammanDay(a.changed_at),
@@ -4259,7 +4263,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const opening = computeBox([], logs || []).opening;
       let entries: any[] = [];
       if (opening) {
-        const r = await db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', groupKey).gte('entry_date', opening.event_date);
+        const r = await db.from('finance_entries').select('entry_type, amount, entry_date, created_at').eq('group_key', groupKey).gte('entry_date', opening.event_date);
         if (groupKey !== state.activeGroup) return;
         entries = r.data || [];
       }
@@ -7913,7 +7917,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       const opening = computeBox([], logs || []).opening;
       let entries: any[] = [];
       if (opening) {
-        const r = await db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', groupKey).gte('entry_date', opening.event_date);
+        const r = await db.from('finance_entries').select('entry_type, amount, entry_date, created_at').eq('group_key', groupKey).gte('entry_date', opening.event_date);
         entries = r.data || [];
       }
       return { logs: (logs || []) as BoxLog[], box: computeBox(entries, logs || []) };
@@ -7950,7 +7954,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       let y = pdfSectionTitle(doc, 20, 'Cash Box', "The group's real cash. Balance is as of today; the records below are the ones dated in this report's period.");
       if (!data) {
         doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(90, 90, 90);
-        doc.text('The cash box is not switched on yet.', 14, y + 4);
+        doc.text('Could not load the cash box.', 14, y + 4);
         return;
       }
       pdfTable(doc, {
@@ -8032,7 +8036,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         pdfTable(doc, {
           startY: y + 2, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
           head: [['When', 'Who', 'What', 'Item', 'Changes']],
-          body: rows.length ? rows : [[auditRes.error ? 'The activity log is not switched on yet' : 'No changes this period', '', '', '', '']],
+          body: rows.length ? rows : [[auditRes.error ? 'Could not load the activity log' : 'No changes this period', '', '', '', '']],
         });
         pdfCashBoxPage(doc, data, start, end, label);
         doc.save(pdfFilename('Cash-Box-and-Activity', label));

@@ -25,7 +25,7 @@ export type BoxSummary = {
   lastCount: BoxLog | null;
 };
 
-type Entry = { entry_type: string; amount: number | string; entry_date: string };
+type Entry = { entry_type: string; amount: number | string; entry_date: string; created_at: string };
 
 const n = (v: any) => Number(v || 0);
 
@@ -47,7 +47,9 @@ export function computeBox(entries: Entry[], logs: BoxLog[]): BoxSummary {
   const opening = byNewest.find((l) => l.kind === 'opening') || null;
   const empty: BoxSummary = { opening, income: 0, expense: 0, toBank: 0, fromBank: 0, corrections: 0, balance: 0, lastCount: null };
   if (!opening) return empty;
-  const since = entries.filter((e) => e.entry_date >= opening.event_date);
+  // Same rule as the box logs below: an entry dated the opening day counts only if it was
+  // entered after the opening balance was set (the opening amount already includes earlier ones).
+  const since = entries.filter((e) => after({ event_date: e.entry_date, created_at: e.created_at }, opening.event_date, opening.created_at));
   const income = since.filter((e) => e.entry_type === 'income').reduce((s, e) => s + n(e.amount), 0);
   const expense = since.filter((e) => e.entry_type === 'expense').reduce((s, e) => s + n(e.amount), 0);
   const moves = byNewest.filter((l) => l.kind !== 'opening' && after(l, opening.event_date, opening.created_at));
@@ -186,11 +188,9 @@ export function boxDiffAllGroups(logs: BoxLog[], groupKeys: string[], start: str
   return groupKeys.reduce((s, k) => s + boxDiffInRange(logs.filter((l) => l.group_key === k), start, end), 0);
 }
 
-// Sum of bank check differences dated in [start, end]. Checks from the
-// old Reconcile flow that already posted a ledger adjustment entry are
-// skipped, that money is already in the ledger.
+// Sum of bank check differences dated in [start, end].
 export function bankDiffInRange(checks: any[], start: string, end: string): number {
   return checks
-    .filter((c) => c.as_of_date >= start && c.as_of_date <= end && !c.adjustment_entry_id && c.difference != null)
+    .filter((c) => c.as_of_date >= start && c.as_of_date <= end && c.difference != null)
     .reduce((s, c) => s + n(c.difference), 0);
 }

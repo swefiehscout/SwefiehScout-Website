@@ -269,11 +269,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <div data-subpanel="finance:adjustments" hidden>
             <p class="ws-att-hint">Every time a group counted its cash box, from every group, and whether it matched. A box that's often short is worth a conversation.</p>
             <div class="ws-dgroups" data-box-counts></div>
-            <div data-adj-block hidden>
-              <h3 class="ws-admin-h3">Older bank adjustment entries</h3>
-              <p class="ws-att-hint">From before the cash box, when the old bank check (then called Reconcile) posted a correcting entry into a group's ledger. They're still real ledger entries.</p>
-              <div class="ws-dgroups" data-adj-body></div>
-            </div>
           </div>
 
           <div data-subpanel="finance:activity" hidden>
@@ -1038,7 +1033,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       return { start: `${period}-01`, end: `${period}-${String(lastDay).padStart(2, '0')}`, label, period, isYear: false };
     }
     function signedAmount(e: any) { return e.entry_type === 'income' ? Number(e.amount) : -Number(e.amount); }
-    function fmt(n: number) { return Number(n || 0).toFixed(2); }
+    function fmt(n: number | string | null | undefined) { return Number(n || 0).toFixed(2); }
 
     // ---------- PDF helpers (simplified, always "All Groups", no active
     // group concept here like the per-group Reports tab has) -------------
@@ -1190,8 +1185,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       els.recSave = el('[data-rec-save]');
       els.recCancel = el('[data-rec-cancel]');
       els.recHistoryBody = el('[data-rec-history-body]');
-      els.adjBody = el('[data-adj-body]');
-      els.adjBlock = el('[data-adj-block]');
       els.boxBody = el('[data-box-body]');
       els.boxCounts = el('[data-box-counts]');
       els.openMeta = el('[data-open-meta]');
@@ -2185,10 +2178,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function loadFinanceKpis() {
       await ensureOrgSettings();
       const [entriesRes, lastCheckRes, logsRes, checksRes] = await Promise.all([
-        db.from('finance_entries').select('group_key, entry_type, amount, entry_date'),
+        db.from('finance_entries').select('group_key, entry_type, amount, entry_date, created_at'),
         db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).order('created_at', { ascending: false }).limit(1).maybeSingle(),
         db.from('cash_box_log').select('*'),
-        db.from('finance_reconciliations').select('as_of_date, difference, adjustment_entry_id'),
+        db.from('finance_reconciliations').select('as_of_date, difference'),
       ]);
       if (entriesRes.error) { console.error(entriesRes.error); showToast('Could not load finance totals.'); return; }
       const rows = entriesRes.data || [];
@@ -2364,7 +2357,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         db.from('finance_entries').select('group_key, entry_type, category, amount, entry_date, description, created_by_name, created_at')
           .order('entry_date', { ascending: false }).order('created_at', { ascending: false }),
         db.from('cash_box_log').select('*'),
-        db.from('finance_reconciliations').select('as_of_date, difference, adjustment_entry_id').gte('as_of_date', start).lte('as_of_date', end),
+        db.from('finance_reconciliations').select('as_of_date, difference').gte('as_of_date', start).lte('as_of_date', end),
       ]);
       if (res.error) { console.error(res.error); showToast('Could not load finance.'); return; }
       const all = res.data || [];
@@ -2458,7 +2451,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
           <tr data-rec-id="${r.id}">
             <td data-label="Bank app showed"><strong>${fmt(r.statement_balance)}</strong></td>
             <td data-label="System expected">${r.system_balance == null ? '-' : fmt(r.system_balance)}</td>
-            <td data-label="Difference">${diff == null ? '-' : Math.abs(diff) < 0.005 ? 'Matched' : `<span class="ws-box-diff ws-box-diff--${diff < 0 ? 'neg' : 'pos'}">${diff < 0 ? '−' : '+'}${fmt(Math.abs(diff))}</span>`}${r.adjustment_entry_id ? '<span class="ws-stamp">old-style adjustment posted</span>' : ''}</td>
+            <td data-label="Difference">${diff == null ? '-' : Math.abs(diff) < 0.005 ? 'Matched' : `<span class="ws-box-diff ws-box-diff--${diff < 0 ? 'neg' : 'pos'}">${diff < 0 ? '−' : '+'}${fmt(Math.abs(diff))}</span>`}</td>
             <td data-label="Note">${escapeHtml(r.notes || '-')}</td>
             <td data-label="Recorded by">${whoWhen(r.created_by_name, r.created_at, escapeHtml)}</td>
             <td class="ws-row-actions"><button type="button" class="ws-edit-btn" data-rec-edit>Edit</button> <button type="button" class="ws-row-del" data-rec-del>×</button></td>
@@ -2530,13 +2523,10 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
 
     // ---------- Box Counts: every group's cash box counts ------------------
     async function loadBoxCounts() {
-      const [countsRes, adjRes] = await Promise.all([
-        db.from('cash_box_log').select('*').eq('kind', 'count').order('created_at', { ascending: false }).limit(300),
-        db.from('finance_entries').select('*').eq('is_adjustment', true).order('entry_date', { ascending: false }),
-      ]);
+      const countsRes = await db.from('cash_box_log').select('*').eq('kind', 'count').order('created_at', { ascending: false }).limit(300);
       const counts: BoxLog[] = countsRes.data || [];
       els.boxCounts.innerHTML = countsRes.error
-        ? '<p class="ws-empty">The cash box isn\'t switched on yet, run cash_box_schema.sql in Supabase.</p>'
+        ? '<p class="ws-empty">Could not load the cash box counts. Check your connection and try again.</p>'
         : counts.length ? renderDateGroups({
           rows: counts,
           day: (l: BoxLog) => l.event_date,
@@ -2554,22 +2544,6 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
             </tr>`;
           },
         }) : '<p class="ws-empty">No group has counted its box yet.</p>';
-      const adj = adjRes.data || [];
-      els.adjBlock.hidden = !adj.length;
-      els.adjBody.innerHTML = adj.length ? renderDateGroups({
-        rows: adj,
-        day: (r: any) => r.entry_date,
-        head: '<tr><th>Date</th><th>Group</th><th>Type</th><th>Amount</th><th>Note</th><th>Posted by</th></tr>',
-        row: (r: any) => `
-          <tr>
-            <td data-label="Date">${r.entry_date}</td>
-            <td data-label="Group">${escapeHtml(GROUPS.find((x) => x.key === r.group_key)?.en || r.group_key)}</td>
-            <td data-label="Type">${r.entry_type === 'income' ? 'Income' : 'Expense'}</td>
-            <td data-label="Amount">${fmt(r.amount)}</td>
-            <td data-label="Note">${escapeHtml(r.description || '-')}</td>
-            <td data-label="Posted by">${whoWhen(r.created_by_name, r.created_at, escapeHtml)}</td>
-          </tr>`,
-      }) : '';
     }
 
     // ---------- Finance Activity Log: every add/edit/delete on money -------
@@ -2580,7 +2554,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (filter === '__bank') q = q.is('group_key', null);
       else if (filter) q = q.eq('group_key', filter);
       const { data, error } = await q;
-      if (error) { els.fauditBody.innerHTML = '<p class="ws-empty">The activity log isn\'t switched on yet, run cash_box_schema.sql in Supabase.</p>'; return; }
+      if (error) { els.fauditBody.innerHTML = '<p class="ws-empty">Could not load the activity log. Check your connection and try again.</p>'; return; }
       els.fauditBody.innerHTML = data && data.length ? renderDateGroups({
         rows: data as AuditRow[],
         day: (a: AuditRow) => ammanDay(a.changed_at),
@@ -2737,7 +2711,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
     async function fetchBoxData(groupKey: string) {
       const [logsRes, entriesRes] = await Promise.all([
         db.from('cash_box_log').select('*').eq('group_key', groupKey),
-        db.from('finance_entries').select('entry_type, amount, entry_date').eq('group_key', groupKey),
+        db.from('finance_entries').select('entry_type, amount, entry_date, created_at').eq('group_key', groupKey),
       ]);
       if (logsRes.error) return null;
       const logs = (logsRes.data || []) as BoxLog[];
@@ -2749,7 +2723,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       let y = pdfSectionTitle(doc, 20, 'Cash Box', "The group's real cash. Balance is as of today; the records below are the ones dated in this report's period.");
       if (!data) {
         doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(90, 90, 90);
-        doc.text('The cash box is not switched on yet.', 14, y + 4);
+        doc.text('Could not load the cash box.', 14, y + 4);
         return;
       }
       pdfTable(doc, {
@@ -2775,7 +2749,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         await ensureOrgSettings();
         const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
         const [entriesRes, lastRecRes, logsRes, checksRes] = await Promise.all([
-          db.from('finance_entries').select('group_key, entry_type, amount, entry_date'),
+          db.from('finance_entries').select('group_key, entry_type, amount, entry_date, created_at'),
           db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).order('created_at', { ascending: false }).limit(1).maybeSingle(),
           db.from('cash_box_log').select('*'),
           db.from('finance_reconciliations').select('*').gte('as_of_date', start).lte('as_of_date', end).order('as_of_date', { ascending: true }),
@@ -2840,7 +2814,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         pdfTable(doc, {
           startY: y, theme: 'grid', headStyles: { fillColor: PDF_BRAND }, styles: { fontSize: 8 },
           head: [['When', 'Who', 'Group', 'What', 'Item', 'Changes']],
-          body: rows.length ? rows : [[error ? 'The activity log is not switched on yet' : 'No changes this period', '', '', '', '', '']],
+          body: rows.length ? rows : [[error ? 'Could not load the activity log' : 'No changes this period', '', '', '', '', '']],
         });
         doc.save(pdfFilename('Finance-Activity-Log', label));
       } catch (err) {
@@ -2858,11 +2832,11 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
         await ensureOrgSettings();
         const { start, end, label } = periodRange(els.reportMonth, els.reportYear);
         const [allEntriesRes, periodEntriesRes, lastRecRes, logsRes, periodChecksRes] = await Promise.all([
-          db.from('finance_entries').select('group_key, entry_type, amount, entry_date'),
+          db.from('finance_entries').select('group_key, entry_type, amount, entry_date, created_at'),
           db.from('finance_entries').select('group_key, entry_type, category, amount').gte('entry_date', start).lte('entry_date', end),
           db.from('finance_reconciliations').select('*').order('as_of_date', { ascending: false }).order('created_at', { ascending: false }).limit(1).maybeSingle(),
           db.from('cash_box_log').select('*'),
-          db.from('finance_reconciliations').select('as_of_date, difference, adjustment_entry_id').gte('as_of_date', start).lte('as_of_date', end),
+          db.from('finance_reconciliations').select('as_of_date, difference').gte('as_of_date', start).lte('as_of_date', end),
         ]);
         if (allEntriesRes.error) throw allEntriesRes.error;
         const allRows = allEntriesRes.data || [];
@@ -4287,7 +4261,7 @@ const dashMarqueePhotos = [...workspaceMarqueePhotos, ...workspaceMarqueePhotos]
       if (cur) els.alogLeader.value = cur;
     }
     async function loadActivityLog() {
-      const namesById = new Map(state.people.map((p: any) => [p.id, p.name]));
+      const namesById = new Map<string, string>(state.people.map((p: any) => [p.id, p.name]));
       const leaderId = els.alogLeader.value || null;
       const leaderName = leaderId ? namesById.get(leaderId) || null : null;
       els.alogBody.innerHTML = '<p class="ws-empty">Loading…</p>';

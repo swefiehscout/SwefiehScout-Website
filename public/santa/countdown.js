@@ -78,7 +78,7 @@
 
   const S = window.Santa;
   if (S && S.sb) {
-    S.sb.rpc("public_config").then(({ data }) => {
+    S.publicConfig().then(({ data }) => {
       if (!data) return;
       hours = { start: data.start_time || hours.start, end: data.end_time || hours.end };
       tick();

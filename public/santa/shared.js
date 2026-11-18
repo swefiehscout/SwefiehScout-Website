@@ -135,5 +135,9 @@
     if (f) f.innerHTML = footer();
   }
 
-  window.Santa = { cfg, sb, demo: !!demo, toMin, fromMin, clock, slotLabel, normPhone, waNumber, km, esc, mapsUrl, navUrl, page, parseMapsLink, isShortMapsLink, pinPicker };
+  // The public settings, fetched once per page and shared (home uses them in three places).
+  let configReq = null;
+  const publicConfig = () => configReq || (configReq = sb.rpc("public_config"));
+
+  window.Santa = { cfg, sb, demo: !!demo, publicConfig, toMin, fromMin, clock, slotLabel, normPhone, waNumber, km, esc, mapsUrl, navUrl, page, parseMapsLink, isShortMapsLink, pinPicker };
 })();

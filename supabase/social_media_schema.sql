@@ -1,8 +1,7 @@
 -- Swefieh Scout, the Social Media group itself, its Content Calendar
 -- (content_items) and login/password vault (credentials), plus the 2
 -- editable category lists (platforms, content types) Content Calendar's
--- own Settings subtab manages. Run this AFTER schema.sql and
--- admin_schema.sql. Safe to re-run.
+-- own Settings subtab manages. Run this AFTER schema.sql. Safe to re-run.
 --
 -- Social Media is just one more group_key (see SOCIAL_MEDIA_GROUP_KEY
 -- in src/lib/curriculum/constants.ts), no new group/role model here,
@@ -32,9 +31,6 @@ create table if not exists content_items (
   status text not null default 'idea' check (status in ('idea', 'drafting', 'scheduled', 'posted')),
   scheduled_date date,
   scheduled_time time,
-  -- Legacy, unused: Content no longer has an "Assigned to" (Social Media
-  -- keeps no roster). Left in place so existing rows don't break.
-  assigned_to uuid references members(id) on delete set null,
   caption text,
   -- One optional draft/reference file (image, video, doc) inside the
   -- existing 'documents' storage bucket, same convention as Curriculum's

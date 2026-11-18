@@ -1,8 +1,9 @@
--- Swefieh Scout, Public Relations tab (General only): Sponsors,
+-- Swefieh Scout, Public Relations (now under Social Media, see
+-- pr_to_social_media_schema.sql; first built for General): Sponsors,
 -- Community/Church Contacts, a PR-scoped document Library, and a
 -- Settings subtab for their 3 editable category lists (same "add a
 -- chip in Settings" pattern as Inventory/Event Calendar). Run this
--- AFTER schema.sql and admin_schema.sql. Safe to re-run.
+-- AFTER schema.sql. Safe to re-run.
 
 -- ============================================================
 -- group_settings: 3 more editable lists, managed from Public
@@ -66,8 +67,7 @@ create policy "group access" on pr_contacts
 
 -- ============================================================
 -- Public Relations Library reuses the existing `documents` table (the
--- same one every troop's own Library tab already writes to), General
--- never had a Library tab before, so this is its first use of it. No
+-- same one every troop's own Library tab already writes to). No
 -- schema change needed there: `documents.category` already exists,
 -- just newly exposed in this tab's own upload form (Press Release,
 -- Media Kit/Photos, Sponsorship Agreement, ...), populated from

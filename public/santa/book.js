@@ -261,7 +261,7 @@
   // ---------- Start ----------
   async function start() {
     page("book");
-    const { data, error } = await sb.rpc("public_config");
+    const { data, error } = await window.Santa.publicConfig();
     if (error || !data) {
       console.error(error);
       $("loading").querySelector("p").textContent = "We couldn't open the booking form. Check your connection and refresh the page.";

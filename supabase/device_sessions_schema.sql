@@ -27,8 +27,8 @@ create index if not exists device_sessions_user_id_idx on device_sessions(user_i
 
 alter table device_sessions enable row level security;
 
--- A leader only ever sees and manages their own devices, there's no
--- admin override here, this isn't an org-wide surveillance tool.
+-- A leader only ever sees and manages their own devices. Admins can also
+-- read every leader's sign-ins (see device_sessions_select_admin below).
 drop policy if exists "device_sessions_select_own" on device_sessions;
 create policy "device_sessions_select_own" on device_sessions
   for select using (user_id = auth.uid());

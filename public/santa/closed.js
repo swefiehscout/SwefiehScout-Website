@@ -11,7 +11,7 @@
   if (!S || !notices.length) return;
   const CUTOFF_HOURS = 48; // the default online-booking cutoff; the public settings don't expose it
 
-  S.sb.rpc("public_config").then(({ data }) => {
+  S.publicConfig().then(({ data }) => {
     if (!data || data.open) return;
     const at = (t) => new Date(`${data.event_date}T${String(t).slice(0, 5)}:00+03:00`).getTime(); // Amman time
     const start = at(data.start_time);

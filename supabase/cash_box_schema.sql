@@ -1,3 +1,5 @@
+-- Run this AFTER admin_schema.sql (it changes org_finance_settings and
+-- finance_reconciliations). Safe to re-run.
 -- ============================================================
 -- Cash boxes, each group keeps its own physical cash box, separate
 -- from the organization's one bank account (which is CliQ-driven and

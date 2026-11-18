@@ -4658,6 +4658,8 @@ see that markup's own comment), always claiming the full row width
    portal's group-picker styling for step one. */
 .join-wrap { max-width: 900px; margin: 0 auto; }
 .join-error { color: var(--color-brand-light); font-weight: 600; font-size: 0.85rem; margin: 0.6rem 0 0; }
+/* Spam trap on /join: off-screen for people, bots fill it in. */
+.join-trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 .join-done { max-width: 560px; margin: 3rem auto; }
 
 /* ---------- Attendance / Fees / Finance / Library shared bits --------- */

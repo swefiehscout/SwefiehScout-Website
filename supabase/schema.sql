@@ -315,11 +315,27 @@ create policy "delete own group" on documents
 drop policy if exists "admin manage shared docs" on documents;
 
 -- ============================================================
--- curriculum_meetings already exists from the earlier build.
--- Tighten its policy now that real auth exists, replace the
--- open "anon full access" policy with group-scoped access.
+-- curriculum_meetings, one row per troop meeting date. It came from the
+-- earlier Curriculum Maker build; this definition matches the live table
+-- (copied from it in November 2026) so a new project can be set up from
+-- these files. materials_needed and actual_notes are added by
+-- curriculum_materials_schema.sql and curriculum_actuals_schema.sql.
 -- ============================================================
-drop policy if exists "anon full access" on curriculum_meetings;
+create table if not exists curriculum_meetings (
+  id uuid primary key default gen_random_uuid(),
+  group_key text not null,
+  date date not null,
+  theme text,
+  notes text,
+  activities jsonb not null default '[]'::jsonb,
+  created_by text,
+  updated_by text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (group_key, date)
+);
+alter table curriculum_meetings enable row level security;
+
 drop policy if exists "group access" on curriculum_meetings;
 create policy "group access" on curriculum_meetings
   for all using (has_group_access(group_key)) with check (has_group_access(group_key));
@@ -330,9 +346,8 @@ create policy "group access" on curriculum_meetings
 alter table curriculum_meetings add column if not exists attachment_path text;
 
 -- ============================================================
--- Storage bucket for the document library. Run once, if it
--- already exists this will error harmlessly; ignore that and
--- move on to the policies below.
+-- Storage bucket for the document library. Safe to re-run: if it
+-- already exists, the insert does nothing.
 -- ============================================================
 insert into storage.buckets (id, name, public)
 values ('documents', 'documents', false)

@@ -1,7 +1,7 @@
 -- Swefieh Scout, Music's Event Calendar tab: wedding/event bookings,
 -- who's playing, and the payout math once a booking is done. Run this
--- AFTER schema.sql and inventory_schema.sql (references
--- has_group_access(), members, finance_entries, and group_settings).
+-- AFTER schema.sql (references has_group_access(), members,
+-- finance_entries, and group_settings).
 -- Safe to re-run.
 --
 -- Same group_key + has_group_access() scoping as every other table,

@@ -104,7 +104,7 @@ const albums = [
     const modal = document.getElementById('gallery-modal');
     if (!modal) return;
     const closeBtn = modal.querySelector<HTMLButtonElement>('.gallery-modal-close');
-    let hideTimer: ReturnType<typeof window.setTimeout> | undefined;
+    let hideTimer: number | undefined;
 
     function openGalleryModal() {
       if (!modal) return;

@@ -20,5 +20,8 @@
     "astro": "^6.2.2",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5"
   }
 }

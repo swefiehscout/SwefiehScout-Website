@@ -1,5 +1,6 @@
 -- Swefieh Scout, Shared Calendar: one org-wide calendar every leader
--- and admin can see, add to, and browse in Day/Week/Month/Year views,
+-- and admin can see (adding is for leaders with a group, see
+-- support_leader_calendar_readonly_schema.sql) and browse in Day/Week/Month/Year views,
 -- regardless of which group they're actually assigned to. Two kinds of
 -- rows show up on it:
 --   1. shared_calendar_events, added directly here, by anyone already

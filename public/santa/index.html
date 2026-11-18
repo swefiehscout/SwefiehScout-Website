@@ -209,9 +209,9 @@ Greek Orthodox Scouts &amp; Guides - Swefieh
 <script src="countdown.js"></script>
 <script>
 (function () {
-  const { sb, clock, page } = window.Santa;
+  const { clock, page, publicConfig } = window.Santa;
   page("index");
-  sb.rpc("public_config").then(({ data }) => {
+  publicConfig().then(({ data }) => {
     if (!data) return;
     const d = new Date(data.event_date + "T12:00:00");
     document.getElementById("f-day").textContent = d.toLocaleDateString("en-GB", { weekday: "long" });

@@ -4,8 +4,8 @@
 -- there). Safe to re-run.
 --
 -- There's no separate "Treasury" system and no new group/role model
--- here, Music and General are just 2 extra group_keys (see
--- MUSIC_GROUP_KEY/GENERAL_GROUP_KEY in src/lib/curriculum/constants.ts)
+-- here, the non-troop groups (Music, General, Social Media, Leaders) are
+-- just extra group_keys (see src/lib/curriculum/constants.ts)
 -- using the exact same finance_entries table, group_settings
 -- categories, and has_group_access() rules as the 5 troops. The only
 -- things genuinely new are the pieces every individual group ledger
@@ -45,7 +45,7 @@ alter table join_requests alter column guardian1_phone drop not null;
 
 -- ============================================================
 -- finance_entries: flag a row as a reconciliation adjustment (posted
--- from /admin's Reconcile section, see finance_reconciliations above)
+-- from /admin's Reconcile section, see finance_reconciliations below)
 -- rather than a normal transaction someone logged. Lets the Admin
 -- console show a dedicated Adjustment Entries list without relying on
 -- matching the category text.
