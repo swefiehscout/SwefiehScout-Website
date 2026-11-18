@@ -6113,8 +6113,8 @@ body.theme-xmas .site-header::before {
   body.theme-xmas { background: #fff !important; }
 }
 
-/* Contact Us without its form (removed 2026-10-17, see
-   docs/archived-public-forms.md): the info card stands alone, centred. */
+/* Contact Us without its form (removed 2026-10-17):
+   the info card stands alone, centred. */
 .contact-layout--solo { max-width: 560px; }
 @media (min-width: 880px) {
   .contact-layout.contact-layout--solo { grid-template-columns: 1fr; }

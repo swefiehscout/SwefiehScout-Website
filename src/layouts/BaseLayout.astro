@@ -114,31 +114,6 @@ const xmasTheme = currentPath === '/christmas-proposal';
         document.addEventListener('astro:page-load', bind);
       })();
 
-      // FormSubmit forms navigate normally (data-astro-reload keeps
-      // Astro's view-transition router from intercepting them) so that
-      // FormSubmit's CAPTCHA challenge, when triggered, is visible and
-      // solvable by a real visitor. FormSubmit redirects to _next itself
-      // once the message is sent, we only disable the button here so
-      // it's clear the submission is in flight.
-      (function () {
-        function setup() {
-          document.querySelectorAll('form[action^="https://formsubmit.co/"]').forEach(function (form) {
-            if (form.dataset.fsBound) return;
-            form.dataset.fsBound = '1';
-            form.addEventListener('submit', function () {
-              var btn = form.querySelector('button[type="submit"]');
-              if (btn) {
-                btn.disabled = true;
-                if (!btn.dataset.origLabel) btn.dataset.origLabel = btn.textContent;
-                btn.textContent = 'Sending…';
-              }
-            });
-          });
-        }
-        setup();
-        document.addEventListener('astro:page-load', setup);
-      })();
-
       // Marquee shuffle, on every page-load, reshuffle each
       // .band-marquee-track's slides and pick a random starting offset
       // for the looping animation so refresh / re-navigation never

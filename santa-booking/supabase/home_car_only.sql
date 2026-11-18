@@ -1,5 +1,6 @@
 -- =====================================================================
--- Website books the area's own car only. Run once in Supabase → SQL Editor.
+-- Website books the area's own car only. Run once in Supabase → SQL Editor, BEFORE second_car.sql
+-- (both define home_car; second_car.sql's version also handles a second car, so it must run last).
 -- If the home car is full at a time, that time shows as taken and the family
 -- can join the waitlist; the team then assigns any car from the Waitlist page.
 -- =====================================================================

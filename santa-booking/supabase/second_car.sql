@@ -1,5 +1,6 @@
 -- =====================================================================
--- An area can share two cars. Run once in Supabase → SQL Editor.
+-- An area can share two cars. Run once in Supabase → SQL Editor, after audit_fixes.sql
+-- (it replaces home_car from home_car_only.sql with one that knows about the second car).
 -- Set the second car on the Setup page. The website then books whichever of
 -- the two has more room at that time; if equal, the one with fewer visits that night.
 -- =====================================================================

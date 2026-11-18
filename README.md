@@ -1,51 +1,57 @@
 # The Greek Orthodox Scouts & Guides – Swefieh
 
-Bilingual (English / Arabic) Astro site for the Orthodox scout group at the Presentation of the Lord Cathedral, Swefieh, Amman.
+Website of the Orthodox scout group at the Presentation of the Lord Cathedral, Swefieh, Amman.
+It has three parts:
 
-## Stack
+- **Public site** in English and Arabic: home, About Us, Join Us, Gallery, Contact Us, Christmas Proposal.
+- **Leaders Workspace** (`/leaders`) and **Admin console** (`/admin`): sign-in tools for leaders, backed by Supabase.
+- **Santa Booking** (`/santa/`): Christmas Eve visit bookings, with its own Supabase project. See [santa-booking/README.md](santa-booking/README.md).
 
-- [Astro](https://astro.build) static site
-- Content collections (`src/content/pages/`) for prose pages
-- Custom `.astro` pages in `src/pages/` for interactive surfaces (forms, gallery, landing)
-- Per-page bilingual paired-row layout, generated client-side from `dir="auto"` blocks (see `src/layouts/BaseLayout.astro`)
-- Fonts: Inter (Latin body), Playfair Display (Latin display), Markazi Text (Arabic body + display)
-
-## Project structure
-
-```
-src/
-├── components/        # SiteHeader, SiteFooter, Icon (SVG icon set)
-├── content/pages/     # Markdown for prose pages, bilingual paired-row split applies
-├── layouts/           # BaseLayout
-├── lib/               # nav.ts builds the top nav from the content collection
-├── pages/             # File-based routes
-│   ├── index.astro              # Landing
-│   ├── gallery.astro            # Album-cover grid
-│   ├── join-us.astro            # Reasons + steps + CTA
-│   ├── christmas-proposal.astro # Christmas proposal (under the Christmas menu)
-│   ├── contact-us.astro         # Contact details
-│   ├── about-us/our-team.astro  # Leader cards + achievements
-│   └── [...path].astro          # Catch-all renderer for content-collection pages
-└── styles/global.css
-
-public/santa/          # Santa Booking pages, served as-is at /santa/ (see santa-booking/README.md)
-santa-booking/         # Santa Booking notes and database SQL (not published)
-vercel.json            # Clean URLs and redirects for /santa only
-```
+Built with [Astro](https://astro.build) and deployed on Vercel.
 
 ## Commands
 
-| Command            | Action                              |
-| :----------------- | :---------------------------------- |
-| `npm install`      | Install dependencies                |
-| `npm run dev`      | Start dev server at `localhost:4321`|
-| `npm run build`    | Build production site to `./dist/`  |
-| `npm run preview`  | Preview the production build        |
+| Command           | What it does                                                    |
+| :---------------- | :-------------------------------------------------------------- |
+| `npm install`     | Install dependencies                                            |
+| `npm run dev`     | Start the dev server at `localhost:4321`                        |
+| `npm run build`   | Make photo thumbnails, then build the site into `dist/`         |
+| `npm run preview` | Preview the built site                                          |
+| `npm run thumbs`  | Make the small photo copies used by the photo strips            |
+| `npm run videos`  | Prepare new Christmas Proposal videos for the web (needs ffmpeg) |
+
+## Where things are
+
+```
+src/
+├── pages/
+│   ├── index.astro, about-us*, join-us.astro, gallery.astro,
+│   │   contact-us.astro, christmas-proposal.astro   # public pages
+│   ├── join.astro             # public member sign-up form (goes to the workspace's Approvals)
+│   ├── leaders.astro          # Leaders Workspace sign in / create account
+│   ├── leaders/app.astro      # Leaders Workspace
+│   ├── leaders/guide.astro    # plain-language guide for leaders
+│   ├── admin.astro            # Admin console: all groups, bank and cash boxes, approvals
+│   └── [...path].astro        # renders the Markdown pages in src/content/pages/
+├── content/pages/       # text for the Markdown pages
+├── content/leader-portal.md   # Lessons links shown in the workspace
+├── components/          # SiteHeader, SiteFooter, Icon
+├── layouts/BaseLayout.astro
+├── lib/                 # menu (nav.ts), photo lists, workspace helpers
+└── styles/global.css
+
+supabase/            # SQL for the Leaders Workspace database, one file per feature
+public/santa/        # Santa Booking pages, served as-is at /santa/
+santa-booking/       # Santa Booking notes and SQL (not published)
+scripts/             # photo thumbnails and video preparation
+media-originals/     # full-size photos and videos (git-ignored, not published)
+vercel.json          # clean URLs and redirects for /santa only
+```
 
 ## Conventions
 
-- All grids of cards/tiles use **explicit `grid-template-columns`** per item count (no `auto-fit`) so layouts are symmetric at every breakpoint, no orphan cards.
-- Markdown pages with both English and Arabic content are paired automatically: each `<h2>` boundary starts a new section, and matching English/Arabic sections render as paired rows on desktop, stacked on phone.
-- Pages backed by a custom `.astro` file in `src/pages/` set `custom: true` in their markdown frontmatter so the catch-all route skips them.
-- The email-only public forms were removed on 2026-10-17; see `docs/archived-public-forms.md`.
-- The nav's "Christmas" menu (Book Santa, Christmas Proposal) is added by hand in `src/lib/nav.ts`.
+- **English and Arabic side by side.** On Markdown pages, each `<h2>` starts a new section, and matching English and Arabic sections show as paired rows on desktop and stacked on phones.
+- **Custom pages.** A Markdown page that has its own `.astro` file sets `custom: true` in its frontmatter, so the catch-all route skips it.
+- **Grids.** Card and tile grids set `grid-template-columns` for each item count (no `auto-fit`), so rows stay even at every width.
+- **Menu.** The Christmas menu (Book Santa, Christmas Proposal) is added by hand in `src/lib/nav.ts`. If the menu changes, also update the copy of the header in the Santa pages (see the Santa README).
+- **Database changes.** New tables and columns go in a new file in `supabase/`, run once in the Supabase SQL Editor.

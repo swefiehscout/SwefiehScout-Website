@@ -45,8 +45,8 @@ function rehypeAddDirAuto() {
 }
 
 export default defineConfig({
-  // Pages removed on 2026-10-17 (FormSubmit-only forms, see
-  // docs/archived-public-forms.md) and the Christmas Proposal's move to a
+  // Pages removed on 2026-10-17 (old email-only forms)
+  // and the Christmas Proposal's move to a
   // top-level page; old links already shared keep working.
   redirects: {
     '/event-booking/christmas-proposal': '/christmas-proposal',

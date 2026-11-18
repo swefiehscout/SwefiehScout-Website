@@ -1,135 +1,141 @@
 # Santa Booking
 
 Christmas Eve Santa visit booking for the Greek Orthodox Scouts & Guides – Swefieh.
+It is part of the main website and served at **/santa/** (for example `/santa/book` and `/santa/admin`).
+The database is a separate Supabase project, "Santa Booking".
 
-It lives inside the main website repo and is served at **/santa/** on the main site
-(for example `/santa/book` and `/santa/admin`). There is no separate deployment any more.
+## Files
 
-## Where the files are
+`public/santa/` holds the pages, served at `/santa/`:
 
-- `public/santa/`: the pages, served by the website at `/santa/`
-  - `index.html`: home page (`/santa/`)
-  - `book.html`: booking form, Arabic / English, map pin, live free times (`/santa/book`)
-  - `contact.html`: contact details and a message form (`/santa/contact`)
-  - `admin.html`: team dashboard: board, bookings, waitlist, driver sheets, messages, setup (`/santa/admin`)
-  - `config.js`: Supabase project URL and public key, contact details
-  - `site.css`, `logo.png`, `shared.js`, `book.js`, `admin.js`, `demo.js`
-  - `theme.css`: the main website's look for the public pages (home, book, contact). Admin doesn't use it.
-  - `header.css`: the main website's header styles, copied from `src/styles/global.css`
-  - `closed.js`: the friendly "bookings closed" messages on home and book (see below)
-  - `countdown.js`: the home page countdown to Christmas Eve (24 December, midnight Amman time)
-  - `hero-illustration.webp` / `.jpg`: the Christmas Eve illustration in the home hero circle. To change it,
-    replace both files with a new square image (about 1250 x 1250 px) keeping the same names
-  - `book-hero`, `contact-hero`, `signin-hero` (`.webp` + `.jpg`): the pictures in the Book and Contact
-    heroes and beside the Team Sign In form; swap them the same way
-- `santa-booking/` (this folder): database scripts in `supabase/` and these notes. It sits
-  outside `public/`, so none of it is published on the website.
+| File | What it is |
+| :--- | :--- |
+| `index.html` | Home page (`/santa/`) |
+| `book.html`, `book.js` | Booking form in Arabic and English, with map pin and live free times (`/santa/book`) |
+| `contact.html` | Contact details and message form (`/santa/contact`) |
+| `admin.html`, `admin.js` | Team dashboard: board, bookings, waitlist, driver sheets, messages, setup (`/santa/admin`) |
+| `config.js` | Supabase URL and public key, team login domain, contact links |
+| `shared.js` | Code shared by all pages |
+| `demo.js` | Demo mode on sample data (used when `config.js` has no real keys) |
+| `closed.js` | The "bookings closed" messages on home and book |
+| `countdown.js` | Home page countdown to Christmas Eve (24 December, midnight Amman time) |
+| `site.css` | Styles for all pages |
+| `theme.css` | The main website's look for home, book and contact (admin doesn't use it) |
+| `header.css` | The main website's header styles, copied from `src/styles/global.css` |
+| `logo.png` | Logo |
 
-**The header on the public pages is a copy.** Home, Book and Contact show the main website's
-header (menu, phone menu and its script), copied from the built site. If the main menu changes
-(a page is added, renamed or moved), copy the new `<header class="site-header">` block from
-`dist/index.html` after `npm run build` into the three pages, and set `aria-current="page"` on
-the Christmas and Book Santa links.
+**Pictures.** `hero-illustration` is the home hero circle (square, about 1250 x 1250 px).
+`book-hero`, `contact-hero` and `signin-hero` are the Book and Contact heroes and the picture beside
+Team Sign In. Each comes as `.webp` and `.jpg`; to change one, replace both files and keep the names.
 
-The pages are plain HTML/JS, not Astro pages. They don't load the main site's global CSS or
-scripts (only the copied header), and all their links are relative, so they work as is under
-`/santa/`. The database is hosted on
-Supabase; the SQL in `supabase/` is for reference and has already been applied.
+`santa-booking/` (this folder) holds these notes and the SQL in `supabase/`. It is outside `public/`,
+so none of it is published.
 
-## How it's deployed
+**The header on home, book and contact is a copy** of the main website's header. If the main menu
+changes, run `npm run build`, copy the `<header class="site-header">` block from `dist/index.html`
+into the three pages, and set `aria-current="page"` on the Christmas and Book Santa links.
 
-Astro copies everything in `public/` into the build unchanged, so `public/santa/` ships with
-every deploy of the main site on Vercel. The root `vercel.json` adds rules for `/santa` only:
+The pages are plain HTML and JavaScript, not Astro pages. They don't load the main site's CSS or
+scripts, and all their links are relative, so they work as they are under `/santa/`.
 
-- `/santa/book`, `/santa/contact` and `/santa/admin` serve the matching `.html` file, and the
-  `.html` addresses redirect to them.
-- `/santa` and `/santa/index.html` redirect to `/santa/`. The trailing slash matters: the
-  pages use relative links, so without it the CSS, logo and scripts would not load.
+## Deploying and previewing
 
-The main site's menu has a **Christmas** item (Book Santa, Christmas Proposal) and the home page
-has a Book Santa button, both linking to `/santa/`. The main site never links to the admin page.
-The Santa pages themselves link to it as "Team Sign In".
+Astro copies `public/` into the build unchanged, so the Santa pages ship with every deploy of the
+main site. The root `vercel.json` adds rules for `/santa` only:
+
+- `/santa/book`, `/santa/contact` and `/santa/admin` serve the matching `.html` file, and the `.html` addresses redirect to them.
+- `/santa` and `/santa/index.html` redirect to `/santa/`. The trailing slash matters: without it the relative links to CSS, logo and scripts break.
+
+To preview, run `npm run build && npm run preview` from the repo root and open
+http://localhost:4321/santa/. The local preview doesn't apply `vercel.json`, so use the `.html`
+addresses there (for example `/santa/book.html`).
+
+The main site links to `/santa/` from the Christmas menu and the home page's Book Santa button. It
+never links to the admin page; the Santa pages link to it as "Team Sign In".
 
 ## Opening and closing bookings
 
-The admin page has an **Open / Close bookings** button at the top of the sidebar (a compact
-one on phones). It flips `booking_open` in the settings, the same switch as the checkbox in
-Setup, and asks before changing anything. Existing bookings are kept.
+The **Open / Close bookings** button at the top of the admin sidebar (a smaller one on phones)
+flips `booking_open`, the same switch as the checkbox in Setup. Existing bookings are kept.
 
-Bookings also close by themselves `cutoff_hours` (48 by default) before the first visit.
-When bookings are closed, `closed.js` shows families a message based on why: as its own card at
-the top of the home page, and in place of the form on the Book page. The Reserve buttons stay, so
-families who tap them see the message there:
+Bookings also close by themselves `cutoff_hours` (48 by default) before the first visit. While
+closed, `closed.js` shows families a message, as a card on the home page and in place of the form on
+the Book page:
 
-- **Paused by the team:** "Bookings are paused for now", check back soon, or call if it seems wrong
-- **Close to Christmas Eve:** "Online booking has closed", call or message us
-- **After Christmas Eve:** "Thank you for a wonderful Christmas Eve"
+- **Paused by the team:** "Bookings are paused for now", check back soon, or call if it seems wrong.
+- **Close to Christmas Eve:** "Online booking has closed", call or message us.
+- **After Christmas Eve:** "Thank you for a wonderful Christmas Eve".
 
-The phone number comes from **Contact phone** in Setup. While it's blank, families are asked to
-send a message instead. `closed.js` treats "within 48 hours of the first visit" as close to
-Christmas Eve, because the public settings don't include the cutoff.
-
-## Preview locally
-
-From the repo root:
-
-```bash
-npm run build && npm run preview
-```
-
-Then open http://localhost:4321/santa/. The local preview doesn't apply the `vercel.json`
-rules, so use the `.html` addresses there (for example `/santa/book.html`).
-`npm run dev` works the same way.
-
-## Setting up from scratch
-
-Only needed if the Supabase project is ever recreated.
-
-1. **Supabase**: in the "Santa Booking" project, open SQL Editor and run `supabase/schema.sql`, then `supabase/seed.sql`, then `supabase/activity_log.sql`.
-2. **Admin login**: go to Authentication → Users → Add user, and pick an email and the team password (tick "Auto confirm"). Then go to Authentication → Providers → Email and turn off "Allow new users to sign up".
-3. **Keys**: go to Project Settings → API. Copy the Project URL and the `anon` public key into `public/santa/config.js`, and set `ADMIN_EMAIL` to the email from step 2.
-4. **Make that email an admin**: in SQL Editor, run
-   `insert into admins (email) values ('the-email-from-step-2');`
-
-If `public/santa/config.js` has no real Supabase keys, the pages run in **demo mode** on sample data saved in your browser, and any password works on the admin page.
-
-## Team logins
-
-Everyone on the team has their own login. Nobody can create an account themselves (sign-ups are off in Supabase), and every change is recorded under the person's real name.
-
-Run `supabase/team_accounts.sql` once in the SQL Editor (after `activity_log.sql`) to switch this on.
-
-**Add someone** (owner, in Supabase):
-1. Authentication → Users → Add user → Create new user. Email: `username@santa.team` (for example `sara@santa.team`; it doesn't need to be a real inbox). Choose a password and tick **Auto Confirm User**.
-2. Table Editor → **admins** → Insert row. Email: the same email. Name: their real name, as it should appear in the activity log.
-3. Send them their username (`sara`) and password. They sign in at `/santa/admin` on the main website.
-
-**Change a password:** Authentication → Users → the user → set a new password, then send it to them.
-
-**Remove someone:** delete their user in Authentication → Users, and their row in the **admins** table. They're locked out straight away.
-
-The owner account `santa@swefieh-orthodox-scout.com` signs in by typing the full email as the username.
-
-**Owners:** only owners can see the Activity log. Run `supabase/owner_only_log.sql` once (after `team_accounts.sql`); it makes the `santa@swefieh-orthodox-scout.com` account an owner. To make someone else an owner, tick **is_owner** on their row in Table Editor → admins.
+The phone number comes from **Contact phone** in Setup; while it's blank, families are asked to send
+a message instead. `closed.js` always treats the last 48 hours as "close to Christmas Eve", because
+the public settings don't include the cutoff.
 
 ## How cars get assigned
 
-1. On the website, a family can only book times when their area's home car is free. The map pin doesn't change this; it's for the driver.
-2. If they want a time that's taken, they can pick one of the nearest free times or join the waitlist for the time they wanted. Each family gets one or the other.
-3. The team assigns waitlist families from Admin → Waitlist, which lists every free car and time with its distance from the family.
+1. On the website, a family can only book times when one of their area's cars is free. The map pin doesn't change this; it's for the driver.
+2. An area can have a second car (set in Setup). The website then books whichever of the two has more room at that time, or if equal, the one with fewer visits that night.
+3. If the time they want is taken, they can pick one of the nearest free times or join the waitlist for that time.
+4. The team places waitlist families from Admin → Waitlist, which lists every free car and time with its distance from the family.
 
-On an existing database, run `supabase/home_car_only.sql` and then `supabase/audit_fixes.sql` once in the SQL Editor. The second one adds length limits, caps the website at 40 bookings in any 10 minutes, and stops signed-in accounts that aren't on the team from calling internal functions. Keep "Allow new users to sign up" turned off in Supabase.
+Hours, cars, areas, capacity and blocked times can all be edited in Admin → Setup and on the Board.
 
-**Contact page spam guard.** Run `supabase/spam_guard.sql` once (after `audit_fixes.sql`). Messages that look like spam then go to a hidden `messages_spam` table instead of Admin → Messages:
-- messages not sent from the Contact page;
-- messages sent within 3 seconds of opening it;
-- messages that fill in the hidden trap field;
-- messages with links other than Google Maps;
-- messages in Cyrillic or Chinese/Japanese/Korean script;
-- repeats of the same text within 24 hours.
+## Team logins
 
-The same phone or email can send at most 3 messages an hour. Senders always see "sent". Running it also moves spam already in Messages (non-Maps links, Cyrillic/CJK script, repeated text) into `messages_spam` and shows how many are left. The bottom of the file has SQL to see what was caught, move a real message back, or empty the spam table. The Contact page works before and after the script is run.
+Everyone on the team has their own login, and every change is recorded under their real name.
+Nobody can create an account themselves: "Allow new users to sign up" is off in Supabase.
 
-**Deleting messages.** Admin → Messages has a Delete button on each message, and a Select all / Delete selected bar for clearing many at once. Every delete can be undone from the toast straight after.
+**Add people:** fill in the list at the top of `supabase/add_team.sql` and run it in the SQL Editor.
+It creates each login and adds the person to the team list, then shows the usernames and passwords to send them.
+They sign in at `/santa/admin` with just the username (for example `sara`).
 
-Everything (hours, cars, zones, capacity, blocked times) can be edited in Admin → Setup and on the Board.
+To add someone by hand instead:
+1. Authentication → Users → Add user → Create new user. Email: `username@santa.team` (it doesn't need to be a real inbox). Choose a password and tick **Auto Confirm User**.
+2. Table Editor → **admins** → Insert row with the same email and their real name.
+
+**Change a password:** Authentication → Users → the user → set a new password, then send it to them.
+
+**Remove someone:** delete their user in Authentication → Users and their row in **admins**. They're locked out straight away.
+
+**Owners** can also see the Activity log. The owner account `santa@swefieh-orthodox-scout.com` signs in with the full email.
+To make someone else an owner, tick **is_owner** on their row in Table Editor → admins.
+
+## Messages
+
+**Spam guard.** Contact page messages that look like spam go to a hidden `messages_spam` table instead of Admin → Messages:
+
+- not sent from the Contact page, or sent within 3 seconds of opening it;
+- the hidden trap field is filled in;
+- links other than Google Maps;
+- Cyrillic or Chinese/Japanese/Korean script;
+- the same text again within 24 hours.
+
+The same phone or email can send at most 3 messages an hour. Senders always see "sent". The bottom of
+`supabase/spam_guard.sql` has SQL to see what was caught, move a real message back, or empty the spam table.
+
+**Deleting.** Each message has a Delete button, and Select all / Delete selected clears many at once.
+Every delete can be undone from the toast straight after.
+
+## Database
+
+The SQL in `supabase/` has already been applied to the live project; it's kept for reference and for
+setting up again. To set up a new project, run these in the SQL Editor in this order:
+
+1. `schema.sql`: tables and booking rules
+2. `seed.sql`: 8 cars and the Amman areas
+3. `activity_log.sql`: records every change
+4. `team_accounts.sql`: personal logins, changes stamped with the person's name
+5. `owner_only_log.sql`: only owners see the Activity log
+6. `home_car_only.sql`: the website books the area's own car only
+7. `audit_fixes.sql`: length limits, at most 40 website bookings in 10 minutes, locks internal functions
+8. `second_car.sql`: an area can share two cars (must come after `home_car_only.sql`)
+9. `spam_guard.sql`: the Contact page spam guard
+
+Then:
+
+- Authentication → Providers → Email: turn off "Allow new users to sign up".
+- Create the owner login (Authentication → Users → Add user), add it to **admins** and tick **is_owner**.
+- Project Settings → API: copy the Project URL and the public `anon` key into `public/santa/config.js`, and set `ADMIN_EMAIL`.
+- Add the team with `add_team.sql`.
+
+If `config.js` has no real keys, the pages run in **demo mode** on sample data saved in the browser,
+and any password works on the admin page.
