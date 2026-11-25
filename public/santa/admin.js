@@ -725,7 +725,7 @@
     car_id: "car", car2_id: "second car", slot_time: "time", area_id: "area", preferred_time: "wanted time", payment_method: "donation method",
     amount: "donation (JD)", donation_method: "gave by", collected_by: "collected by", admin_notes: "team notes",
     gift_message: "message for Santa", address_details: "address", maps_link: "Google Maps link", lat: "pin latitude", lng: "pin longitude",
-    name_en: "name", name_ar: "Arabic name", start_time: "starts", end_time: "ends", sort: "column position", active: "running",
+    name_en: "name", name_ar: "Arabic name", start_time: "starts", end_time: "ends", sort: "position", active: "running",
     event_date: "date", slot_minutes: "minutes per visit", default_capacity: "visits per car", cutoff_hours: "booking cutoff (hours)",
     borrow_km: "help distance (km)", booking_open: "booking form open", contact_phone: "contact phone", cliq_alias: "CliQ alias",
     price_note: "donation note", blocked: "blocked", capacity: "visits allowed", handled: "replied", paid: "donation received",
@@ -933,9 +933,10 @@
       <div><button class="btn" id="add-car">+ Add a car</button></div>
     </div>
     <div class="panel"><h3>Areas</h3>
-      <p class="muted" style="margin:0">Families can only book their area's car. Give a busy area a second car to share it: the website then books whichever of the two has more room at that time (if both have the same, the one with fewer visits that night). If they're full at the time they want, they can join the waitlist and the team places them from there. The coordinates are used when a family doesn't drop a pin.</p>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Area</th><th>Its car</th><th>Second car</th><th>Lat</th><th>Lng</th><th>Shown</th></tr></thead><tbody>
-      ${S.areas.map((a) => `<tr>
+      <p class="muted" style="margin:0">Drag ⋮⋮ to change the order families see the areas in. Families can only book their area's car. Give a busy area a second car to share it: the website then books whichever of the two has more room at that time (if both have the same, the one with fewer visits that night). If they're full at the time they want, they can join the waitlist and the team places them from there. The coordinates are used when a family doesn't drop a pin.</p>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th aria-label="Order"></th><th>Area</th><th>Its car</th><th>Second car</th><th>Lat</th><th>Lng</th><th>Shown</th></tr></thead><tbody>
+      ${S.areas.map((a) => `<tr data-row="${a.id}">
+        <td class="grip-cell"><button type="button" class="grip" data-grip="${a.id}" aria-label="Move ${esc(a.name_en)} (drag, or use the arrow keys)" title="Drag to move">⋮⋮</button></td>
         <td><input data-area="${a.id}" data-k="name_en" value="${esc(a.name_en)}"></td>
         <td><select data-area="${a.id}" data-k="car_id">${carOpts(a.car_id)}</select></td>
         <td><select data-area="${a.id}" data-k="car2_id">${carOpts(a.car2_id)}</select></td>
@@ -984,10 +985,64 @@
       S.cars.push(data); render();
     };
     $("add-area").onclick = async () => {
-      const { data, error } = await sb.from("areas").insert({ name_en: "New area", name_ar: "", sort: 50 }).select().single();
+      const sort = Math.max(0, ...S.areas.map((a) => a.sort || 0)) + 1;
+      const { data, error } = await sb.from("areas").insert({ name_en: "New area", name_ar: "", sort }).select().single();
       if (error) return toast("Not saved: " + error.message);
       S.areas.push(data); render();
     };
+    wireAreaOrder();
+  }
+
+  // Drag the ⋮⋮ handle (mouse or finger) to reorder areas; arrow keys on the handle do the same.
+  function wireAreaOrder() {
+    const body = $("main").querySelector("[data-grip]")?.closest("tbody");
+    if (!body) return;
+    const save = async () => {
+      const order = [...body.querySelectorAll("tr[data-row]")].map((tr) => Number(tr.dataset.row));
+      const changed = order.map((id, i) => ({ id, sort: i + 1 })).filter((x) => areaById(x.id)?.sort !== x.sort);
+      if (!changed.length) return;
+      const res = await Promise.all(changed.map((x) => sb.from("areas").update({ sort: x.sort }).eq("id", x.id)));
+      const err = res.find((r) => r.error);
+      if (err) { toast("Order not saved: " + err.error.message); if (await loadAll()) render(); return; }
+      changed.forEach((x) => (areaById(x.id).sort = x.sort));
+      S.areas.sort((a, b) => a.sort - b.sort || a.name_en.localeCompare(b.name_en));
+      toast("Order saved");
+    };
+    body.querySelectorAll("[data-grip]").forEach((g) => {
+      const row = g.closest("tr");
+      g.onpointerdown = (e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        row.classList.add("dragging");
+        let moved = false;
+        const move = (ev) => {
+          for (;;) {
+            const prev = row.previousElementSibling, next = row.nextElementSibling;
+            if (prev && ev.clientY < prev.getBoundingClientRect().top + prev.offsetHeight / 2) body.insertBefore(row, prev);
+            else if (next && ev.clientY > next.getBoundingClientRect().top + next.offsetHeight / 2) body.insertBefore(next, row);
+            else break;
+            moved = true;
+          }
+        };
+        const end = () => {
+          window.removeEventListener("pointermove", move);
+          window.removeEventListener("pointerup", end);
+          window.removeEventListener("pointercancel", end);
+          row.classList.remove("dragging");
+          if (moved) save();
+        };
+        window.addEventListener("pointermove", move);
+        window.addEventListener("pointerup", end);
+        window.addEventListener("pointercancel", end);
+      };
+      g.onkeydown = (e) => {
+        const prev = row.previousElementSibling, next = row.nextElementSibling;
+        if (e.key === "ArrowUp" && prev) body.insertBefore(row, prev);
+        else if (e.key === "ArrowDown" && next) body.insertBefore(next, row);
+        else return;
+        e.preventDefault(); g.focus(); save();
+      };
+    });
   }
 
   // ---------- Overlays ----------

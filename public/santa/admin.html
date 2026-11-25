@@ -251,6 +251,11 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .tbl td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 .tbl td input, .tbl td select { min-height: 38px; padding: 6px 9px; }
 .tbl-wrap { overflow-x: auto; }
+.tbl td.grip-cell { width: 1%; padding-inline: 4px; }
+.grip { border: 0; background: none; color: var(--muted); font-size: 18px; line-height: 1; letter-spacing: -3px; padding: 10px 8px; min-height: 38px; cursor: grab; touch-action: none; border-radius: 6px; }
+.grip:hover, .grip:focus-visible { color: inherit; background: var(--line); }
+tr.dragging { opacity: .6; background: var(--line); }
+tr.dragging .grip { cursor: grabbing; }
 .saved { color: var(--ok); font-size: 13px; }
 
 /* Activity log */
