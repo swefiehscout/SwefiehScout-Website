@@ -15,9 +15,10 @@
 
   // ---------- Areas & map ----------
   function fillAreas() {
-    // Same order as the Areas table in admin Setup (dragged there; ties fall back to A to Z).
+    const sorted = [...config.areas].sort((a, b) =>
+      a.en === "Other" ? 1 : b.en === "Other" ? -1 : a.en.localeCompare(b.en, "en", { numeric: true }));
     $("area").innerHTML = `<option value="" disabled selected>Choose your area</option>` +
-      config.areas.map((a) => `<option value="${a.id}">${esc(a.en)}</option>`).join("");
+      sorted.map((a) => `<option value="${a.id}">${esc(a.en)}</option>`).join("");
   }
   const currentArea = () => config.areas.find((a) => String(a.id) === $("area").value) || null;
 
