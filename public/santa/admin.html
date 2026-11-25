@@ -53,6 +53,9 @@ h3 { margin: 0; font-size: 16px; font-weight: 600; }
 .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
 .btn.primary:hover { filter: brightness(1.08); }
 .btn.good { background: var(--ok); border-color: var(--ok); color: #fff; }
+/* An action, not a status: outlined so it can't be mistaken for "already confirmed". */
+.btn.do-confirm { background: #fff; border: 1.5px solid var(--ok); color: var(--ok); }
+.btn.do-confirm:hover { background: var(--ok); color: #fff; }
 .btn.small { min-height: 34px; padding: 0 10px; font-size: 14px; }
 .btn.link { border: 0; background: none; color: var(--brand); padding: 0 4px; min-height: 30px; }
 .btn.danger { color: var(--cancel); }
@@ -117,6 +120,11 @@ body.fit-grid main { max-width: none; padding-bottom: 14px; }
   .bottom-nav .tab[aria-selected=true] { background: var(--brand-soft); }
   .bottom-nav .tab .count { position: absolute; top: 2px; inset-inline-end: 50%; margin-inline-end: -22px; min-width: 18px; height: 18px; font-size: 11px; padding: 0 5px; }
   .toast { bottom: 84px; }
+  body.fit-grid main { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }   /* room for the bottom tabs */
+  /* Phone schedule: give the rows the room. The instructions hide and the car buttons shrink. */
+  body.fit-grid main { gap: 10px; padding-top: 12px; }
+  body.fit-grid .intro p { display: none; }
+  body.fit-grid .chip { padding: 2px 10px; min-height: 30px; font-size: 14px; }
 }
 .intro { display: grid; gap: 2px; }
 .intro p { margin: 0; color: var(--muted); }
@@ -226,10 +234,6 @@ body.moving .fam:not(.selected) { cursor: pointer; opacity: .45; transition: opa
 body.moving .fam:not(.selected):hover { opacity: 1; outline: 2px dashed var(--ink); outline-offset: 1px; }
 td.drag-over { outline: 3px solid var(--free); outline-offset: -3px; }
 
-/* Per-car list (phone / single car) */
-.carlist { display: grid; gap: 6px; }
-.carrow { display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: start; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
-.carrow .t { font-weight: 500; padding-top: 8px; font-size: 14px; font-variant-numeric: tabular-nums; }
 
 /* Waitlist */
 .wgroup { display: grid; gap: 10px; }

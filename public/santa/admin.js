@@ -317,7 +317,7 @@
       ? `<b>${esc(shortTime(hhmm(b.slot_time)))}</b><span>${esc(carName(b.car_id))}</span>`
       : `<b class="muted">No time</b><span>wants ${esc(shortTime(hhmm(b.preferred_time)))}</span>`;
     const act = b.status === "new"
-      ? `<button class="btn small good" data-confirm="${b.id}">Confirmed ✓</button>`
+      ? `<button class="btn small do-confirm" data-confirm="${b.id}" title="Press after you've called them and they've confirmed">Mark confirmed</button>`
       : b.status === "waitlist" ? `<button class="btn small" data-go="waitlist">Find a place</button>` : "";
     return `<div class="item" data-open="${b.id}" role="button" tabindex="0">
       <div class="when">${when}</div>
@@ -350,9 +350,7 @@
     const fam = (b) => {
       const hop = hopBefore(b);
       return `<button class="fam ${b.status}${S.moving === b.id ? " selected" : ""}" draggable="true" data-fam="${b.id}" title="${esc(b.name)} · ${STATUS[b.status]}">
-        ${S.schedView === "grid"
-          ? `<b>${esc(b.name.replace(/\s+family$/i, ""))}</b><span>${hop != null && hop > hopLimit() ? `<em class="far">${hop.toFixed(1)} km</em> · ` : ""}${esc(areaName(b.area_id))}</span>`
-          : `<b>${esc(b.name)}</b><span>${esc(areaName(b.area_id))}</span>${hop != null && hop > hopLimit() ? `<span class="far">${hop.toFixed(1)} km from last stop</span>` : ""}`}</button>`;
+        <b>${esc(S.schedView === "grid" ? b.name.replace(/\s+family$/i, "") : b.name)}</b><span>${hop != null && hop > hopLimit() ? `<em class="far">${hop.toFixed(1)} km from last stop</em> · ` : ""}${esc(areaName(b.area_id))}</span></button>`;
     };
     const cell = (c, s) => {
       const o = override(c.id, s), list = inCell(c.id, s), cap = capacity(c.id, s);
@@ -364,26 +362,24 @@
       return { cls, inner: `<div class="cellbox">${list.map(fam).join("")}${spot}</div>` };
     };
 
-    if (S.schedView === "grid") {
-      html += `<div class="grid-wrap"><table class="grid"><thead><tr><th class="time">Time</th>${cars.map((c) =>
+    // Both views use the same table (One car is just a single column), sized by fitGrid() to fill the screen.
+    const grid = (cars) => `<div class="grid-wrap"><table class="grid${cars.length === 1 ? " one" : ""}"><thead><tr><th class="time">Time</th>${cars.map((c) =>
         `<th>${esc(c.name)}<small>${esc(c.driver || "No driver yet")} · ${route(c.id).length} visit${route(c.id).length === 1 ? "" : "s"}${hasOwnHours(c) ? ` · ${esc(shortTime(fromMin(carStart(c))))}–${esc(shortTime(fromMin(carEnd(c))))}` : ""}</small></th>`).join("")}</tr></thead><tbody>
         ${sl.map((s) => `<tr><th class="time num">${esc(shortTime(s))}</th>${cars.map((c) => {
           const x = cell(c, s); return `<td class="${x.cls}" data-car="${c.id}" data-slot="${s}">${x.inner}</td>`;
         }).join("")}</tr>`).join("")}</tbody></table></div>`;
-    } else {
+    if (S.schedView === "grid") html += grid(cars);
+    else {
       const carId = ensureCar("schedCar");
       const c = carById(carId);
       html += carChips(carId, "data-schedcar");
-      html += c ? `<div class="carlist">${sl.map((s) => {
-        const x = cell(c, s);
-        return `<div class="carrow"><div class="t">${esc(label(s))}</div><table style="width:100%;border-spacing:0"><tr><td class="${x.cls}" data-car="${c.id}" data-slot="${s}" style="padding:0">${x.inner}</td></tr></table></div>`;
-      }).join("")}</div>` : `<div class="empty">No cars are running. Switch one on in Setup.</div>`;
+      html += c ? grid([c]) : `<div class="empty">No cars are running. Switch one on in Setup.</div>`;
     }
     $("main").innerHTML = html;
     wireSchedule();
     fitGrid();
   }
-  // All cars: size the rows so the whole night fits on screen with no scrolling.
+  // Schedule (All cars or One car): size the rows so the whole night fits on screen with no scrolling.
   // A cell holding two families gets two row-units. Below a set height the area line is hidden.
   function fitGrid() {
     const wrap = $("main").querySelector(".grid-wrap"), table = wrap?.querySelector("table");
@@ -405,8 +401,10 @@
     size(table.tBodies[0].offsetHeight + innerHeight - wrap.getBoundingClientRect().bottom - padBottom - 2);
     const spill = document.documentElement.scrollHeight - innerHeight;
     if (spill > 0) size(table.tBodies[0].offsetHeight - spill - 2);
+    const inner = wrap.scrollHeight - wrap.clientHeight;   // rounding inside the table
+    if (inner > 0) size(table.tBodies[0].offsetHeight - inner - 1);
   }
-  addEventListener("resize", () => { if (S.tab === "schedule" && S.schedView === "grid") fitGrid(); });
+  addEventListener("resize", () => { if (S.tab === "schedule") fitGrid(); });
   function wireSchedule() {
     const m = $("main");
     m.querySelectorAll("[data-view]").forEach((el) => (el.onclick = () => { S.schedView = el.dataset.view; render(); }));
