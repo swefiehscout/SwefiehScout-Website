@@ -97,6 +97,7 @@ h3 { margin: 0; font-size: 16px; font-weight: 600; }
 .mobile-bar { display: none; }
 .bottom-nav { display: none; }
 main { padding: 26px 28px 60px; display: grid; gap: 16px; max-width: 1240px; width: 100%; margin: 0 auto; align-content: start; }
+body.fit-grid main { max-width: none; padding-bottom: 14px; }
 @media (max-width: 899px) {
   .shell { grid-template-columns: minmax(0, 1fr); }
   .side { display: none; }
@@ -177,20 +178,33 @@ main { padding: 26px 28px 60px; display: grid; gap: 16px; max-width: 1240px; wid
 .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-inline-end: 5px; }
 .moving-bar { position: sticky; top: 8px; z-index: 20; background: var(--ink); color: #fff; border-radius: 12px; padding: 10px 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .moving-bar .btn { background: transparent; color: #fff; border-color: rgba(255,255,255,.4); }
-.grid-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 14px; background: #fff; max-height: calc(100vh - 250px); }
-table.grid { border-collapse: separate; border-spacing: 0; min-width: 100%; }
-.grid th, .grid td { border-bottom: 1px solid var(--line); border-inline-end: 1px solid var(--line); vertical-align: top; padding: 5px; }
-.grid thead th { position: sticky; top: 0; background: #faf9f7; z-index: 2; text-align: start; padding: 8px 10px; min-width: 150px; font-weight: 600; }
-.grid thead th small { display: block; font-weight: 400; color: var(--muted); }
-.grid .time { position: sticky; inset-inline-start: 0; background: #faf9f7; z-index: 1; min-width: 96px; font-weight: 500; font-size: 14px; white-space: nowrap; padding: 10px; }
+.grid-wrap { overflow-y: auto; overflow-x: hidden; border: 1px solid var(--line); border-radius: 14px; background: #fff; max-height: calc(100vh - 250px); }
+table.grid { border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; }
+.grid th, .grid td { border-bottom: 1px solid var(--line); border-inline-end: 1px solid var(--line); vertical-align: top; padding: 4px; }
+.grid thead th { position: sticky; top: 0; background: #faf9f7; z-index: 2; text-align: start; padding: 5px 6px; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.grid thead th small { display: block; font-size: 10px; font-weight: 400; color: var(--muted); }
+.grid .time { position: sticky; inset-inline-start: 0; background: #faf9f7; z-index: 1; width: 64px; font-weight: 500; font-size: 11px; white-space: nowrap; padding: 8px 6px; }
 .grid thead th.time { z-index: 3; }
-.cellbox { display: grid; gap: 5px; min-height: 44px; }
+/* All cars grid is sized by fitGrid() so the whole night fits: tight cards, name then a small area line. */
+.grid tbody td, .grid tbody th { padding: 2px; vertical-align: middle; }
+.grid tbody th.time { padding: 0 6px; vertical-align: middle; font-size: clamp(10px, calc(var(--unit, 26px) * .3), 13px); }
+.grid .cellbox { min-height: 0; gap: 2px; }
+.grid .cellbox > * { height: calc(var(--unit, 34px) - 5px); }
+.grid .fam { padding: 0 5px; border-radius: 5px; border-inline-start-width: 3px; align-content: center; overflow: hidden; }
+.grid .fam b { font-size: clamp(10px, calc(var(--unit, 26px) * .3), 13px); line-height: 1.1; }
+.grid .fam span { font-size: clamp(8.5px, calc(var(--unit, 26px) * .22), 11px); line-height: 1.1; }
+.grid .fam .far { font-style: normal; }
+.grid .slotbtn { min-height: 0; font-size: 13px; border-radius: 5px; padding: 0; }
+.grid td.off .slotbtn, .grid td.blocked .slotbtn { font-size: 10px; }
+.grid.tiny .fam span { display: none; }
+.grid.tiny .fam b { font-size: 10.5px; }
+.cellbox { display: grid; gap: 4px; min-height: 36px; }
 .fam {
-  border: 0; border-radius: 8px; padding: 6px 8px; text-align: start; cursor: grab; display: grid; gap: 0; width: 100%;
+  border: 0; border-radius: 8px; padding: 4px 6px; min-width: 0; text-align: start; cursor: grab; display: grid; gap: 0; width: 100%;
   background: var(--call-soft); border-inline-start: 4px solid var(--call);
 }
-.fam b { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fam span { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fam b { font-weight: 600; font-size: 13px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fam span { font-size: 11px; line-height: 1.25; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fam.confirmed { background: var(--ok-soft); border-color: var(--ok); }
 .fam.done { background: var(--done-soft); border-color: var(--done); }
 .fam .far { color: var(--call); font-weight: 600; }

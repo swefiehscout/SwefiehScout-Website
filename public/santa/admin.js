@@ -254,6 +254,7 @@
   function render() {
     if (!S.settings) return;
     document.body.classList.toggle("moving", !!S.moving);
+    document.body.classList.remove("fit-grid");
     document.querySelectorAll(".tab[data-tab]").forEach((t) => t.setAttribute("aria-selected", t.dataset.tab === S.tab));
     const wait = S.bookings.filter((b) => b.status === "waitlist").length;
     document.querySelectorAll(".c-wait").forEach((el) => { el.textContent = wait; el.hidden = !wait; });
@@ -349,7 +350,9 @@
     const fam = (b) => {
       const hop = hopBefore(b);
       return `<button class="fam ${b.status}${S.moving === b.id ? " selected" : ""}" draggable="true" data-fam="${b.id}" title="${esc(b.name)} · ${STATUS[b.status]}">
-        <b>${esc(b.name)}</b><span>${esc(areaName(b.area_id))}</span>${hop != null && hop > hopLimit() ? `<span class="far">${hop.toFixed(1)} km from last stop</span>` : ""}</button>`;
+        ${S.schedView === "grid"
+          ? `<b>${esc(b.name.replace(/\s+family$/i, ""))}</b><span>${hop != null && hop > hopLimit() ? `<em class="far">${hop.toFixed(1)} km</em> · ` : ""}${esc(areaName(b.area_id))}</span>`
+          : `<b>${esc(b.name)}</b><span>${esc(areaName(b.area_id))}</span>${hop != null && hop > hopLimit() ? `<span class="far">${hop.toFixed(1)} km from last stop</span>` : ""}`}</button>`;
     };
     const cell = (c, s) => {
       const o = override(c.id, s), list = inCell(c.id, s), cap = capacity(c.id, s);
@@ -378,7 +381,32 @@
     }
     $("main").innerHTML = html;
     wireSchedule();
+    fitGrid();
   }
+  // All cars: size the rows so the whole night fits on screen with no scrolling.
+  // A cell holding two families gets two row-units. Below a set height the area line is hidden.
+  function fitGrid() {
+    const wrap = $("main").querySelector(".grid-wrap"), table = wrap?.querySelector("table");
+    if (!table) return;
+    const rows = [...table.tBodies[0].rows];
+    const units = rows.map((r) => Math.max(1, ...[...r.cells].map((c) => c.querySelectorAll(".fam").length + (c.querySelector(".fam") && c.querySelector(".slotbtn") ? 1 : 0))));
+    const total = units.reduce((a, b) => a + b, 0) || 1;
+    wrap.style.maxHeight = "none";
+    document.body.classList.add("fit-grid");   // page uses the full width and drops its bottom padding
+    const size = (room) => {
+      const unit = Math.max(16, Math.floor(room / total));
+      table.style.setProperty("--unit", unit + "px");
+      table.classList.toggle("tiny", unit < 24);   // too short for the area line: name only
+      rows.forEach((r, i) => (r.style.height = unit * units[i] + "px"));
+    };
+    // Fill the screen: start small, then grow (or shrink) the rows by exactly the space left over.
+    size(16 * total);
+    const padBottom = parseFloat(getComputedStyle(wrap.parentElement).paddingBottom) || 0;
+    size(table.tBodies[0].offsetHeight + innerHeight - wrap.getBoundingClientRect().bottom - padBottom - 2);
+    const spill = document.documentElement.scrollHeight - innerHeight;
+    if (spill > 0) size(table.tBodies[0].offsetHeight - spill - 2);
+  }
+  addEventListener("resize", () => { if (S.tab === "schedule" && S.schedView === "grid") fitGrid(); });
   function wireSchedule() {
     const m = $("main");
     m.querySelectorAll("[data-view]").forEach((el) => (el.onclick = () => { S.schedView = el.dataset.view; render(); }));
