@@ -206,6 +206,24 @@ table.grid { border-collapse: separate; border-spacing: 0; width: 100%; table-la
 .grid td.off .slotbtn, .grid td.blocked .slotbtn { font-size: 10px; }
 .grid.tiny .fam span { display: none; }
 .grid.tiny .fam b { font-size: 10.5px; }
+/* One car: on a wide screen each card is a row with the family's details in columns, labelled in the header. */
+.grid .fam .x, .one-head > span { display: none; }
+@media (min-width: 900px) {
+  .grid.one .fam, .grid.one .one-head { display: grid; grid-template-columns: 1.6fr .8fr 1fr 1fr 1fr 1fr; column-gap: 14px; }
+  .grid.one .one-head { padding-inline: 4px 1px; align-items: end; }   /* lines up with the card text below */
+  .grid.one .one-head > span { display: block; font-size: 11px; font-weight: 500; color: var(--muted); }
+  .grid.one .fam { grid-template-rows: auto auto; }
+  .grid.one .fam b { grid-column: 1; grid-row: 1; }
+  .grid.one .fam span { grid-column: 1; grid-row: 2; }
+  .grid.one .fam .x { display: block; grid-row: 1 / 3; align-self: center; font-style: normal; font-size: clamp(10px, calc(var(--unit, 26px) * .3), 13px); color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .grid.one.tiny .fam .x { grid-row: 1; }
+  .grid.one .fam .x.warn { color: var(--call); font-weight: 600; }
+  .grid.one .fam .x.st-new { color: var(--call); font-weight: 600; }
+  .grid.one .fam .x.st-confirmed { color: var(--ok); font-weight: 600; }
+  .grid.one .fam .x.st-done { color: var(--done); font-weight: 600; }
+  .grid.one .fam span .far { display: none; }   /* shown in its own column instead */
+}
 .cellbox { display: grid; gap: 4px; min-height: 36px; }
 .fam {
   border: 0; border-radius: 8px; padding: 4px 6px; min-width: 0; text-align: start; cursor: grab; display: grid; gap: 0; width: 100%;

@@ -349,8 +349,16 @@
 
     const fam = (b) => {
       const hop = hopBefore(b);
-      return `<button class="fam ${b.status}${S.moving === b.id ? " selected" : ""}" draggable="true" data-fam="${b.id}" title="${esc(b.name)} · ${STATUS[b.status]}">
-        <b>${esc(S.schedView === "grid" ? b.name.replace(/\s+family$/i, "") : b.name)}</b><span>${hop != null && hop > hopLimit() ? `<em class="far">${hop.toFixed(1)} km from last stop</em> · ` : ""}${esc(areaName(b.area_id))}</span></button>`;
+      return `<button class="fam ${b.status}${S.moving === b.id ? " selected" : ""}" draggable="true" data-fam="${b.id}" title="${esc([`${b.name} · ${STATUS[b.status]}`, b.notes && "Notes: " + b.notes, b.admin_notes && "Team notes: " + b.admin_notes].filter(Boolean).join("\n"))}">
+        <b>${esc(S.schedView === "grid" ? b.name.replace(/\s+family$/i, "") : b.name)}</b><span>${hop != null && hop > hopLimit() ? `<em class="far">${hop.toFixed(1)} km from last stop · </em>` : ""}${esc(areaName(b.area_id))}</span>${S.schedView === "grid" ? "" : oneCols(b, hop)}</button>`;
+    };
+    // One car on a wide screen: the planning details, one column each (labels in ONE_COLS).
+    const oneCols = (b, hop) => {
+      const moved = b.slot_time && hhmm(b.preferred_time) !== hhmm(b.slot_time);
+      return `<i class="x st-${b.status}">${STATUS[b.status]}</i><i class="x num">${esc(b.phone)}</i>`
+        + `<i class="x${moved ? " warn" : ""}">${moved ? `Wanted ${esc(shortTime(hhmm(b.preferred_time)))}` : "Same"}</i>`
+        + `<i class="x${hop != null && hop > hopLimit() ? " warn" : ""}">${hop == null ? "First stop" : `${hop.toFixed(1)} km`}</i>`
+        + `<i class="x${b.lat == null ? " warn" : ""}">${b.lat == null ? "No pin, area only" : "Pin set"}</i>`;
     };
     const cell = (c, s) => {
       const o = override(c.id, s), list = inCell(c.id, s), cap = capacity(c.id, s);
@@ -364,7 +372,7 @@
 
     // Both views use the same table (One car is just a single column), sized by fitGrid() to fill the screen.
     const grid = (cars) => `<div class="grid-wrap"><table class="grid${cars.length === 1 ? " one" : ""}"><thead><tr><th class="time">Time</th>${cars.map((c) =>
-        `<th>${esc(c.name)}<small>${esc(c.driver || "No driver yet")} · ${route(c.id).length} visit${route(c.id).length === 1 ? "" : "s"}${hasOwnHours(c) ? ` · ${esc(shortTime(fromMin(carStart(c))))}–${esc(shortTime(fromMin(carEnd(c))))}` : ""}</small></th>`).join("")}</tr></thead><tbody>
+        `<th><div class="one-head"><div>${esc(c.name)}<small>${esc(c.driver || "No driver yet")} · ${route(c.id).length} visit${route(c.id).length === 1 ? "" : "s"}${hasOwnHours(c) ? ` · ${esc(shortTime(fromMin(carStart(c))))}–${esc(shortTime(fromMin(carEnd(c))))}` : ""}</small></div>${cars.length === 1 ? `<span>Status</span><span>Phone</span><span>Time they asked for</span><span>From last stop</span><span>Map pin</span>` : ""}</div></th>`).join("")}</tr></thead><tbody>
         ${sl.map((s) => `<tr><th class="time num">${esc(shortTime(s))}</th>${cars.map((c) => {
           const x = cell(c, s); return `<td class="${x.cls}" data-car="${c.id}" data-slot="${s}">${x.inner}</td>`;
         }).join("")}</tr>`).join("")}</tbody></table></div>`;
