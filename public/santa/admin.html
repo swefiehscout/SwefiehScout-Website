@@ -37,6 +37,9 @@ input, select, textarea {
   border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; background: #fff; width: 100%; min-width: 0; min-height: 42px;
 }
 textarea { resize: vertical; min-height: 64px; }
+/* iPad/iPhone Safari gives date and time boxes a fixed width that spills over their column; this lets them shrink like other boxes. */
+input[type=date], input[type=time] { -webkit-appearance: none; appearance: none; display: block; text-align: start; max-width: 100%; overflow: hidden; }
+input[type=date]::-webkit-date-and-time-value, input[type=time]::-webkit-date-and-time-value { text-align: start; min-height: 1.3em; }
 input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); outline-offset: -1px; border-color: transparent; }
 input[type=checkbox], input[type=radio] { width: auto; min-height: 0; accent-color: var(--brand); }
 a { color: var(--brand); }
@@ -321,7 +324,7 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .drawer footer, .modal footer { padding: 12px 16px; border-top: 1px solid var(--line); display: flex; gap: 8px; flex-wrap: wrap; }
 .sec { display: grid; gap: 10px; }
 .sec > h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
-.g2 { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+.g2 { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 @media (max-width: 480px) { .g2 { grid-template-columns: 1fr; } }
 .f { display: grid; gap: 4px; min-width: 0; }
 .f > span { font-size: 13px; color: var(--muted); font-weight: 500; }
